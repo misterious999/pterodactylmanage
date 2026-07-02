@@ -379,15 +379,25 @@
             } 
         });
 
-        function ambilDataPtero() {
-            fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users`, { 
-                headers: { 
-                    'Accept': 'application/json', 
-                    'Authorization': `Bearer ${PTERO_API}` 
-                } 
-            }).then(res => res.json()).then(data => {
+        async function ambilDataPtero() {
+            const tabelEl = document.getElementById('tabelPtero');
+            tabelEl.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-sub); padding: 30px;">
+                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Mengambil data user dari panel...</td></tr>`;
+
+            try {
+                const res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users`, { 
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Authorization': `Bearer ${PTERO_API}` 
+                    } 
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+
+                const data = await res.json();
                 let tabel = `<tr><th>ID</th><th>Username</th><th>Email</th><th>Status</th><th>Aksi</th></tr>`;
                 let countDisplayed = 0;
+
                 const svgCrown = `<svg viewBox="0 0 24 24"><path d="M12 1.5l3.09 6.3 6.91 1-5 4.87 1.18 6.88L12 17.25l-6.18 3.25L7 13.62 2 8.75l6.91-1L12 1.5z"/></svg>`;
                 const svgUser = `<svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
                 const svgTrash = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
@@ -407,10 +417,11 @@
                 });
 
                 if (countDisplayed === 0) tabel += `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">Belum ada akun yang bisa ditampilkan.</td></tr>`;
-                document.getElementById('tabelPtero').innerHTML = tabel;
-            }).catch(e => { 
-                document.getElementById('tabelPtero').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">Error: ${e.message}</td></tr>`; 
-            });
+                tabelEl.innerHTML = tabel;
+
+            } catch (e) {
+                tabelEl.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">Gagal memuat data user.<br><small>${e.message}</small></td></tr>`;
+            }
         }
 
         function cariDataTabel() {
