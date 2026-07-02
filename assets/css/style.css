@@ -1,0 +1,283 @@
+/* =============================================
+   ZEROIXDARK MINECRAFT THEME - CSS
+   Tema Blocky, Inventory Style, Professional Fun
+   ============================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+  --mc-bg: #1C2526;
+  --mc-surface: #3D3D3D;
+  --mc-surface-dark: #2C2C2C;
+  --mc-surface-light: #4A4A4A;
+  --mc-green: #5D9C3E;
+  --mc-green-dark: #2E4A1F;
+  --mc-gold: #E3B23C;
+  --mc-gold-dark: #8B5A2B;
+  --mc-text: #E0E0E0;
+  --mc-text-dim: #AAAAAA;
+  --mc-black: #1A1A1A;
+  --mc-border: #222222;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: var(--mc-bg);
+  color: var(--mc-text);
+  min-height: 100vh;
+}
+
+/* Minecraft Font for Headings */
+.mc-font {
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  letter-spacing: 1px;
+}
+
+/* Block / Card Style (seperti inventory slot) */
+.mc-card {
+  background-color: var(--mc-surface);
+  border: 4px solid var(--mc-border);
+  box-shadow: 0 4px 0 var(--mc-black),
+              inset 0 2px 0 rgba(255,255,255,0.1),
+              inset 0 -2px 0 rgba(0,0,0,0.4);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.mc-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 var(--mc-black);
+}
+
+/* Button Minecraft Style */
+.mc-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
+  padding: 12px 24px;
+  background-color: var(--mc-green);
+  color: white;
+  border: 4px solid var(--mc-green-dark);
+  box-shadow: 0 4px 0 var(--mc-black);
+  text-transform: uppercase;
+  transition: all 0.1s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mc-btn:hover {
+  background-color: #4A7A2E;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--mc-black);
+}
+
+.mc-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--mc-black);
+}
+
+.mc-btn-gold {
+  background-color: var(--mc-gold);
+  border-color: var(--mc-gold-dark);
+  color: #1A1A1A;
+  font-weight: bold;
+}
+
+.mc-btn-gold:hover {
+  background-color: #D4A017;
+}
+
+.mc-btn-danger {
+  background-color: #9F2A2A;
+  border-color: #5C1A1A;
+}
+
+.mc-btn-danger:hover {
+  background-color: #7A1F1F;
+}
+
+/* Input Minecraft */
+.mc-input {
+  background-color: var(--mc-surface-dark);
+  border: 3px solid var(--mc-border);
+  color: var(--mc-text);
+  padding: 12px 16px;
+  font-family: 'Courier New', monospace;
+  transition: all 0.2s ease;
+}
+
+.mc-input:focus {
+  outline: none;
+  border-color: var(--mc-green);
+  box-shadow: 0 0 0 3px rgba(93, 156, 62, 0.2);
+}
+
+/* Table Style */
+.mc-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.mc-table th {
+  background-color: var(--mc-surface-dark);
+  color: var(--mc-gold);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  padding: 14px 12px;
+  text-align: left;
+  border-bottom: 4px solid var(--mc-border);
+  text-transform: uppercase;
+}
+
+.mc-table td {
+  padding: 14px 12px;
+  border-bottom: 2px solid #333;
+  vertical-align: middle;
+}
+
+.mc-table tr:hover {
+  background-color: #333A3A;
+}
+
+/* Status Badge */
+.mc-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  font-size: 10px;
+  font-weight: bold;
+  border: 2px solid;
+  text-transform: uppercase;
+}
+
+.mc-badge-active {
+  background-color: #1E4D2B;
+  color: #5D9C3E;
+  border-color: #2E4A1F;
+}
+
+.mc-badge-expired {
+  background-color: #4D1E1E;
+  color: #E57373;
+  border-color: #5C1A1A;
+}
+
+.mc-badge-suspended {
+  background-color: #4A3A1A;
+  color: #E3B23C;
+  border-color: #8B5A2B;
+}
+
+/* Modal already styled in JS, but extra */
+.mc-modal-content {
+  animation: mcPopIn 0.2s ease-out;
+}
+
+@keyframes mcPopIn {
+  from { transform: scale(0.9) translateY(20px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Sidebar Nav */
+.mc-nav {
+  background-color: var(--mc-surface);
+  border-right: 4px solid var(--mc-border);
+}
+
+.mc-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  color: var(--mc-text);
+  font-weight: 600;
+  transition: all 0.1s ease;
+  border-left: 5px solid transparent;
+}
+
+.mc-nav-link:hover {
+  background-color: #333A3A;
+  color: white;
+}
+
+.mc-nav-link.active {
+  background-color: var(--mc-green);
+  color: white;
+  border-left-color: var(--mc-green-dark);
+}
+
+/* Topbar */
+.mc-topbar {
+  background-color: var(--mc-surface-dark);
+  border-bottom: 4px solid var(--mc-border);
+}
+
+/* Stats Card */
+.mc-stat-card {
+  background: linear-gradient(145deg, #3D3D3D, #2C2C2C);
+  border: 4px solid var(--mc-border);
+  transition: transform 0.2s ease;
+}
+
+.mc-stat-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Loading Overlay */
+.mc-loading {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 37, 38, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mc-loading .pickaxe {
+  font-size: 48px;
+  animation: mining 1s infinite ease-in-out;
+}
+
+@keyframes mining {
+  0%, 100% { transform: rotate(-20deg); }
+  50% { transform: rotate(20deg); }
+}
+
+/* Search Input */
+.mc-search {
+  background-color: var(--mc-surface-dark);
+  border: 3px solid var(--mc-border);
+  padding-left: 44px;
+  background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22%23E0E0E0%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z%22/%3E%3C/svg%3E');
+  background-repeat: no-repeat;
+  background-position: 14px center;
+  background-size: 20px;
+}
+
+/* Role Badge */
+.role-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.role-pemilik { background: #5D9C3E; color: white; }
+.role-reseller_private { background: #3D5A80; color: white; }
+.role-partner_public { background: #E3B23C; color: #1A1A1A; }
+.role-reseller_public { background: #8B5A2B; color: white; }
+
+/* Grass accent line */
+.grass-accent {
+  height: 4px;
+  background: linear-gradient(to right, #5D9C3E, #7CB342, #5D9C3E);
+  background-size: 200% 100%;
+  animation: grassMove 3s linear infinite;
+}
+
+@keyframes grassMove {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
