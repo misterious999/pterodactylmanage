@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activity Logs • ZEROIXDARK MINECRAFT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="assets/js/common.js"></script>
+</head>
+<body>
+  <div class="mc-topbar sticky top-0 z-50">
+    <div class="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
+      <!-- Left: Logo -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-[#5D9C3E] border-2 border-[#2E4A1F] flex items-center justify-center text-xl">⛏️</div>
+          <div>
+            <span class="mc-font text-2xl text-[#E3B23C]">ZEROIXDARK</span>
+            <span class="text-xs text-[#5D9C3E] block -mt-1 tracking-[2px]">MINECRAFT</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop Mode Switcher -->
+      <div id="mode-switcher" class="hidden md:flex items-center gap-1 bg-[#2C2C2C] p-1 border border-[#222]"></div>
+
+      <!-- Right: Hamburger + User Info -->
+      <div class="flex items-center gap-3">
+        <button id="hamburger-btn" 
+                class="md:hidden w-10 h-10 flex items-center justify-center text-2xl text-[#E3B23C] border-2 border-[#222] bg-[#2C2C2C] active:bg-[#3D3D3D]">
+          ☰
+        </button>
+        <div id="user-info"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-screen-2xl mx-auto px-6 py-8">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="mc-font text-3xl text-white">RIWAYAT AKTIVITAS / LOG</h1>
+        <p class="text-[#888] text-sm">Semua aksi penting tercatat di Firebase Realtime</p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="loadLogs()" class="mc-btn px-6">REFRESH LOGS</button>
+        <button onclick="clearOldLogs()" class="px-5 py-3 text-xs border border-red-900 text-red-400 hover:bg-red-950">HAPUS LOG LAMA</button>
+      </div>
+    </div>
+    <div class="grass-accent mb-6"></div>
+
+    <div class="mc-card p-4 mb-4 flex flex-wrap gap-3 items-end">
+      <div class="flex-1 min-w-[220px]">
+        <label class="text-xs text-[#E3B23C] block mb-1">CARI AKSI / USER</label>
+        <input type="text" id="log-search" class="mc-input w-full" placeholder="auto_deploy, delete_user, extend..." onkeyup="filterLogs()">
+      </div>
+      <div>
+        <label class="text-xs text-[#E3B23C] block mb-1">MODE</label>
+        <select id="log-mode-filter" onchange="filterLogs()" class="mc-input px-4">
+          <option value="">Semua Mode</option>
+          <option value="private">Private</option>
+          <option value="public">Public</option>
+          <option value="public_v2">Public V2</option>
+        </select>
+      </div>
+      <button onclick="filterLogs()" class="mc-btn px-8">FILTER</button>
+    </div>
+
+    <div class="mc-card overflow-hidden">
+      <table class="mc-table">
+        <thead>
+          <tr>
+            <th>WAKTU</th>
+            <th>AKSI</th>
+            <th>DETAIL</th>
+            <th>MODE</th>
+            <th>USER</th>
+          </tr>
+        </thead>
+        <tbody id="logs-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let allLogs = [];
+
+    async function initLogsPage() {
+      const user = requireAuth();
+      if (!user) return;
+      initCommonUI();
+      await loadLogs();
+      window.addEventListener('modeChanged', () => window.location.reload());
+    }
+
+    async function loadLogs() {
+      const tbody = document.getElementById('logs-tbody');
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-[#888]">📜 Memuat log aktivitas...</td></tr>`;
+
+      try {
+        const snap = await getDatabase().ref('zeroixdark/activity_logs').limitToLast(100).once('value');
+        allLogs = [];
+
+        if (snap.exists()) {
+          snap.forEach(child => {
+            allLogs.unshift({ id: child.key, ...child.val() });
+          });
+        }
+
+        renderLogsTable(allLogs);
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-red-400 text-center">Gagal memuat log. Pastikan Firebase bisa diakses.</td></tr>`;
+      }
+    }
+
+    function renderLogsTable(logs) {
+      const tbody = document.getElementById('logs-tbody');
+      tbody.innerHTML = '';
+
+      if (logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-[#666]">Belum ada log aktivitas.</td></tr>`;
+        return;
+      }
+
+      logs.forEach(log => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="text-xs text-[#AAA]">${formatDate(log.timestamp)}</td>
+          <td><span class="font-bold text-[#E3B23C]">${log.action}</span></td>
+          <td class="text-xs max-w-xs truncate">${JSON.stringify(log.details || {})}</td>
+          <td><span class="text-xs px-2 py-0.5 bg-[#333]">${log.mode || '-'}</span></td>
+          <td class="text-xs">${log.username || '-'}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function filterLogs() {
+      const search = document.getElementById('log-search').value.toLowerCase();
+      const modeFilter = document.getElementById('log-mode-filter').value;
+
+      const filtered = allLogs.filter(log => {
+        const matchSearch = !search || 
+          log.action.toLowerCase().includes(search) || 
+          JSON.stringify(log.details || {}).toLowerCase().includes(search) ||
+          (log.username && log.username.toLowerCase().includes(search));
+        
+        const matchMode = !modeFilter || log.mode === modeFilter;
+        return matchSearch && matchMode;
+      });
+
+      renderLogsTable(filtered);
+    }
+
+    async function clearOldLogs() {
+      createModal("HAPUS LOG LAMA?", `
+        <p class="text-sm">Akan menghapus log yang lebih lama dari <strong>30 hari</strong>. Tindakan ini permanen.</p>
+      `, async () => {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 30);
+
+        const logsRef = getDatabase().ref('zeroixdark/activity_logs');
+        const snap = await logsRef.once('value');
+        let deleted = 0;
+
+        const promises = [];
+        snap.forEach(child => {
+          const log = child.val();
+          if (new Date(log.timestamp) < cutoff) {
+            promises.push(child.ref.remove());
+            deleted++;
+          }
+        });
+
+        await Promise.all(promises);
+        showNotification(`${deleted} log lama berhasil dihapus`, "success");
+        await loadLogs();
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initLogsPage);
+  </script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Server • ZEROIXDARK MINECRAFT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="assets/js/common.js"></script>
+</head>
+<body>
+  <div class="mc-topbar sticky top-0 z-50">
+    <div class="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
+      <!-- Left: Logo -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-[#5D9C3E] border-2 border-[#2E4A1F] flex items-center justify-center text-xl">⛏️</div>
+          <div>
+            <span class="mc-font text-2xl text-[#E3B23C]">ZEROIXDARK</span>
+            <span class="text-xs text-[#5D9C3E] block -mt-1 tracking-[2px]">MINECRAFT</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop Mode Switcher -->
+      <div id="mode-switcher" class="hidden md:flex items-center gap-1 bg-[#2C2C2C] p-1 border border-[#222]"></div>
+
+      <!-- Right: Hamburger + User Info -->
+      <div class="flex items-center gap-3">
+        <button id="hamburger-btn" 
+                class="md:hidden w-10 h-10 flex items-center justify-center text-2xl text-[#E3B23C] border-2 border-[#222] bg-[#2C2C2C] active:bg-[#3D3D3D]">
+          ☰
+        </button>
+        <div id="user-info"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-screen-2xl mx-auto px-6 py-8">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="mc-font text-3xl text-white">KELOLA SERVER</h1>
+        <p class="text-[#888] text-sm">Mode: <span id="page-mode" class="font-bold text-[#5D9C3E]"></span></p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="loadServers()" class="mc-btn px-5 text-sm">REFRESH DATA</button>
+        <button onclick="showBulkCleanModal()" class="mc-btn-danger mc-btn px-5 text-sm">BERSIHKAN TOTAL</button>
+      </div>
+    </div>
+    <div class="grass-accent mb-6"></div>
+
+    <!-- Search -->
+    <div class="mb-4 flex gap-3">
+      <input type="text" id="search-input" placeholder="Cari nama server atau owner..." class="mc-search mc-input flex-1" onkeyup="filterServers()">
+      <select id="status-filter" onchange="filterServers()" class="mc-input px-4 text-sm w-44">
+        <option value="">Semua Status</option>
+        <option value="active">Aktif</option>
+        <option value="suspended">Suspended</option>
+        <option value="expired">Expired</option>
+      </select>
+    </div>
+
+    <div class="mc-card overflow-x-auto">
+      <table class="mc-table min-w-[800px]">
+        <thead>
+          <tr>
+            <th>NAMA SERVER</th>
+            <th>OWNER (PTERO ID)</th>
+            <th>PACKAGE</th>
+            <th>EXPIRED</th>
+            <th>STATUS</th>
+            <th class="text-right">AKSI</th>
+          </tr>
+        </thead>
+        <tbody id="servers-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let allServers = [];
+
+    async function initServersPage() {
+      const user = requireAuth();
+      if (!user) return;
+      initCommonUI();
+
+      const mode = getCurrentMode();
+      document.getElementById('page-mode').textContent = modeConfig[mode].title;
+
+      await loadServers();
+
+      window.addEventListener('modeChanged', () => window.location.reload());
+    }
+
+    async function loadServers(silent = false) {
+      const tbody = document.getElementById('servers-tbody');
+      if (!silent) tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-[#888]">⛏️ Memuat daftar server...</td></tr>`;
+
+      const mode = getCurrentMode();
+      const db = getDatabase();
+
+      try {
+        const snap = await db.ref(`zeroixdark/managed_servers/${mode}`).once('value');
+        allServers = [];
+
+        if (snap.exists()) {
+          snap.forEach(child => {
+            allServers.push({ id: child.key, ...child.val() });
+          });
+        }
+
+        // Optional: enrich dengan data real dari Pterodactyl (bisa di-expand)
+        renderServersTable(allServers);
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-400">Error memuat data server.</td></tr>`;
+      }
+    }
+
+    function renderServersTable(servers) {
+      const tbody = document.getElementById('servers-tbody');
+      tbody.innerHTML = '';
+
+      if (servers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-[#666]">Tidak ada server di mode ini.</td></tr>`;
+        return;
+      }
+
+      servers.forEach(srv => {
+        const expired = srv.expired_at && isExpired(srv.expired_at);
+        let statusHTML = `<span class="mc-badge mc-badge-active">AKTIF</span>`;
+        
+        if (expired) statusHTML = `<span class="mc-badge mc-badge-expired">EXPIRED</span>`;
+        if (srv.status === 'suspended') statusHTML = `<span class="mc-badge mc-badge-suspended">SUSPENDED</span>`;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="font-mono text-sm">${srv.name || 'Unnamed Server'}</td>
+          <td class="text-xs">Ptero #${srv.user_ptero_id || srv.ptero_id}</td>
+          <td><span class="text-xs px-2 py-0.5 bg-[#2C2C2C] border border-[#222]">${srv.package || 'medium'}</span></td>
+          <td class="text-xs">${srv.expired_at ? formatDate(srv.expired_at) : '-'}</td>
+          <td>${statusHTML}</td>
+          <td class="text-right">
+            <div class="flex justify-end gap-1.5">
+              ${srv.status !== 'suspended' ? 
+                `<button onclick="suspendServer('${srv.id}', '${srv.ptero_id}', true)" class="px-3 py-1 text-xs border border-[#E3B23C] text-[#E3B23C]">SUSPEND</button>` : 
+                `<button onclick="suspendServer('${srv.id}', '${srv.ptero_id}', false)" class="px-3 py-1 text-xs bg-[#E3B23C] text-black">UNSUSPEND</button>`}
+              <button onclick="deleteServer('${srv.id}', '${srv.ptero_id}', '${srv.name}')" class="px-3 py-1 text-xs bg-red-700 hover:bg-red-800">HAPUS</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function filterServers() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const statusFilter = document.getElementById('status-filter').value;
+
+      const filtered = allServers.filter(s => {
+        const matchSearch = !search || (s.name && s.name.toLowerCase().includes(search));
+        let matchStatus = true;
+        
+        if (statusFilter === 'expired') matchStatus = s.expired_at && isExpired(s.expired_at);
+        else if (statusFilter === 'suspended') matchStatus = s.status === 'suspended';
+        else if (statusFilter === 'active') matchStatus = (!s.expired_at || !isExpired(s.expired_at)) && s.status !== 'suspended';
+        
+        return matchSearch && matchStatus;
+      });
+
+      renderServersTable(filtered);
+    }
+
+    async function suspendServer(firebaseId, pteroServerId, shouldSuspend) {
+      const mode = getCurrentMode();
+      const action = shouldSuspend ? 'suspend' : 'unsuspend';
+      
+      createModal(`${shouldSuspend ? 'SUSPEND' : 'UNSUSPEND'} SERVER?`, `
+        <p class="text-sm">Server ID <strong>${pteroServerId}</strong> akan di-${action}.</p>
+      `, async () => {
+        try {
+          const endpoint = shouldSuspend ? `/servers/${pteroServerId}/suspend` : `/servers/${pteroServerId}/unsuspend`;
+          await pteroApiCall(mode, endpoint, 'POST');
+
+          // Update local status di Firebase
+          await getDatabase().ref(`zeroixdark/managed_servers/${mode}/${firebaseId}`).update({ 
+            status: shouldSuspend ? 'suspended' : 'active' 
+          });
+
+          await logActivity(`${action}_server`, { ptero_server_id: pteroServerId }, mode);
+          showNotification(`Server berhasil di-${action}`, "success");
+          await loadServers(true);
+        } catch (err) {
+          showNotification("Gagal: " + err.message, "error");
+        }
+      });
+    }
+
+    async function deleteServer(firebaseId, pteroServerId, name) {
+      createModal("HAPUS SERVER?", `
+        <div>
+          <p class="text-red-400">Server <strong>${name}</strong> (ID: ${pteroServerId}) akan dihapus permanen.</p>
+        </div>
+      `, async () => {
+        const mode = getCurrentMode();
+        try {
+          await pteroApiCall(mode, `/servers/${pteroServerId}`, 'DELETE');
+          await getDatabase().ref(`zeroixdark/managed_servers/${mode}/${firebaseId}`).remove();
+
+          await logActivity('delete_server', { name, ptero_id: pteroServerId }, mode);
+          showNotification("Server dihapus", "success");
+          await loadServers(true);
+        } catch (err) {
+          showNotification(err.message, "error");
+        }
+      }, "HAPUS PERMANEN");
+    }
+
+    function showBulkCleanModal() {
+      createModal("BERSIHKAN TOTAL?", `
+        <div class="text-sm text-red-400">
+          Fitur ini akan menghapus SEMUA server + user di mode ini dari Pterodactyl.<br><br>
+          <strong>Gunakan dengan hati-hati!</strong>
+        </div>
+      `, async () => {
+        const mode = getCurrentMode();
+        if (!confirm("Kamu yakin 100%? Ini akan membersihkan SEMUA data di mode " + mode)) return;
+
+        showNotification("Fitur Bersihkan Total sedang dalam pengembangan. Gunakan manual dulu ya, Sayang.", "error");
+        // TODO: Implementasi bulk delete loop (bisa ditambah nanti)
+      }, "LANJUTKAN (HATI-HATI)");
+    }
+
+    document.addEventListener('DOMContentLoaded', initServersPage);
+  </script>
+</body>
+</html>

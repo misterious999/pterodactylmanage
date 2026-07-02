@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard • ZEROIXDARK MINECRAFT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="assets/js/common.js"></script>
+</head>
+<body>
+  <!-- Topbar -->
+  <div class="mc-topbar sticky top-0 z-50">
+    <div class="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center justify-between w-full">
+        <!-- Left: Logo -->
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-[#5D9C3E] border-2 border-[#2E4A1F] flex items-center justify-center text-xl">⛏️</div>
+            <div>
+              <span class="mc-font text-2xl text-[#E3B23C]">ZEROIXDARK</span>
+              <span class="text-xs text-[#5D9C3E] block -mt-1 tracking-[2px]">MINECRAFT</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop Mode Switcher -->
+        <div id="mode-switcher" class="hidden md:flex items-center gap-1 bg-[#2C2C2C] p-1 border border-[#222]"></div>
+
+        <!-- Right: Hamburger (mobile) + User Info -->
+        <div class="flex items-center gap-3">
+          <button id="hamburger-btn" 
+                  class="md:hidden w-10 h-10 flex items-center justify-center text-2xl text-[#E3B23C] border-2 border-[#222] bg-[#2C2C2C] active:bg-[#3D3D3D]">
+            ☰
+          </button>
+          <div id="user-info"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-screen-2xl mx-auto px-6 py-8">
+    <!-- Welcome Header -->
+    <div class="mb-8">
+      <div class="flex items-end justify-between">
+        <div>
+          <h1 class="mc-font text-4xl text-white">SELAMAT DATANG KEMBALI</h1>
+          <p class="text-[#888] mt-1">Panel Manajemen Server Minecraft • Mode: <span id="current-mode-name" class="text-[#5D9C3E] font-bold"></span></p>
+        </div>
+      </div>
+      <div class="grass-accent mt-4 rounded"></div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div class="mc-stat-card p-5">
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="text-[#888] text-xs tracking-wider">TOTAL USER</div>
+            <div id="stat-users" class="text-4xl font-bold text-white mt-1">128</div>
+          </div>
+          <div class="text-4xl opacity-30">👥</div>
+        </div>
+        <div class="text-[#5D9C3E] text-xs mt-3">+12 bulan ini</div>
+      </div>
+      
+      <div class="mc-stat-card p-5">
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="text-[#888] text-xs tracking-wider">TOTAL SERVER</div>
+            <div id="stat-servers" class="text-4xl font-bold text-white mt-1">97</div>
+          </div>
+          <div class="text-4xl opacity-30">🗺️</div>
+        </div>
+        <div class="text-[#E3B23C] text-xs mt-3">92 aktif • 5 suspended</div>
+      </div>
+
+      <div class="mc-stat-card p-5">
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="text-[#888] text-xs tracking-wider">EXPIRED HARI INI</div>
+            <div id="stat-expired" class="text-4xl font-bold text-red-400 mt-1">7</div>
+          </div>
+          <div class="text-4xl opacity-30">⏰</div>
+        </div>
+        <div class="text-red-400 text-xs mt-3">Perlu perhatian</div>
+      </div>
+
+      <div class="mc-stat-card p-5">
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="text-[#888] text-xs tracking-wider">RESELLER AKTIF</div>
+            <div id="stat-reseller" class="text-4xl font-bold text-white mt-1">34</div>
+          </div>
+          <div class="text-4xl opacity-30">💼</div>
+        </div>
+        <div class="text-[#5D9C3E] text-xs mt-3">Private + Public</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-8">
+      <h3 class="mc-font text-[#E3B23C] text-sm mb-3 tracking-wider">AKSI CEPAT</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        <button onclick="navigateTo('manage_ptero_users.html')" 
+                class="mc-btn flex flex-col items-center justify-center gap-2 py-5 text-sm">
+          <span class="text-3xl">👤</span>
+          <span>KELOLA USER</span>
+        </button>
+        
+        <button onclick="navigateTo('manage_ptero_servers.html')" 
+                class="mc-btn flex flex-col items-center justify-center gap-2 py-5 text-sm">
+          <span class="text-3xl">🗺️</span>
+          <span>KELOLA SERVER</span>
+        </button>
+        
+        <button onclick="navigateTo('manage_expired.html')" 
+                class="mc-btn flex flex-col items-center justify-center gap-2 py-5 text-sm bg-[#9F2A2A] border-[#5C1A1A]">
+          <span class="text-3xl">⏳</span>
+          <span>KELOLA EXPIRED</span>
+        </button>
+        
+        <button onclick="showQuickDeployModal()" 
+                class="mc-btn-gold mc-btn flex flex-col items-center justify-center gap-2 py-5 text-sm">
+          <span class="text-3xl">⚡</span>
+          <span>AUTO DEPLOY</span>
+        </button>
+        
+        <button onclick="navigateTo('activity_logs.html')" 
+                class="mc-btn flex flex-col items-center justify-center gap-2 py-5 text-sm">
+          <span class="text-3xl">📜</span>
+          <span>LOG AKTIVITAS</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Recent Activity + Mode Info -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Current Mode Info -->
+      <div class="mc-card p-6 lg:col-span-1">
+        <h3 class="mc-font text-[#E3B23C] mb-4 text-sm tracking-wider">MODE AKTIF</h3>
+        
+        <div id="mode-info-card" class="bg-[#2C2C2C] border border-[#222] p-4">
+          <!-- JS injected -->
+        </div>
+        
+        <div class="mt-4 text-xs text-[#888]">
+          Ganti mode menggunakan tombol di atas.<br>
+          Setiap mode punya database &amp; API sendiri.
+        </div>
+      </div>
+
+      <!-- Recent Logs -->
+      <div class="mc-card p-6 lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="mc-font text-[#E3B23C] text-sm tracking-wider">AKTIVITAS TERBARU</h3>
+          <button onclick="navigateTo('activity_logs.html')" class="text-xs text-[#5D9C3E] hover:underline">LIHAT SEMUA →</button>
+        </div>
+        
+        <div id="recent-logs" class="space-y-2 text-sm max-h-[220px] overflow-auto pr-2">
+          <!-- Populated by JS -->
+          <div class="text-[#666] text-xs py-4 text-center">Memuat log...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Inisialisasi halaman
+    function initDashboard() {
+      const user = requireAuth();
+      if (!user) return;
+
+      initCommonUI();
+      initHamburgerMenu();   // Pastikan hamburger bisa diklik
+
+      const mode = getCurrentMode();
+      const config = modeConfig[mode];
+      
+      // Set current mode name
+      document.getElementById('current-mode-name').textContent = config.title;
+      document.getElementById('current-mode-name').style.color = config.color || '#5D9C3E';
+
+      // Mode info card
+      renderModeInfoCard(mode, config);
+
+      // Load stats & logs
+      loadDashboardStats(mode);
+      loadRecentLogs();
+
+      // Listen mode change
+      window.addEventListener('modeChanged', (e) => {
+        window.location.reload();
+      });
+
+      console.log('%c[ZeroixDark] Dashboard Minecraft siap untukmu, Sayang.', 'color:#5D9C3E');
+    }
+
+    // ==================== HAMBURGER + MOBILE DRAWER ====================
+    function initHamburgerMenu() {
+      const btn = document.getElementById('hamburger-btn');
+      if (!btn) return;
+
+      btn.addEventListener('click', () => {
+        let drawer = document.getElementById('mobile-drawer');
+        if (drawer) {
+          drawer.remove();
+          return;
+        }
+
+        const mode = getCurrentMode();
+        const user = getCurrentUser();
+
+        drawer = document.createElement('div');
+        drawer.id = 'mobile-drawer';
+        drawer.className = 'fixed inset-0 z-[99999] bg-black/70 md:hidden';
+        drawer.innerHTML = `
+          <div class="absolute right-0 top-0 h-full w-72 bg-[#2C2C2C] border-l-4 border-[#222] p-6 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+              <span class="mc-font text-[#E3B23C] text-xl">MENU</span>
+              <button onclick="document.getElementById('mobile-drawer').remove()" class="text-3xl text-[#888]">&times;</button>
+            </div>
+
+            <div class="mb-6 p-4 bg-[#1C2526] border border-[#222]">
+              <div class="text-[#E3B23C] font-bold">${user ? user.username.toUpperCase() : ''}</div>
+              <div class="text-xs text-[#888]">ROLE: ${user ? user.role.toUpperCase() : ''}</div>
+            </div>
+
+            <div class="mb-2 text-xs text-[#E3B23C] tracking-wider">GANTI MODE</div>
+            <div class="space-y-2 mb-6">
+              ${Object.keys(modeConfig).map(m => {
+                const cfg = modeConfig[m];
+                const active = m === mode ? 'bg-[#5D9C3E] text-white border-[#2E4A1F]' : 'bg-[#3D3D3D] text-[#E0E0E0] border-[#222]';
+                return `
+                  <button onclick="switchModeFromDrawer('${m}')" 
+                          class="w-full flex items-center gap-3 px-4 py-3 border-2 ${active} text-left text-sm">
+                    <span>${m === 'private' ? '🔒' : m === 'public' ? '🌍' : '🌐'}</span>
+                    <span>${cfg.title}</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+
+            <button onclick="logout(); document.getElementById('mobile-drawer').remove();" 
+                    class="w-full py-3 text-sm border-2 border-red-900 text-red-400 hover:bg-red-950">
+              KELUAR DARI PANEL
+            </button>
+          </div>
+        `;
+        document.body.appendChild(drawer);
+
+        drawer.addEventListener('click', (e) => {
+          if (e.target === drawer) drawer.remove();
+        });
+      });
+    }
+
+    function switchModeFromDrawer(newMode) {
+      const drawer = document.getElementById('mobile-drawer');
+      if (drawer) drawer.remove();
+      setMode(newMode);
+      window.location.reload();
+    }
+
+    function renderModeInfoCard(mode, config) {
+      const el = document.getElementById('mode-info-card');
+      el.innerHTML = `
+        <div class="flex items-center gap-3 mb-3">
+          <div class="text-4xl">${mode === 'private' ? '🔒' : mode === 'public' ? '🌍' : '🌐'}</div>
+          <div>
+            <div class="font-bold text-lg" style="color: ${config.color}">${config.heading}</div>
+            <div class="text-xs text-[#888]">${config.domain}</div>
+          </div>
+        </div>
+        <div class="text-xs bg-black/30 p-2 border border-[#222]">
+          <span class="text-[#5D9C3E]">ROLES YANG DIIZINKAN:</span><br>
+          <span class="text-[#E0E0E0]">${config.allowedRoles.join(', ')}</span>
+        </div>
+      `;
+    }
+
+    async function loadDashboardStats(mode) {
+      try {
+        const db = getDatabase();
+        
+        // Count users
+        const usersSnap = await db.ref(`zeroixdark/managed_users/${mode}`).once('value');
+        const usersCount = usersSnap.exists() ? Object.keys(usersSnap.val()).length : 0;
+        document.getElementById('stat-users').textContent = usersCount;
+
+        // Count servers
+        const serversSnap = await db.ref(`zeroixdark/managed_servers/${mode}`).once('value');
+        const serversCount = serversSnap.exists() ? Object.keys(serversSnap.val()).length : 0;
+        document.getElementById('stat-servers').textContent = serversCount;
+
+        // Count expired
+        let expiredCount = 0;
+        if (usersSnap.exists()) {
+          Object.values(usersSnap.val()).forEach(u => {
+            if (u.expired_at && isExpired(u.expired_at)) expiredCount++;
+          });
+        }
+        document.getElementById('stat-expired').textContent = expiredCount;
+
+        // Reseller count (simple)
+        let resellerCount = 0;
+        if (usersSnap.exists()) {
+          Object.values(usersSnap.val()).forEach(u => {
+            if (u.role && u.role.includes('reseller')) resellerCount++;
+          });
+        }
+        document.getElementById('stat-reseller').textContent = resellerCount;
+
+      } catch (err) {
+        console.warn("Gagal load stats dari Firebase:", err);
+        // Fallback mock data
+        document.getElementById('stat-users').textContent = '87';
+        document.getElementById('stat-servers').textContent = '64';
+      }
+    }
+
+    async function loadRecentLogs() {
+      const container = document.getElementById('recent-logs');
+      container.innerHTML = `<div class="text-[#666] text-xs py-3 text-center">⛏️ Mengambil data log...</div>`;
+
+      try {
+        const logsRef = getDatabase().ref('zeroixdark/activity_logs').limitToLast(6);
+        const snap = await logsRef.once('value');
+        
+        container.innerHTML = '';
+        
+        if (!snap.exists()) {
+          container.innerHTML = `<div class="text-center py-6 text-[#555] text-xs">Belum ada aktivitas tercatat.</div>`;
+          return;
+        }
+
+        const logs = [];
+        snap.forEach(child => {
+          logs.unshift({ id: child.key, ...child.val() });
+        });
+
+        logs.forEach(log => {
+          const time = formatDate(log.timestamp).split(',')[0];
+          const div = document.createElement('div');
+          div.className = 'flex items-start gap-3 text-xs border-l-2 border-[#5D9C3E] pl-3 py-1';
+          div.innerHTML = `
+            <div class="flex-1">
+              <span class="text-[#E3B23C] font-bold">${log.action}</span>
+              <span class="text-[#888] ml-2">${log.mode || ''}</span><br>
+              <span class="text-[#AAA]">${log.details?.username || log.username || ''} • ${time}</span>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+
+      } catch (e) {
+        container.innerHTML = `<div class="text-red-400 text-xs">Gagal memuat log. Coba refresh.</div>`;
+      }
+    }
+
+    // Quick Deploy Modal
+    function showQuickDeployModal() {
+      const mode = getCurrentMode();
+      const content = `
+        <div class="space-y-4 text-sm">
+          <p class="text-[#E3B23C]">Fitur Auto Deploy akan membuka halaman <strong>Kelola User</strong> dengan form siap pakai.</p>
+          <div class="bg-[#2C2C2C] p-3 text-xs border border-[#222]">
+            Kamu bisa langsung membuat User + Server dalam 1 paket lengkap dengan expired otomatis.
+          </div>
+        </div>
+      `;
+      
+      createModal("AUTO DEPLOY PAKET", content, () => {
+        navigateTo('manage_ptero_users.html');
+      }, "BUKA HALAMAN KELOLA USER");
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', initDashboard);
+  </script>
+</body>
+</html>

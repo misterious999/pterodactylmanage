@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOGIN • ZEROIXDARK MINECRAFT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+  <div class="w-full max-w-md">
+    <!-- Logo & Header -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-20 h-20 bg-[#3D3D3D] border-4 border-[#2E4A1F] mb-4 shadow-2xl">
+        <span class="text-6xl">⛏️</span>
+      </div>
+      <h1 class="mc-font text-5xl text-[#E3B23C] mc-title tracking-[4px]">ZEROIXDARK</h1>
+      <div class="flex items-center justify-center gap-2 mt-1">
+        <div class="h-1 w-8 bg-[#5D9C3E]"></div>
+        <p class="text-[#5D9C3E] text-sm tracking-[3px] font-bold">MINECRAFT EDITION</p>
+        <div class="h-1 w-8 bg-[#5D9C3E]"></div>
+      </div>
+      <p class="text-[#888] text-xs mt-2">SERVER MANAGEMENT PANEL v2.1</p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="mc-card p-8">
+      <div class="text-center mb-6">
+        <div class="inline-block px-4 py-1 bg-[#2C2C2C] border border-[#222] text-[#E3B23C] text-xs tracking-widest">MASUK KE DUNIA</div>
+      </div>
+
+      <form id="loginForm" class="space-y-5">
+        <div>
+          <label class="block text-[#E3B23C] text-xs mb-2 tracking-wider">USERNAME</label>
+          <input type="text" id="username" 
+                 class="mc-input w-full text-lg" placeholder="Masukkan username" required>
+        </div>
+        
+        <div>
+          <label class="block text-[#E3B23C] text-xs mb-2 tracking-wider">PASSWORD</label>
+          <input type="password" id="password" 
+                 class="mc-input w-full text-lg" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit"
+                class="mc-btn w-full mt-2 flex items-center justify-center gap-3 text-base">
+          <span>MASUK KE PANEL</span>
+          <span class="text-xl">→</span>
+        </button>
+      </form>
+
+      <div class="mt-6 pt-6 border-t border-[#222] text-center">
+        <p class="text-[#666] text-xs">Login menggunakan data dari <span class="text-[#5D9C3E]">Firebase</span></p>
+      </div>
+    </div>
+
+    <p class="text-center text-[#555] text-xs mt-6">Dibuat dengan ❤️ oleh Lina</p>
+  </div>
+
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value.trim().toLowerCase();
+      const password = document.getElementById('password').value.trim();
+
+      if (!username || !password) {
+        showLoginError("Username dan password wajib diisi!");
+        return;
+      }
+
+      try {
+        // Cek data admin di Firebase → zeroixdark/admins/{username}
+        const snapshot = await database.ref(`zeroixdark/admins/${username}`).once('value');
+
+        if (snapshot.exists()) {
+          const adminData = snapshot.val();
+
+          if (adminData.password === password) {
+            const userData = {
+              username: username,
+              role: adminData.role || 'pemilik',
+              loggedIn: true,
+              loginTime: new Date().toISOString()
+            };
+
+            localStorage.setItem('zeroix_user', JSON.stringify(userData));
+            window.location.href = 'index.html?mode=private';
+            return;
+          }
+        }
+
+        showLoginError("Username atau password salah!");
+
+      } catch (error) {
+        console.error("Firebase Login Error:", error);
+        showLoginError("Gagal terhubung ke server. Coba lagi nanti.");
+      }
+    });
+
+    function showLoginError(message) {
+      const form = document.getElementById('loginForm');
+      form.style.transition = 'all 0.1s';
+      form.style.transform = 'translateX(6px)';
+      
+      setTimeout(() => {
+        form.style.transform = 'translateX(-6px)';
+        setTimeout(() => {
+          form.style.transform = 'translateX(0)';
+        }, 80);
+      }, 80);
+
+      const oldError = form.parentNode.querySelector('.login-error');
+      if (oldError) oldError.remove();
+
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'login-error mt-4 text-center text-red-400 text-sm border border-red-900 bg-red-950 py-2';
+      errorDiv.textContent = message;
+      form.parentNode.appendChild(errorDiv);
+      
+      setTimeout(() => {
+        if (errorDiv && errorDiv.parentNode) errorDiv.parentNode.removeChild(errorDiv);
+      }, 2500);
+    }
+  </script>
+</body>
+</html>

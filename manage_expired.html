@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Expired • ZEROIXDARK MINECRAFT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="assets/js/common.js"></script>
+</head>
+<body>
+  <div class="mc-topbar sticky top-0 z-50">
+    <div class="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
+      <!-- Left: Logo -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-[#5D9C3E] border-2 border-[#2E4A1F] flex items-center justify-center text-xl">⛏️</div>
+          <div>
+            <span class="mc-font text-2xl text-[#E3B23C]">ZEROIXDARK</span>
+            <span class="text-xs text-[#5D9C3E] block -mt-1 tracking-[2px]">MINECRAFT</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop Mode Switcher -->
+      <div id="mode-switcher" class="hidden md:flex items-center gap-1 bg-[#2C2C2C] p-1 border border-[#222]"></div>
+
+      <!-- Right: Hamburger + User Info -->
+      <div class="flex items-center gap-3">
+        <button id="hamburger-btn" 
+                class="md:hidden w-10 h-10 flex items-center justify-center text-2xl text-[#E3B23C] border-2 border-[#222] bg-[#2C2C2C] active:bg-[#3D3D3D]">
+          ☰
+        </button>
+        <div id="user-info"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-screen-2xl mx-auto px-6 py-8">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="mc-font text-3xl text-white">KELOLA EXPIRED + TAMBAH HARI</h1>
+        <p class="text-[#888] text-sm">Mode: <span id="page-mode" class="font-bold text-[#5D9C3E]"></span></p>
+      </div>
+      <button onclick="loadExpiredData()" class="mc-btn">REFRESH LIST</button>
+    </div>
+    <div class="grass-accent mb-6"></div>
+
+    <div class="mc-card p-5 mb-6 bg-[#2C2C2C]">
+      <div class="flex items-center gap-4 text-sm">
+        <div class="flex-1">
+          <span class="text-[#E3B23C] font-bold">TIPS:</span> 
+          Gunakan tombol <span class="px-2 py-0.5 bg-[#E3B23C] text-black text-xs">+ HARI</span> untuk memperpanjang masa aktif user/server.
+        </div>
+        <button onclick="bulkExtendExpired()" class="mc-btn-gold mc-btn text-xs px-5">PERPANJANG SEMUA YANG EXPIRED (BULK)</button>
+      </div>
+    </div>
+
+    <div class="mc-card overflow-x-auto">
+      <table class="mc-table min-w-[700px]">
+        <thead>
+          <tr>
+            <th>USERNAME / SERVER</th>
+            <th>TIPE</th>
+            <th>EXPIRED AT</th>
+            <th>HARI TERSISA</th>
+            <th class="text-right">AKSI</th>
+          </tr>
+        </thead>
+        <tbody id="expired-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let expiredData = [];
+
+    async function initExpiredPage() {
+      const user = requireAuth();
+      if (!user) return;
+      initCommonUI();
+
+      const mode = getCurrentMode();
+      document.getElementById('page-mode').textContent = modeConfig[mode].title;
+
+      await loadExpiredData();
+      window.addEventListener('modeChanged', () => window.location.reload());
+    }
+
+    async function loadExpiredData() {
+      const tbody = document.getElementById('expired-tbody');
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-[#888]">⛏️ Memindai data expired...</td></tr>`;
+
+      const mode = getCurrentMode();
+      const db = getDatabase();
+      expiredData = [];
+
+      try {
+        // Ambil user
+        const usersSnap = await db.ref(`zeroixdark/managed_users/${mode}`).once('value');
+        if (usersSnap.exists()) {
+          usersSnap.forEach(child => {
+            const u = child.val();
+            if (u.expired_at) {
+              expiredData.push({
+                id: child.key,
+                type: 'user',
+                name: u.username,
+                expired_at: u.expired_at,
+                ptero_id: u.ptero_id,
+                firebase_path: `managed_users/${mode}/${child.key}`
+              });
+            }
+          });
+        }
+
+        // Ambil server
+        const serversSnap = await db.ref(`zeroixdark/managed_servers/${mode}`).once('value');
+        if (serversSnap.exists()) {
+          serversSnap.forEach(child => {
+            const s = child.val();
+            if (s.expired_at) {
+              expiredData.push({
+                id: child.key,
+                type: 'server',
+                name: s.name,
+                expired_at: s.expired_at,
+                ptero_id: s.ptero_id,
+                firebase_path: `managed_servers/${mode}/${child.key}`
+              });
+            }
+          });
+        }
+
+        // Sort by expired date
+        expiredData.sort((a, b) => new Date(a.expired_at) - new Date(b.expired_at));
+
+        renderExpiredTable();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-red-400 text-center py-8">Gagal memuat data expired.</td></tr>`;
+      }
+    }
+
+    function renderExpiredTable() {
+      const tbody = document.getElementById('expired-tbody');
+      tbody.innerHTML = '';
+
+      if (expiredData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-[#5D9C3E]">🎉 Tidak ada data yang memiliki tanggal expired!</td></tr>`;
+        return;
+      }
+
+      expiredData.forEach(item => {
+        const expDate = new Date(item.expired_at);
+        const now = new Date();
+        const diffTime = expDate - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        let daysLeftHTML = '';
+        if (diffDays < 0) {
+          daysLeftHTML = `<span class="text-red-400 font-bold">${Math.abs(diffDays)} hari lalu (EXPIRED)</span>`;
+        } else if (diffDays === 0) {
+          daysLeftHTML = `<span class="text-[#E3B23C]">Hari ini!</span>`;
+        } else {
+          daysLeftHTML = `${diffDays} hari lagi`;
+        }
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="font-mono">${item.name}</td>
+          <td><span class="text-xs px-2 py-0.5 ${item.type === 'user' ? 'bg-[#3D5A80]' : 'bg-[#5D9C3E]'}">${item.type.toUpperCase()}</span></td>
+          <td class="text-xs">${formatDate(item.expired_at)}</td>
+          <td>${daysLeftHTML}</td>
+          <td class="text-right">
+            <button onclick="extendItem('${item.firebase_path}', '${item.name}', ${diffDays})" 
+                    class="mc-btn px-4 py-1 text-xs">+ TAMBAH HARI</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    async function extendItem(firebasePath, name, currentDiffDays) {
+      const daysStr = prompt(`Tambah berapa hari untuk ${name}? (Saat ini ${currentDiffDays < 0 ? 'sudah expired' : currentDiffDays + ' hari lagi'})`, "15");
+      if (!daysStr || isNaN(daysStr)) return;
+
+      const days = parseInt(daysStr);
+      const mode = getCurrentMode();
+      const fullPath = `zeroixdark/${firebasePath}`;
+
+      try {
+        const ref = getDatabase().ref(fullPath);
+        const snap = await ref.once('value');
+        const data = snap.val();
+        if (!data) return showNotification("Data tidak ditemukan", "error");
+
+        const newExpired = addDaysToDate(data.expired_at, days);
+        await ref.update({ expired_at: newExpired });
+
+        await logActivity('extend_expired_bulk', { name, type: firebasePath.includes('user') ? 'user' : 'server', days }, mode);
+
+        showNotification(`${name} diperpanjang ${days} hari`, "success");
+        await loadExpiredData();
+      } catch (e) {
+        showNotification("Gagal memperpanjang: " + e.message, "error");
+      }
+    }
+
+    async function bulkExtendExpired() {
+      const expiredOnly = expiredData.filter(i => isExpired(i.expired_at));
+      if (expiredOnly.length === 0) {
+        showNotification("Tidak ada item yang sudah expired.", "success");
+        return;
+      }
+
+      createModal("PERPANJANG SEMUA EXPIRED?", `
+        <p>Akan memperpanjang <strong>${expiredOnly.length} item</strong> yang sudah expired selama <strong>15 hari</strong>.</p>
+      `, async () => {
+        const mode = getCurrentMode();
+        let success = 0;
+
+        for (const item of expiredOnly) {
+          try {
+            const ref = getDatabase().ref(`zeroixdark/${item.firebase_path}`);
+            const snap = await ref.once('value');
+            const data = snap.val();
+            if (data) {
+              const newExp = addDaysToDate(data.expired_at, 15);
+              await ref.update({ expired_at: newExp });
+              success++;
+            }
+          } catch (e) { console.warn(e); }
+        }
+
+        await logActivity('bulk_extend_expired', { count: success }, mode);
+        showNotification(`${success} item berhasil diperpanjang 15 hari`, "success");
+        await loadExpiredData();
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initExpiredPage);
+  </script>
+</body>
+</html>

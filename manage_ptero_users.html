@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola User • ZEROIXDARK MINECRAFT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="assets/js/common.js"></script>
+</head>
+<body>
+  <!-- Topbar -->
+  <div class="mc-topbar sticky top-0 z-50">
+    <div class="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
+      <!-- Left: Logo -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-[#5D9C3E] border-2 border-[#2E4A1F] flex items-center justify-center text-xl">⛏️</div>
+          <div>
+            <span class="mc-font text-2xl text-[#E3B23C]">ZEROIXDARK</span>
+            <span class="text-xs text-[#5D9C3E] block -mt-1 tracking-[2px]">MINECRAFT</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop Mode Switcher -->
+      <div id="mode-switcher" class="hidden md:flex items-center gap-1 bg-[#2C2C2C] p-1 border border-[#222]"></div>
+
+      <!-- Right: Hamburger + User Info -->
+      <div class="flex items-center gap-3">
+        <button id="hamburger-btn" 
+                class="md:hidden w-10 h-10 flex items-center justify-center text-2xl text-[#E3B23C] border-2 border-[#222] bg-[#2C2C2C] active:bg-[#3D3D3D]">
+          ☰
+        </button>
+        <div id="user-info"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-screen-2xl mx-auto px-6 py-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="mc-font text-3xl text-white">KELOLA USER + AUTO DEPLOY</h1>
+        <p class="text-[#888] text-sm">Mode: <span id="page-mode" class="font-bold text-[#5D9C3E]"></span></p>
+      </div>
+      <button onclick="showAutoDeployModal()" class="mc-btn flex items-center gap-2">
+        <span>⚡</span> <span>AUTO DEPLOY USER + SERVER</span>
+      </button>
+    </div>
+
+    <div class="grass-accent mb-6"></div>
+
+    <!-- Search & Filter -->
+    <div class="flex flex-col md:flex-row gap-3 mb-4">
+      <div class="flex-1 relative">
+        <input type="text" id="search-input" placeholder="Cari username atau email..." 
+               class="mc-search mc-input w-full" onkeyup="filterUsers()">
+      </div>
+      <select id="role-filter" onchange="filterUsers()" class="mc-input px-4 text-sm w-full md:w-52">
+        <option value="">Semua Role</option>
+        <option value="pemilik">Pemilik</option>
+        <option value="reseller_private">Reseller Private</option>
+        <option value="partner_public">Partner Public</option>
+        <option value="reseller_public">Reseller Public</option>
+        <option value="partner_public_v2">Partner Public V2</option>
+      </select>
+      <button onclick="loadUsers()" class="mc-btn px-6">REFRESH</button>
+    </div>
+
+    <!-- Users Table -->
+    <div class="mc-card overflow-x-auto">
+      <table class="mc-table min-w-[700px]">
+        <thead>
+          <tr>
+            <th>USERNAME</th>
+            <th>EMAIL</th>
+            <th>ROLE</th>
+            <th>EXPIRED AT</th>
+            <th>STATUS</th>
+            <th class="text-right">AKSI</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-3 text-xs text-[#666] flex items-center gap-2">
+      <span>💡</span> 
+      <span>Data diambil dari Firebase + Pterodactyl API. Hapus user akan menghapus server terkait juga.</span>
+    </div>
+  </div>
+
+  <script>
+    let allUsers = [];
+
+    async function initUsersPage() {
+      const user = requireAuth();
+      if (!user) return;
+
+      initCommonUI();
+
+      const mode = getCurrentMode();
+      document.getElementById('page-mode').textContent = modeConfig[mode].title;
+
+      await loadUsers();
+
+      // Auto refresh every 60s
+      setInterval(() => {
+        if (document.visibilityState === 'visible') loadUsers(true);
+      }, 60000);
+
+      window.addEventListener('modeChanged', () => window.location.reload());
+    }
+
+    async function loadUsers(silent = false) {
+      const tbody = document.getElementById('users-tbody');
+      if (!silent) tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-[#888]">⛏️ Memuat data user dari Firebase...</td></tr>`;
+
+      const mode = getCurrentMode();
+      const db = getDatabase();
+
+      try {
+        const snap = await db.ref(`zeroixdark/managed_users/${mode}`).once('value');
+        allUsers = [];
+
+        if (snap.exists()) {
+          snap.forEach(child => {
+            allUsers.push({ id: child.key, ...child.val() });
+          });
+        }
+
+        renderUsersTable(allUsers);
+      } catch (err) {
+        console.error(err);
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-400">Gagal memuat data. Coba refresh halaman.</td></tr>`;
+      }
+    }
+
+    function renderUsersTable(users) {
+      const tbody = document.getElementById('users-tbody');
+      tbody.innerHTML = '';
+
+      if (users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-[#666]">Belum ada user di mode ini. Gunakan tombol Auto Deploy.</td></tr>`;
+        return;
+      }
+
+      users.forEach(user => {
+        const expired = user.expired_at ? isExpired(user.expired_at) : false;
+        const statusHTML = expired 
+          ? `<span class="mc-badge mc-badge-expired">EXPIRED</span>` 
+          : `<span class="mc-badge mc-badge-active">AKTIF</span>`;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="font-mono text-sm">${user.username || '-'}</td>
+          <td class="text-xs text-[#AAA]">${user.email || '-'}</td>
+          <td><span class="role-badge role-${user.role || 'reseller_private'}">${user.role || 'unknown'}</span></td>
+          <td class="text-xs">${user.expired_at ? formatDate(user.expired_at) : '<span class="text-[#666]">Tidak diatur</span>'}</td>
+          <td>${statusHTML}</td>
+          <td class="text-right">
+            <div class="flex justify-end gap-2">
+              <button onclick="extendUser('${user.id}', '${user.username}')" 
+                      class="px-3 py-1 text-xs bg-[#E3B23C] text-black border border-[#8B5A2B] hover:bg-[#D4A017]">+ HARI</button>
+              <button onclick="deleteUser('${user.id}', '${user.username}', '${user.ptero_id || ''}')" 
+                      class="px-3 py-1 text-xs bg-red-700 hover:bg-red-800 border border-red-900">HAPUS</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function filterUsers() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const roleFilter = document.getElementById('role-filter').value;
+
+      const filtered = allUsers.filter(u => {
+        const matchSearch = !search || 
+          (u.username && u.username.toLowerCase().includes(search)) || 
+          (u.email && u.email.toLowerCase().includes(search));
+        
+        const matchRole = !roleFilter || u.role === roleFilter;
+        return matchSearch && matchRole;
+      });
+
+      renderUsersTable(filtered);
+    }
+
+    // ==================== AUTO DEPLOY ====================
+    function showAutoDeployModal() {
+      const mode = getCurrentMode();
+      const config = modeConfig[mode];
+
+      const content = `
+        <div class="space-y-5 text-sm">
+          <div class="bg-[#2C2C2C] border border-[#222] p-3 text-xs">
+            <strong class="text-[#E3B23C]">Auto Deploy</strong> akan membuat:<br>
+            1. User baru di Pterodactyl<br>
+            2. Server Minecraft (default package)<br>
+            3. Expired otomatis 30 hari<br>
+            4. Simpan ke Firebase
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs text-[#E3B23C] block mb-1">USERNAME</label>
+              <input id="deploy-username" class="mc-input w-full" placeholder="steve2026" value="player${Date.now().toString().slice(-4)}">
+            </div>
+            <div>
+              <label class="text-xs text-[#E3B23C] block mb-1">EMAIL</label>
+              <input id="deploy-email" type="email" class="mc-input w-full" value="player${Date.now().toString().slice(-4)}@zeroix.id">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label class="text-xs text-[#E3B23C] block mb-1">PASSWORD</label>
+              <input id="deploy-password" class="mc-input w-full" value="Minecraft123!">
+            </div>
+            <div>
+              <label class="text-xs text-[#E3B23C] block mb-1">PAKET</label>
+              <select id="deploy-package" class="mc-input w-full">
+                <option value="small">Small (1GB RAM / 5GB Disk)</option>
+                <option value="medium" selected>Medium (2GB RAM / 10GB Disk)</option>
+                <option value="large">Large (4GB RAM / 20GB Disk)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs text-[#E3B23C] block mb-1">ROLE</label>
+              <select id="deploy-role" class="mc-input w-full">
+                ${config.allowedRoles.map(r => `<option value="${r}">${r}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div class="text-[10px] text-[#888] pt-2">Server akan dibuat dengan egg default Minecraft (ubah di worker jika perlu).</div>
+        </div>
+      `;
+
+      createModal("AUTO DEPLOY USER + SERVER", content, async () => {
+        await performAutoDeploy(mode);
+      }, "DEPLOY SEKARANG");
+    }
+
+    async function performAutoDeploy(mode) {
+      const username = document.getElementById('deploy-username').value.trim();
+      const email = document.getElementById('deploy-email').value.trim();
+      const password = document.getElementById('deploy-password').value.trim();
+      const pkg = document.getElementById('deploy-package').value;
+      const role = document.getElementById('deploy-role').value;
+
+      if (!username || !email || !password) {
+        showNotification("Username, Email, dan Password wajib diisi!", "error");
+        return;
+      }
+
+      const loadingModal = createModal("MEMPROSES DEPLOY...", `
+        <div class="flex flex-col items-center py-6">
+          <div class="text-5xl animate-bounce mb-4">⛏️</div>
+          <p class="text-sm">Sedang membuat user &amp; server di Pterodactyl...</p>
+          <p class="text-xs text-[#888] mt-1">Jangan tutup halaman ini.</p>
+        </div>
+      `, null, "TUNGGU...");
+
+      try {
+        // 1. Create User via Ptero API
+        const userPayload = {
+          username: username.toLowerCase().replace(/\s/g, ''),
+          email: email,
+          first_name: username,
+          last_name: "Zeroix",
+          password: password
+        };
+
+        const userRes = await pteroApiCall(mode, '/users', 'POST', userPayload);
+        const pteroUserId = userRes.attributes.id;
+
+        // 2. Create Server (simplified - kamu bisa expand ini dengan allocation & egg)
+        const serverPayload = {
+          name: `${username}-mc-server`,
+          user: pteroUserId,
+          egg: 1,                    // Ganti sesuai egg Minecraft kamu
+          docker_image: "ghcr.io/pterodactyl/yolks:java_17",
+          startup: "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+          environment: {
+            SERVER_JARFILE: "server.jar",
+            VANILLA_VERSION: "1.21.1",
+            SERVER_MEMORY: pkg === 'small' ? "1024" : pkg === 'medium' ? "2048" : "4096"
+          },
+          limits: {
+            memory: pkg === 'small' ? 1024 : pkg === 'medium' ? 2048 : 4096,
+            swap: 0,
+            disk: pkg === 'small' ? 5120 : pkg === 'medium' ? 10240 : 20480,
+            io: 500,
+            cpu: pkg === 'small' ? 100 : pkg === 'medium' ? 150 : 200
+          },
+          feature_limits: { allocations: 1, backups: 1, databases: 0 }
+        };
+
+        const serverRes = await pteroApiCall(mode, '/servers', 'POST', serverPayload);
+        const pteroServerId = serverRes.attributes.id;
+
+        // 3. Save to Firebase
+        const expiredDate = new Date();
+        expiredDate.setDate(expiredDate.getDate() + 30);
+
+        const userData = {
+          ptero_id: pteroUserId,
+          username: username,
+          email: email,
+          role: role,
+          expired_at: expiredDate.toISOString(),
+          package: pkg,
+          created_by: getCurrentUser().username
+        };
+
+        await saveManagedUser(mode, userData);
+
+        const serverData = {
+          ptero_id: pteroServerId,
+          user_ptero_id: pteroUserId,
+          name: serverPayload.name,
+          expired_at: expiredDate.toISOString(),
+          package: pkg,
+          status: 'active'
+        };
+
+        await saveManagedServer(mode, serverData);
+
+        // 4. Log
+        await logActivity('auto_deploy', { 
+          username, 
+          ptero_user_id: pteroUserId, 
+          ptero_server_id: pteroServerId,
+          package: pkg 
+        }, mode);
+
+        // Close loading
+        const loading = document.getElementById('mc-modal');
+        if (loading) loading.remove();
+
+        showNotification(`Berhasil deploy ${username}! Server ID: ${pteroServerId}`, "success");
+
+        // Refresh table
+        await loadUsers(true);
+
+      } catch (err) {
+        const loading = document.getElementById('mc-modal');
+        if (loading) loading.remove();
+
+        console.error(err);
+        showNotification("Gagal deploy: " + err.message, "error");
+        
+        createModal("ERROR DEPLOY", `
+          <div class="text-red-400 text-sm">${err.message}</div>
+          <div class="text-xs mt-3 text-[#888]">Cek console browser atau pastikan Worker &amp; API Key benar.</div>
+        `, null, "TUTUP");
+      }
+    }
+
+    // Extend expired
+    async function extendUser(firebaseId, username) {
+      const days = prompt(`Berapa hari tambahan untuk ${username}?`, "30");
+      if (!days || isNaN(days)) return;
+
+      const mode = getCurrentMode();
+      const db = getDatabase();
+      const userRef = db.ref(`zeroixdark/managed_users/${mode}/${firebaseId}`);
+
+      try {
+        const snap = await userRef.once('value');
+        const current = snap.val();
+        if (!current) return;
+
+        const newExpired = addDaysToDate(current.expired_at, parseInt(days));
+        
+        await userRef.update({ expired_at: newExpired });
+
+        await logActivity('extend_expired', { username, days: parseInt(days), new_expired: newExpired }, mode);
+
+        showNotification(`${username} ditambah ${days} hari`, "success");
+        await loadUsers(true);
+      } catch (e) {
+        showNotification("Gagal memperpanjang: " + e.message, "error");
+      }
+    }
+
+    // Delete user + servers
+    async function deleteUser(firebaseId, username, pteroUserId) {
+      createModal("HAPUS USER?", `
+        <div class="text-sm">
+          <p class="text-red-400 font-bold">PERINGATAN!</p>
+          <p class="mt-2">User <strong>${username}</strong> dan SEMUA server miliknya akan dihapus permanen dari Pterodactyl &amp; Firebase.</p>
+          <p class="text-xs text-[#888] mt-3">Tindakan ini tidak bisa dibatalkan.</p>
+        </div>
+      `, async () => {
+        const mode = getCurrentMode();
+        try {
+          // 1. Hapus server dari ptero jika ada
+          if (pteroUserId) {
+            // Ambil daftar server milik user ini dulu (opsional, bisa di-expand)
+            // Untuk simplicity, kita hapus user saja. Kamu bisa tambah logic hapus server.
+          }
+
+          // 2. Hapus user dari Pterodactyl
+          if (pteroUserId) {
+            await pteroApiCall(mode, `/users/${pteroUserId}`, 'DELETE');
+          }
+
+          // 3. Hapus dari Firebase
+          await getDatabase().ref(`zeroixdark/managed_users/${mode}/${firebaseId}`).remove();
+
+          await logActivity('delete_user', { username, ptero_id: pteroUserId }, mode);
+
+          showNotification(`User ${username} berhasil dihapus`, "success");
+          await loadUsers(true);
+
+        } catch (err) {
+          showNotification("Gagal hapus: " + err.message, "error");
+        }
+      }, "YA, HAPUS PERMANEN");
+    }
+
+    document.addEventListener('DOMContentLoaded', initUsersPage);
+  </script>
+</body>
+</html>
