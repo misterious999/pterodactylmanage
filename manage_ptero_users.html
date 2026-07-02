@@ -14,8 +14,24 @@
             --text-main: #f8fafc; --text-sub: #94a3b8; 
             --input-bg: #0f172a; --border-color: rgba(255,255,255,0.08); 
         }
-        .expiry-timer { font-size: 12px; font-weight: 700; color: var(--text-main); background: var(--primary-glow); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(13, 148, 136, 0.3); margin-left: 15px; white-space: nowrap; }
+        .expiry-timer { font-size: 12px; font-weight: 700; color: var(--text-main); background: var(--primary-glow); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(13, 148, 136, 0.3); margin-left: 15px; white-space: nowrap; transition: all 0.3s ease; display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
         .expiry-timer.expired { color: var(--danger); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+        .timer-date { font-size: 10px; opacity: 0.8; font-weight: 500; }
+        .timer-countdown { font-family: 'Courier New', Courier, monospace; font-size: 13px; letter-spacing: 0.5px; text-shadow: 0 0 5px var(--primary-glow); }
+        .timer-unlimited { 
+            background: linear-gradient(135deg, #10b981, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4)); }
+            50% { opacity: 0.8; transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.6)); }
+        }
         body { font-family: 'Inter', sans-serif; padding: 20px 5%; background-color: var(--bg-color); color: var(--text-main); margin: 0; max-width: 1200px; margin: auto; }
         
         .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 10px 18px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.3); transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -113,6 +129,7 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInPop { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -380,34 +397,36 @@
         });
 
         async function ambilDataPtero() {
-            const tabelEl = document.getElementById('tabelPtero');
-            tabelEl.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-sub); padding: 30px;">
-                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Mengambil data user...</td></tr>`;
-
             try {
-                const res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users`, { 
-                    headers: { 
-                        'Accept': 'application/json', 
-                        'Authorization': `Bearer ${PTERO_API}` 
-                    } 
-                });
+                document.getElementById('tabelPtero').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">⏳ Memuat data user dari semua halaman...</td></tr>`;
+                let allUsers = [];
+                let currentPage = 1;
+                let totalPages = 1;
 
-                if (!res.ok) {
-                    const errText = await res.text();
-                    throw new Error(`HTTP ${res.status} - ${errText}`);
-                }
+                do {
+                    let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users?page=${currentPage}`, { 
+                        headers: { 
+                            'Accept': 'application/json', 
+                            'Authorization': `Bearer ${PTERO_API}` 
+                        } 
+                    });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                    let data = await res.json();
+                    const users = (data && data.data) ? data.data : [];
+                    allUsers = allUsers.concat(users);
+                    totalPages = (data && data.meta) ? data.meta.pagination.total_pages : 1;
+                    currentPage++;
+                } while (currentPage <= totalPages);
 
-                const data = await res.json();
                 let tabel = `<tr><th>ID</th><th>Username</th><th>Email</th><th>Status</th><th>Aksi</th></tr>`;
                 let countDisplayed = 0;
-
                 const svgCrown = `<svg viewBox="0 0 24 24"><path d="M12 1.5l3.09 6.3 6.91 1-5 4.87 1.18 6.88L12 17.25l-6.18 3.25L7 13.62 2 8.75l6.91-1L12 1.5z"/></svg>`;
                 const svgUser = `<svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
                 const svgTrash = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
 
-                data.data.forEach(user => {
+                allUsers.forEach(user => {
                     let u = user.attributes;
-                    if (role !== 'pemilik' && role !== 'demo') { if (u.root_admin === true) return; if (u.last_name !== myUsername) return; }
+                    if (role !== 'pemilik' && u.last_name !== myUsername) return;
                     if(role === 'demo' && u.last_name !== 'admin' && u.last_name !== 'Admin' && u.last_name !== 'User') return;
 
                     countDisplayed++;
@@ -420,15 +439,9 @@
                 });
 
                 if (countDisplayed === 0) tabel += `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">Belum ada akun yang bisa ditampilkan.</td></tr>`;
-                tabelEl.innerHTML = tabel;
-
-            } catch (e) {
-                alert("ERROR ambilDataPtero: " + e.message); // Untuk HP biar kelihatan
-                tabelEl.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">
-                    Gagal memuat data user.<br>
-                    <small>${e.message}</small><br><br>
-                    <button onclick="ambilDataPtero()" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;">Coba Lagi</button>
-                </td></tr>`;
+                document.getElementById('tabelPtero').innerHTML = tabel;
+            } catch(e) { 
+                document.getElementById('tabelPtero').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">Error: ${e.message}</td></tr>`; 
             }
         }
 
@@ -471,21 +484,31 @@
             btn.innerHTML = `${spinnerSvg} Memindai...`; 
             btn.style.pointerEvents = "none";
             try {
-                let resServers = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers`, { 
-                    headers: { 
-                        'Accept': 'application/json', 
-                        'Authorization': `Bearer ${PTERO_API}` 
-                    } 
-                });
-                let serverOwners = (await resServers.json()).data.map(s => s.attributes.user);
-                let resUsers = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users`, { 
-                    headers: { 
-                        'Accept': 'application/json', 
-                        'Authorization': `Bearer ${PTERO_API}` 
-                    } 
-                });
-                let targetHapus = []; 
-                (await resUsers.json()).data.forEach(user => { 
+                // Helper: fetch semua halaman dari endpoint
+                async function fetchAllPages(endpoint) {
+                    let all = [], page = 1, totalPages = 1;
+                    do {
+                        let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/${endpoint}?page=${page}`, {
+                            headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
+                        });
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        let data = await res.json();
+                        all = all.concat((data && data.data) ? data.data : []);
+                        totalPages = (data && data.meta) ? data.meta.pagination.total_pages : 1;
+                        page++;
+                    } while (page <= totalPages);
+                    return all;
+                }
+
+                // Fetch servers dan users secara paralel
+                const [allServers, allUsers] = await Promise.all([
+                    fetchAllPages('servers'),
+                    fetchAllPages('users')
+                ]);
+
+                let serverOwners = allServers.map(s => s.attributes.user);
+                let targetHapus = [];
+                allUsers.forEach(user => { 
                     let u = user.attributes; 
                     if (u.root_admin || u.id === 1) return; 
                     if (role !== 'pemilik' && u.last_name !== myUsername) return; 
@@ -534,9 +557,9 @@
                 ambilDataPtero(); 
             } catch (e) { 
                 showAiAlert("Error: " + e.message, "ERROR"); 
-            } 
-            btn.innerHTML = originalSapuText; 
-            btn.style.pointerEvents = "auto";
+                btn.innerHTML = originalSapuText; 
+                btn.style.pointerEvents = "auto"; 
+            }
         }
 
         async function buatSatuPaket() {
@@ -590,7 +613,7 @@
                     "user": newUserId, 
                     "egg": parseInt(eggId), 
                     "docker_image": "ghcr.io/parkervcp/yolks:nodejs_20", 
-                    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == "1" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z ${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z ${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo ${CUSTOM_ENVIRONMENT_VARIABLES} | tr ";" "\n"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
+                    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z ${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z ${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo ${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
                     "environment": { "INST": "npm", "USER_UPLOAD": "0", "AUTO_UPDATE": "0", "CMD_RUN": "npm start" }, 
                     "limits": { "memory": parseInt(ram), "swap": 0, "disk": parseInt(disk), "io": 500, "cpu": parseInt(cpu) }, 
                     "feature_limits": { "databases": 5, "backups": 5, "allocations": 5 }, 
@@ -641,13 +664,19 @@
             btn.innerHTML = `${spinnerSvg} Menghancurkan...`; 
             btn.style.pointerEvents = "none";
             try {
-                let resServers = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers`, { 
-                    headers: { 
-                        'Accept': 'application/json', 
-                        'Authorization': `Bearer ${PTERO_API}` 
-                    } 
-                });
-                let serversMilikUser = (await resServers.json()).data.filter(s => s.attributes.user === userId);
+                // Fetch semua halaman server
+                let allServers = [], page = 1, totalPages = 1;
+                do {
+                    let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers?page=${page}`, { 
+                        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` } 
+                    });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    let data = await res.json();
+                    allServers = allServers.concat((data && data.data) ? data.data : []);
+                    totalPages = (data && data.meta) ? data.meta.pagination.total_pages : 1;
+                    page++;
+                } while (page <= totalPages);
+                let serversMilikUser = allServers.filter(s => s.attributes.user === userId);
                 for (let server of serversMilikUser) { 
                     await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers/${server.attributes.id}/force`, { 
                         method: 'DELETE', 
@@ -702,7 +731,7 @@ Server Bot: ${server}
 _Terima kasih telah berbelanja!_`; 
             navigator.clipboard.writeText(teksSalin).then(() => { 
                 let btn = document.getElementById('btnSalin'); 
-                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Berhasil Disalin!`; 
+                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Teks`; 
                 setTimeout(() => { 
                     btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Teks`; 
                 }, 2000); 
@@ -750,26 +779,30 @@ _Terima kasih telah berbelanja!_`;
         const database = firebase.database();
 
         // Proteksi Ganda Sesi User
-        const currentUserId = localStorage.getItem(\'panel_user_id\') || localStorage.getItem(\'user_id\') || localStorage.getItem(\'user_id_ptero\');
-        const roleRaw = localStorage.getItem(\'role\') || localStorage.getItem(\'panel_role\') || \'\';
+        const currentUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
+        const roleRaw = localStorage.getItem('role') || localStorage.getItem('panel_role') || '';
         const role = roleRaw.trim().toLowerCase();
 
         // Countdown Timer
         let expiryInterval;
         function startExpiryTimer(expiredAt) {
-            const timerNav = document.getElementById(\'expiryTimerNav\');
+            const timerNav = document.getElementById('expiryTimerNav');
 
             if (!timerNav) return;
-
             clearInterval(expiryInterval);
+
+            if (role === 'pemilik') {
+                timerNav.innerHTML = '<span class="timer-unlimited">∞ Unlimited</span>';
+                return;
+            }
 
             expiryInterval = setInterval(() => {
                 const now = Date.now();
                 const timeLeft = expiredAt - now;
 
                 if (timeLeft <= 0) {
-                    timerNav.innerText = \'EXPIRED\';
-                    timerNav.classList.add(\'expired\');
+                    timerNav.innerHTML = '<span class="timer-countdown" style="color:var(--danger)">EXPIRED</span>';
+                    timerNav.classList.add('expired');
                     clearInterval(expiryInterval);
                     return;
                 }
@@ -779,79 +812,18 @@ _Terima kasih telah berbelanja!_`;
                 const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-                const timerString = `${days}h ${hours}j ${minutes}m ${seconds}d`;
-
-                timerNav.innerText = timerString;
+                const dateObj = new Date(expiredAt);
+                const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                timerNav.innerHTML = `<span class="timer-date">${dateStr}</span><span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}d</span>`;
             }, 1000);
         }
 
         // Fetch expiredAt from Firebase and start timer
-        if (currentUserId && role !== \'pemilik\') {
-            database.ref(\'users/\'+ currentUserId + \'/expiredAt\').on(\'value\', (snapshot) => {
+        if (currentUserId) {
+            database.ref('users/'+ currentUserId + '/expiredAt').on('value', (snapshot) => {
                 const expiredAt = Number(snapshot.val() || 0);
-                if (expiredAt > 0) {
-                    startExpiryTimer(expiredAt);
-                } else {
-                    const timerNav = document.getElementById(\'expiryTimerNav\');
-                    if (timerNav) timerNav.innerText = \'N/A\';
-                }
-            });
-        }
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script>
-        // Firebase Setup (re-initialize if not already)
-        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        // Proteksi Ganda Sesi User
-        const currentUserId = localStorage.getItem(\'panel_user_id\') || localStorage.getItem(\'user_id\') || localStorage.getItem(\'user_id_ptero\');
-        const roleRaw = localStorage.getItem(\'role\') || localStorage.getItem(\'panel_role\') || \'\';
-        const role = roleRaw.trim().toLowerCase();
-
-        // Countdown Timer
-        let expiryInterval;
-        function startExpiryTimer(expiredAt) {
-            const timerNav = document.getElementById(\'expiryTimerNav\');
-
-            if (!timerNav) return;
-
-            clearInterval(expiryInterval);
-
-            expiryInterval = setInterval(() => {
-                const now = Date.now();
-                const timeLeft = expiredAt - now;
-
-                if (timeLeft <= 0) {
-                    timerNav.innerText = \'EXPIRED\';
-                    timerNav.classList.add(\'expired\');
-                    clearInterval(expiryInterval);
-                    return;
-                }
-
-                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-                const timerString = `${days}h ${hours}j ${minutes}m ${seconds}d`;
-
-                timerNav.innerText = timerString;
-            }, 1000);
-        }
-
-        // Fetch expiredAt from Firebase and start timer
-        if (currentUserId && role !== \'pemilik\') {
-            database.ref(\'users/\'+ currentUserId + \'/expiredAt\').on(\'value\', (snapshot) => {
-                const expiredAt = Number(snapshot.val() || 0);
-                if (expiredAt > 0) {
-                    startExpiryTimer(expiredAt);
-                } else {
-                    const timerNav = document.getElementById(\'expiryTimerNav\');
-                    if (timerNav) timerNav.innerText = \'N/A\';
-                }
+                startExpiryTimer(expiredAt);
             });
         }
     </script>
