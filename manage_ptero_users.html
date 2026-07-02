@@ -382,7 +382,7 @@
         async function ambilDataPtero() {
             const tabelEl = document.getElementById('tabelPtero');
             tabelEl.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-sub); padding: 30px;">
-                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Mengambil data user dari panel...</td></tr>`;
+                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Mengambil data user...</td></tr>`;
 
             try {
                 const res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users`, { 
@@ -392,7 +392,10 @@
                     } 
                 });
 
-                if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(`HTTP ${res.status} - ${errText}`);
+                }
 
                 const data = await res.json();
                 let tabel = `<tr><th>ID</th><th>Username</th><th>Email</th><th>Status</th><th>Aksi</th></tr>`;
@@ -420,7 +423,12 @@
                 tabelEl.innerHTML = tabel;
 
             } catch (e) {
-                tabelEl.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">Gagal memuat data user.<br><small>${e.message}</small></td></tr>`;
+                alert("ERROR ambilDataPtero: " + e.message); // Untuk HP biar kelihatan
+                tabelEl.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">
+                    Gagal memuat data user.<br>
+                    <small>${e.message}</small><br><br>
+                    <button onclick="ambilDataPtero()" style="background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:6px;">Coba Lagi</button>
+                </td></tr>`;
             }
         }
 
