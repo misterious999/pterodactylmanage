@@ -16,6 +16,17 @@
         }
         .expiry-timer { font-size: 12px; font-weight: 700; color: var(--text-main); background: var(--primary-glow); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(13, 148, 136, 0.3); margin-left: 15px; white-space: nowrap; }
         .expiry-timer.expired { color: var(--danger); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+        .timer-date { font-size: 10px; opacity: 0.8; font-weight: 500; }
+        .timer-countdown { font-family: 'Courier New', Courier, monospace; font-size: 12px; letter-spacing: 0.5px; }
+        .timer-unlimited { 
+            background: linear-gradient(135deg, #10b981, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.5));
+        }
         body { font-family: 'Inter', sans-serif; padding: 20px 5%; background-color: var(--bg-color); color: var(--text-main); margin: 0; max-width: 1200px; margin: auto; }
         
         .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 10px 18px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.3); transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -658,22 +669,26 @@
         const roleRaw = localStorage.getItem(\'role\') || localStorage.getItem(\'panel_role\') || \'\';
         const role = roleRaw.trim().toLowerCase();
 
-        // Countdown Timer
+        // Countdown Timer (Improved - full date + seconds + ∞ Unlimited for pemilik)
         let expiryInterval;
         function startExpiryTimer(expiredAt) {
-            const timerNav = document.getElementById(\'expiryTimerNav\');
+            const timerNav = document.getElementById('expiryTimerNav');
 
             if (!timerNav) return;
-
             clearInterval(expiryInterval);
+
+            if (role === 'pemilik') {
+                timerNav.innerHTML = '<span class="timer-unlimited">∞ Unlimited</span>';
+                return;
+            }
 
             expiryInterval = setInterval(() => {
                 const now = Date.now();
                 const timeLeft = expiredAt - now;
 
                 if (timeLeft <= 0) {
-                    timerNav.innerText = \'EXPIRED\';
-                    timerNav.classList.add(\'expired\');
+                    timerNav.innerHTML = '<span class="timer-countdown" style="color:var(--danger)">EXPIRED</span>';
+                    timerNav.classList.add('expired');
                     clearInterval(expiryInterval);
                     return;
                 }
@@ -683,22 +698,18 @@
                 const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-                const timerString = `${days}h ${hours}j ${minutes}m ${seconds}d`;
-
-                timerNav.innerText = timerString;
+                const dateObj = new Date(expiredAt);
+                const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                timerNav.innerHTML = `<span class="timer-date">${dateStr}</span><span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}d</span>`;
             }, 1000);
         }
 
-        // Fetch expiredAt from Firebase and start timer
-        if (currentUserId && role !== \'pemilik\') {
-            database.ref(\'users/\'+ currentUserId + \'/expiredAt\').on(\'value\', (snapshot) => {
+        // Fetch expiredAt from Firebase and start timer (works for pemilik too)
+        if (currentUserId) {
+            database.ref('users/'+ currentUserId + '/expiredAt').on('value', (snapshot) => {
                 const expiredAt = Number(snapshot.val() || 0);
-                if (expiredAt > 0) {
-                    startExpiryTimer(expiredAt);
-                } else {
-                    const timerNav = document.getElementById(\'expiryTimerNav\');
-                    if (timerNav) timerNav.innerText = \'N/A\';
-                }
+                startExpiryTimer(expiredAt);
             });
         }
     </script>
