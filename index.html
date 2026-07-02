@@ -121,7 +121,7 @@
                 <img class="user-avatar" id="avatar" src="https://ui-avatars.com/api/?name=Admin&background=0d9488&color=fff" alt="Avatar">
                 <span id="navUser" style="font-weight: 600; font-size: 14px; padding-right: 8px;">Admin</span>
             </div>
-            <span id="expiryTimerNav" class="expiry-timer"></span>
+            <span id="expiryTimerNav" class="expiry-timer" style="display: none;"></span>
             <button class="btn-menu" onclick="toggleSidebar()"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg></button>
         </div>
     </div>
@@ -492,7 +492,10 @@
 
                 const timerString = `${days}h ${hours}j ${minutes}m ${seconds}d`;
 
-                if (timerNav) timerNav.innerText = timerString;
+                if (timerNav) {
+                    timerNav.innerText = timerString;
+                    timerNav.style.display = 'inline-flex';
+                }
                 if (timerSidebar) timerSidebar.innerText = timerString;
             }, 1000);
         }
@@ -507,8 +510,11 @@
                     // If expiredAt is not set or 0, display a default message or hide the timer
                     const timerNav = document.getElementById(\'expiryTimerNav\');
                     const timerSidebar = document.getElementById(\'expiryTimerSidebar\');
-                    if (timerNav) timerNav.innerText = \'N/A\';
-                    if (timerSidebar) timerSidebar.innerText = \'N/A\';
+                    if (timerNav) {
+                        timerNav.style.display = 'none';
+                        timerNav.innerText = '';
+                    }
+                    if (timerSidebar) timerSidebar.innerText = 'N/A';
                 }
             });
         }
