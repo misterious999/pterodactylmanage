@@ -1,139 +1,334 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LOGIN • ZEROIXDARK MINECRAFT</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-</head>
-<body class="min-h-screen flex items-center justify-center p-6">
-  <div class="w-full max-w-md">
-    <!-- Logo & Header -->
-    <div class="text-center mb-8">
-      <div class="inline-flex items-center justify-center w-20 h-20 bg-[#3D3D3D] border-4 border-[#2E4A1F] mb-4 shadow-2xl">
-        <span class="text-6xl">⛏️</span>
-      </div>
-      <h1 class="mc-font text-5xl text-[#E3B23C] mc-title tracking-[4px]">ZEROIXDARK</h1>
-      <div class="flex items-center justify-center gap-2 mt-1">
-        <div class="h-1 w-8 bg-[#5D9C3E]"></div>
-        <p class="text-[#5D9C3E] text-sm tracking-[3px] font-bold">MINECRAFT EDITION</p>
-        <div class="h-1 w-8 bg-[#5D9C3E]"></div>
-      </div>
-      <p class="text-[#888] text-xs mt-2">SERVER MANAGEMENT PANEL v2.1</p>
-    </div>
-
-    <!-- Login Card -->
-    <div class="mc-card p-8">
-      <div class="text-center mb-6">
-        <div class="inline-block px-4 py-1 bg-[#2C2C2C] border border-[#222] text-[#E3B23C] text-xs tracking-widest">MASUK KE DUNIA</div>
-      </div>
-
-      <form id="loginForm" class="space-y-5">
-        <div>
-          <label class="block text-[#E3B23C] text-xs mb-2 tracking-wider">USERNAME</label>
-          <input type="text" id="username" 
-                 class="mc-input w-full text-lg" placeholder="Masukkan username" required>
-        </div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Panel Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #0d9488; /* Teal 600 - Adem di mata */
+            --primary-hover: #0f766e; /* Teal 700 */
+            --primary-glow: rgba(13, 148, 136, 0.3);
+            --danger: #ef4444;
+            --text-main: #f8fafc; 
+            --text-sub: #94a3b8; 
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --border-color: rgba(255, 255, 255, 0.1); 
+            --card-bg: #1e293b;
+        }
         
-        <div>
-          <label class="block text-[#E3B23C] text-xs mb-2 tracking-wider">PASSWORD</label>
-          <input type="password" id="password" 
-                 class="mc-input w-full text-lg" placeholder="••••••••" required>
-        </div>
-
-        <button type="submit"
-                class="mc-btn w-full mt-2 flex items-center justify-center gap-3 text-base">
-          <span>MASUK KE PANEL</span>
-          <span class="text-xl">→</span>
-        </button>
-      </form>
-
-      <div class="mt-6 pt-6 border-t border-[#222] text-center">
-        <p class="text-[#666] text-xs">Login menggunakan data dari <span class="text-[#5D9C3E]">Firebase</span></p>
-      </div>
-    </div>
-
-    <p class="text-center text-[#555] text-xs mt-6">Dibuat dengan ❤️ oleh Lina</p>
-  </div>
-
-  <script>
-    // Firebase Config
-    const firebaseConfig = {
-      databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const username = document.getElementById('username').value.trim().toLowerCase();
-      const password = document.getElementById('password').value.trim();
-
-      if (!username || !password) {
-        showLoginError("Username dan password wajib diisi!");
-        return;
-      }
-
-      try {
-        // Cek data admin di Firebase → zeroixdark/admins/{username}
-        const snapshot = await database.ref(`zeroixdark/admins/${username}`).once('value');
-
-        if (snapshot.exists()) {
-          const adminData = snapshot.val();
-
-          if (adminData.password === password) {
-            const userData = {
-              username: username,
-              role: adminData.role || 'pemilik',
-              loggedIn: true,
-              loginTime: new Date().toISOString()
-            };
-
-            localStorage.setItem('zeroix_user', JSON.stringify(userData));
-            window.location.href = 'index.html?mode=private';
-            return;
-          }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main); 
+            margin: 0; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: hidden; 
         }
 
-        showLoginError("Username atau password salah!");
+        /* VIDEO BACKGROUND */
+        .bg-video { position: fixed; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: -2; transform: translateX(-50%) translateY(-50%); object-fit: cover; }
+        
+        /* OVERLAY LEBIH GELAP BIAR MATA NYAMAN */
+        .bg-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); z-index: -1; }
+                /* KOTAK LOGIN KACA (PREMIUM UI) */
+        .login-box {
+            background: rgba(30, 41, 59, 0.7); 
+            backdrop-filter: blur(15px); 
+            padding: 40px 35px;
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05); 
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            z-index: 1;
+            animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
 
-      } catch (error) {
-        console.error("Firebase Login Error:", error);
-        showLoginError("Gagal terhubung ke server. Coba lagi nanti.");
-      }
-    });
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
 
-    function showLoginError(message) {
-      const form = document.getElementById('loginForm');
-      form.style.transition = 'all 0.1s';
-      form.style.transform = 'translateX(6px)';
-      
-      setTimeout(() => {
-        form.style.transform = 'translateX(-6px)';
-        setTimeout(() => {
-          form.style.transform = 'translateX(0)';
-        }, 80);
-      }, 80);
+        /* LOGO ELEGAN */
+        .login-logo { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin: 0 auto 20px auto; display: block; border: 2px solid var(--primary); box-shadow: 0 0 20px var(--primary-glow); background-color: var(--input-bg); }
+        .login-box h2 { margin-top: 0; margin-bottom: 5px; font-size: 24px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px; }
+        .login-box p { color: var(--text-sub); font-size: 13px; margin-bottom: 30px; line-height: 1.5; }
+        
+        .input-group { text-align: left; margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
+        .input-group input { width: 100%; padding: 14px 16px; background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); font-size: 14px; box-sizing: border-box; outline: none; transition: 0.3s; font-family: 'Inter', sans-serif;}
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(15, 23, 42, 0.9); }
 
-      const oldError = form.parentNode.querySelector('.login-error');
-      if (oldError) oldError.remove();
+        /* TOMBOL MASUK TEAL */
+        .btn-masuk { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px; box-shadow: 0 5px 15px var(--primary-glow); display: flex; justify-content: center; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .btn-masuk:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(13, 148, 136, 0.5); }
+        .btn-masuk svg { width: 18px; height: 18px; fill: currentColor; }
+                /* TOMBOL MUSIK MELAYANG */
+        .audio-btn { position: fixed; bottom: 25px; right: 25px; background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(8px); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px 18px; border-radius: 50px; cursor: pointer; z-index: 10; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .audio-btn:hover { background: var(--primary-glow); border-color: var(--primary); transform: translateY(-3px); }
+        .audio-btn svg { width: 16px; height: 16px; fill: currentColor; }
 
-      const errorDiv = document.createElement('div');
-      errorDiv.className = 'login-error mt-4 text-center text-red-400 text-sm border border-red-900 bg-red-950 py-2';
-      errorDiv.textContent = message;
-      form.parentNode.appendChild(errorDiv);
-      
-      setTimeout(() => {
-        if (errorDiv && errorDiv.parentNode) errorDiv.parentNode.removeChild(errorDiv);
-      }, 2500);
-    }
-  </script>
+        /* COPYRIGHT KAPSUL */
+        .copyright-capsule { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10; text-align: center; opacity: 0; animation: fadeInUp 0.8s ease-out forwards 0.5s; }
+        .copyright-text { display: inline-block; padding: 8px 20px; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); border-radius: 50px; border: 1px solid var(--border-color); box-shadow: 0 5px 15px rgba(0,0,0,0.3); color: var(--text-sub); font-size: 12px; letter-spacing: 0.5px; }
+        .copyright-text b { color: var(--primary); font-weight: 700; }
+
+        /* =========================================
+           POP-UP MODAL ERROR (CLEAN UI)
+           ========================================= */
+        .mini-ai-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s ease; }
+        .mini-ai-popup { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 350px; padding: 30px 25px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.6); border: 1px solid var(--border-color); }
+        
+        .modal-icon-top { width: 60px; height: 60px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }
+        .modal-icon-top svg { width: 30px; height: 30px; fill: var(--danger); }
+        
+        .mini-ai-header { font-size: 18px; font-weight: 800; color: var(--danger); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .mini-ai-body { font-size: 13px; color: var(--text-sub); line-height: 1.6; margin-bottom: 25px; }
+        
+        .mini-ai-btn-close { width: 100%; background: var(--danger); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+        .mini-ai-btn-close:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4); }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+        @keyframes fadeInPop { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        @media (max-width: 480px) {
+            .copyright-capsule { bottom: 85px; width: 80%; }
+            .audio-btn { bottom: 20px; right: 50%; transform: translateX(50%); width: auto; justify-content: center; }
+            .audio-btn:hover { transform: translateX(50%) translateY(-2px); }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop><source src="https://files.catbox.moe/v439jy.mp3" type="audio/ogg"></audio>
+
+    <div class="copyright-capsule">
+        <div class="copyright-text">
+            Powered By <b>Ai Mini & Pstar7</b>
+        </div>
+    </div>
+
+    <button id="audioToggle" class="audio-btn" onclick="toggleAudio()">
+        <svg id="audioIcon" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+        <span id="audioText">Putar Musik</span>
+    </button>
+
+    <video autoplay muted loop playsinline class="bg-video"><source src="https://cdn.yupra.my.id/yp/jjt9na1f.mp4" type="video/mp4"></video>
+    <div class="bg-overlay"></div>
+
+    <div class="login-box">
+        <img src="https://files.catbox.moe/dg0v4i.jpg" alt="Logo Panel" class="login-logo" onerror="this.src='https://ui-avatars.com/api/?name=Zeroix+Dark&background=1e293b&color=0d9488&size=150'">
+        
+        <h2>ZeroixDark Center</h2>
+        <p>Login untuk mengelola server Pterodactyl</p>
+        
+        <div class="input-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="Ketik username..." autocomplete="off" required>
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Ketik password..." required>
+        </div>
+        
+        <button onclick="prosesLogin()" id="btnLogin" class="btn-masuk">
+            Masuk Sekarang 
+            <svg viewBox="0 0 24 24"><path d="M5 13h11.17l-4.88 4.88c-.39.39-.39 1.03 0 1.42.39.39 1.02.39 1.41 0l6.59-6.59c.39-.39.39-1.02 0-1.41l-6.58-6.6a.996.996 0 10-1.41 1.41L16.17 11H5c-.55 0-1 .45-1 1s.45 1 1 1z"/></svg>
+        </button>
+    </div>
+
+    <div id="modalLoginError" class="mini-ai-overlay">
+        <div class="mini-ai-popup">
+            <div class="modal-icon-top">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            </div>
+            <div class="mini-ai-header">Akses Ditolak</div>
+            <div class="mini-ai-body" id="errorMsgText">Username atau Password salah.</div>
+            <button class="mini-ai-btn-close" onclick="tutupError()">Coba Lagi</button>
+        </div>
+    </div>
+        <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        // LOGIKA MUSIK DENGAN SVG
+        let music = document.getElementById("bgMusic"); 
+        let audioBtn = document.getElementById("audioToggle"); 
+        let audioText = document.getElementById("audioText");
+        let audioIcon = document.getElementById("audioIcon");
+        let isPlaying = false;
+        
+        function toggleAudio() { 
+            if (isPlaying) { 
+                music.pause(); 
+                audioText.innerText = "Putar Musik"; 
+                audioIcon.innerHTML = `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>`;
+                isPlaying = false; 
+            } else { 
+                music.play().then(() => { 
+                    audioText.innerText = "Matikan Musik"; 
+                    audioIcon.innerHTML = `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>`;
+                    isPlaying = true; 
+                }).catch((error) => { 
+                    tampilkanError("Gagal memutar musik, pastikan volume perangkat menyala."); 
+                }); 
+            } 
+        }
+
+        // KONEKSI FIREBASE
+        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); } 
+        const database = firebase.database();
+        
+        // Seed admin default jika database masih kosong.
+        // Setelah login pertama, password bisa diganti dari dashboard.
+        database.ref('users').once('value').then((snapshot) => {
+            if (!snapshot.exists()) {
+                database.ref('users/user_001').set({
+                    username: "admin",
+                    usernameLower: "admin",
+                    password: "pstar7@123",
+                    role: "pemilik",
+                    maker: "system",
+                    isOnline: false,
+                    profilePic: "",
+                    timestamp: Date.now(),
+                    createdAt: Date.now(),
+                    lastLoginAt: 0
+                });
+            }
+        }).catch(() => {
+            tampilkanError("Gagal membaca database Firebase. Cek databaseURL dan rules Realtime Database.");
+        });
+
+        // FUNGSI MODAL ERROR
+        function tampilkanError(pesan) {
+            document.getElementById('errorMsgText').innerText = pesan;
+            document.getElementById('modalLoginError').style.display = 'flex';
+        }
+        function tutupError() {
+            document.getElementById('modalLoginError').style.display = 'none';
+        }
+
+        // JALANKAN DENGAN TOMBOL ENTER
+        document.getElementById('password').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') prosesLogin();
+        });
+        document.getElementById('username').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') document.getElementById('password').focus();
+        });
+
+        // LOGIKA PROSES LOGIN
+        function prosesLogin() {
+            const userIn = document.getElementById('username').value.trim();
+            const passIn = document.getElementById('password').value.trim();
+            const btn = document.getElementById('btnLogin');
+            const defaultBtn = `Masuk Sekarang <svg viewBox="0 0 24 24"><path d="M5 13h11.17l-4.88 4.88c-.39.39-.39 1.03 0 1.42.39.39 1.02.39 1.41 0l6.59-6.59c.39-.39.39-1.02 0-1.41l-6.58-6.6a.996.996 0 10-1.41 1.41L16.17 11H5c-.55 0-1 .45-1 1s.45 1 1 1z"/></svg>`;
+
+            if (!userIn || !passIn) {
+                tampilkanError("Tolong isi username dan password kamu ya!");
+                return;
+            }
+
+            btn.innerHTML = `<svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg> Mengecek...`;
+            btn.style.opacity = "0.7";
+            btn.style.pointerEvents = "none";
+
+            database.ref('users').once('value').then((snapshot) => {
+                const users = snapshot.val() || {};
+                let matchedId = null;
+                let matchedUser = null;
+
+                Object.keys(users).some((id) => {
+                    const u = users[id] || {};
+                    const dbUsername = String(u.username || '').trim().toLowerCase();
+                    const dbPassword = String(u.password || '');
+                    if (dbUsername === userIn.toLowerCase() && dbPassword === passIn) {
+                        matchedId = id;
+                        matchedUser = u;
+                        return true;
+                    }
+                    return false;
+                });
+
+                if (!matchedId || !matchedUser) {
+                    tampilkanError("Username atau password yang dimasukkan salah. Coba periksa lagi.");
+                    btn.innerHTML = defaultBtn;
+                    btn.style.opacity = "1";
+                    btn.style.pointerEvents = "auto";
+                    return;
+                }
+
+                const role = String(matchedUser.role || 'reseller_public').trim().toLowerCase();
+                const username = matchedUser.username || userIn;
+
+                function resetLoginButton() {
+                    btn.innerHTML = defaultBtn;
+                    btn.style.opacity = "1";
+                    btn.style.pointerEvents = "auto";
+                }
+
+                function lanjutLogin() {
+                    // Session konsisten untuk semua halaman lama dan halaman baru.
+                    localStorage.setItem('panel_user_id', matchedId);
+                    localStorage.setItem('user_id', matchedId);
+                    localStorage.setItem('user_id_ptero', matchedId); // legacy compatibility
+                    localStorage.setItem('panel_username', username);
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('panel_role', role);
+                    localStorage.setItem('role', role);
+                    localStorage.setItem('panel_password', passIn);
+                    if (matchedUser.ptero_id) localStorage.setItem('ptero_user_id', matchedUser.ptero_id);
+
+                    const now = Date.now();
+                    return database.ref('users/' + matchedId).update({
+                        isOnline: true,
+                        lastLoginAt: now,
+                        usernameLower: String(username).toLowerCase()
+                    }).then(() => database.ref('activity_logs').push({
+                        uid: matchedId,
+                        username,
+                        role,
+                        action: "Melakukan Login ke dalam Panel.",
+                        timestamp: now
+                    })).then(() => {
+                        window.location.replace("index.html");
+                    });
+                }
+
+                // Expired berlaku per-user. Pemilik selalu exempt.
+                if (role === 'pemilik') {
+                    return lanjutLogin();
+                }
+
+                const expiredAt = Number(matchedUser.expiredAt || 0);
+                if (!expiredAt) {
+                    tampilkanError(`Akun ${username} belum diaktifkan oleh pemilik. Hubungi pemilik untuk mengatur expired akun.`);
+                    resetLoginButton();
+                    return null;
+                }
+
+                if (expiredAt <= Date.now()) {
+                    tampilkanError(`Akun ${username} sudah expired. Hubungi pemilik untuk perpanjangan.`);
+                    resetLoginButton();
+                    return null;
+                }
+
+                return lanjutLogin();
+            }).catch((error) => {
+                tampilkanError("Gagal koneksi ke Firebase Realtime Database. Cek internet, databaseURL, dan rules database.");
+                console.error(error);
+                btn.innerHTML = defaultBtn;
+                btn.style.opacity = "1";
+                btn.style.pointerEvents = "auto";
+            });
+        }
+    </script>
 </body>
 </html>

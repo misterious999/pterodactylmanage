@@ -1,247 +1,161 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kelola Expired • ZEROIXDARK MINECRAFT</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="assets/js/common.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Expired User</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color:#0f172a; --card-bg:#1e293b; --primary:#0d9488; --primary-glow:rgba(13,148,136,.15); --success:#10b981; --danger:#ef4444; --warning:#f59e0b; --text-main:#f8fafc; --text-sub:#94a3b8; --border-color:rgba(255,255,255,.08); --section-bg:rgba(255,255,255,.02); }
+        .expiry-timer { font-size: 12px; font-weight: 700; color: var(--text-main); background: var(--primary-glow); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(13, 148, 136, 0.3); margin-left: 15px; white-space: nowrap; }
+        .expiry-timer.expired { color: var(--danger); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+        *{box-sizing:border-box} body{font-family:'Inter',sans-serif;background:var(--bg-color);color:var(--text-main);margin:0;padding:24px}.container{max-width:1180px;margin:0 auto}.topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px}.brand-icon{width:42px;height:42px;border-radius:14px;background:var(--primary-glow);display:flex;align-items:center;justify-content:center;border:1px solid rgba(13,148,136,.35)}.brand-icon svg{width:24px;height:24px;fill:var(--primary)}h1{margin:0;font-size:24px;letter-spacing:-.4px}.subtitle{margin:4px 0 0;color:var(--text-sub);font-size:13px;line-height:1.5}.back-btn{color:var(--text-main);text-decoration:none;border:1px solid var(--border-color);border-radius:12px;padding:11px 14px;background:var(--card-bg);font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:8px;transition:.2s}.back-btn:hover{border-color:var(--primary);color:var(--primary);transform:translateY(-1px)}.grid{display:grid;grid-template-columns:390px 1fr;gap:18px;align-items:start}.card{background:var(--card-bg);border:1px solid var(--border-color);border-radius:18px;padding:22px;box-shadow:0 14px 35px rgba(0,0,0,.14)}.card-title{margin:0 0 6px;color:var(--text-main);font-size:16px;display:flex;align-items:center;gap:8px}.card-title svg{width:20px;height:20px;fill:currentColor}.card-desc{color:var(--text-sub);font-size:12px;line-height:1.6;margin:0 0 18px}label{display:block;color:var(--text-main);font-weight:700;font-size:12px;margin-bottom:7px}input,select,textarea{width:100%;padding:12px 13px;background:var(--bg-color);color:var(--text-main);border:1px solid var(--border-color);border-radius:11px;outline:none;font-family:'Inter',sans-serif;font-size:13px;transition:.2s}input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow)}textarea{resize:vertical;min-height:82px}.field{margin-bottom:14px}.btn{border:none;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'Inter',sans-serif}.btn svg{width:18px;height:18px;fill:currentColor}.btn-primary{background:var(--primary);color:white;width:100%}.btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 25px rgba(13,148,136,.28)}.btn-danger{background:rgba(239,68,68,.12);color:var(--danger);border:1px solid rgba(239,68,68,.28)}.btn-danger:hover{background:rgba(239,68,68,.2)}.btn-outline{background:transparent;color:var(--text-sub);border:1px solid var(--border-color)}.btn-outline:hover{color:var(--text-main);border-color:var(--primary)}.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}.stat{background:var(--section-bg);border:1px solid var(--border-color);border-radius:14px;padding:14px}.stat-value{margin:0;font-size:24px;font-weight:800}.stat-label{margin:4px 0 0;color:var(--text-sub);font-size:11px;text-transform:uppercase;letter-spacing:.5px}.toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}.toolbar input{max-width:360px}.table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--border-color)}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:13px 14px;border-bottom:1px solid var(--border-color);text-align:left;vertical-align:top;font-size:13px}th{color:var(--text-main);background:rgba(255,255,255,.03);font-size:11px;text-transform:uppercase;letter-spacing:.7px}td{color:var(--text-sub)}tr:last-child td{border-bottom:none}.target{color:var(--text-main);font-weight:800}.muted{color:var(--text-sub);font-size:12px}.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase;border:1px solid transparent;white-space:nowrap}.badge-active{color:var(--success);background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.25)}.badge-soon{color:var(--warning);background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.25)}.badge-expired{color:var(--danger);background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.25)}.badge-unset{color:var(--text-sub);background:rgba(148,163,184,.08);border-color:rgba(148,163,184,.2)}.empty{text-align:center;padding:36px 10px;color:var(--text-sub)}.alert{display:none;margin-bottom:14px;border-radius:13px;padding:12px 14px;font-size:13px;line-height:1.5;border:1px solid transparent}.alert.ok{display:block;background:rgba(16,185,129,.1);color:var(--success);border-color:rgba(16,185,129,.25)}.alert.warn{display:block;background:rgba(245,158,11,.1);color:var(--warning);border-color:rgba(245,158,11,.25)}.alert.err{display:block;background:rgba(239,68,68,.1);color:var(--danger);border-color:rgba(239,68,68,.25)}.access-denied{display:none;min-height:70vh;align-items:center;justify-content:center;text-align:center}.access-denied .card{max-width:420px}@media(max-width:900px){body{padding:16px}.grid{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.stat-row{grid-template-columns:1fr}.toolbar{flex-direction:column;align-items:stretch}.toolbar input{max-width:none}}
+    </style>
 </head>
 <body>
-  <div class="mc-topbar sticky top-0 z-50">
-    <div class="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
-      <!-- Left: Logo -->
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 bg-[#5D9C3E] border-2 border-[#2E4A1F] flex items-center justify-center text-xl">⛏️</div>
-          <div>
-            <span class="mc-font text-2xl text-[#E3B23C]">ZEROIXDARK</span>
-            <span class="text-xs text-[#5D9C3E] block -mt-1 tracking-[2px]">MINECRAFT</span>
-          </div>
+    <div id="accessDenied" class="access-denied"><div class="card"><h2 style="color:var(--danger);margin-top:0;">Akses Ditolak</h2><p class="subtitle">Fitur addexpired, listexpired, dan deleteexpired hanya untuk role <b>pemilik</b>.</p><a class="back-btn" href="index.html" style="margin-top:18px;">Kembali ke Dashboard</a></div></div>
+
+    <div id="app" class="container" style="display:none;">
+        <div class="topbar">
+            <div class="brand"><div class="brand-icon"><svg viewBox="0 0 24 24"><path d="M7 2v2H5c-1.11 0-1.99.89-1.99 2L3 20c0 1.11.89 2 2 2h14c1.1 0 2-.89 2-2V6c0-1.11-.9-2-2-2h-2V2h-2v2H9V2H7zm12 18H5V9h14v11zm-7-3.5c1.38 0 2.5-1.12 2.5-2.5S13.38 11.5 12 11.5 9.5 12.62 9.5 14s1.12 2.5 2.5 2.5z"/></svg></div><div><h1>Manajemen Expired User</h1><p class="subtitle">Expired dibuat per-user. Role pemilik tidak memiliki expired. Semua user non-pemilik default-nya tidak bisa login sampai diberi expired aktif oleh pemilik.</p></div></div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a href="index.html" class="back-btn"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Dashboard</a>
+                <span id="expiryTimerNav" class="expiry-timer"></span>
+            </div>
         </div>
-      </div>
-
-      <!-- Desktop Mode Switcher -->
-      <div id="mode-switcher" class="hidden md:flex items-center gap-1 bg-[#2C2C2C] p-1 border border-[#222]"></div>
-
-      <!-- Right: Hamburger + User Info -->
-      <div class="flex items-center gap-3">
-        <button id="hamburger-btn" 
-                class="md:hidden w-10 h-10 flex items-center justify-center text-2xl text-[#E3B23C] border-2 border-[#222] bg-[#2C2C2C] active:bg-[#3D3D3D]">
-          ☰
-        </button>
-        <div id="user-info"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="max-w-screen-2xl mx-auto px-6 py-8">
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="mc-font text-3xl text-white">KELOLA EXPIRED + TAMBAH HARI</h1>
-        <p class="text-[#888] text-sm">Mode: <span id="page-mode" class="font-bold text-[#5D9C3E]"></span></p>
-      </div>
-      <button onclick="loadExpiredData()" class="mc-btn">REFRESH LIST</button>
-    </div>
-    <div class="grass-accent mb-6"></div>
-
-    <div class="mc-card p-5 mb-6 bg-[#2C2C2C]">
-      <div class="flex items-center gap-4 text-sm">
-        <div class="flex-1">
-          <span class="text-[#E3B23C] font-bold">TIPS:</span> 
-          Gunakan tombol <span class="px-2 py-0.5 bg-[#E3B23C] text-black text-xs">+ HARI</span> untuk memperpanjang masa aktif user/server.
+        <div id="alertBox" class="alert"></div>
+        <div class="grid">
+            <div class="card">
+                <h2 class="card-title" style="color:var(--primary);"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>addexpired</h2>
+                <p class="card-desc">Tambah atau update expired untuk akun tertentu. User non-pemilik yang belum punya expired tidak bisa login.</p>
+                <div class="field"><label for="expiredUser">User yang Diatur</label><select id="expiredUser"></select></div>
+                <div class="field"><label for="expiredAt">Tanggal & Jam Expired</label><input id="expiredAt" type="datetime-local"></div>
+                <div class="field"><label for="expiredNote">Catatan</label><textarea id="expiredNote" placeholder="Opsional: contoh paket, durasi, reseller/partner terkait, atau catatan internal."></textarea></div>
+                <button class="btn btn-primary" onclick="addexpired()"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>Simpan / Update Expired</button>
+            </div>
+            <div class="card">
+                <h2 class="card-title" style="color:var(--warning);"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>listexpired</h2>
+                <p class="card-desc">Daftar expired per user. `deleteexpired` akan menghapus akses expired user sehingga user tersebut tidak bisa login.</p>
+                <div class="stat-row"><div class="stat"><p id="totalUser" class="stat-value">0</p><p class="stat-label">User Non-Pemilik</p></div><div class="stat"><p id="activeUser" class="stat-value" style="color:var(--success);">0</p><p class="stat-label">Bisa Login</p></div><div class="stat"><p id="blockedUser" class="stat-value" style="color:var(--danger);">0</p><p class="stat-label">Tidak Bisa Login</p></div></div>
+                <div class="toolbar"><input id="searchExpired" type="text" placeholder="Cari username / role / catatan..." oninput="listexpired()"><button class="btn btn-outline" onclick="confirmDeleteExpiredAll()">Hapus Semua yang Expired</button></div>
+                <div class="table-wrap"><table id="expiredTable"><tr><td class="empty">Memuat data...</td></tr></table></div>
+            </div>
         </div>
-        <button onclick="bulkExtendExpired()" class="mc-btn-gold mc-btn text-xs px-5">PERPANJANG SEMUA YANG EXPIRED (BULK)</button>
-      </div>
     </div>
 
-    <div class="mc-card overflow-x-auto">
-      <table class="mc-table min-w-[700px]">
-        <thead>
-          <tr>
-            <th>USERNAME / SERVER</th>
-            <th>TIPE</th>
-            <th>EXPIRED AT</th>
-            <th>HARI TERSISA</th>
-            <th class="text-right">AKSI</th>
-          </tr>
-        </thead>
-        <tbody id="expired-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <script>
-    let expiredData = [];
-
-    async function initExpiredPage() {
-      const user = requireAuth();
-      if (!user) return;
-      initCommonUI();
-
-      const mode = getCurrentMode();
-      document.getElementById('page-mode').textContent = modeConfig[mode].title;
-
-      await loadExpiredData();
-      window.addEventListener('modeChanged', () => window.location.reload());
-    }
-
-    async function loadExpiredData() {
-      const tbody = document.getElementById('expired-tbody');
-      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-[#888]">⛏️ Memindai data expired...</td></tr>`;
-
-      const mode = getCurrentMode();
-      const db = getDatabase();
-      expiredData = [];
-
-      try {
-        // Ambil user
-        const usersSnap = await db.ref(`zeroixdark/managed_users/${mode}`).once('value');
-        if (usersSnap.exists()) {
-          usersSnap.forEach(child => {
-            const u = child.val();
-            if (u.expired_at) {
-              expiredData.push({
-                id: child.key,
-                type: 'user',
-                name: u.username,
-                expired_at: u.expired_at,
-                ptero_id: u.ptero_id,
-                firebase_path: `managed_users/${mode}/${child.key}`
-              });
-            }
-          });
-        }
-
-        // Ambil server
-        const serversSnap = await db.ref(`zeroixdark/managed_servers/${mode}`).once('value');
-        if (serversSnap.exists()) {
-          serversSnap.forEach(child => {
-            const s = child.val();
-            if (s.expired_at) {
-              expiredData.push({
-                id: child.key,
-                type: 'server',
-                name: s.name,
-                expired_at: s.expired_at,
-                ptero_id: s.ptero_id,
-                firebase_path: `managed_servers/${mode}/${child.key}`
-              });
-            }
-          });
-        }
-
-        // Sort by expired date
-        expiredData.sort((a, b) => new Date(a.expired_at) - new Date(b.expired_at));
-
-        renderExpiredTable();
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-red-400 text-center py-8">Gagal memuat data expired.</td></tr>`;
-      }
-    }
-
-    function renderExpiredTable() {
-      const tbody = document.getElementById('expired-tbody');
-      tbody.innerHTML = '';
-
-      if (expiredData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-[#5D9C3E]">🎉 Tidak ada data yang memiliki tanggal expired!</td></tr>`;
-        return;
-      }
-
-      expiredData.forEach(item => {
-        const expDate = new Date(item.expired_at);
-        const now = new Date();
-        const diffTime = expDate - now;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        let daysLeftHTML = '';
-        if (diffDays < 0) {
-          daysLeftHTML = `<span class="text-red-400 font-bold">${Math.abs(diffDays)} hari lalu (EXPIRED)</span>`;
-        } else if (diffDays === 0) {
-          daysLeftHTML = `<span class="text-[#E3B23C]">Hari ini!</span>`;
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const currentUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
+        const username = localStorage.getItem('panel_username') || localStorage.getItem('username') || 'Unknown';
+        const role = String(localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
+        const usersRef = database.ref('users');
+        let usersCache = {};
+        const ROLE_LABELS = { pemilik:'Pemilik Panel', partner_public:'Partner Public', partner_public_v2:'Partner Public V2', reseller_private:'Reseller Private', reseller_public:'Reseller Public', reseller_public_v2:'Reseller Public V2', reseller:'Reseller', demo:'Demo' };
+        if (!currentUserId || role !== 'pemilik') {
+            document.getElementById('accessDenied').style.display = 'flex';
+            setTimeout(() => window.location.replace('index.html'), 2500);
         } else {
-          daysLeftHTML = `${diffDays} hari lagi`;
+            document.getElementById('app').style.display = 'block';
+            database.ref('users/' + currentUserId + '/isOnline').set(true);
+            database.ref('users/' + currentUserId + '/isOnline').onDisconnect().set(false);
+            usersRef.on('value', (snapshot) => { usersCache = snapshot.val() || {}; initUserOptions(); listexpired(); });
+        }
+        function getRoleLabel(roleKey){ return ROLE_LABELS[roleKey] || String(roleKey || '-').replace(/_/g,' ').toUpperCase(); }
+        function escapeHtml(value){ return String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+        function formatDate(ts){ if(!ts) return '-'; return new Date(Number(ts)).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}); }
+        function manageableUsers(){ return Object.entries(usersCache).map(([uid,u])=>({uid,...(u||{})})).filter(u => String(u.role || '').toLowerCase() !== 'pemilik' && u.username).sort((a,b)=>String(a.username).localeCompare(String(b.username))); }
+        function initUserOptions(){ const select=document.getElementById('expiredUser'); const selected=select.value; const rows=manageableUsers(); select.innerHTML=rows.map(u=>`<option value="${escapeHtml(u.uid)}">${escapeHtml(u.username)} — ${escapeHtml(getRoleLabel(String(u.role||'')))}${u.maker ? ' — maker: '+escapeHtml(u.maker) : ''}</option>`).join(''); if(selected && usersCache[selected] && String(usersCache[selected].role||'').toLowerCase() !== 'pemilik') select.value=selected; }
+        function getStatus(expiredAt){ if(!expiredAt) return {label:'Belum Aktif',cls:'badge-unset',remain:null}; const remain=Number(expiredAt)-Date.now(); if(remain<=0) return {label:'Expired',cls:'badge-expired',remain}; if(remain<=3*86400000) return {label:'Hampir Expired',cls:'badge-soon',remain}; return {label:'Aktif',cls:'badge-active',remain}; }
+        function humanRemain(ms){ if(ms===null) return 'Belum bisa login'; if(ms<=0) return 'Lewat waktu'; const d=Math.floor(ms/86400000); const h=Math.floor((ms%86400000)/3600000); if(d>0) return `${d} hari ${h} jam lagi`; const m=Math.floor((ms%3600000)/60000); return `${h} jam ${m} menit lagi`; }
+        function showAlert(message,type='ok'){ const box=document.getElementById('alertBox'); box.className='alert '+type; box.innerHTML=message; clearTimeout(window.__alertTimer); window.__alertTimer=setTimeout(()=>{box.className='alert';box.innerHTML='';},3500); }
+        function resetForm(){ document.getElementById('expiredAt').value=''; document.getElementById('expiredNote').value=''; }
+        function addexpired(){
+            if(role!=='pemilik') return showAlert('Akses ditolak. Hanya pemilik yang bisa addexpired.','err');
+            const uid=document.getElementById('expiredUser').value; const dt=document.getElementById('expiredAt').value; const note=document.getElementById('expiredNote').value.trim();
+            const target=usersCache[uid] || {}; if(!uid || !target.username) return showAlert('User tidak valid.','warn');
+            if(String(target.role||'').toLowerCase()==='pemilik') return showAlert('Pemilik tidak boleh diberi expired.','warn');
+            if(!dt) return showAlert('Tanggal expired wajib diisi.','warn'); const expiredAt=new Date(dt).getTime(); if(!Number.isFinite(expiredAt)) return showAlert('Format tanggal tidak valid.','warn');
+            const now=Date.now(); const payload={ expiredAt, expiredNote:note, expiredUpdatedAt:now, expiredUpdatedBy:username, expiredUpdatedByUid:currentUserId, expiredStatus: expiredAt<=now?'expired':'active' };
+            usersRef.child(uid).update(payload).then(()=>database.ref('activity_logs').push({uid:currentUserId,username,role,action:`addexpired: mengatur user ${target.username} sampai ${formatDate(expiredAt)}.`,timestamp:now})).then(()=>{ resetForm(); showAlert(`Expired user <b>${escapeHtml(target.username)}</b> berhasil disimpan.`,'ok'); }).catch(e=>showAlert('Gagal addexpired: '+escapeHtml(e.message),'err'));
+        }
+        function listexpired(){
+            const table=document.getElementById('expiredTable'); const query=document.getElementById('searchExpired').value.trim().toLowerCase(); const rowsAll=manageableUsers(); let active=0, blocked=0;
+            rowsAll.forEach(u=>{ const st=getStatus(Number(u.expiredAt||0)); st.cls==='badge-active'||st.cls==='badge-soon'?active++:blocked++; });
+            document.getElementById('totalUser').innerText=rowsAll.length; document.getElementById('activeUser').innerText=active; document.getElementById('blockedUser').innerText=blocked;
+            let rows=rowsAll; if(query) rows=rows.filter(u=>`${u.username||''} ${u.role||''} ${u.maker||''} ${u.expiredNote||''}`.toLowerCase().includes(query));
+            let html='<tr><th>User</th><th>Role</th><th>Expired</th><th>Status</th><th>Catatan</th><th>Aksi</th></tr>'; if(!rows.length){ table.innerHTML=html+'<tr><td colspan="6" class="empty">Tidak ada user yang cocok.</td></tr>'; return; }
+            rows.forEach(u=>{ const expiredAt=Number(u.expiredAt||0); const st=getStatus(expiredAt); html+=`<tr><td><div class="target">${escapeHtml(u.username)}</div><div class="muted">UID: ${escapeHtml(u.uid)}</div>${u.maker?`<div class="muted">Maker: ${escapeHtml(u.maker)}</div>`:''}</td><td><span class="badge badge-unset">${escapeHtml(getRoleLabel(String(u.role||'')))}</span></td><td><b style="color:var(--text-main);">${expiredAt?formatDate(expiredAt):'-'}</b><br><span class="muted">${humanRemain(st.remain)}</span></td><td><span class="badge ${st.cls}">${st.label}</span></td><td>${u.expiredNote?escapeHtml(u.expiredNote):'<span class="muted">-</span>'}${u.expiredUpdatedBy?`<br><span class="muted">Update oleh: ${escapeHtml(u.expiredUpdatedBy)}</span>`:''}</td><td>${expiredAt?`<button class="btn btn-danger" onclick="deleteexpired('${escapeHtml(u.uid)}')">deleteexpired</button>`:'<span class="muted">Belum aktif</span>'}</td></tr>`; });
+            table.innerHTML=html;
+        }
+        function deleteexpired(uid){
+            if(role!=='pemilik') return showAlert('Akses ditolak. Hanya pemilik yang bisa deleteexpired.','err'); const target=usersCache[uid] || {}; if(!uid || !target.username) return showAlert('User tidak valid.','warn');
+            if(!confirm(`Hapus expired untuk user ${target.username}? User ini tidak bisa login sampai diberi expired baru.`)) return; const now=Date.now();
+            usersRef.child(uid).update({expiredAt:null,expiredNote:null,expiredUpdatedAt:now,expiredUpdatedBy:username,expiredUpdatedByUid:currentUserId,expiredStatus:'unset'}).then(()=>database.ref('activity_logs').push({uid:currentUserId,username,role,action:`deleteexpired: menghapus expired user ${target.username}.`,timestamp:now})).then(()=>showAlert(`Expired user <b>${escapeHtml(target.username)}</b> berhasil dihapus. User sekarang tidak bisa login.`,'ok')).catch(e=>showAlert('Gagal deleteexpired: '+escapeHtml(e.message),'err'));
+        }
+        function confirmDeleteExpiredAll(){
+            if(role!=='pemilik') return showAlert('Akses ditolak.','err'); const expiredRows=manageableUsers().filter(u=>Number(u.expiredAt||0) && Number(u.expiredAt||0)<=Date.now()); if(!expiredRows.length) return showAlert('Tidak ada user yang sudah expired.','warn');
+            if(!confirm(`Hapus expired untuk ${expiredRows.length} user yang sudah expired? User tersebut tidak bisa login sampai diberi expired baru.`)) return; const now=Date.now(); const updates={}; expiredRows.forEach(u=>{ updates[u.uid+'/expiredAt']=null; updates[u.uid+'/expiredNote']=null; updates[u.uid+'/expiredUpdatedAt']=now; updates[u.uid+'/expiredUpdatedBy']=username; updates[u.uid+'/expiredUpdatedByUid']=currentUserId; updates[u.uid+'/expiredStatus']='unset'; });
+            usersRef.update(updates).then(()=>database.ref('activity_logs').push({uid:currentUserId,username,role,action:`deleteexpired: menghapus massal ${expiredRows.length} expired user.`,timestamp:now})).then(()=>showAlert(`${expiredRows.length} expired user berhasil dihapus.`, 'ok')).catch(e=>showAlert('Gagal hapus massal: '+escapeHtml(e.message),'err'));
+        }
+    </script>
+    <script>
+        // Firebase Setup (re-initialize if not already)
+        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Proteksi Ganda Sesi User
+        const currentUserId = localStorage.getItem(\'panel_user_id\') || localStorage.getItem(\'user_id\') || localStorage.getItem(\'user_id_ptero\');
+        const roleRaw = localStorage.getItem(\'role\') || localStorage.getItem(\'panel_role\') || \'\';
+        const role = roleRaw.trim().toLowerCase();
+
+        // Countdown Timer
+        let expiryInterval;
+        function startExpiryTimer(expiredAt) {
+            const timerNav = document.getElementById(\'expiryTimerNav\');
+
+            if (!timerNav) return;
+
+            clearInterval(expiryInterval);
+
+            expiryInterval = setInterval(() => {
+                const now = Date.now();
+                const timeLeft = expiredAt - now;
+
+                if (timeLeft <= 0) {
+                    timerNav.innerText = \'EXPIRED\';
+                    timerNav.classList.add(\'expired\');
+                    clearInterval(expiryInterval);
+                    return;
+                }
+
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                const timerString = `${days}h ${hours}j ${minutes}m ${seconds}d`;
+
+                timerNav.innerText = timerString;
+            }, 1000);
         }
 
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td class="font-mono">${item.name}</td>
-          <td><span class="text-xs px-2 py-0.5 ${item.type === 'user' ? 'bg-[#3D5A80]' : 'bg-[#5D9C3E]'}">${item.type.toUpperCase()}</span></td>
-          <td class="text-xs">${formatDate(item.expired_at)}</td>
-          <td>${daysLeftHTML}</td>
-          <td class="text-right">
-            <button onclick="extendItem('${item.firebase_path}', '${item.name}', ${diffDays})" 
-                    class="mc-btn px-4 py-1 text-xs">+ TAMBAH HARI</button>
-          </td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
-
-    async function extendItem(firebasePath, name, currentDiffDays) {
-      const daysStr = prompt(`Tambah berapa hari untuk ${name}? (Saat ini ${currentDiffDays < 0 ? 'sudah expired' : currentDiffDays + ' hari lagi'})`, "15");
-      if (!daysStr || isNaN(daysStr)) return;
-
-      const days = parseInt(daysStr);
-      const mode = getCurrentMode();
-      const fullPath = `zeroixdark/${firebasePath}`;
-
-      try {
-        const ref = getDatabase().ref(fullPath);
-        const snap = await ref.once('value');
-        const data = snap.val();
-        if (!data) return showNotification("Data tidak ditemukan", "error");
-
-        const newExpired = addDaysToDate(data.expired_at, days);
-        await ref.update({ expired_at: newExpired });
-
-        await logActivity('extend_expired_bulk', { name, type: firebasePath.includes('user') ? 'user' : 'server', days }, mode);
-
-        showNotification(`${name} diperpanjang ${days} hari`, "success");
-        await loadExpiredData();
-      } catch (e) {
-        showNotification("Gagal memperpanjang: " + e.message, "error");
-      }
-    }
-
-    async function bulkExtendExpired() {
-      const expiredOnly = expiredData.filter(i => isExpired(i.expired_at));
-      if (expiredOnly.length === 0) {
-        showNotification("Tidak ada item yang sudah expired.", "success");
-        return;
-      }
-
-      createModal("PERPANJANG SEMUA EXPIRED?", `
-        <p>Akan memperpanjang <strong>${expiredOnly.length} item</strong> yang sudah expired selama <strong>15 hari</strong>.</p>
-      `, async () => {
-        const mode = getCurrentMode();
-        let success = 0;
-
-        for (const item of expiredOnly) {
-          try {
-            const ref = getDatabase().ref(`zeroixdark/${item.firebase_path}`);
-            const snap = await ref.once('value');
-            const data = snap.val();
-            if (data) {
-              const newExp = addDaysToDate(data.expired_at, 15);
-              await ref.update({ expired_at: newExp });
-              success++;
-            }
-          } catch (e) { console.warn(e); }
+        // Fetch expiredAt from Firebase and start timer
+        if (currentUserId && role !== \'pemilik\') {
+            database.ref(\'users/\'+ currentUserId + \'/expiredAt\').on(\'value\', (snapshot) => {
+                const expiredAt = Number(snapshot.val() || 0);
+                if (expiredAt > 0) {
+                    startExpiryTimer(expiredAt);
+                } else {
+                    const timerNav = document.getElementById(\'expiryTimerNav\');
+                    if (timerNav) timerNav.innerText = \'N/A\';
+                }
+            });
         }
-
-        await logActivity('bulk_extend_expired', { count: success }, mode);
-        showNotification(`${success} item berhasil diperpanjang 15 hari`, "success");
-        await loadExpiredData();
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', initExpiredPage);
-  </script>
+    </script>
 </body>
 </html>

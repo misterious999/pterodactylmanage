@@ -1,0 +1,30 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": true,
+    "users": {
+      ".indexOn": [
+        "username",
+        "usernameLower",
+        "maker",
+        "role",
+        "expiredAt",
+        "timestamp"
+      ],
+      "$uid": {
+        ".validate": "newData.hasChildren(['username','password','role'])"
+      }
+    },
+    "activity_logs": {
+      ".indexOn": [
+        "timestamp"
+      ],
+      "$logId": {
+        ".validate": "newData.hasChildren(['username','role','action','timestamp'])"
+      }
+    },
+    "pengumuman_global": {
+      ".validate": "newData.val() == null || newData.hasChildren(['pesan','timestamp'])"
+    }
+  }
+}

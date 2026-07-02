@@ -1,0 +1,17 @@
+{
+  "users": {
+    "user_001": {
+      "username": "admin",
+      "usernameLower": "admin",
+      "password": "pstar7@123",
+      "role": "pemilik",
+      "maker": "system",
+      "isOnline": false,
+      "profilePic": "",
+      "timestamp": 1710000000000,
+      "createdAt": 1710000000000,
+      "lastLoginAt": 0,
+      "expiredStatus": "exempt"
+    }
+  }
+}

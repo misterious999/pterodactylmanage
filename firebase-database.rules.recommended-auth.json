@@ -1,0 +1,21 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "users": {
+      ".indexOn": [
+        "username",
+        "usernameLower",
+        "maker",
+        "role",
+        "expiredAt",
+        "timestamp"
+      ]
+    },
+    "activity_logs": {
+      ".indexOn": [
+        "timestamp"
+      ]
+    }
+  }
+}

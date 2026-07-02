@@ -1,434 +1,840 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kelola User • ZEROIXDARK MINECRAFT</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="assets/js/common.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Kelola User & Server - Panel Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-color: #0f172a; --card-bg: #1e293b; 
+            --primary: #0d9488; 
+            --primary-glow: rgba(13, 148, 136, 0.15);
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
+            --text-main: #f8fafc; --text-sub: #94a3b8; 
+            --input-bg: #0f172a; --border-color: rgba(255,255,255,0.08); 
+        }
+        .expiry-timer { font-size: 12px; font-weight: 700; color: var(--text-main); background: var(--primary-glow); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(13, 148, 136, 0.3); margin-left: 15px; white-space: nowrap; }
+        .expiry-timer.expired { color: var(--danger); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+        body { font-family: 'Inter', sans-serif; padding: 20px 5%; background-color: var(--bg-color); color: var(--text-main); margin: 0; max-width: 1200px; margin: auto; }
+        
+        .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 10px 18px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.3); transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn-back svg { width: 18px; height: 18px; fill: currentColor; transition: transform 0.3s; }
+        .btn-back:hover { background: var(--primary); color: white; box-shadow: 0 6px 20px var(--primary-glow); transform: translateY(-2px); }
+        .btn-back:hover svg { transform: translateX(-4px); }
+        
+        h2 { font-weight: 800; margin-bottom: 5px; color: var(--text-main); border-left: 4px solid var(--primary); padding-left: 12px; display: flex; align-items: center; gap: 10px; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        h2 svg { width: 22px; height: 22px; fill: var(--primary); }
+        .sub-title { color: var(--text-sub); margin-bottom: 25px; font-size: 13px; line-height: 1.5; }
+        
+        .box { background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); overflow-x: auto; }
+        .box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+        .box-header h3 { margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+        .box-header h3 svg { width: 18px; height: 18px; fill: var(--primary); }
+        
+        label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        input { width: 100%; padding: 12px 14px; margin-bottom: 0; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-size: 14px; box-sizing: border-box; outline: none; transition: 0.3s; font-family: 'Inter', sans-serif;}
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(15, 23, 42, 0.8); }
+        
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 15px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        
+        .custom-select-wrapper { position: relative; user-select: none; margin-bottom: 15px; }
+        .custom-select-trigger { width: 100%; padding: 12px 14px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-size: 14px; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; font-weight: 500; }
+        .custom-select-trigger:hover, .custom-select-trigger.active { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        .custom-select-trigger svg { width: 16px; height: 16px; fill: var(--text-sub); transition: transform 0.3s ease; }
+        .custom-select-trigger.active svg { transform: rotate(180deg); fill: var(--primary); }
+        
+        .custom-options { position: absolute; display: none; top: calc(100% + 5px); left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--primary); border-radius: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 99; overflow: hidden; animation: fadeIn 0.2s ease; }
+        .custom-options.open { display: block; }
+        .custom-option { padding: 12px 14px; font-size: 13px; color: var(--text-main); cursor: pointer; transition: 0.2s; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px; }
+        .custom-option svg { width: 16px; height: 16px; fill: var(--text-sub); transition: 0.2s; }
+        .custom-option:last-child { border-bottom: none; }
+        .custom-option:hover, .custom-option.selected { background: var(--primary-glow); color: var(--primary); padding-left: 20px; font-weight: 600; }
+        .custom-option:hover svg, .custom-option.selected svg { fill: var(--primary); }
+
+        .btn-tambah { width: 100%; background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; cursor: pointer; border-radius: 10px; padding: 14px; font-weight: 700; transition: 0.3s; margin-top: 5px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px var(--primary-glow); }
+        .btn-tambah svg { width: 18px; height: 18px; fill: currentColor; }
+        .btn-tambah:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(13, 148, 136, 0.4); }
+        
+        .btn-sapu { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); cursor: pointer; border-radius: 8px; padding: 8px 14px; font-weight: 600; transition: 0.3s; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-sapu svg { width: 14px; height: 14px; fill: currentColor; }
+        .btn-sapu:hover { background: var(--warning); color: white; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); transform: translateY(-2px); }
+        
+        .search-container { position: relative; margin-bottom: 20px; }
+        .search-container svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: var(--text-sub); }
+        .search-container input { padding-left: 40px; margin-bottom: 0; background: rgba(0,0,0,0.15); border-color: rgba(13, 148, 136, 0.3); }
+        .search-container input:focus { background: var(--input-bg); border-color: var(--primary); }
+
+        table { width: 100%; border-collapse: collapse; min-width: 600px; margin-top: 10px; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        th { background: rgba(0,0,0,0.15); color: var(--text-sub); font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; white-space: nowrap; border-radius: 8px 8px 0 0;}
+        tr:hover { background: rgba(255,255,255,0.03); }
+        
+        .btn-hapus { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); cursor: pointer; border-radius: 8px; padding: 8px 12px; font-weight: 600; font-size: 12px; transition: 0.3s; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-hapus svg { width: 14px; height: 14px; fill: currentColor; }
+        .btn-hapus:hover { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); border-color: var(--danger); transform: scale(1.05); }
+        
+        .badge { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .badge svg { width: 12px; height: 12px; fill: currentColor; }
+        .badge-admin { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-user { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(13, 148, 136, 0.3); }
+        .reseller-tag { font-size: 10px; color: var(--primary); background: var(--primary-glow); padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 6px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.2);}
+
+        /* MODALS */
+        .mini-ai-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s ease; }
+        .mini-ai-popup { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 380px; padding: 30px 25px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1px solid var(--border-color); }
+        
+        .modal-icon-top { width: 50px; height: 50px; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        .modal-icon-top svg { width: 24px; height: 24px; }
+        
+        .mode-danger .modal-icon-top { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); } .mode-danger .modal-icon-top svg { fill: var(--danger); } .mode-danger .mini-ai-header { color: var(--danger); }
+        .mode-success .modal-icon-top { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); } .mode-success .modal-icon-top svg { fill: var(--success); } .mode-success .mini-ai-header { color: var(--success); }
+        .mode-warning .modal-icon-top { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); } .mode-warning .modal-icon-top svg { fill: var(--warning); } .mode-warning .mini-ai-header { color: var(--warning); }
+        .mode-info .modal-icon-top { background: var(--primary-glow); border: 1px solid rgba(13, 148, 136, 0.3); } .mode-info .modal-icon-top svg { fill: var(--primary); } .mode-info .mini-ai-header { color: var(--primary); }
+
+        .mini-ai-header { font-size: 18px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .mini-ai-body { font-size: 13px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; }
+        
+        .info-detail-ai { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; text-align: left; margin-bottom: 20px; }
+        .detail-row { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+        .detail-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .detail-label { font-size: 10px; color: var(--text-sub); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+        .detail-label svg { width: 12px; height: 12px; fill: var(--text-sub); }
+        .detail-value { font-size: 14px; font-weight: 600; color: var(--text-main); word-break: break-all; }
+        .value-highlight { color: var(--primary); }
+        
+        .ai-btn-group { display: flex; gap: 10px; }
+        .mini-ai-btn { flex: 1; border: none; padding: 12px; font-weight: 700; font-size: 12px; border-radius: 10px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 6px;}
+        .btn-primary-action { background: var(--primary); color: white; } .btn-primary-action:hover { background: #0f766e; transform: translateY(-2px); }
+        .btn-danger-action { background: var(--danger); color: white; } .btn-danger-action:hover { background: #dc2626; transform: translateY(-2px); }
+        .btn-warning-action { background: var(--warning); color: white; } .btn-warning-action:hover { background: #d97706; transform: translateY(-2px); }
+        .btn-outline-action { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-sub); } .btn-outline-action:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInPop { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    </style>
 </head>
 <body>
-  <!-- Topbar -->
-  <div class="mc-topbar sticky top-0 z-50">
-    <div class="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
-      <!-- Left: Logo -->
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 bg-[#5D9C3E] border-2 border-[#2E4A1F] flex items-center justify-center text-xl">⛏️</div>
-          <div>
-            <span class="mc-font text-2xl text-[#E3B23C]">ZEROIXDARK</span>
-            <span class="text-xs text-[#5D9C3E] block -mt-1 tracking-[2px]">MINECRAFT</span>
-          </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <a href="index.html" class="btn-back">
+            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            Kembali ke Dashboard
+        </a>
+        <span id="expiryTimerNav" class="expiry-timer"></span>
+    </div>
+    
+    <h2>
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+        <span id="pageHeading">Kelola User & Server</span>
+    </h2>
+    <p class="sub-title" id="pageSubtitle">Bikin Akun + Server pelanggan langsung dalam 1x proses otomatis.</p>
+
+    <div class="box">
+        <div class="box-header">
+            <h3><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg> Auto-Deploy 1 Paket (User + Server)</h3>
         </div>
-      </div>
-
-      <!-- Desktop Mode Switcher -->
-      <div id="mode-switcher" class="hidden md:flex items-center gap-1 bg-[#2C2C2C] p-1 border border-[#222]"></div>
-
-      <!-- Right: Hamburger + User Info -->
-      <div class="flex items-center gap-3">
-        <button id="hamburger-btn" 
-                class="md:hidden w-10 h-10 flex items-center justify-center text-2xl text-[#E3B23C] border-2 border-[#222] bg-[#2C2C2C] active:bg-[#3D3D3D]">
-          ☰
+        <div class="grid-2">
+            <div><label>Username Panel</label><input type="text" id="newUsername" placeholder="Tanpa spasi..." autocomplete="off"></div>
+            <div><label>Password</label><input type="text" id="newPassword" placeholder="Ketik password..." autocomplete="off"></div>
+        </div>
+        <div class="grid-2">
+            <div><label>Email Aktif</label><input type="email" id="newEmail" placeholder="user@gmail.com" autocomplete="off"></div>
+            <div><label>Nama Server Bot</label><input type="text" id="newServerName" placeholder="Contoh: Bot Server" autocomplete="off"></div>
+        </div>
+        
+        <div class="grid-3">
+            <div>
+                <label>RAM Server</label>
+                <select id="newRam" style="width: 100%; padding: 14px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); font-size: 14px; outline: none; cursor: pointer; appearance: none;">
+                    <option value="1024">1 GB</option>
+                    <option value="2048">2 GB</option>
+                    <option value="3072">3 GB</option>
+                    <option value="4096" selected>4 GB</option>
+                    <option value="5120">5 GB</option>
+                    <option value="6144">6 GB</option>
+                    <option value="7168">7 GB</option>
+                    <option value="8192">8 GB</option>
+                    <option value="9216">9 GB</option>
+                    <option value="10240">10 GB</option>
+                    <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited 🚀</option>
+                </select>
+            </div>
+            <div>
+                <label>CPU Limit</label>
+                <select id="newCpu" style="width: 100%; padding: 14px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); font-size: 14px; outline: none; cursor: pointer; appearance: none;">
+                    <option value="50">50%</option>
+                    <option value="100" selected>100%</option>
+                    <option value="150">150%</option>
+                    <option value="200">200%</option>
+                    <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited 🚀</option>
+                </select>
+            </div>
+            <div>
+                <label>Disk Space</label>
+                <select id="newDisk" style="width: 100%; padding: 14px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); font-size: 14px; outline: none; cursor: pointer; appearance: none;">
+                    <option value="1024">1 GB</option>
+                    <option value="2048" selected>2 GB</option>
+                    <option value="5120">5 GB</option>
+                    <option value="10240">10 GB</option>
+                    <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited 🚀</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="grid-2" style="display: none;">
+            <input type="number" id="newLocId" value="1">
+            <input type="number" id="newEggId" value="15">
+        </div>
+        
+        <div id="roleContainer">
+            <label>Tipe Akun (Pterodactyl Role)</label>
+            <div class="custom-select-wrapper">
+                <div class="custom-select-trigger" onclick="toggleRoleSelect()">
+                    <span id="customSelectText"><svg viewBox="0 0 24 24" style="width:14px;margin-right:6px;vertical-align:middle;fill:currentColor;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> Member Biasa</span>
+                    <svg viewBox="0 0 24 24" class="arrow"><path d="M7 10l5 5 5-5z"/></svg>
+                </div>
+                <div class="custom-options" id="customRoleOptions">
+                    <div class="custom-option selected" onclick="pilihRole(event, 'false', 'Member Biasa')">
+                        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> Member Biasa
+                    </div>
+                    <div class="custom-option" onclick="pilihRole(event, 'true', 'Admin Panel (Akses Penuh)')">
+                        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg> Admin Panel (Akses Penuh)
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="newRole" value="false">
+        </div>
+        
+        <button class="btn-tambah" onclick="buatSatuPaket()">
+            Bikin 1 Paket Sekarang
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
         </button>
-        <div id="user-info"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="max-w-screen-2xl mx-auto px-6 py-8">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="mc-font text-3xl text-white">KELOLA USER + AUTO DEPLOY</h1>
-        <p class="text-[#888] text-sm">Mode: <span id="page-mode" class="font-bold text-[#5D9C3E]"></span></p>
-      </div>
-      <button onclick="showAutoDeployModal()" class="mc-btn flex items-center gap-2">
-        <span>⚡</span> <span>AUTO DEPLOY USER + SERVER</span>
-      </button>
     </div>
 
-    <div class="grass-accent mb-6"></div>
-
-    <!-- Search & Filter -->
-    <div class="flex flex-col md:flex-row gap-3 mb-4">
-      <div class="flex-1 relative">
-        <input type="text" id="search-input" placeholder="Cari username atau email..." 
-               class="mc-search mc-input w-full" onkeyup="filterUsers()">
-      </div>
-      <select id="role-filter" onchange="filterUsers()" class="mc-input px-4 text-sm w-full md:w-52">
-        <option value="">Semua Role</option>
-        <option value="pemilik">Pemilik</option>
-        <option value="reseller_private">Reseller Private</option>
-        <option value="partner_public">Partner Public</option>
-        <option value="reseller_public">Reseller Public</option>
-        <option value="partner_public_v2">Partner Public V2</option>
-      </select>
-      <button onclick="loadUsers()" class="mc-btn px-6">REFRESH</button>
+    <div class="box">
+        <div class="box-header">
+            <h3><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Semua User Pelanggan <span id="textDaftar"></span></h3>
+            <button class="btn-sapu" id="btnSapu" onclick="konfirmasiSapuAwal()"><svg viewBox="0 0 24 24"><path d="M19.36 2.72L20.78 4.14L15.06 9.85C16.13 11.39 16.28 13.24 15.38 14.44L9.06 8.12C10.26 7.22 12.11 7.37 13.65 8.44L19.36 2.72M5.93 17.57C3.92 15.56 2.69 13.16 2.35 10.92L7.23 15.8L5.93 17.57M11.66 11.33L10.33 10L3 17.33L4.33 18.66L11.66 11.33M20.65 19.3L15.3 14C15.65 16.24 14.41 18.65 12.4 20.65L20.65 19.3Z" /></svg> Bersihkan User Tanpa Server</button>
+        </div>
+        <div class="search-container">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" id="searchInput" onkeyup="cariDataTabel()" placeholder="Cari username, email, atau ID..." autocomplete="off">
+        </div>
+        <table id="tabelPtero">
+            <tr><th>ID</th><th>Username</th><th>Email</th><th>Status</th><th>Aksi</th></tr>
+            <tr><td colspan="5" style="text-align: center; color: var(--text-sub); padding: 30px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Mengambil data...</td></tr>
+        </table>
     </div>
 
-    <!-- Users Table -->
-    <div class="mc-card overflow-x-auto">
-      <table class="mc-table min-w-[700px]">
-        <thead>
-          <tr>
-            <th>USERNAME</th>
-            <th>EMAIL</th>
-            <th>ROLE</th>
-            <th>EXPIRED AT</th>
-            <th>STATUS</th>
-            <th class="text-right">AKSI</th>
-          </tr>
-        </thead>
-        <tbody id="users-tbody">
-          <!-- Populated by JS -->
-        </tbody>
-      </table>
+    <div id="modalScreenshot" class="mini-ai-overlay">
+        <div class="mini-ai-popup mode-info">
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+            <div class="mini-ai-header">ACCESS DIBUAT</div>
+            <p style="margin-bottom: 15px; color: var(--text-sub); font-size: 12px;">Proses 1 Paket berhasil. Detail akun telah tersimpan di sistem.</p>
+            <div class="info-detail-ai">
+                <div class="detail-row"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> Detail Akun</div><div class="detail-value">User: <span id="resUser" class="value-highlight"></span></div><div class="detail-value">Pass: <span id="resPass" style="color:var(--warning);"></span></div></div>
+                <div class="detail-row"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96z"/></svg> Akses Panel</div><div class="detail-value"><a id="resLink" href="#" target="_blank" style="color: var(--primary); text-decoration: none;"></a></div></div>
+                <div class="detail-row" style="border: none; padding: 0;"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> Spesifikasi Server</div><div class="detail-value">Server: <span id="resServer" style="color: var(--success);"></span></div></div>
+            </div>
+            <div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" onclick="salinDataBuyer()" id="btnSalin"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Teks</button><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalScreenshot')">Tutup</button></div>
+        </div>
     </div>
 
-    <div class="mt-3 text-xs text-[#666] flex items-center gap-2">
-      <span>💡</span> 
-      <span>Data diambil dari Firebase + Pterodactyl API. Hapus user akan menghapus server terkait juga.</span>
-    </div>
-  </div>
+    <div id="modalHapusConfirm" class="mini-ai-overlay"><div class="mini-ai-popup mode-danger"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></div><div class="mini-ai-header">Hapus User & Server</div><div class="mini-ai-body">Yakin ingin menghapus user <b style="color: var(--danger);" id="delUsername"></b> beserta <b>SEMUA SERVER</b> miliknya?<br><br>Data yang dihapus <u>tidak bisa dikembalikan</u>!</div><div class="ai-btn-group"><button id="btnKonfirmasiHapus" class="mini-ai-btn btn-danger-action" onclick="prosesHapusUser()">Hapus Permanen</button><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalHapusConfirm')">Batal</button></div></div></div>
+    <div id="modalSapuConfirm" class="mini-ai-overlay"><div class="mini-ai-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M19.36 2.72L20.78 4.14L15.06 9.85C16.13 11.39 16.28 13.24 15.38 14.44L9.06 8.12C10.26 7.22 12.11 7.37 13.65 8.44L19.36 2.72M5.93 17.57C3.92 15.56 2.69 13.16 2.35 10.92L7.23 15.8L5.93 17.57M11.66 11.33L10.33 10L3 17.33L4.33 18.66L11.66 11.33M20.65 19.3L15.3 14C15.65 16.24 14.41 18.65 12.4 20.65L20.65 19.3Z" /></svg></div><div class="mini-ai-header">Sapu Bersih</div><div class="mini-ai-body" id="sapuConfirmBody"></div><div class="ai-btn-group"><button id="btnEksekusiSapu" class="mini-ai-btn btn-warning-action" onclick="eksekusiSapuBersih()">Lanjutkan Eksekusi</button><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalSapuConfirm')">Batal</button></div></div></div>
+    <div id="modalAiAlert" class="mini-ai-overlay" style="z-index: 999999;"><div class="mini-ai-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><div class="mini-ai-header" id="aiAlertTitle">PERHATIAN</div><div class="mini-ai-body" id="aiAlertBody">Pesan peringatan di sini.</div><div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" style="background: var(--warning);" onclick="tutupModal('modalAiAlert')">Mengerti</button></div></div></div>
+    <div id="modalAiSuccess" class="mini-ai-overlay" style="z-index: 999999;"><div class="mini-ai-popup mode-success" id="popupSuccessMode"><div class="modal-icon-top" id="iconSuccessMode"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="mini-ai-header" id="aiSuccessTitle">BERHASIL</div><div class="mini-ai-body" id="aiSuccessBody">Proses sukses dilakukan.</div><div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" id="btnTutupSuccess" style="background: var(--success);" onclick="tutupModal('modalAiSuccess')">Tutup</button></div></div></div>
 
-  <script>
-    let allUsers = [];
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-    async function initUsersPage() {
-      const user = requireAuth();
-      if (!user) return;
+    <script>
+        // ============ MODE CONFIGURATION ============
+        const urlParams = new URLSearchParams(window.location.search);
+        const modeParam = urlParams.get('mode') || localStorage.getItem('userMode') || 'private';
+        
+        const modeConfig = {
+            private: {
+                title: 'Kelola User & Server (Private)',
+                heading: 'Kelola User & Server (Private)',
+                subtitle: 'Bikin Akun + Server pelanggan VIP langsung dalam 1x proses otomatis.',
+                allowedRoles: ['pemilik', 'reseller_private', 'reseller', 'demo'],
+                domain: localStorage.getItem('prvt_domain') || 'privateserverzeroix.bypstar7.web.id',
+                api: localStorage.getItem('prvt_api') || 'ptla_FN9WdJ1WzLH1BlGyzyeoWtZGDl9roNeAd8VVmz7g5tF',
+                daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : 'Buatanmu',
+                showRoleContainer: (role) => role === 'pemilik'
+            },
+            public: {
+                title: 'Kelola User & Server (Public)',
+                heading: 'Kelola User & Server (Public)',
+                subtitle: 'Bikin Akun + Server pelanggan Public langsung dalam 1x proses otomatis.',
+                allowedRoles: ['pemilik', 'reseller_public', 'partner_public', 'demo'],
+                domain: 'publikzero.bypstar7.web.id',
+                api: 'ptla_YTtzIHJr2S10NFRokBa3SQHHwM5NJrrXLnlSc2JibUv',
+                daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : (role === 'partner_public' ? '(Tim Kamu)' : (role === 'demo' ? '(Akun Demo)' : 'Buatanmu')),
+                showRoleContainer: (role) => role === 'pemilik' || role === 'partner_public' || role === 'demo'
+            },
+            public_v2: {
+                title: 'Kelola User & Server (Public V2)',
+                heading: 'Kelola User & Server (Public V2)',
+                subtitle: 'Bikin Akun + Server pelanggan Public V2 langsung dalam 1x proses otomatis.',
+                allowedRoles: ['pemilik', 'reseller_public_v2', 'partner_public_v2'],
+                domain: 'zerropubv2.bypstar7.web.id',
+                api: 'ptla_eJXEQcFYVuOYBFqhmHDb0bdm7uUaeQbBoqwrRUQbJbh',
+                daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : (role === 'partner_public_v2' ? '(Tim Kamu)' : 'Buatanmu'),
+                showRoleContainer: (role) => role === 'pemilik' || role === 'partner_public_v2'
+            }
+        };
 
-      initCommonUI();
-
-      const mode = getCurrentMode();
-      document.getElementById('page-mode').textContent = modeConfig[mode].title;
-
-      await loadUsers();
-
-      // Auto refresh every 60s
-      setInterval(() => {
-        if (document.visibilityState === 'visible') loadUsers(true);
-      }, 60000);
-
-      window.addEventListener('modeChanged', () => window.location.reload());
-    }
-
-    async function loadUsers(silent = false) {
-      const tbody = document.getElementById('users-tbody');
-      if (!silent) tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-[#888]">⛏️ Memuat data user dari Firebase...</td></tr>`;
-
-      const mode = getCurrentMode();
-      const db = getDatabase();
-
-      try {
-        const snap = await db.ref(`zeroixdark/managed_users/${mode}`).once('value');
-        allUsers = [];
-
-        if (snap.exists()) {
-          snap.forEach(child => {
-            allUsers.push({ id: child.key, ...child.val() });
-          });
+        const config = modeConfig[modeParam] || modeConfig.private;
+        
+        // ============ AUTHENTICATION & INIT ============
+        const currentUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
+        const roleRaw = localStorage.getItem('role') || localStorage.getItem('panel_role') || '';
+        const role = roleRaw.trim().toLowerCase();
+        const myUsername = localStorage.getItem('username') || localStorage.getItem('panel_username') || 'Unknown'; 
+        
+        if (!currentUserId || !config.allowedRoles.includes(role)) {
+            window.location.replace("index.html");
+        }
+        
+        document.getElementById('pageTitle').innerText = config.title;
+        document.getElementById('pageHeading').innerText = config.heading;
+        document.getElementById('pageSubtitle').innerText = config.subtitle;
+        document.getElementById('textDaftar').innerText = config.daftarLabel(role);
+        
+        if (!config.showRoleContainer(role)) {
+            document.getElementById('roleContainer').style.display = 'none';
         }
 
-        renderUsersTable(allUsers);
-      } catch (err) {
-        console.error(err);
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-400">Gagal memuat data. Coba refresh halaman.</td></tr>`;
-      }
-    }
+        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-    function renderUsersTable(users) {
-      const tbody = document.getElementById('users-tbody');
-      tbody.innerHTML = '';
-
-      if (users.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-[#666]">Belum ada user di mode ini. Gunakan tombol Auto Deploy.</td></tr>`;
-        return;
-      }
-
-      users.forEach(user => {
-        const expired = user.expired_at ? isExpired(user.expired_at) : false;
-        const statusHTML = expired 
-          ? `<span class="mc-badge mc-badge-expired">EXPIRED</span>` 
-          : `<span class="mc-badge mc-badge-active">AKTIF</span>`;
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td class="font-mono text-sm">${user.username || '-'}</td>
-          <td class="text-xs text-[#AAA]">${user.email || '-'}</td>
-          <td><span class="role-badge role-${user.role || 'reseller_private'}">${user.role || 'unknown'}</span></td>
-          <td class="text-xs">${user.expired_at ? formatDate(user.expired_at) : '<span class="text-[#666]">Tidak diatur</span>'}</td>
-          <td>${statusHTML}</td>
-          <td class="text-right">
-            <div class="flex justify-end gap-2">
-              <button onclick="extendUser('${user.id}', '${user.username}')" 
-                      class="px-3 py-1 text-xs bg-[#E3B23C] text-black border border-[#8B5A2B] hover:bg-[#D4A017]">+ HARI</button>
-              <button onclick="deleteUser('${user.id}', '${user.username}', '${user.ptero_id || ''}')" 
-                      class="px-3 py-1 text-xs bg-red-700 hover:bg-red-800 border border-red-900">HAPUS</button>
-            </div>
-          </td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
-
-    function filterUsers() {
-      const search = document.getElementById('search-input').value.toLowerCase();
-      const roleFilter = document.getElementById('role-filter').value;
-
-      const filtered = allUsers.filter(u => {
-        const matchSearch = !search || 
-          (u.username && u.username.toLowerCase().includes(search)) || 
-          (u.email && u.email.toLowerCase().includes(search));
-        
-        const matchRole = !roleFilter || u.role === roleFilter;
-        return matchSearch && matchRole;
-      });
-
-      renderUsersTable(filtered);
-    }
-
-    // ==================== AUTO DEPLOY ====================
-    function showAutoDeployModal() {
-      const mode = getCurrentMode();
-      const config = modeConfig[mode];
-
-      const content = `
-        <div class="space-y-5 text-sm">
-          <div class="bg-[#2C2C2C] border border-[#222] p-3 text-xs">
-            <strong class="text-[#E3B23C]">Auto Deploy</strong> akan membuat:<br>
-            1. User baru di Pterodactyl<br>
-            2. Server Minecraft (default package)<br>
-            3. Expired otomatis 30 hari<br>
-            4. Simpan ke Firebase
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="text-xs text-[#E3B23C] block mb-1">USERNAME</label>
-              <input id="deploy-username" class="mc-input w-full" placeholder="steve2026" value="player${Date.now().toString().slice(-4)}">
-            </div>
-            <div>
-              <label class="text-xs text-[#E3B23C] block mb-1">EMAIL</label>
-              <input id="deploy-email" type="email" class="mc-input w-full" value="player${Date.now().toString().slice(-4)}@zeroix.id">
-            </div>
-          </div>
-
-          <div class="grid grid-cols-3 gap-4">
-            <div>
-              <label class="text-xs text-[#E3B23C] block mb-1">PASSWORD</label>
-              <input id="deploy-password" class="mc-input w-full" value="Minecraft123!">
-            </div>
-            <div>
-              <label class="text-xs text-[#E3B23C] block mb-1">PAKET</label>
-              <select id="deploy-package" class="mc-input w-full">
-                <option value="small">Small (1GB RAM / 5GB Disk)</option>
-                <option value="medium" selected>Medium (2GB RAM / 10GB Disk)</option>
-                <option value="large">Large (4GB RAM / 20GB Disk)</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-xs text-[#E3B23C] block mb-1">ROLE</label>
-              <select id="deploy-role" class="mc-input w-full">
-                ${config.allowedRoles.map(r => `<option value="${r}">${r}</option>`).join('')}
-              </select>
-            </div>
-          </div>
-
-          <div class="text-[10px] text-[#888] pt-2">Server akan dibuat dengan egg default Minecraft (ubah di worker jika perlu).</div>
-        </div>
-      `;
-
-      createModal("AUTO DEPLOY USER + SERVER", content, async () => {
-        await performAutoDeploy(mode);
-      }, "DEPLOY SEKARANG");
-    }
-
-    async function performAutoDeploy(mode) {
-      const username = document.getElementById('deploy-username').value.trim();
-      const email = document.getElementById('deploy-email').value.trim();
-      const password = document.getElementById('deploy-password').value.trim();
-      const pkg = document.getElementById('deploy-package').value;
-      const role = document.getElementById('deploy-role').value;
-
-      if (!username || !email || !password) {
-        showNotification("Username, Email, dan Password wajib diisi!", "error");
-        return;
-      }
-
-      const loadingModal = createModal("MEMPROSES DEPLOY...", `
-        <div class="flex flex-col items-center py-6">
-          <div class="text-5xl animate-bounce mb-4">⛏️</div>
-          <p class="text-sm">Sedang membuat user &amp; server di Pterodactyl...</p>
-          <p class="text-xs text-[#888] mt-1">Jangan tutup halaman ini.</p>
-        </div>
-      `, null, "TUNGGU...");
-
-      try {
-        // 1. Create User via Ptero API
-        const userPayload = {
-          username: username.toLowerCase().replace(/\s/g, ''),
-          email: email,
-          first_name: username,
-          last_name: "Zeroix",
-          password: password
-        };
-
-        const userRes = await pteroApiCall(mode, '/users', 'POST', userPayload);
-        const pteroUserId = userRes.attributes.id;
-
-        // 2. Create Server (simplified - kamu bisa expand ini dengan allocation & egg)
-        const serverPayload = {
-          name: `${username}-mc-server`,
-          user: pteroUserId,
-          egg: 1,                    // Ganti sesuai egg Minecraft kamu
-          docker_image: "ghcr.io/pterodactyl/yolks:java_17",
-          startup: "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
-          environment: {
-            SERVER_JARFILE: "server.jar",
-            VANILLA_VERSION: "1.21.1",
-            SERVER_MEMORY: pkg === 'small' ? "1024" : pkg === 'medium' ? "2048" : "4096"
-          },
-          limits: {
-            memory: pkg === 'small' ? 1024 : pkg === 'medium' ? 2048 : 4096,
-            swap: 0,
-            disk: pkg === 'small' ? 5120 : pkg === 'medium' ? 10240 : 20480,
-            io: 500,
-            cpu: pkg === 'small' ? 100 : pkg === 'medium' ? 150 : 200
-          },
-          feature_limits: { allocations: 1, backups: 1, databases: 0 }
-        };
-
-        const serverRes = await pteroApiCall(mode, '/servers', 'POST', serverPayload);
-        const pteroServerId = serverRes.attributes.id;
-
-        // 3. Save to Firebase
-        const expiredDate = new Date();
-        expiredDate.setDate(expiredDate.getDate() + 30);
-
-        const userData = {
-          ptero_id: pteroUserId,
-          username: username,
-          email: email,
-          role: role,
-          expired_at: expiredDate.toISOString(),
-          package: pkg,
-          created_by: getCurrentUser().username
-        };
-
-        await saveManagedUser(mode, userData);
-
-        const serverData = {
-          ptero_id: pteroServerId,
-          user_ptero_id: pteroUserId,
-          name: serverPayload.name,
-          expired_at: expiredDate.toISOString(),
-          package: pkg,
-          status: 'active'
-        };
-
-        await saveManagedServer(mode, serverData);
-
-        // 4. Log
-        await logActivity('auto_deploy', { 
-          username, 
-          ptero_user_id: pteroUserId, 
-          ptero_server_id: pteroServerId,
-          package: pkg 
-        }, mode);
-
-        // Close loading
-        const loading = document.getElementById('mc-modal');
-        if (loading) loading.remove();
-
-        showNotification(`Berhasil deploy ${username}! Server ID: ${pteroServerId}`, "success");
-
-        // Refresh table
-        await loadUsers(true);
-
-      } catch (err) {
-        const loading = document.getElementById('mc-modal');
-        if (loading) loading.remove();
-
-        console.error(err);
-        showNotification("Gagal deploy: " + err.message, "error");
-        
-        createModal("ERROR DEPLOY", `
-          <div class="text-red-400 text-sm">${err.message}</div>
-          <div class="text-xs mt-3 text-[#888]">Cek console browser atau pastikan Worker &amp; API Key benar.</div>
-        `, null, "TUTUP");
-      }
-    }
-
-    // Extend expired
-    async function extendUser(firebaseId, username) {
-      const days = prompt(`Berapa hari tambahan untuk ${username}?`, "30");
-      if (!days || isNaN(days)) return;
-
-      const mode = getCurrentMode();
-      const db = getDatabase();
-      const userRef = db.ref(`zeroixdark/managed_users/${mode}/${firebaseId}`);
-
-      try {
-        const snap = await userRef.once('value');
-        const current = snap.val();
-        if (!current) return;
-
-        const newExpired = addDaysToDate(current.expired_at, parseInt(days));
-        
-        await userRef.update({ expired_at: newExpired });
-
-        await logActivity('extend_expired', { username, days: parseInt(days), new_expired: newExpired }, mode);
-
-        showNotification(`${username} ditambah ${days} hari`, "success");
-        await loadUsers(true);
-      } catch (e) {
-        showNotification("Gagal memperpanjang: " + e.message, "error");
-      }
-    }
-
-    // Delete user + servers
-    async function deleteUser(firebaseId, username, pteroUserId) {
-      createModal("HAPUS USER?", `
-        <div class="text-sm">
-          <p class="text-red-400 font-bold">PERINGATAN!</p>
-          <p class="mt-2">User <strong>${username}</strong> dan SEMUA server miliknya akan dihapus permanen dari Pterodactyl &amp; Firebase.</p>
-          <p class="text-xs text-[#888] mt-3">Tindakan ini tidak bisa dibatalkan.</p>
-        </div>
-      `, async () => {
-        const mode = getCurrentMode();
-        try {
-          // 1. Hapus server dari ptero jika ada
-          if (pteroUserId) {
-            // Ambil daftar server milik user ini dulu (opsional, bisa di-expand)
-            // Untuk simplicity, kita hapus user saja. Kamu bisa tambah logic hapus server.
-          }
-
-          // 2. Hapus user dari Pterodactyl
-          if (pteroUserId) {
-            await pteroApiCall(mode, `/users/${pteroUserId}`, 'DELETE');
-          }
-
-          // 3. Hapus dari Firebase
-          await getDatabase().ref(`zeroixdark/managed_users/${mode}/${firebaseId}`).remove();
-
-          await logActivity('delete_user', { username, ptero_id: pteroUserId }, mode);
-
-          showNotification(`User ${username} berhasil dihapus`, "success");
-          await loadUsers(true);
-
-        } catch (err) {
-          showNotification("Gagal hapus: " + err.message, "error");
+        if (currentUserId) {
+            database.ref('users/' + currentUserId + '/isOnline').set(true);
+            database.ref('users/' + currentUserId + '/isOnline').onDisconnect().set(false);
         }
-      }, "YA, HAPUS PERMANEN");
-    }
 
-    document.addEventListener('DOMContentLoaded', initUsersPage);
-  </script>
+        const WORKER_URL = "https://restless-truth-9b75.amisterious09.workers.dev";
+        const PTERO_DOMAIN = config.domain;
+        const PTERO_API = config.api;
+
+        const spinnerSvg = `<svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite; width:18px; fill:currentColor;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg>`;
+
+        function tutupModal(id) { 
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'none'; 
+        }
+        
+        function showAiAlert(pesan, judul = "PERHATIAN") {
+            document.getElementById('aiAlertTitle').innerText = judul;
+            document.getElementById('aiAlertBody').innerHTML = pesan;
+            document.getElementById('modalAiAlert').style.display = 'flex';
+        }
+
+        function showAiSuccess(pesan, judul = "BERHASIL", isDanger = false) {
+            document.getElementById('aiSuccessTitle').innerText = judul;
+            document.getElementById('aiSuccessBody').innerHTML = pesan;
+            let popup = document.getElementById('popupSuccessMode');
+            let iconBox = document.getElementById('iconSuccessMode');
+            let btn = document.getElementById('btnTutupSuccess');
+            if(isDanger) {
+                popup.className = "mini-ai-popup mode-danger";
+                iconBox.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
+                btn.style.background = "var(--danger)";
+            } else {
+                popup.className = "mini-ai-popup mode-success";
+                iconBox.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
+                btn.style.background = "var(--success)";
+            }
+            document.getElementById('modalAiSuccess').style.display = 'flex';
+        }
+
+        function toggleRoleSelect() { 
+            document.getElementById('customRoleOptions').classList.toggle('open'); 
+            document.querySelector('.custom-select-trigger').classList.toggle('active'); 
+        }
+        
+        function pilihRole(event, value, text) {
+            if (!event || !event.target) return;
+            
+            document.getElementById('newRole').value = value;
+            let icon = value === 'true' ? `<svg viewBox="0 0 24 24" style="width:14px;margin-right:6px;vertical-align:middle;fill:currentColor;"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>` : `<svg viewBox="0 0 24 24" style="width:14px;margin-right:6px;vertical-align:middle;fill:currentColor;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+            
+            document.getElementById('customSelectText').innerHTML = icon + text;
+            let options = document.querySelectorAll('.custom-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            event.target.closest('.custom-option').classList.add('selected');
+            toggleRoleSelect();
+        }
+        
+        document.addEventListener('click', function(e) { 
+            const select = document.querySelector('.custom-select-wrapper'); 
+            if (select && !select.contains(e.target)) { 
+                document.getElementById('customRoleOptions').classList.remove('open'); 
+                let trigger = document.querySelector('.custom-select-trigger'); 
+                if(trigger) trigger.classList.remove('active'); 
+            } 
+        });
+
+        function ambilDataPtero() {
+            fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users`, { 
+                headers: { 
+                    'Accept': 'application/json', 
+                    'Authorization': `Bearer ${PTERO_API}` 
+                } 
+            }).then(res => res.json()).then(data => {
+                let tabel = `<tr><th>ID</th><th>Username</th><th>Email</th><th>Status</th><th>Aksi</th></tr>`;
+                let countDisplayed = 0;
+                const svgCrown = `<svg viewBox="0 0 24 24"><path d="M12 1.5l3.09 6.3 6.91 1-5 4.87 1.18 6.88L12 17.25l-6.18 3.25L7 13.62 2 8.75l6.91-1L12 1.5z"/></svg>`;
+                const svgUser = `<svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+                const svgTrash = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
+
+                data.data.forEach(user => {
+                    let u = user.attributes;
+                    if (role !== 'pemilik' && role !== 'demo') { if (u.root_admin === true) return; if (u.last_name !== myUsername) return; }
+                    if(role === 'demo' && u.last_name !== 'admin' && u.last_name !== 'Admin' && u.last_name !== 'User') return;
+
+                    countDisplayed++;
+                    let status = u.root_admin ? `<span class="badge badge-admin">${svgCrown} Admin</span>` : `<span class="badge badge-user">${svgUser} Member</span>`;
+                    let namaPembuat = u.last_name; if (namaPembuat === 'User' || namaPembuat === 'Admin') namaPembuat = 'admin'; 
+                    let makerTag = (role === 'pemilik' || role === 'demo') ? `<br><span class="reseller-tag">Oleh: ${namaPembuat}</span>` : '';
+                    let tombolHapus = u.id !== 1 ? `<button class="btn-hapus" id="btnHapus_${u.id}" onclick="munculkanModalHapusConfirm(${u.id}, '${u.username}')">${svgTrash} Hapus 1 Paket</button>` : `<span style="color:var(--text-sub); font-size:12px; font-weight:bold;">Sistem Pusat</span>`;
+                    
+                    tabel += `<tr><td style="color: var(--text-sub); font-weight: bold;">#${u.id}</td><td style="font-weight: 700; color: var(--text-main); font-size:15px;">${u.username}${makerTag}</td><td style="color: var(--text-sub); font-size: 13px;">${u.email}</td><td>${status}</td><td>${tombolHapus}</td></tr>`;
+                });
+
+                if (countDisplayed === 0) tabel += `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">Belum ada akun yang bisa ditampilkan.</td></tr>`;
+                document.getElementById('tabelPtero').innerHTML = tabel;
+            }).catch(e => { 
+                document.getElementById('tabelPtero').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">Error: ${e.message}</td></tr>`; 
+            });
+        }
+
+        function cariDataTabel() {
+            let input = document.getElementById("searchInput").value.toLowerCase(); 
+            let table = document.getElementById("tabelPtero"); 
+            let tr = table.getElementsByTagName("tr");
+            for (let i = 1; i < tr.length; i++) {
+                if (tr[i].getElementsByTagName("td").length === 1) continue;
+                let tdID = tr[i].getElementsByTagName("td")[0]; 
+                let tdUsername = tr[i].getElementsByTagName("td")[1]; 
+                let tdEmail = tr[i].getElementsByTagName("td")[2];
+                if (tdID || tdUsername || tdEmail) {
+                    let textID = tdID.textContent || tdID.innerText; 
+                    let textUsername = tdUsername.textContent || tdUsername.innerText; 
+                    let textEmail = tdEmail.textContent || tdEmail.innerText;
+                    if (textID.toLowerCase().indexOf(input) > -1 || textUsername.toLowerCase().indexOf(input) > -1 || textEmail.toLowerCase().indexOf(input) > -1) { 
+                        tr[i].style.display = ""; 
+                    } else { 
+                        tr[i].style.display = "none"; 
+                    }
+                }       
+            }
+        }
+
+        let targetHantuGlobal = []; 
+        function konfirmasiSapuAwal() {
+            if (role === 'demo') return showAiAlert("<b>MODE DEMO:</b> Fitur ini dikunci.", "AKSES DITOLAK");
+            document.getElementById('sapuConfirmBody').innerHTML = "Sistem akan MENGHAPUS semua User (Member) yang tidak memiliki Server aktif.<br><br>Lanjutkan pemindaian?";
+            let btnExec = document.getElementById('btnEksekusiSapu');
+            btnExec.innerHTML = `<svg viewBox="0 0 24 24" style="width:18px;fill:currentColor;"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg> Pindai Data`;
+            btnExec.onclick = prosesPindaiHantu; 
+            document.getElementById('modalSapuConfirm').style.display = 'flex';
+        }
+        
+        async function prosesPindaiHantu() {
+            tutupModal('modalSapuConfirm'); 
+            let btn = document.getElementById('btnSapu'); 
+            let originalSapuText = btn.innerHTML; 
+            btn.innerHTML = `${spinnerSvg} Memindai...`; 
+            btn.style.pointerEvents = "none";
+            try {
+                let resServers = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers`, { 
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Authorization': `Bearer ${PTERO_API}` 
+                    } 
+                });
+                let serverOwners = (await resServers.json()).data.map(s => s.attributes.user);
+                let resUsers = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users`, { 
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Authorization': `Bearer ${PTERO_API}` 
+                    } 
+                });
+                let targetHapus = []; 
+                (await resUsers.json()).data.forEach(user => { 
+                    let u = user.attributes; 
+                    if (u.root_admin || u.id === 1) return; 
+                    if (role !== 'pemilik' && u.last_name !== myUsername) return; 
+                    if (!serverOwners.includes(u.id)) targetHapus.push(u); 
+                });
+                if (targetHapus.length === 0) { 
+                    showAiSuccess("Tidak ada <b>'User Hantu'</b>.", "✨ BERSIH!"); 
+                    btn.innerHTML = originalSapuText; 
+                    btn.style.pointerEvents = "auto"; 
+                    return; 
+                }
+                targetHantuGlobal = targetHapus; 
+                document.getElementById('sapuConfirmBody').innerHTML = `Ditemukan <b style="color:var(--danger); font-size:18px;">${targetHapus.length} USER HANTU!</b><br><br>Lanjutkan eksekusi penghapusan?`;
+                let btnExec = document.getElementById('btnEksekusiSapu'); 
+                btnExec.innerHTML = `Ya, Eksekusi!`; 
+                btnExec.onclick = eksekusiHapusHantu; 
+                document.getElementById('modalSapuConfirm').style.display = 'flex'; 
+                btn.innerHTML = originalSapuText; 
+                btn.style.pointerEvents = "auto";
+            } catch (e) { 
+                showAiAlert("Terjadi Error: " + e.message, "ERROR"); 
+                btn.innerHTML = originalSapuText; 
+                btn.style.pointerEvents = "auto"; 
+            }
+        }
+        
+        async function eksekusiHapusHantu() {
+            tutupModal('modalSapuConfirm'); 
+            let btn = document.getElementById('btnSapu'); 
+            let originalSapuText = btn.innerHTML; 
+            btn.innerHTML = `${spinnerSvg} Menghapus...`; 
+            btn.style.pointerEvents = "none";
+            try { 
+                let terhapus = 0; 
+                for (let u of targetHantuGlobal) { 
+                    await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users/${u.id}`, { 
+                        method: 'DELETE', 
+                        headers: { 
+                            'Accept': 'application/json', 
+                            'Authorization': `Bearer ${PTERO_API}` 
+                        } 
+                    }); 
+                    terhapus++; 
+                } 
+                showAiSuccess(`Sapu bersih selesai!<br>Total <b>${terhapus} User Hantu</b> dimusnahkan.`, "CLEAR!", false); 
+                ambilDataPtero(); 
+            } catch (e) { 
+                showAiAlert("Error: " + e.message, "ERROR"); 
+            } 
+            btn.innerHTML = originalSapuText; 
+            btn.style.pointerEvents = "auto";
+        }
+
+        async function buatSatuPaket() {
+            if (role === 'demo') return showAiAlert("<b>MODE DEMO:</b> Fitur ini dikunci.", "AKSES DITOLAK");
+            let username = document.getElementById('newUsername').value.trim(); 
+            let password = document.getElementById('newPassword').value.trim(); 
+            let email = document.getElementById('newEmail').value.trim(); 
+            let serverName = document.getElementById('newServerName').value.trim(); 
+            let ram = document.getElementById('newRam').value; 
+            let cpu = document.getElementById('newCpu').value; 
+            let disk = document.getElementById('newDisk').value; 
+            let locId = document.getElementById('newLocId').value; 
+            let eggId = document.getElementById('newEggId').value; 
+            let isAdmin = document.getElementById('newRole').value === "true"; 
+            
+            if(!username || !password || !email || !serverName || !ram || !cpu || !disk) { 
+                showAiAlert("Harap isi semua kolom formulir secara lengkap!", "DATA KOSONG"); 
+                return; 
+            }
+            
+            let btn = document.querySelector('.btn-tambah'); 
+            let originalText = btn.innerHTML; 
+            btn.style.pointerEvents = "none";
+            
+            try {
+                btn.innerHTML = `${spinnerSvg} 1/2: Membuat Akun...`;
+                let userPayload = { 
+                    "email": email, 
+                    "username": username, 
+                    "first_name": username, 
+                    "last_name": myUsername, 
+                    "password": password, 
+                    "root_admin": isAdmin 
+                };
+                let resUser = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users`, { 
+                    method: 'POST', 
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${PTERO_API}` 
+                    }, 
+                    body: JSON.stringify(userPayload) 
+                });
+                if (!resUser.ok) throw new Error(await resUser.text()); 
+                let newUserId = (await resUser.json()).attributes.id; 
+                
+                btn.innerHTML = `${spinnerSvg} 2/2: Mendeploy Server...`;
+                let serverPayload = { 
+                    "name": serverName, 
+                    "description": `Dibuat oleh ${myUsername}`, 
+                    "user": newUserId, 
+                    "egg": parseInt(eggId), 
+                    "docker_image": "ghcr.io/parkervcp/yolks:nodejs_20", 
+                    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == "1" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z ${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z ${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo ${CUSTOM_ENVIRONMENT_VARIABLES} | tr ";" "\n"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
+                    "environment": { "INST": "npm", "USER_UPLOAD": "0", "AUTO_UPDATE": "0", "CMD_RUN": "npm start" }, 
+                    "limits": { "memory": parseInt(ram), "swap": 0, "disk": parseInt(disk), "io": 500, "cpu": parseInt(cpu) }, 
+                    "feature_limits": { "databases": 5, "backups": 5, "allocations": 5 }, 
+                    "deploy": { "locations": [parseInt(locId)], "dedicated_ip": false, "port_range": [] } 
+                };
+                let resServer = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers`, { 
+                    method: 'POST', 
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${PTERO_API}` 
+                    }, 
+                    body: JSON.stringify(serverPayload) 
+                });
+                if (!resServer.ok) throw new Error(await resServer.text());
+                
+                btn.innerHTML = originalText; 
+                btn.style.pointerEvents = "auto"; 
+                munculkanModalStruk(username, password, email, serverName); 
+                document.getElementById('newUsername').value = ""; 
+                document.getElementById('newPassword').value = ""; 
+                document.getElementById('newEmail').value = ""; 
+                document.getElementById('newServerName').value = ""; 
+                ambilDataPtero(); 
+            } catch(e) { 
+                btn.innerHTML = originalText; 
+                btn.style.pointerEvents = "auto"; 
+                showAiAlert(`${e.message}`, "GAGAL DEPLOY"); 
+            }
+        }
+
+        let userToDeleteId = null; 
+        let userToDeleteName = null;
+        function munculkanModalHapusConfirm(userId, username) { 
+            if (role === 'demo') return showAiAlert("<b>MODE DEMO:</b> Fitur ini dikunci.", "AKSES DITOLAK"); 
+            userToDeleteId = userId; 
+            userToDeleteName = username; 
+            document.getElementById('delUsername').innerText = username; 
+            document.getElementById('modalHapusConfirm').style.display = 'flex'; 
+        }
+        
+        async function prosesHapusUser() {
+            tutupModal('modalHapusConfirm'); 
+            let userId = userToDeleteId; 
+            let username = userToDeleteName; 
+            let btn = document.getElementById(`btnHapus_${userId}`); 
+            let originalText = btn.innerHTML; 
+            btn.innerHTML = `${spinnerSvg} Menghancurkan...`; 
+            btn.style.pointerEvents = "none";
+            try {
+                let resServers = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers`, { 
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Authorization': `Bearer ${PTERO_API}` 
+                    } 
+                });
+                let serversMilikUser = (await resServers.json()).data.filter(s => s.attributes.user === userId);
+                for (let server of serversMilikUser) { 
+                    await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers/${server.attributes.id}/force`, { 
+                        method: 'DELETE', 
+                        headers: { 
+                            'Accept': 'application/json', 
+                            'Authorization': `Bearer ${PTERO_API}` 
+                        } 
+                    }); 
+                }
+                let resUser = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users/${userId}`, { 
+                    method: 'DELETE', 
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Authorization': `Bearer ${PTERO_API}` 
+                    } 
+                });
+                if (!resUser.ok) throw new Error(await resUser.text()); 
+                showAiSuccess(`User <b style="color: #ef4444;">${username}</b> musnah!`, "DUAARR!! MUSNAH!", true); 
+                ambilDataPtero(); 
+            } catch (e) { 
+                showAiAlert("Gagal menghapus: " + e.message, "ERROR"); 
+                btn.innerHTML = originalText; 
+                btn.style.pointerEvents = "auto"; 
+            }
+        }
+
+        function munculkanModalStruk(user, pass, email, serverName) { 
+            document.getElementById('resUser').innerText = user; 
+            document.getElementById('resPass').innerText = pass; 
+            document.getElementById('resLink').innerText = `https://${PTERO_DOMAIN}`; 
+            document.getElementById('resLink').href = `https://${PTERO_DOMAIN}`; 
+            document.getElementById('resServer').innerText = serverName; 
+            document.getElementById('modalScreenshot').style.display = 'flex'; 
+            let btnSalin = document.getElementById('btnSalin'); 
+            if(btnSalin) { 
+                btnSalin.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Teks`; 
+            } 
+        }
+        
+        function salinDataBuyer() { 
+            let user = document.getElementById('resUser').innerText; 
+            let pass = document.getElementById('resPass').innerText; 
+            let link = document.getElementById('resLink').innerText; 
+            let server = document.getElementById('resServer').innerText; 
+            let teksSalin = `*AKSES BERHASIL DIBUAT*
+
+Username: ${user}
+Password: ${pass}
+Link Panel: ${link}
+Server Bot: ${server}
+
+_Terima kasih telah berbelanja!_`; 
+            navigator.clipboard.writeText(teksSalin).then(() => { 
+                let btn = document.getElementById('btnSalin'); 
+                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Berhasil Disalin!`; 
+                setTimeout(() => { 
+                    btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Teks`; 
+                }, 2000); 
+            }).catch(() => {
+                showAiAlert("Gagal menyalin ke clipboard", "ERROR");
+            });
+        }
+
+        ambilDataPtero();
+    </script>
+
+    <script>
+    (function userExpiryGuard(){
+        const guardRole = String(localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
+        const guardUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
+        if (!guardRole || guardRole === 'pemilik' || !guardUserId || !window.firebase) return;
+        const guardConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(guardConfig);
+        let __expiredHandled = false;
+        firebase.database().ref('users/' + guardUserId).on('value', function(snapshot){
+            const data = snapshot.val() || {};
+            const expiredAt = Number(data.expiredAt || 0);
+            let blockMessage = '';
+            if (!expiredAt) {
+                blockMessage = 'Akun ' + String(data.username || '').replace(/</g,'&lt;') + ' belum diaktifkan oleh pemilik. Hubungi pemilik untuk mengatur expired akun.';
+            } else if (expiredAt <= Date.now()) {
+                blockMessage = 'Akun ' + String(data.username || '').replace(/</g,'&lt;') + ' sudah expired. Hubungi pemilik untuk perpanjangan.';
+            }
+            if (!blockMessage || __expiredHandled) return;
+            __expiredHandled = true;
+            firebase.database().ref('users/' + guardUserId + '/isOnline').set(false).catch(function(){});
+            ['panel_user_id','user_id','user_id_ptero','panel_username','username','panel_role','role','panel_password','ptero_user_id'].forEach(function(k){ localStorage.removeItem(k); });
+            alert(blockMessage);
+            window.location.replace('login.html');
+        }, function(){});
+    })();
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        // Firebase Setup (re-initialize if not already)
+        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Proteksi Ganda Sesi User
+        const currentUserId = localStorage.getItem(\'panel_user_id\') || localStorage.getItem(\'user_id\') || localStorage.getItem(\'user_id_ptero\');
+        const roleRaw = localStorage.getItem(\'role\') || localStorage.getItem(\'panel_role\') || \'\';
+        const role = roleRaw.trim().toLowerCase();
+
+        // Countdown Timer
+        let expiryInterval;
+        function startExpiryTimer(expiredAt) {
+            const timerNav = document.getElementById(\'expiryTimerNav\');
+
+            if (!timerNav) return;
+
+            clearInterval(expiryInterval);
+
+            expiryInterval = setInterval(() => {
+                const now = Date.now();
+                const timeLeft = expiredAt - now;
+
+                if (timeLeft <= 0) {
+                    timerNav.innerText = \'EXPIRED\';
+                    timerNav.classList.add(\'expired\');
+                    clearInterval(expiryInterval);
+                    return;
+                }
+
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                const timerString = `${days}h ${hours}j ${minutes}m ${seconds}d`;
+
+                timerNav.innerText = timerString;
+            }, 1000);
+        }
+
+        // Fetch expiredAt from Firebase and start timer
+        if (currentUserId && role !== \'pemilik\') {
+            database.ref(\'users/\'+ currentUserId + \'/expiredAt\').on(\'value\', (snapshot) => {
+                const expiredAt = Number(snapshot.val() || 0);
+                if (expiredAt > 0) {
+                    startExpiryTimer(expiredAt);
+                } else {
+                    const timerNav = document.getElementById(\'expiryTimerNav\');
+                    if (timerNav) timerNav.innerText = \'N/A\';
+                }
+            });
+        }
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        // Firebase Setup (re-initialize if not already)
+        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Proteksi Ganda Sesi User
+        const currentUserId = localStorage.getItem(\'panel_user_id\') || localStorage.getItem(\'user_id\') || localStorage.getItem(\'user_id_ptero\');
+        const roleRaw = localStorage.getItem(\'role\') || localStorage.getItem(\'panel_role\') || \'\';
+        const role = roleRaw.trim().toLowerCase();
+
+        // Countdown Timer
+        let expiryInterval;
+        function startExpiryTimer(expiredAt) {
+            const timerNav = document.getElementById(\'expiryTimerNav\');
+
+            if (!timerNav) return;
+
+            clearInterval(expiryInterval);
+
+            expiryInterval = setInterval(() => {
+                const now = Date.now();
+                const timeLeft = expiredAt - now;
+
+                if (timeLeft <= 0) {
+                    timerNav.innerText = \'EXPIRED\';
+                    timerNav.classList.add(\'expired\');
+                    clearInterval(expiryInterval);
+                    return;
+                }
+
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                const timerString = `${days}h ${hours}j ${minutes}m ${seconds}d`;
+
+                timerNav.innerText = timerString;
+            }, 1000);
+        }
+
+        // Fetch expiredAt from Firebase and start timer
+        if (currentUserId && role !== \'pemilik\') {
+            database.ref(\'users/\'+ currentUserId + \'/expiredAt\').on(\'value\', (snapshot) => {
+                const expiredAt = Number(snapshot.val() || 0);
+                if (expiredAt > 0) {
+                    startExpiryTimer(expiredAt);
+                } else {
+                    const timerNav = document.getElementById(\'expiryTimerNav\');
+                    if (timerNav) timerNav.innerText = \'N/A\';
+                }
+            });
+        }
+    </script>
 </body>
 </html>

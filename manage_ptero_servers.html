@@ -1,240 +1,706 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kelola Server • ZEROIXDARK MINECRAFT</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="assets/js/common.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Kelola Server - Panel Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-color: #0f172a; --card-bg: #1e293b; 
+            --primary: #0d9488; 
+            --primary-glow: rgba(13, 148, 136, 0.15);
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
+            --text-main: #f8fafc; --text-sub: #94a3b8; 
+            --input-bg: #0f172a; --border-color: rgba(255,255,255,0.08); 
+        }
+        .expiry-timer { font-size: 12px; font-weight: 700; color: var(--text-main); background: var(--primary-glow); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(13, 148, 136, 0.3); margin-left: 15px; white-space: nowrap; }
+        .expiry-timer.expired { color: var(--danger); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+        body { font-family: 'Inter', sans-serif; padding: 20px 5%; background-color: var(--bg-color); color: var(--text-main); margin: 0; max-width: 1200px; margin: auto; }
+        
+        .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 10px 18px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.3); transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn-back svg { width: 18px; height: 18px; fill: currentColor; transition: transform 0.3s; }
+        .btn-back:hover { background: var(--primary); color: white; box-shadow: 0 6px 20px var(--primary-glow); transform: translateY(-2px); }
+        .btn-back:hover svg { transform: translateX(-4px); }
+        
+        h2 { font-weight: 800; margin-bottom: 5px; color: var(--text-main); border-left: 4px solid var(--primary); padding-left: 12px; display: flex; align-items: center; gap: 10px; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        h2 svg { width: 22px; height: 22px; fill: var(--primary); }
+        .sub-title { color: var(--text-sub); margin-bottom: 25px; font-size: 13px; line-height: 1.5; }
+        
+        .box { background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); overflow-x: auto; }
+        .box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+        .box-header h3 { margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+        .box-header h3 svg { width: 18px; height: 18px; fill: var(--primary); }
+        
+        label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select { width: 100%; padding: 12px 14px; margin-bottom: 0; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-size: 14px; box-sizing: border-box; outline: none; transition: 0.3s; font-family: 'Inter', sans-serif; appearance: none; }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(15, 23, 42, 0.8); }
+        
+        .select-wrapper { position: relative; margin-bottom: 15px; }
+        .select-wrapper::after { content: "▼"; position: absolute; right: 15px; top: 38px; color: var(--text-sub); font-size: 10px; pointer-events: none; }
+
+        .input-group { margin-bottom: 15px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 15px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        
+        .btn-tambah { width: 100%; background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; cursor: pointer; border-radius: 10px; padding: 14px; font-weight: 700; transition: 0.3s; margin-top: 5px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px var(--primary-glow); }
+        .btn-tambah svg { width: 18px; height: 18px; fill: currentColor; }
+        .btn-tambah:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(13, 148, 136, 0.4); }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 600px; margin-top: 10px; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        th { background: rgba(0,0,0,0.15); color: var(--text-sub); font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; white-space: nowrap; border-radius: 8px 8px 0 0;}
+        tr:hover { background: rgba(255,255,255,0.03); }
+        
+        .action-group { display: flex; gap: 6px; align-items: center; }
+        .btn-action-small { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; border: none; cursor: pointer; transition: 0.3s; }
+        .btn-action-small svg { width: 14px; height: 14px; fill: currentColor; }
+        
+        .btn-hapus { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .btn-hapus:hover { background: var(--danger); color: white; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3); transform: scale(1.05); }
+        
+        .btn-suspend { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .btn-suspend:hover { background: var(--warning); color: white; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); transform: scale(1.05); }
+
+        .btn-unsuspend { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .btn-unsuspend:hover { background: var(--success); color: white; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); transform: scale(1.05); }
+        
+        .badge { padding: 6px 12px; border-radius: 50px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; border: 1px solid transparent; }
+        .badge-install { background: rgba(245, 158, 11, 0.1); color: var(--warning); border-color: rgba(245, 158, 11, 0.3); }
+        .badge-active { background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.3); }
+        .badge-suspended { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
+        
+        .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; }
+        .dot-warning { background-color: var(--warning); box-shadow: 0 0 8px var(--warning); }
+        .dot-success { background-color: var(--success); box-shadow: 0 0 8px var(--success); }
+        .dot-danger { background-color: var(--danger); box-shadow: 0 0 8px var(--danger); }
+        
+        .reseller-tag { font-size: 10px; color: var(--primary); background: var(--primary-glow); padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 6px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.2);}
+
+        .search-container { position: relative; margin-bottom: 20px; }
+        .search-container svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: var(--text-sub); }
+        .search-container input { padding-left: 40px; margin-bottom: 0; background: rgba(0,0,0,0.15); border-color: rgba(13, 148, 136, 0.3); }
+        .search-container input:focus { background: var(--input-bg); border-color: var(--primary); }
+
+        /* MODALS */
+        .mini-ai-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s ease; }
+        .mini-ai-popup { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 380px; padding: 30px 25px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1px solid var(--border-color); }
+        
+        .modal-icon-top { width: 50px; height: 50px; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        .modal-icon-top svg { width: 24px; height: 24px; }
+        
+        .mode-danger .modal-icon-top { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); } .mode-danger .modal-icon-top svg { fill: var(--danger); } .mode-danger .mini-ai-header { color: var(--danger); }
+        .mode-success .modal-icon-top { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); } .mode-success .modal-icon-top svg { fill: var(--success); } .mode-success .mini-ai-header { color: var(--success); }
+        .mode-warning .modal-icon-top { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); } .mode-warning .modal-icon-top svg { fill: var(--warning); } .mode-warning .mini-ai-header { color: var(--warning); }
+        .mode-info .modal-icon-top { background: var(--primary-glow); border: 1px solid rgba(13, 148, 136, 0.3); } .mode-info .modal-icon-top svg { fill: var(--primary); } .mode-info .mini-ai-header { color: var(--primary); }
+
+        .mini-ai-header { font-size: 18px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .mini-ai-body { font-size: 13px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; }
+        
+        .info-detail-ai { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; text-align: left; margin-bottom: 20px; }
+        .detail-row { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+        .detail-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .detail-label { font-size: 10px; color: var(--text-sub); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+        .detail-label svg { width: 12px; height: 12px; fill: var(--text-sub); }
+        .detail-value { font-size: 14px; font-weight: 600; color: var(--text-main); word-break: break-all; }
+        
+        .ai-btn-group { display: flex; gap: 10px; }
+        .mini-ai-btn { flex: 1; border: none; padding: 12px; font-weight: 700; font-size: 12px; border-radius: 10px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 6px;}
+        .btn-primary-action { background: var(--primary); color: white; } .btn-primary-action:hover { background: #0f766e; transform: translateY(-2px); }
+        .btn-danger-action { background: var(--danger); color: white; } .btn-danger-action:hover { background: #dc2626; transform: translateY(-2px); }
+        .btn-warning-action { background: var(--warning); color: white; } .btn-warning-action:hover { background: #d97706; transform: translateY(-2px); }
+        .btn-success-action { background: var(--success); color: white; } .btn-success-action:hover { background: #059669; transform: translateY(-2px); }
+        .btn-outline-action { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-sub); } .btn-outline-action:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInPop { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    </style>
 </head>
 <body>
-  <div class="mc-topbar sticky top-0 z-50">
-    <div class="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
-      <!-- Left: Logo -->
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 bg-[#5D9C3E] border-2 border-[#2E4A1F] flex items-center justify-center text-xl">⛏️</div>
-          <div>
-            <span class="mc-font text-2xl text-[#E3B23C]">ZEROIXDARK</span>
-            <span class="text-xs text-[#5D9C3E] block -mt-1 tracking-[2px]">MINECRAFT</span>
-          </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <a href="index.html" class="btn-back">
+            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            Kembali ke Dashboard
+        </a>
+        <span id="expiryTimerNav" class="expiry-timer"></span>
+    </div>
+    
+    <h2>
+        <svg viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg>
+        <span id="pageHeading">Kelola Server</span>
+    </h2>
+    <p class="sub-title" id="pageSubtitle">Tambah dan kelola server baru.</p>
+
+    <div class="box">
+        <div class="box-header">
+            <h3><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg> Deploy Server Baru</h3>
         </div>
-      </div>
-
-      <!-- Desktop Mode Switcher -->
-      <div id="mode-switcher" class="hidden md:flex items-center gap-1 bg-[#2C2C2C] p-1 border border-[#222]"></div>
-
-      <!-- Right: Hamburger + User Info -->
-      <div class="flex items-center gap-3">
-        <button id="hamburger-btn" 
-                class="md:hidden w-10 h-10 flex items-center justify-center text-2xl text-[#E3B23C] border-2 border-[#222] bg-[#2C2C2C] active:bg-[#3D3D3D]">
-          ☰
-        </button>
-        <div id="user-info"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="max-w-screen-2xl mx-auto px-6 py-8">
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="mc-font text-3xl text-white">KELOLA SERVER</h1>
-        <p class="text-[#888] text-sm">Mode: <span id="page-mode" class="font-bold text-[#5D9C3E]"></span></p>
-      </div>
-      <div class="flex gap-2">
-        <button onclick="loadServers()" class="mc-btn px-5 text-sm">REFRESH DATA</button>
-        <button onclick="showBulkCleanModal()" class="mc-btn-danger mc-btn px-5 text-sm">BERSIHKAN TOTAL</button>
-      </div>
-    </div>
-    <div class="grass-accent mb-6"></div>
-
-    <!-- Search -->
-    <div class="mb-4 flex gap-3">
-      <input type="text" id="search-input" placeholder="Cari nama server atau owner..." class="mc-search mc-input flex-1" onkeyup="filterServers()">
-      <select id="status-filter" onchange="filterServers()" class="mc-input px-4 text-sm w-44">
-        <option value="">Semua Status</option>
-        <option value="active">Aktif</option>
-        <option value="suspended">Suspended</option>
-        <option value="expired">Expired</option>
-      </select>
-    </div>
-
-    <div class="mc-card overflow-x-auto">
-      <table class="mc-table min-w-[800px]">
-        <thead>
-          <tr>
-            <th>NAMA SERVER</th>
-            <th>OWNER (PTERO ID)</th>
-            <th>PACKAGE</th>
-            <th>EXPIRED</th>
-            <th>STATUS</th>
-            <th class="text-right">AKSI</th>
-          </tr>
-        </thead>
-        <tbody id="servers-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <script>
-    let allServers = [];
-
-    async function initServersPage() {
-      const user = requireAuth();
-      if (!user) return;
-      initCommonUI();
-
-      const mode = getCurrentMode();
-      document.getElementById('page-mode').textContent = modeConfig[mode].title;
-
-      await loadServers();
-
-      window.addEventListener('modeChanged', () => window.location.reload());
-    }
-
-    async function loadServers(silent = false) {
-      const tbody = document.getElementById('servers-tbody');
-      if (!silent) tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-[#888]">⛏️ Memuat daftar server...</td></tr>`;
-
-      const mode = getCurrentMode();
-      const db = getDatabase();
-
-      try {
-        const snap = await db.ref(`zeroixdark/managed_servers/${mode}`).once('value');
-        allServers = [];
-
-        if (snap.exists()) {
-          snap.forEach(child => {
-            allServers.push({ id: child.key, ...child.val() });
-          });
-        }
-
-        // Optional: enrich dengan data real dari Pterodactyl (bisa di-expand)
-        renderServersTable(allServers);
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-400">Error memuat data server.</td></tr>`;
-      }
-    }
-
-    function renderServersTable(servers) {
-      const tbody = document.getElementById('servers-tbody');
-      tbody.innerHTML = '';
-
-      if (servers.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-[#666]">Tidak ada server di mode ini.</td></tr>`;
-        return;
-      }
-
-      servers.forEach(srv => {
-        const expired = srv.expired_at && isExpired(srv.expired_at);
-        let statusHTML = `<span class="mc-badge mc-badge-active">AKTIF</span>`;
         
-        if (expired) statusHTML = `<span class="mc-badge mc-badge-expired">EXPIRED</span>`;
-        if (srv.status === 'suspended') statusHTML = `<span class="mc-badge mc-badge-suspended">SUSPENDED</span>`;
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td class="font-mono text-sm">${srv.name || 'Unnamed Server'}</td>
-          <td class="text-xs">Ptero #${srv.user_ptero_id || srv.ptero_id}</td>
-          <td><span class="text-xs px-2 py-0.5 bg-[#2C2C2C] border border-[#222]">${srv.package || 'medium'}</span></td>
-          <td class="text-xs">${srv.expired_at ? formatDate(srv.expired_at) : '-'}</td>
-          <td>${statusHTML}</td>
-          <td class="text-right">
-            <div class="flex justify-end gap-1.5">
-              ${srv.status !== 'suspended' ? 
-                `<button onclick="suspendServer('${srv.id}', '${srv.ptero_id}', true)" class="px-3 py-1 text-xs border border-[#E3B23C] text-[#E3B23C]">SUSPEND</button>` : 
-                `<button onclick="suspendServer('${srv.id}', '${srv.ptero_id}', false)" class="px-3 py-1 text-xs bg-[#E3B23C] text-black">UNSUSPEND</button>`}
-              <button onclick="deleteServer('${srv.id}', '${srv.ptero_id}', '${srv.name}')" class="px-3 py-1 text-xs bg-red-700 hover:bg-red-800">HAPUS</button>
+        <div class="select-wrapper">
+            <label>Pilih Pemilik Server (User):</label>
+            <select id="userSelect">
+                <option value="">⏳ Memuat daftar user...</option>
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label>Nama Server:</label>
+            <input type="text" id="serverName" placeholder="Contoh: Bot Server" autocomplete="off">
+        </div>
+        
+        <div class="grid-3">
+            <div>
+                <label>RAM Server</label>
+                <select id="serverRam">
+                    <option value="1024">1 GB</option>
+                    <option value="2048">2 GB</option>
+                    <option value="3072">3 GB</option>
+                    <option value="4096" selected>4 GB</option>
+                    <option value="5120">5 GB</option>
+                    <option value="6144">6 GB</option>
+                    <option value="7168">7 GB</option>
+                    <option value="8192">8 GB</option>
+                    <option value="9216">9 GB</option>
+                    <option value="10240">10 GB</option>
+                    <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited 🚀</option>
+                </select>
             </div>
-          </td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
-
-    function filterServers() {
-      const search = document.getElementById('search-input').value.toLowerCase();
-      const statusFilter = document.getElementById('status-filter').value;
-
-      const filtered = allServers.filter(s => {
-        const matchSearch = !search || (s.name && s.name.toLowerCase().includes(search));
-        let matchStatus = true;
-        
-        if (statusFilter === 'expired') matchStatus = s.expired_at && isExpired(s.expired_at);
-        else if (statusFilter === 'suspended') matchStatus = s.status === 'suspended';
-        else if (statusFilter === 'active') matchStatus = (!s.expired_at || !isExpired(s.expired_at)) && s.status !== 'suspended';
-        
-        return matchSearch && matchStatus;
-      });
-
-      renderServersTable(filtered);
-    }
-
-    async function suspendServer(firebaseId, pteroServerId, shouldSuspend) {
-      const mode = getCurrentMode();
-      const action = shouldSuspend ? 'suspend' : 'unsuspend';
-      
-      createModal(`${shouldSuspend ? 'SUSPEND' : 'UNSUSPEND'} SERVER?`, `
-        <p class="text-sm">Server ID <strong>${pteroServerId}</strong> akan di-${action}.</p>
-      `, async () => {
-        try {
-          const endpoint = shouldSuspend ? `/servers/${pteroServerId}/suspend` : `/servers/${pteroServerId}/unsuspend`;
-          await pteroApiCall(mode, endpoint, 'POST');
-
-          // Update local status di Firebase
-          await getDatabase().ref(`zeroixdark/managed_servers/${mode}/${firebaseId}`).update({ 
-            status: shouldSuspend ? 'suspended' : 'active' 
-          });
-
-          await logActivity(`${action}_server`, { ptero_server_id: pteroServerId }, mode);
-          showNotification(`Server berhasil di-${action}`, "success");
-          await loadServers(true);
-        } catch (err) {
-          showNotification("Gagal: " + err.message, "error");
-        }
-      });
-    }
-
-    async function deleteServer(firebaseId, pteroServerId, name) {
-      createModal("HAPUS SERVER?", `
-        <div>
-          <p class="text-red-400">Server <strong>${name}</strong> (ID: ${pteroServerId}) akan dihapus permanen.</p>
+            <div>
+                <label>CPU Limit</label>
+                <select id="serverCpu">
+                    <option value="50">50%</option>
+                    <option value="100" selected>100%</option>
+                    <option value="150">150%</option>
+                    <option value="200">200%</option>
+                    <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited 🚀</option>
+                </select>
+            </div>
+            <div>
+                <label>Disk Space</label>
+                <select id="serverDisk">
+                    <option value="1024">1 GB</option>
+                    <option value="2048" selected>2 GB</option>
+                    <option value="5120">5 GB</option>
+                    <option value="10240">10 GB</option>
+                    <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited 🚀</option>
+                </select>
+            </div>
         </div>
-      `, async () => {
-        const mode = getCurrentMode();
-        try {
-          await pteroApiCall(mode, `/servers/${pteroServerId}`, 'DELETE');
-          await getDatabase().ref(`zeroixdark/managed_servers/${mode}/${firebaseId}`).remove();
 
-          await logActivity('delete_server', { name, ptero_id: pteroServerId }, mode);
-          showNotification("Server dihapus", "success");
-          await loadServers(true);
-        } catch (err) {
-          showNotification(err.message, "error");
-        }
-      }, "HAPUS PERMANEN");
-    }
-
-    function showBulkCleanModal() {
-      createModal("BERSIHKAN TOTAL?", `
-        <div class="text-sm text-red-400">
-          Fitur ini akan menghapus SEMUA server + user di mode ini dari Pterodactyl.<br><br>
-          <strong>Gunakan dengan hati-hati!</strong>
+        <div class="grid-2" style="display: none;">
+            <input type="number" id="locId" value="1">
+            <input type="number" id="eggId" value="15">
         </div>
-      `, async () => {
-        const mode = getCurrentMode();
-        if (!confirm("Kamu yakin 100%? Ini akan membersihkan SEMUA data di mode " + mode)) return;
 
-        showNotification("Fitur Bersihkan Total sedang dalam pengembangan. Gunakan manual dulu ya, Sayang.", "error");
-        // TODO: Implementasi bulk delete loop (bisa ditambah nanti)
-      }, "LANJUTKAN (HATI-HATI)");
-    }
+        <button class="btn-tambah" onclick="buatServer()">
+            Deploy Server Sekarang
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+        </button>
+    </div>
 
-    document.addEventListener('DOMContentLoaded', initServersPage);
-  </script>
+    <div class="box">
+        <div class="box-header">
+            <h3><svg viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> Daftar Server <span id="textDaftar"></span></h3>
+        </div>
+        <div class="search-container">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" id="searchInput" onkeyup="cariDataTabel()" placeholder="Cari nama server, user, atau ID..." autocomplete="off">
+        </div>
+        <table id="tabelServer">
+            <tr><th>ID</th><th>Nama Server</th><th>Pemilik</th><th>Status</th><th>Aksi</th></tr>
+            <tr><td colspan="5" style="text-align: center; color: var(--text-sub); padding: 30px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Mengambil data server...</td></tr>
+        </table>
+    </div>
+
+    <div id="modalScreenshot" class="mini-ai-overlay">
+        <div class="mini-ai-popup mode-info">
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+            <div class="mini-ai-header">SERVER DEPLOYED</div>
+            <p style="margin-bottom: 15px; color: var(--text-sub); font-size: 12px;">Server berhasil dibuat! Silakan kirimkan informasi ini ke pelanggan.</p>
+            <div class="info-detail-ai">
+                <div class="detail-row"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> Informasi Server</div><div class="detail-value">Server: <span id="resServerName" style="color: white; font-weight: bold;"></span></div><div class="detail-value">Owner: <span id="resServerOwner" style="color: var(--warning); font-weight: bold;"></span></div></div>
+                <div class="detail-row" style="border: none; padding: 0;"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96z"/></svg> Link Panel</div><div class="detail-value"><a id="resLink" href="#" target="_blank" style="color: var(--primary); text-decoration: none;"></a></div></div>
+            </div>
+            <div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" onclick="salinDataServer()" id="btnSalin"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Teks</button><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalScreenshot')">Tutup</button></div>
+        </div>
+    </div>
+
+    <div id="modalHapusConfirm" class="mini-ai-overlay"><div class="mini-ai-popup mode-danger"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></div><div class="mini-ai-header">HAPUS SERVER?</div><div class="mini-ai-body">Yakin ingin menghapus server <b style="color: var(--danger);" id="delServerName"></b>?<br><br>Tindakan ini permanen dan data server akan hancur selamanya!</div><div class="ai-btn-group"><button id="btnKonfirmasiHapus" class="mini-ai-btn btn-danger-action" onclick="prosesHapusServer()">Hapus Permanen</button><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalHapusConfirm')">Batal</button></div></div></div>
+    <div id="modalSuspendConfirm" class="mini-ai-overlay"><div class="mini-ai-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/></svg></div><div class="mini-ai-header">BEKUKAN SERVER?</div><div class="mini-ai-body">Yakin ingin membekukan (Suspend) server <b style="color: var(--warning);" id="suspendServerName"></b>?<br><br>Pelanggan tidak akan bisa menyalakan servernya.</div><div class="ai-btn-group"><button id="btnKonfirmasiSuspend" class="mini-ai-btn btn-warning-action" onclick="prosesSuspendServer()">Ya, Bekukan</button><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalSuspendConfirm')">Batal</button></div></div></div>
+    <div id="modalUnsuspendConfirm" class="mini-ai-overlay"><div class="mini-ai-popup mode-success"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg></div><div class="mini-ai-header">BUKA BEKU SERVER?</div><div class="mini-ai-body">Yakin ingin membuka status beku (Unsuspend) server <b style="color: var(--success);" id="unsuspendServerName"></b>?<br><br>Server akan kembali normal.</div><div class="ai-btn-group"><button id="btnKonfirmasiUnsuspend" class="mini-ai-btn btn-success-action" onclick="prosesUnsuspendServer()">Buka Akses</button><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalUnsuspendConfirm')">Batal</button></div></div></div>
+    
+    <div id="modalAiAlert" class="mini-ai-overlay" style="z-index: 999999;"><div class="mini-ai-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><div class="mini-ai-header" id="aiAlertTitle">PERHATIAN</div><div class="mini-ai-body" id="aiAlertBody">Pesan peringatan di sini.</div><div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" style="background: var(--warning);" onclick="tutupModal('modalAiAlert')">Mengerti</button></div></div></div>
+    <div id="modalAiSuccess" class="mini-ai-overlay" style="z-index: 999999;"><div class="mini-ai-popup mode-success" id="popupSuccessMode"><div class="modal-icon-top" id="iconSuccessMode"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="mini-ai-header" id="aiSuccessTitle">BERHASIL</div><div class="mini-ai-body" id="aiSuccessBody">Proses sukses dilakukan.</div><div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" id="btnTutupSuccess" style="background: var(--success);" onclick="tutupModal('modalAiSuccess')">Tutup</button></div></div></div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // ============ MODE CONFIGURATION ============
+        // Tentukan mode berdasarkan URL atau localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const modeParam = urlParams.get('mode') || localStorage.getItem('serverMode') || 'private';
+        
+        // Konfigurasi per mode
+        const modeConfig = {
+            private: {
+                title: 'Kelola Server (Private)',
+                heading: 'Kelola Server (Private)',
+                subtitle: 'Tambah dan kelola server baru untuk pengguna yang sudah ada di Divisi Private.',
+                allowedRoles: ['pemilik', 'reseller_private', 'reseller'],
+                domain: localStorage.getItem('prvt_domain') || 'privateserverzeroix.bypstar7.web.id',
+                api: localStorage.getItem('prvt_api') || 'ptla_FN9WdJ1WzLH1BlGyzyeoWtZGDl9roNeAd8VVmz7g5tF',
+                daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : 'Buatanmu'
+            },
+            public: {
+                title: 'Kelola Server (Public)',
+                heading: 'Kelola Server (Public)',
+                subtitle: 'Tambah dan kelola server baru untuk pengguna yang sudah ada di Divisi Public.',
+                allowedRoles: ['pemilik', 'reseller_public', 'partner_public', 'demo'],
+                domain: 'publikzero.bypstar7.web.id',
+                api: 'ptla_YTtzIHJr2S10NFRokBa3SQHHwM5NJrrXLnlSc2JibUv',
+                daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : (role === 'partner_public' ? '(Tim Kamu)' : (role === 'demo' ? '(Akun Demo)' : 'Buatanmu'))
+            },
+            public_v2: {
+                title: 'Kelola Server (Public V2)',
+                heading: 'Kelola Server (Public V2)',
+                subtitle: 'Tambah dan kelola server baru untuk pengguna yang sudah ada di Divisi Public V2.',
+                allowedRoles: ['pemilik', 'reseller_public_v2', 'partner_public_v2'],
+                domain: 'zerropubv2.bypstar7.web.id',
+                api: 'ptla_eJXEQcFYVuOYBFqhmHDb0bdm7uUaeQbBoqwrRUQbJbh',
+                daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : (role === 'partner_public_v2' ? '(Tim Kamu)' : 'Buatanmu')
+            }
+        };
+
+        const config = modeConfig[modeParam] || modeConfig.private;
+        
+        // ============ AUTHENTICATION & INIT ============
+        const currentUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
+        const roleRaw = localStorage.getItem('role') || localStorage.getItem('panel_role') || '';
+        const role = roleRaw.trim().toLowerCase();
+        const myUsername = localStorage.getItem('username') || localStorage.getItem('panel_username') || 'Unknown'; 
+        
+        // Validasi akses
+        if (!currentUserId || !config.allowedRoles.includes(role)) { 
+            window.location.replace("index.html"); 
+        }
+        
+        // Set page title dan heading
+        document.getElementById('pageTitle').innerText = config.title;
+        document.getElementById('pageHeading').innerText = config.heading;
+        document.getElementById('pageSubtitle').innerText = config.subtitle;
+        document.getElementById('textDaftar').innerText = config.daftarLabel(role);
+
+        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        if (currentUserId) { 
+            database.ref('users/' + currentUserId + '/isOnline').set(true); 
+            database.ref('users/' + currentUserId + '/isOnline').onDisconnect().set(false); 
+        }
+
+        const WORKER_URL = "https://restless-truth-9b75.amisterious09.workers.dev";
+        const PTERO_DOMAIN = config.domain;
+        const PTERO_API = config.api;
+
+        const spinnerSvg = `<svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite; width:16px; height:16px; fill:currentColor;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg>`;
+
+        // ============ MODAL FUNCTIONS ============
+        function tutupModal(id) { 
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'none'; 
+        }
+        
+        function showAiAlert(p, j = "PERHATIAN") { 
+            document.getElementById('aiAlertTitle').innerText = j; 
+            document.getElementById('aiAlertBody').innerHTML = p; 
+            document.getElementById('modalAiAlert').style.display = 'flex'; 
+        }
+        
+        function showAiSuccess(p, j = "BERHASIL", isDanger = false) {
+            document.getElementById('aiSuccessTitle').innerText = j; 
+            document.getElementById('aiSuccessBody').innerHTML = p;
+            let popup = document.getElementById('popupSuccessMode'); 
+            let iconBox = document.getElementById('iconSuccessMode'); 
+            let btn = document.getElementById('btnTutupSuccess');
+            if(isDanger) { 
+                popup.className = "mini-ai-popup mode-danger"; 
+                iconBox.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`; 
+                btn.style.background = "var(--danger)"; 
+            } else { 
+                popup.className = "mini-ai-popup mode-success"; 
+                iconBox.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`; 
+                btn.style.background = "var(--success)"; 
+            }
+            document.getElementById('modalAiSuccess').style.display = 'flex';
+        }
+
+        // ============ DATA FETCHING ============
+        let usersMap = {}; 
+        async function ambilDataUsers() {
+            try {
+                let currentPage = 1; 
+                let totalPages = 1; 
+                usersMap = {};
+                let select = document.getElementById('userSelect'); 
+                select.innerHTML = '<option value="">-- Sedang Memuat Semua User... --</option>';
+
+                do {
+                    let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users?page=${currentPage}`, { 
+                        headers: { 
+                            'Accept': 'application/json', 
+                            'Authorization': `Bearer ${PTERO_API}` 
+                        } 
+                    });
+                    
+                    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+                    let data = await res.json();
+                    
+                    data.data.forEach(user => {
+                        let u = user.attributes; 
+                        let pembuat = (u.last_name === 'User' || u.last_name === 'Admin') ? 'admin' : u.last_name;
+                        usersMap[u.id] = { username: u.username, maker: pembuat }; 
+                        
+                        let show = false;
+                        if (role === 'pemilik' || (role.includes('partner') && config.allowedRoles.includes(role))) show = true; 
+                        else if (u.last_name === myUsername) show = true;
+                        
+                        if (show && u.id !== 1) select.innerHTML += `<option value="${u.id}">${u.username} (Oleh: ${pembuat})</option>`;
+                    });
+                    
+                    totalPages = data.meta.pagination.total_pages; 
+                    currentPage++;
+                } while (currentPage <= totalPages);
+                
+                select.options[0].text = '-- Pilih User --'; 
+                ambilDataServers(); 
+            } catch(e) { 
+                showAiAlert("Gagal memuat data user: " + e.message, "ERROR"); 
+            }
+        }
+
+        async function ambilDataServers() {
+            try {
+                document.getElementById('tabelServer').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">⏳ Sedang menyapu bersih data server dari semua halaman...</td></tr>`;
+                
+                let currentPage = 1; 
+                let totalPages = 1; 
+                let allServers = [];
+
+                do {
+                    let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers?page=${currentPage}`, { 
+                        headers: { 
+                            'Accept': 'application/json', 
+                            'Authorization': `Bearer ${PTERO_API}` 
+                        } 
+                    });
+                    
+                    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+                    let data = await res.json();
+                    allServers = allServers.concat(data.data); 
+                    totalPages = data.meta.pagination.total_pages; 
+                    currentPage++;
+                } while (currentPage <= totalPages);
+
+                let tabel = `<tr><th>ID</th><th>Nama Server</th><th>Pemilik</th><th>Status</th><th>Aksi</th></tr>`; 
+                let count = 0;
+                const iconTrash = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
+                const iconLock = `<svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/></svg>`;
+                const iconUnlock = `<svg viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg>`;
+
+                allServers.forEach(srv => {
+                    let s = srv.attributes; 
+                    let oId = s.user; 
+                    let oData = usersMap[oId] || { username: 'Unknown', maker: 'Unknown' };
+                    
+                    // Filter berdasarkan role dan pembuat
+                    const isOwner = role === 'pemilik' || (role.includes('partner') && config.allowedRoles.includes(role));
+                    if (!isOwner && oData.maker !== myUsername) return; 
+                    
+                    count++;
+                    let sBadge = s.suspended ? `<span class="badge badge-suspended"><span class="status-dot dot-danger"></span> Suspended</span>` : `<span class="badge badge-active"><span class="status-dot dot-success"></span> Active</span>`;
+                    if (s.status === 'installing') sBadge = `<span class="badge badge-install"><span class="status-dot dot-warning"></span> Installing</span>`;
+                    let mTag = isOwner ? `<br><span class="reseller-tag">Reseller: ${oData.maker}</span>` : '';
+                    
+                    let btnLock = s.suspended ? 
+                                  `<button class="btn-action-small btn-unsuspend" title="Buka Suspend Server" onclick="konfirmasiUnsuspend(${s.id}, '${s.name}')">${iconUnlock}</button>` : 
+                                  `<button class="btn-action-small btn-suspend" title="Suspend Server" onclick="konfirmasiSuspend(${s.id}, '${s.name}')">${iconLock}</button>`;
+
+                    let btnAction = `<div class="action-group">
+                        <button class="btn-action-small btn-hapus" title="Hapus Server" onclick="konfirmasiHapusServer(${s.id}, '${s.name}')">${iconTrash}</button>
+                        ${btnLock}
+                    </div>`;
+
+                    tabel += `<tr><td style="color:var(--text-sub); font-weight:bold;">#${s.id}</td><td style="font-weight:700; color:var(--text-main); font-size:14px;">${s.name}</td><td><span style="color:var(--primary); font-weight:bold;">${oData.username}</span>${mTag}</td><td>${sBadge}</td><td>${btnAction}</td></tr>`;
+                });
+                
+                if (count === 0) tabel += `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">Belum ada server yang bisa ditampilkan.</td></tr>`;
+                document.getElementById('tabelServer').innerHTML = tabel;
+            } catch(e) { 
+                document.getElementById('tabelServer').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">Error: ${e.message}</td></tr>`; 
+            }
+        }
+
+        // ============ SERVER CREATION ============
+        async function buatServer() {
+            let uId = document.getElementById('userSelect').value; 
+            let name = document.getElementById('serverName').value.trim();
+            let ram = document.getElementById('serverRam').value; 
+            let cpu = document.getElementById('serverCpu').value;
+            let disk = document.getElementById('serverDisk').value; 
+            let locId = document.getElementById('locId').value; 
+            let eggId = document.getElementById('eggId').value;
+            
+            if(!uId || !name || !ram || !cpu || !disk) return showAiAlert("Harap lengkapi semua data formulir!", "DATA TIDAK LENGKAP"); 
+            
+            let btn = document.querySelector('.btn-tambah'); 
+            let originalText = btn.innerHTML;
+            btn.innerHTML = `${spinnerSvg} Sedang Deploy...`; 
+            btn.style.pointerEvents = "none";
+            
+            let payload = { 
+                "name": name, 
+                "user": parseInt(uId), 
+                "egg": parseInt(eggId), 
+                "docker_image": "ghcr.io/parkervcp/yolks:nodejs_20", 
+                "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z ${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z ${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo ${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
+                "environment": { "INST": "npm", "USER_UPLOAD": "0", "AUTO_UPDATE": "0", "CMD_RUN": "npm start" }, 
+                "limits": { "memory": parseInt(ram), "swap": 0, "disk": parseInt(disk), "io": 500, "cpu": parseInt(cpu) }, 
+                "feature_limits": { "databases": 5, "backups": 5, "allocations": 5 }, 
+                "deploy": { "locations": [parseInt(locId)], "dedicated_ip": false, "port_range": [] } 
+            };
+            
+            try {
+                let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers`, { 
+                    method: 'POST', 
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${PTERO_API}` 
+                    }, 
+                    body: JSON.stringify(payload) 
+                });
+                
+                if(!res.ok) throw new Error(await res.text());
+                
+                btn.innerHTML = originalText; 
+                btn.style.pointerEvents = "auto";
+                let sText = document.getElementById('userSelect').options[document.getElementById('userSelect').selectedIndex].text; 
+                let cName = sText.split(' (')[0]; 
+                
+                document.getElementById('resServerName').innerText = name; 
+                document.getElementById('resServerOwner').innerText = cName;
+                document.getElementById('resLink').innerText = `https://${PTERO_DOMAIN}`; 
+                document.getElementById('resLink').href = `https://${PTERO_DOMAIN}`;
+                document.getElementById('modalScreenshot').style.display = 'flex'; 
+                document.getElementById('serverName').value = ""; 
+                ambilDataServers();
+            } catch(e) { 
+                btn.innerHTML = originalText; 
+                btn.style.pointerEvents = "auto"; 
+                showAiAlert("Gagal Deploy: " + e.message, "ERROR SYSTEM"); 
+            }
+        }
+
+        // ============ SERVER ACTIONS ============
+        let targetDelId = null;
+        function konfirmasiHapusServer(id, name) { 
+            targetDelId = id; 
+            document.getElementById('delServerName').innerText = name; 
+            document.getElementById('modalHapusConfirm').style.display = 'flex'; 
+        }
+        
+        async function prosesHapusServer() {
+            tutupModal('modalHapusConfirm'); 
+            let btn = document.getElementById('btnKonfirmasiHapus'); 
+            btn.innerText = "⏳..."; 
+            btn.style.pointerEvents = "none";
+            
+            try {
+                let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers/${targetDelId}/force`, { 
+                    method: 'DELETE', 
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Authorization': `Bearer ${PTERO_API}` 
+                    } 
+                });
+                
+                if(!res.ok) throw new Error(await res.text()); 
+                showAiSuccess("Server berhasil dihapus permanen.", "TERHAPUS", true); 
+                ambilDataServers();
+            } catch(e) { 
+                showAiAlert("Gagal hapus: " + e.message, "ERROR"); 
+            }
+            
+            btn.innerText = "Hapus Permanen"; 
+            btn.style.pointerEvents = "auto";
+        }
+
+        let targetSuspendId = null;
+        function konfirmasiSuspend(id, name) { 
+            targetSuspendId = id; 
+            document.getElementById('suspendServerName').innerText = name; 
+            document.getElementById('modalSuspendConfirm').style.display = 'flex'; 
+        }
+        
+        async function prosesSuspendServer() {
+            tutupModal('modalSuspendConfirm');
+            
+            try {
+                let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers/${targetSuspendId}/suspend`, { 
+                    method: 'POST', 
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Authorization': `Bearer ${PTERO_API}` 
+                    } 
+                });
+                
+                if(!res.ok) throw new Error(await res.text()); 
+                showAiSuccess("Server berhasil dibekukan sementara. Akses dimatikan.", "SERVER SUSPENDED", false); 
+                ambilDataServers();
+            } catch(e) { 
+                showAiAlert("Gagal suspend: " + e.message, "ERROR"); 
+            }
+        }
+
+        let targetUnsuspendId = null;
+        function konfirmasiUnsuspend(id, name) { 
+            targetUnsuspendId = id; 
+            document.getElementById('unsuspendServerName').innerText = name; 
+            document.getElementById('modalUnsuspendConfirm').style.display = 'flex'; 
+        }
+        
+        async function prosesUnsuspendServer() {
+            tutupModal('modalUnsuspendConfirm');
+            
+            try {
+                let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers/${targetUnsuspendId}/unsuspend`, { 
+                    method: 'POST', 
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Authorization': `Bearer ${PTERO_API}` 
+                    } 
+                });
+                
+                if(!res.ok) throw new Error(await res.text()); 
+                showAiSuccess("Server berhasil dibuka kembali. Akses normal.", "SERVER AKTIF", false); 
+                ambilDataServers();
+            } catch(e) { 
+                showAiAlert("Gagal unsuspend: " + e.message, "ERROR"); 
+            }
+        }
+
+        // ============ UTILITY FUNCTIONS ============
+        function cariDataTabel() { 
+            let input = document.getElementById("searchInput").value.toLowerCase(); 
+            let tr = document.getElementById("tabelServer").getElementsByTagName("tr"); 
+            
+            for (let i = 1; i < tr.length; i++) { 
+                if (tr[i].getElementsByTagName("td").length === 1) continue; 
+                tr[i].style.display = tr[i].innerText.toLowerCase().indexOf(input) > -1 ? "" : "none"; 
+            } 
+        }
+        
+        function salinDataServer() { 
+            let text = `✅ *SERVER DEPLOYED SUCCESS!* \n\n🖥️ *Server:* ${document.getElementById('resServerName').innerText}\n👤 *Owner:* ${document.getElementById('resServerOwner').innerText}\n🌐 *Login:* ${document.getElementById('resLink').innerText}\n\n_Server aktif!_ 🚀`; 
+            
+            navigator.clipboard.writeText(text).then(() => { 
+                let btn = document.getElementById('btnSalin'); 
+                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Tersalin!`; 
+                setTimeout(() => btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Teks`, 2000); 
+            }).catch(() => {
+                showAiAlert("Gagal menyalin ke clipboard", "ERROR");
+            });
+        }
+        
+        // Initialize
+        ambilDataUsers();
+    </script>
+
+    <script>
+    (function userExpiryGuard(){
+        const guardRole = String(localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
+        const guardUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
+        if (!guardRole || guardRole === 'pemilik' || !guardUserId || !window.firebase) return;
+        const guardConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(guardConfig);
+        let __expiredHandled = false;
+        firebase.database().ref('users/' + guardUserId).on('value', function(snapshot){
+            const data = snapshot.val() || {};
+            const expiredAt = Number(data.expiredAt || 0);
+            let blockMessage = '';
+            if (!expiredAt) {
+                blockMessage = 'Akun ' + String(data.username || '').replace(/</g,'&lt;') + ' belum diaktifkan oleh pemilik. Hubungi pemilik untuk mengatur expired akun.';
+            } else if (expiredAt <= Date.now()) {
+                blockMessage = 'Akun ' + String(data.username || '').replace(/</g,'&lt;') + ' sudah expired. Hubungi pemilik untuk perpanjangan.';
+            }
+            if (!blockMessage || __expiredHandled) return;
+            __expiredHandled = true;
+            firebase.database().ref('users/' + guardUserId + '/isOnline').set(false).catch(function(){});
+            ['panel_user_id','user_id','user_id_ptero','panel_username','username','panel_role','role','panel_password','ptero_user_id'].forEach(function(k){ localStorage.removeItem(k); });
+            alert(blockMessage);
+            window.location.replace('login.html');
+        }, function(){});
+    })();
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        // Firebase Setup (re-initialize if not already)
+        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Proteksi Ganda Sesi User
+        const currentUserId = localStorage.getItem(\'panel_user_id\') || localStorage.getItem(\'user_id\') || localStorage.getItem(\'user_id_ptero\');
+        const roleRaw = localStorage.getItem(\'role\') || localStorage.getItem(\'panel_role\') || \'\';
+        const role = roleRaw.trim().toLowerCase();
+
+        // Countdown Timer
+        let expiryInterval;
+        function startExpiryTimer(expiredAt) {
+            const timerNav = document.getElementById(\'expiryTimerNav\');
+
+            if (!timerNav) return;
+
+            clearInterval(expiryInterval);
+
+            expiryInterval = setInterval(() => {
+                const now = Date.now();
+                const timeLeft = expiredAt - now;
+
+                if (timeLeft <= 0) {
+                    timerNav.innerText = \'EXPIRED\';
+                    timerNav.classList.add(\'expired\');
+                    clearInterval(expiryInterval);
+                    return;
+                }
+
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                const timerString = `${days}h ${hours}j ${minutes}m ${seconds}d`;
+
+                timerNav.innerText = timerString;
+            }, 1000);
+        }
+
+        // Fetch expiredAt from Firebase and start timer
+        if (currentUserId && role !== \'pemilik\') {
+            database.ref(\'users/\'+ currentUserId + \'/expiredAt\').on(\'value\', (snapshot) => {
+                const expiredAt = Number(snapshot.val() || 0);
+                if (expiredAt > 0) {
+                    startExpiryTimer(expiredAt);
+                } else {
+                    const timerNav = document.getElementById(\'expiryTimerNav\');
+                    if (timerNav) timerNav.innerText = \'N/A\';
+                }
+            });
+        }
+    </script>
 </body>
 </html>

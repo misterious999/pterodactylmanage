@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Akses Web Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-color: #0f172a; --card-bg: #1e293b; 
+            --primary: #0d9488; 
+            --primary-glow: rgba(13, 148, 136, 0.15);
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
+            --text-main: #f8fafc; --text-sub: #94a3b8; 
+            --input-bg: #0f172a; --border-color: rgba(255,255,255,0.08); 
+        }
+        .expiry-timer { font-size: 12px; font-weight: 700; color: var(--text-main); background: var(--primary-glow); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(13, 148, 136, 0.3); margin-left: 15px; white-space: nowrap; }
+        .expiry-timer.expired { color: var(--danger); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+        body { font-family: 'Inter', sans-serif; padding: 30px 5%; background-color: var(--bg-color); color: var(--text-main); margin: 0; max-width: 1200px; margin: auto; }
+        
+        .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 25px; padding: 10px 18px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.3); transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn-back svg { width: 18px; height: 18px; fill: currentColor; transition: transform 0.3s; }
+        .btn-back:hover { background: var(--primary); color: white; box-shadow: 0 6px 20px var(--primary-glow); transform: translateY(-2px); }
+        .btn-back:hover svg { transform: translateX(-4px); }
+        
+        h2 { font-weight: 800; margin-bottom: 5px; color: var(--text-main); border-left: 4px solid var(--primary); padding-left: 12px; display: flex; align-items: center; gap: 10px; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
+        h2 svg { width: 24px; height: 24px; fill: var(--primary); }
+        .sub-title { color: var(--text-sub); margin-bottom: 35px; font-size: 14px; line-height: 1.5; }
+                .box { background: var(--card-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--border-color); margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow-x: auto; }
+        .box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        .box-header h3 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 10px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+        .box-header h3 svg { width: 20px; height: 20px; fill: var(--primary); }
+        
+        label { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        input { width: 100%; padding: 14px 16px; margin-bottom: 20px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); font-size: 14px; box-sizing: border-box; outline: none; transition: 0.3s; font-family: 'Inter', sans-serif;}
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(15, 23, 42, 0.8); }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        
+        .custom-select-wrapper { position: relative; user-select: none; margin-bottom: 25px; }
+        .custom-select-trigger { width: 100%; padding: 14px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); font-size: 14px; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; font-weight: 500; }
+        .custom-select-trigger svg { width: 16px; height: 16px; fill: var(--text-sub); transition: transform 0.3s ease; }
+        .custom-select-trigger.active svg { transform: rotate(180deg); fill: var(--primary); }
+        
+        .custom-options { position: absolute; display: none; top: calc(100% + 8px); left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--primary); border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); z-index: 99; overflow: hidden; animation: fadeIn 0.2s ease; }
+        .custom-options.open { display: block; }
+        .custom-option { padding: 14px 16px; font-size: 14px; color: var(--text-main); cursor: pointer; transition: 0.2s; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; }
+        .custom-option svg { width: 18px; height: 18px; fill: var(--text-sub); }
+        .custom-option:hover { background: var(--primary-glow); color: var(--primary); padding-left: 22px; font-weight: 600; }
+
+        .btn-tambah { width: 100%; background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; cursor: pointer; border-radius: 12px; padding: 16px; font-weight: 700; transition: 0.3s; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 5px 15px var(--primary-glow); }
+        .btn-tambah svg { width: 20px; height: 20px; fill: currentColor; }
+        .btn-tambah:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(13, 148, 136, 0.4); }
+                table { width: 100%; border-collapse: collapse; min-width: 600px; margin-top: 10px; }
+        th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        th { background: rgba(0,0,0,0.15); color: var(--text-sub); font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; white-space: nowrap; border-radius: 8px 8px 0 0; }
+        
+        .role-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 50px; }
+        .status-online { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .status-offline { background: rgba(148, 163, 184, 0.1); color: var(--text-sub); }
+        .dot-online { width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block; box-shadow: 0 0 8px var(--success); }
+        
+        .btn-hapus { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); cursor: pointer; border-radius: 8px; padding: 8px 15px; font-weight: 600; font-size: 13px; transition: 0.3s; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-hapus svg { width: 16px; height: 16px; fill: currentColor; }
+        .btn-hapus:hover { background: var(--danger); color: white; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3); }
+
+        /* MODALS GAYA BARU (CLEAN) */
+        .mini-ai-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s ease; }
+        .mini-ai-popup { background: var(--card-bg); border-radius: 24px; width: 100%; max-width: 420px; padding: 35px 30px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.6); border: 1px solid var(--border-color); }
+        
+        .modal-icon-top { width: 60px; height: 60px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        .modal-icon-top svg { width: 30px; height: 30px; }
+        
+        .mode-danger .modal-icon-top { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); } .mode-danger .modal-icon-top svg { fill: var(--danger); } .mode-danger .mini-ai-header { color: var(--danger); }
+        .mode-success .modal-icon-top { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); } .mode-success .modal-icon-top svg { fill: var(--success); } .mode-success .mini-ai-header { color: var(--success); }
+        .mode-warning .modal-icon-top { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); } .mode-warning .modal-icon-top svg { fill: var(--warning); } .mode-warning .mini-ai-header { color: var(--warning); }
+        .mode-info .modal-icon-top { background: var(--primary-glow); border: 1px solid rgba(13, 148, 136, 0.3); } .mode-info .modal-icon-top svg { fill: var(--primary); } .mode-info .mini-ai-header { color: var(--primary); }
+
+        .mini-ai-header { font-size: 20px; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .mini-ai-body { font-size: 14px; color: var(--text-sub); line-height: 1.6; margin-bottom: 25px; }
+        
+        .info-detail-ai { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; text-align: left; margin-bottom: 25px; }
+        .detail-row { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+        .detail-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .detail-label { font-size: 11px; color: var(--text-sub); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        .detail-label svg { width: 14px; height: 14px; fill: var(--text-sub); }
+        .detail-value { font-size: 15px; font-weight: 600; color: var(--text-main); word-break: break-all; }
+        .value-highlight { color: var(--primary); }
+        
+        .ai-btn-group { display: flex; gap: 12px; }
+        .mini-ai-btn { flex: 1; border: none; padding: 14px; font-weight: 700; font-size: 13px; border-radius: 12px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-primary-action { background: var(--primary); color: white; } .btn-primary-action:hover { background: #0f766e; transform: translateY(-2px); }
+        .btn-danger-action { background: var(--danger); color: white; } .btn-danger-action:hover { background: #dc2626; transform: translateY(-2px); }
+        .btn-outline-action { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-sub); } .btn-outline-action:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInPop { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    </style>
+</head>
+<body>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <a href="index.html" class="btn-back">
+            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            Kembali ke Dashboard
+        </a>
+        <span id="expiryTimerNav" class="expiry-timer"></span>
+    </div>
+    
+    <h2>
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+        Kelola Akses Web Panel
+    </h2>
+    <p class="sub-title">Tambahkan Partner atau Reseller yang diizinkan untuk mengelola server di Control Center ini.</p>
+    
+    <div class="box">
+        <div class="box-header">
+            <h3><svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> Buat Akses Login Baru</h3>
+        </div>
+        <div class="grid-2">
+            <div>
+                <label>Username Baru</label>
+                <input type="text" id="webUsername" placeholder="Contoh: reseller_budi" autocomplete="off">
+            </div>
+            <div>
+                <label>Password Akun</label>
+                <input type="text" id="webPassword" placeholder="Buat kata sandi..." autocomplete="off">
+            </div>
+        </div>
+        <div>
+            <label>Tipe Akun (Role)</label>
+            <div class="custom-select-wrapper">
+                <div class="custom-select-trigger" onclick="toggleRoleSelect()">
+                    <span id="customSelectText">Memuat Pilihan...</span>
+                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </div>
+                <div class="custom-options" id="customRoleOptions"></div>
+            </div>
+            <input type="hidden" id="webRole" value="">
+        </div>
+        <button class="btn-tambah" onclick="buatAkunWeb()">
+            Buat Akun Sekarang
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+    </div>
+
+    <div class="box">
+        <div class="box-header">
+            <h3><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Daftar Pengguna Web</h3>
+        </div>
+        <table id="tabelWebUsers">
+            <tr><th>Informasi Akun</th><th>Tipe Akun</th><th>Expired</th><th>Status</th><th>Aksi</th></tr>
+            <tr><td colspan="5" style="text-align: center; color: var(--text-sub); padding: 30px;">
+                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg>
+                <br>Memuat data dari database...
+            </td></tr>
+        </table>
+    </div>
+
+    <div id="modalAksesDitolak" class="mini-ai-overlay">
+        <div class="mini-ai-popup mode-danger">
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>
+            <div class="mini-ai-header">Akses Ditolak!</div>
+            <div class="mini-ai-body">Halaman ini adalah ruang rahasia Pemilik dan Partner.<br><b>Akun Demo dilarang masuk!</b><br><br><small>Menendang Anda keluar dalam 3 detik...</small></div>
+            <div class="ai-btn-group"><button class="mini-ai-btn btn-danger-action" onclick="window.location.replace('index.html')">Kembali Sekarang</button></div>
+        </div>
+    </div>
+
+    <div id="modalScreenshot" class="mini-ai-overlay">
+        <div class="mini-ai-popup mode-info">
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+            <div class="mini-ai-header">Akun Dibuat!</div>
+            <div class="info-detail-ai">
+                <div class="detail-row"><div class="detail-label">User</div><div class="detail-value value-highlight" id="resUserWeb"></div></div>
+                <div class="detail-row"><div class="detail-label">Pass</div><div class="detail-value" style="color: var(--warning);" id="resPassWeb"></div></div>
+                <div class="detail-row" style="border:none; padding:0;"><div class="detail-label">Akses Role</div><div class="detail-value" id="resRoleWeb"></div></div>
+            </div>
+            <div class="ai-btn-group">
+                <button class="mini-ai-btn btn-primary-action" onclick="salinDataWeb()">Salin</button>
+                <button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalScreenshot')">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalKonfirmasi" class="mini-ai-overlay">
+        <div class="mini-ai-popup mode-danger">
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></div>
+            <div class="mini-ai-header">Hapus Akses</div>
+            <div class="mini-ai-body" id="teksKonfirmasi"></div>
+            <div class="ai-btn-group">
+                <button id="btnGasHapus" class="mini-ai-btn btn-danger-action" onclick="eksekusiHapus()">Cabut Akses</button>
+                <button class="mini-ai-btn btn-outline-action" onclick="tutupKonfirmasi()">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalPeringatan" class="mini-ai-overlay">
+        <div class="mini-ai-popup mode-warning">
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>
+            <div class="mini-ai-header">Peringatan</div>
+            <div class="mini-ai-body" id="teksPeringatan"></div>
+            <div class="ai-btn-group"><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalPeringatan')">Mengerti</button></div>
+        </div>
+    </div>
+            <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // 🔥 FIX BACA KARCIS LOGIN: Sekarang sistem kenal mana Pemilik, mana Demo! 🔥
+        const currentUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
+        const myRoleRaw = localStorage.getItem('role') || localStorage.getItem('panel_role') || '';
+        const myRole = myRoleRaw.trim().toLowerCase();
+        const myUsername = localStorage.getItem('username') || localStorage.getItem('panel_username') || 'Unknown'; 
+        
+        const allowedRoles = ['pemilik', 'partner_public', 'partner_public_v2'];
+        
+        // Cek Keamanan
+        if (!currentUserId || !allowedRoles.includes(myRole)) {
+            document.getElementById('modalAksesDitolak').style.display = 'flex';
+            setTimeout(() => {
+                window.location.replace('index.html');
+            }, 3000);
+        }
+
+        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        if (currentUserId) {
+            const userStatusRef = database.ref('users/' + currentUserId + '/isOnline');
+            userStatusRef.set(true);
+            userStatusRef.onDisconnect().set(false);
+        }
+
+        function tutupModal(id) { document.getElementById(id).style.display = 'none'; }
+        function showPeringatan(p) { document.getElementById('teksPeringatan').innerHTML = p; document.getElementById('modalPeringatan').style.display = 'flex'; }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!currentUserId || !allowedRoles.includes(myRole)) return;
+            let opts = document.getElementById('customRoleOptions');
+            let trig = document.getElementById('customSelectText');
+            let roleInp = document.getElementById('webRole');
+            
+            if (myRole === 'pemilik') {
+                opts.innerHTML = `<div class="custom-option selected" onclick="pilihRole('pemilik', 'Pemilik Panel')">Pemilik Panel</div><div class="custom-option" onclick="pilihRole('partner_public', 'Partner Public')">Partner Public</div><div class="custom-option" onclick="pilihRole('partner_public_v2', 'Partner Public V2')">Partner Public V2</div><div class="custom-option" onclick="pilihRole('reseller_private', 'Reseller Private')">Reseller Private</div><div class="custom-option" onclick="pilihRole('reseller_public', 'Reseller Public')">Reseller Public</div><div class="custom-option" onclick="pilihRole('reseller_public_v2', 'Reseller Public V2')">Reseller Public V2</div><div class="custom-option" onclick="pilihRole('reseller', 'Reseller')">Reseller</div><div class="custom-option" onclick="pilihRole('demo', 'Demo')">Demo</div>`;
+                trig.innerText = 'Pemilik Panel'; roleInp.value = 'pemilik';
+            } else if (myRole === 'partner_public') {
+                opts.innerHTML = `<div class="custom-option selected" onclick="pilihRole('reseller_public', 'Reseller Public')">Reseller Public</div>`;
+                trig.innerText = 'Reseller Public'; roleInp.value = 'reseller_public';
+            } else if (myRole === 'partner_public_v2') {
+                opts.innerHTML = `<div class="custom-option selected" onclick="pilihRole('reseller_public_v2', 'Reseller Public V2')">Reseller Public V2</div>`;
+                trig.innerText = 'Reseller Public V2'; roleInp.value = 'reseller_public_v2';
+            }
+        });
+
+        function toggleRoleSelect() { document.getElementById('customRoleOptions').classList.toggle('open'); document.querySelector('.custom-select-trigger').classList.toggle('active'); }
+        function pilihRole(v, t) { document.getElementById('webRole').value = v; document.getElementById('customSelectText').innerText = t; toggleRoleSelect(); }
+        function formatExpiredDate(ts) { if (!ts) return '-'; return new Date(Number(ts)).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }); }
+        function getExpiredCell(u) {
+            if (String(u.role || '').toLowerCase() === 'pemilik') return '<span style="color:var(--success);font-size:12px;font-weight:700;">EXEMPT</span>';
+            const expiredAt = Number(u.expiredAt || 0);
+            if (!expiredAt) return '<span style="color:var(--danger);font-size:12px;font-weight:700;">Belum Aktif</span><br><small style="color:var(--text-sub);">Belum bisa login</small>';
+            if (expiredAt <= Date.now()) return `<span style="color:var(--danger);font-size:12px;font-weight:700;">Expired</span><br><small style="color:var(--text-sub);">${formatExpiredDate(expiredAt)}</small>`;
+            return `<span style="color:var(--success);font-size:12px;font-weight:700;">Aktif</span><br><small style="color:var(--text-sub);">${formatExpiredDate(expiredAt)}</small>`;
+        }
+
+        function ambilDataWebUsers() {
+            if (!currentUserId || !allowedRoles.includes(myRole)) return;
+            database.ref('users').on('value', (snap) => {
+                let tabel = `<tr><th>Informasi Akun</th><th>Tipe Akun</th><th>Expired</th><th>Status</th><th>Aksi</th></tr>`;
+                let d = []; snap.forEach(c => { let u = c.val(); if(u && u.username) { u.uId=c.key; if(myRole==='pemilik'||myRole==='demo'||u.maker===myUsername) d.push(u);
+ } });
+                
+                const svgShield = `<svg viewBox="0 0 24 24" style="width:14px; fill:var(--primary);"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>`;
+
+                d.sort((a,b)=>(a.timestamp||0)-(b.timestamp||0)).forEach(u => {
+                    let r = u.role ? String(u.role) : 'reseller_public';
+                    let rBadge = `<span class="role-badge role-${r.split('_')[0]}">${r.replace(/_/g,' ').toUpperCase()}</span>`;
+                    
+                    let hapus = (String(u.username).toLowerCase() === 'admin') ? 
+                                `<span style="color:var(--text-sub); font-size:12px; display:flex; align-items:center; gap:4px;">${svgShield} Admin Utama</span>` : 
+                                `<button class="btn-hapus" onclick="hapusAkunWeb('${u.uId}', '${u.username}')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Hapus</button>`;
+                    
+                    let stat = u.isOnline ? `<span class="status-badge status-online"><span class="status-dot dot-online"></span>Online</span>` : `<span class="status-badge status-offline">Offline</span>`;
+                    let expCell = getExpiredCell(u);
+
+                    tabel += `<tr><td><b style="font-size:15px;">${u.username}</b><br><small style="color:var(--warning);">Pass: ${u.password||'***'}</small></td><td>${rBadge}</td><td>${expCell}</td><td>${stat}</td><td>${hapus}</td></tr>`;
+                });
+                document.getElementById('tabelWebUsers').innerHTML = tabel;
+            });
+        }
+
+        function buatAkunWeb() {
+            let uName = document.getElementById('webUsername').value.trim(); let pWord = document.getElementById('webPassword').value.trim();
+            if(!uName || !pWord) return showPeringatan("Harap lengkapi username dan password!");
+            database.ref('users').once('value', s => {
+                let usernameDipakai = false;
+                s.forEach(c => { const u = c.val() || {}; if (String(u.username || '').trim().toLowerCase() === uName.toLowerCase()) usernameDipakai = true; });
+                if(usernameDipakai){ showPeringatan("Username sudah digunakan, cari yang lain."); } 
+                else {
+                    const roleBaru = document.getElementById('webRole').value;
+                    const now = Date.now();
+                    const newRef = database.ref('users').push();
+                    newRef.set({
+                        username: uName,
+                        usernameLower: uName.toLowerCase(),
+                        password: pWord,
+                        role: roleBaru,
+                        maker: myUsername,
+                        isOnline: false,
+                        profilePic: '',
+                        timestamp: now,
+                        createdAt: now,
+                        lastLoginAt: 0,
+                        expiredStatus: roleBaru === 'pemilik' ? 'exempt' : 'unset'
+                    }).then(() => database.ref('activity_logs').push({
+                        uid: currentUserId,
+                        username: myUsername,
+                        role: myRole,
+                        action: `Membuat akses web untuk ${uName} (${roleBaru}).`,
+                        timestamp: now
+                    })).then(() => {
+                        munculkanModalWeb(uName, pWord, roleBaru);
+                        document.getElementById('webUsername').value = '';
+                        document.getElementById('webPassword').value = '';
+                    });
+                }
+            });
+        }
+
+        let delId = ""; function hapusAkunWeb(id, n) { 
+            delId = id; document.getElementById('teksKonfirmasi').innerHTML = `Hapus permanen akses untuk <b style="color:var(--danger);">${n}</b>?`; document.getElementById('modalKonfirmasi').style.display = 'flex'; 
+        }
+        function tutupKonfirmasi(){ document.getElementById('modalKonfirmasi').style.display = 'none'; }
+        function eksekusiHapus() {
+            const now = Date.now();
+            database.ref('users/'+delId).once('value').then((snap) => {
+                const target = snap.val() || {};
+                return database.ref('users/'+delId).remove().then(() => database.ref('activity_logs').push({
+                    uid: currentUserId,
+                    username: myUsername,
+                    role: myRole,
+                    action: `Menghapus akses web ${target.username || delId}.`,
+                    timestamp: now
+                }));
+            }).then(() => { tutupKonfirmasi(); });
+        }
+
+        function munculkanModalWeb(u, p, r) { document.getElementById('resUserWeb').innerText = u; document.getElementById('resPassWeb').innerText = p; document.getElementById('resRoleWeb').innerText = r.replace('_', ' ').toUpperCase(); document.getElementById('modalScreenshot').style.display = 'flex'; }
+        function salinDataWeb() { navigator.clipboard.writeText(`Data Akses Panel:\nUser: ${document.getElementById('resUserWeb').innerText}\nPass: ${document.getElementById('resPassWeb').innerText}`).then(() => { alert("Kredensial berhasil disalin!"); }); }
+
+        ambilDataWebUsers();
+    </script>
+
+<script>
+(function userExpiryGuard(){
+    const guardRole = String(localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
+    const guardUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
+    if (!guardRole || guardRole === 'pemilik' || !guardUserId || !window.firebase) return;
+    const guardConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+    if (!firebase.apps.length) firebase.initializeApp(guardConfig);
+    let __expiredHandled = false;
+    firebase.database().ref('users/' + guardUserId).on('value', function(snapshot){
+        const data = snapshot.val() || {};
+        const expiredAt = Number(data.expiredAt || 0);
+        let blockMessage = '';
+        if (!expiredAt) {
+            blockMessage = 'Akun ' + String(data.username || '').replace(/</g,'&lt;') + ' belum diaktifkan oleh pemilik. Hubungi pemilik untuk mengatur expired akun.';
+        } else if (expiredAt <= Date.now()) {
+            blockMessage = 'Akun ' + String(data.username || '').replace(/</g,'&lt;') + ' sudah expired. Hubungi pemilik untuk perpanjangan.';
+        }
+        if (!blockMessage || __expiredHandled) return;
+        __expiredHandled = true;
+        firebase.database().ref('users/' + guardUserId + '/isOnline').set(false).catch(function(){});
+        ['panel_user_id','user_id','user_id_ptero','panel_username','username','panel_role','role','panel_password','ptero_user_id'].forEach(function(k){ localStorage.removeItem(k); });
+        alert(blockMessage);
+        window.location.replace('login.html');
+    }, function(){});
+})();
+</script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        // Firebase Setup (re-initialize if not already)
+        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Proteksi Ganda Sesi User
+        const currentUserId = localStorage.getItem(\'panel_user_id\') || localStorage.getItem(\'user_id\') || localStorage.getItem(\'user_id_ptero\');
+        const roleRaw = localStorage.getItem(\'role\') || localStorage.getItem(\'panel_role\') || \'\';
+        const role = roleRaw.trim().toLowerCase();
+
+        // Countdown Timer
+        let expiryInterval;
+        function startExpiryTimer(expiredAt) {
+            const timerNav = document.getElementById(\'expiryTimerNav\');
+
+            if (!timerNav) return;
+
+            clearInterval(expiryInterval);
+
+            expiryInterval = setInterval(() => {
+                const now = Date.now();
+                const timeLeft = expiredAt - now;
+
+                if (timeLeft <= 0) {
+                    timerNav.innerText = \'EXPIRED\';
+                    timerNav.classList.add(\'expired\');
+                    clearInterval(expiryInterval);
+                    return;
+                }
+
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                const timerString = `${days}h ${hours}j ${minutes}m ${seconds}d`;
+
+                timerNav.innerText = timerString;
+            }, 1000);
+        }
+
+        // Fetch expiredAt from Firebase and start timer
+        if (currentUserId && role !== \'pemilik\') {
+            database.ref(\'users/\'+ currentUserId + \'/expiredAt\').on(\'value\', (snapshot) => {
+                const expiredAt = Number(snapshot.val() || 0);
+                if (expiredAt > 0) {
+                    startExpiryTimer(expiredAt);
+                } else {
+                    const timerNav = document.getElementById(\'expiryTimerNav\');
+                    if (timerNav) timerNav.innerText = \'N/A\';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
