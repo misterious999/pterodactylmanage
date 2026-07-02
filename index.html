@@ -456,15 +456,20 @@
     </script>
 
     <script>
-        // Countdown Timer
+        // Countdown Timer (Improved - full date + seconds + Unlimited for pemilik)
         let expiryInterval;
         function startExpiryTimer(expiredAt) {
-            const timerNav = document.getElementById(\'expiryTimerNav\');
-            const timerSidebar = document.getElementById(\'expiryTimerSidebar\');
+            const timerNav = document.getElementById('expiryTimerNav');
+            const timerSidebar = document.getElementById('expiryTimerSidebar');
 
             if (!timerNav && !timerSidebar) return;
-
             clearInterval(expiryInterval);
+
+            if (role === 'pemilik') {
+                if (timerNav) timerNav.innerHTML = '<span class="timer-unlimited">∞ Unlimited</span>';
+                if (timerSidebar) timerSidebar.innerHTML = '<span class="timer-unlimited">∞ Unlimited</span>';
+                return;
+            }
 
             expiryInterval = setInterval(() => {
                 const now = Date.now();
@@ -472,16 +477,14 @@
 
                 if (timeLeft <= 0) {
                     if (timerNav) {
-                        timerNav.innerText = \'EXPIRED\';
-                        timerNav.classList.add(\'expired\');
+                        timerNav.innerHTML = '<span class="timer-countdown" style="color:var(--danger)">EXPIRED</span>';
+                        timerNav.classList.add('expired');
                     }
                     if (timerSidebar) {
-                        timerSidebar.innerText = \'EXPIRED\';
-                        timerSidebar.classList.add(\'expired\');
+                        timerSidebar.innerHTML = '<span class="timer-countdown" style="color:var(--danger)">EXPIRED</span>';
+                        timerSidebar.classList.add('expired');
                     }
                     clearInterval(expiryInterval);
-                    // Optionally trigger auto-delete and logout here if not already handled by userExpiryGuard
-                    // deleteUserServersAndLogout(currentUserId, \'Akun Anda telah kedaluwarsa.\');
                     return;
                 }
 
@@ -490,32 +493,24 @@
                 const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-                const timerString = `${days}h ${hours}j ${minutes}m ${seconds}d`;
+                const dateObj = new Date(expiredAt);
+                const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                const html = `<span class="timer-date">${dateStr}</span><span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}d</span>`;
 
                 if (timerNav) {
-                    timerNav.innerText = timerString;
+                    timerNav.innerHTML = html;
                     timerNav.style.display = 'inline-flex';
                 }
-                if (timerSidebar) timerSidebar.innerText = timerString;
+                if (timerSidebar) timerSidebar.innerHTML = html;
             }, 1000);
         }
 
-        // Fetch expiredAt from Firebase and start timer
-        if (currentUserId && role !== \'pemilik\') {
-            database.ref(\'users/\'+ currentUserId + \'/expiredAt\').on(\'value\', (snapshot) => {
+        // Fetch expiredAt from Firebase and start timer (works for all roles)
+        if (currentUserId) {
+            database.ref('users/'+ currentUserId + '/expiredAt').on('value', (snapshot) => {
                 const expiredAt = Number(snapshot.val() || 0);
-                if (expiredAt > 0) {
-                    startExpiryTimer(expiredAt);
-                } else {
-                    // If expiredAt is not set or 0, display a default message or hide the timer
-                    const timerNav = document.getElementById(\'expiryTimerNav\');
-                    const timerSidebar = document.getElementById(\'expiryTimerSidebar\');
-                    if (timerNav) {
-                        timerNav.style.display = 'none';
-                        timerNav.innerText = '';
-                    }
-                    if (timerSidebar) timerSidebar.innerText = 'N/A';
-                }
+                startExpiryTimer(expiredAt);
             });
         }
     </script>
