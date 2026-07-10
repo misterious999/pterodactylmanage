@@ -16,7 +16,7 @@
         /* Navbar Utama */
         .top-nav { background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
         
-        /* UPDATE: Expiry Timer & Responsivitas */
+        /* UPDATE: Expiry Timer & Responsivitas Layout Mobile Teredit */
         .expiry-timer { 
             font-size: 11px; 
             font-weight: 700; 
@@ -36,9 +36,24 @@
         .timer-date { color: var(--text-sub); font-size: 10px; font-weight: 600; }
         .expiry-timer.expired { color: var(--danger); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
         
+        /* FIX MOBILE ANTI-NEMBUS */
         @media (max-width: 768px) {
-            .expiry-timer { flex-direction: row; font-size: 12px; padding: 5px 10px; }
-            .timer-date { display: none; }
+            .top-nav { padding: 10px 15px; }
+            .brand-logo { font-size: 0; gap: 0; }
+            .brand-logo svg { width: 28px; height: 28px; }
+            .header-controls { gap: 8px; }
+            #navUser { display: none; }
+            .user-profile { padding: 2px; border-radius: 50%; }
+            .expiry-timer { 
+                flex-direction: row; 
+                font-size: 10px; 
+                padding: 5px 8px; 
+                margin-left: 0;
+                letter-spacing: -0.2px; 
+            }
+            .timer-date { display: none; } 
+            .btn-menu { padding: 4px; }
+            .btn-menu svg { width: 26px; height: 26px; }
         }
 
         .brand-logo { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px; text-transform: uppercase; }
@@ -172,7 +187,6 @@
             <button class="sidebar-btn sidebar-btn-logout" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg> Keluar Sistem</button>
         </div>
     </div>
-    
     <div class="main-container">
         <div id="boxPengumumanAdmin" style="display: none; background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid rgba(245, 158, 11, 0.4); margin-bottom: 30px;">
             <h3 style="color: var(--warning); margin: 0 0 5px 0; font-size: 16px; display: flex; align-items: center; gap: 8px;"><svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: var(--warning);"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z"/></svg> Pengumuman Global</h3>
@@ -261,7 +275,6 @@
     <div id="modalAlert" class="modal-overlay" style="z-index: 999999;"><div class="modal-box" style="border-top: 4px solid var(--warning);"><svg class="modal-icon warning" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg><h3 style="color: var(--warning);" id="alertTitle">PERHATIAN</h3><p id="alertBody" style="color: var(--text-main); font-size: 13px; margin-bottom: 20px;"></p><button class="btn-batal" style="width: 100%; border-color: var(--warning); color: var(--warning);" onclick="tutupModal('modalAlert')">Mengerti</button></div></div>
     <div id="modalSuccess" class="modal-overlay" style="z-index: 999999;"><div class="modal-box" style="border-top: 4px solid var(--success);"><svg class="modal-icon success" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg><h3 style="color: var(--success);">BERHASIL</h3><p id="successBody" style="color: var(--text-main); font-size: 13px; margin-bottom: 20px;"></p><button class="btn-action btn-success" onclick="tutupModal('modalSuccess')">Tutup</button></div></div>
     <div id="modalConfirm" class="modal-overlay" style="z-index: 999999;"><div class="modal-box" style="border-top: 4px solid var(--danger);"><svg class="modal-icon danger" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg><h3 style="color: var(--danger);">KONFIRMASI</h3><p id="confirmBody" style="color: var(--text-main); font-size: 13px; margin-bottom: 20px;">Yakin ingin melakukan ini?</p><div style="display: flex; gap: 10px;"><button class="btn-action btn-danger" style="margin: 0; flex: 1;" onclick="eksekusiCabutPengumuman()">Ya, Lanjutkan!</button><button class="btn-batal" style="margin: 0; flex: 1;" onclick="tutupModal('modalConfirm')">Batal</button></div></div></div>
-
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -338,7 +351,7 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // 🔥 BUG FIX: SINKRONISASI FOTO PROFIL NAVBAR & SIDEBAR 🔥
+        // 🔥 SINKRONISASI FOTO PROFIL NAVBAR & SIDEBAR 🔥
         database.ref('users/' + currentUserId).on('value', (snap) => {
             if (snap.exists()) {
                 let u = snap.val();
@@ -475,7 +488,7 @@
             window.location.replace('login.html');
         }
 
-        // UPDATE: Countdown Timer dengan pemisah tag span yang bersih
+        // UPDATE: Countdown Timer dengan pemisah tag span yang bersih & padat
         let expiryInterval;
         function startExpiryTimer(expiredAt) {
             const timerNav = document.getElementById('expiryTimerNav');
@@ -515,7 +528,7 @@
                 const dateObj = new Date(expiredAt);
                 const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 
-                // SPASI DITAMBAHKAN DI SINI UNTUK HTML YANG LEBIH RAPI
+                // SPASI DITAMBAHKAN DI SINI
                 const html = `<span class="timer-date">${dateStr}</span> <span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}d</span>`;
 
                 if (timerNav) {
