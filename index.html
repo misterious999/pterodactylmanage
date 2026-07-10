@@ -15,15 +15,38 @@
         
         /* Navbar Utama */
         .top-nav { background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-        .expiry-timer { font-size: 12px; font-weight: 700; color: var(--text-main); background: var(--primary-glow); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(13, 148, 136, 0.3); margin-left: 15px; white-space: nowrap; }
+        
+        /* UPDATE: Expiry Timer & Responsivitas */
+        .expiry-timer { 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: var(--text-main); 
+            background: var(--primary-glow); 
+            padding: 6px 12px; 
+            border-radius: 8px; 
+            border: 1px solid rgba(13, 148, 136, 0.3); 
+            margin-left: 15px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            white-space: nowrap; 
+        }
+        .timer-date { color: var(--text-sub); font-size: 10px; font-weight: 600; }
         .expiry-timer.expired { color: var(--danger); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+        
+        @media (max-width: 768px) {
+            .expiry-timer { flex-direction: row; font-size: 12px; padding: 5px 10px; }
+            .timer-date { display: none; }
+        }
+
         .brand-logo { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px; text-transform: uppercase; }
         .brand-logo svg { width: 30px; height: 30px; fill: var(--primary); filter: drop-shadow(0 0 8px var(--primary-glow)); }
         
         .header-controls { display: flex; align-items: center; gap: 15px; }
         .user-profile { display: flex; align-items: center; gap: 10px; background: var(--section-bg); padding: 6px 14px 6px 6px; border-radius: 50px; border: 1px solid var(--border-color); cursor: pointer; transition: 0.3s; }
         .user-profile:hover { border-color: var(--primary); background: var(--primary-glow); }
-        /* BUG FIX: object-fit cover ditambahkan agar gambar tidak gepeng */
         .user-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: linear-gradient(135deg, var(--primary), #00f2fe); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: white; box-shadow: 0 2px 10px rgba(13, 148, 136, 0.4); }
         
         .btn-menu { background: transparent; color: var(--text-main); border: none; padding: 8px; border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
@@ -31,7 +54,8 @@
         .btn-menu:hover { background: var(--primary-glow); color: var(--primary); }
 
         .main-container { padding: 40px 5%; max-width: 1400px; margin: 0 auto; }
-                /* Sidebar Menu */
+        
+        /* Sidebar Menu */
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 9998; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
         .sidebar-overlay.active { opacity: 1; visibility: visible; }
         .sidebar { position: fixed; top: 0; right: -320px; width: 300px; height: 100%; background: var(--card-bg); border-left: 1px solid var(--primary); box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 9999; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; padding: 30px 25px; box-sizing: border-box; overflow-y: auto; }
@@ -86,7 +110,8 @@
         .card-public:hover { border-color: var(--success); transform: translateY(-4px); } .card-public h3, .card-public svg { color: var(--success); fill: var(--success); }
 
         .role-badge { display: inline-block; padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
-                /* Loading Screen */
+        
+        /* Loading Screen */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 99999; display: flex; align-items: center; justify-content: center; transition: 0.6s ease; }
         .core-spinner { width: 50px; height: 50px; margin: 0 auto 20px auto; border-radius: 50%; border: 3px solid transparent; border-top-color: var(--primary); border-bottom-color: var(--success); animation: spin 1.2s infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -147,7 +172,8 @@
             <button class="sidebar-btn sidebar-btn-logout" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg> Keluar Sistem</button>
         </div>
     </div>
-        <div class="main-container">
+    
+    <div class="main-container">
         <div id="boxPengumumanAdmin" style="display: none; background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid rgba(245, 158, 11, 0.4); margin-bottom: 30px;">
             <h3 style="color: var(--warning); margin: 0 0 5px 0; font-size: 16px; display: flex; align-items: center; gap: 8px;"><svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: var(--warning);"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z"/></svg> Pengumuman Global</h3>
             <p style="font-size: 13px; color: var(--text-sub); margin-top: 0; margin-bottom: 15px;">Siarkan pesan sistem ke seluruh pengguna yang aktif.</p>
@@ -225,11 +251,9 @@
         <div class="modal-box" style="border-top: 4px solid var(--warning);">
             <svg class="modal-icon warning" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
             <h3 style="color: var(--warning);">INFORMASI PENTING</h3>
-            
             <div style="background: rgba(245, 158, 11, 0.05); padding: 15px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.2); margin-bottom: 20px; text-align: left; max-height: 45vh; overflow-y: auto; overscroll-behavior: contain;">
                 <p id="teksIsiPengumuman" style="color: var(--text-main); margin: 0; line-height: 1.6; white-space: pre-wrap; font-size: 13px;"></p>
             </div>
-            
             <button class="btn-action btn-warning" onclick="tutupPengumuman()">Siap, Paham!</button>
         </div>
     </div>
@@ -237,7 +261,8 @@
     <div id="modalAlert" class="modal-overlay" style="z-index: 999999;"><div class="modal-box" style="border-top: 4px solid var(--warning);"><svg class="modal-icon warning" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg><h3 style="color: var(--warning);" id="alertTitle">PERHATIAN</h3><p id="alertBody" style="color: var(--text-main); font-size: 13px; margin-bottom: 20px;"></p><button class="btn-batal" style="width: 100%; border-color: var(--warning); color: var(--warning);" onclick="tutupModal('modalAlert')">Mengerti</button></div></div>
     <div id="modalSuccess" class="modal-overlay" style="z-index: 999999;"><div class="modal-box" style="border-top: 4px solid var(--success);"><svg class="modal-icon success" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg><h3 style="color: var(--success);">BERHASIL</h3><p id="successBody" style="color: var(--text-main); font-size: 13px; margin-bottom: 20px;"></p><button class="btn-action btn-success" onclick="tutupModal('modalSuccess')">Tutup</button></div></div>
     <div id="modalConfirm" class="modal-overlay" style="z-index: 999999;"><div class="modal-box" style="border-top: 4px solid var(--danger);"><svg class="modal-icon danger" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg><h3 style="color: var(--danger);">KONFIRMASI</h3><p id="confirmBody" style="color: var(--text-main); font-size: 13px; margin-bottom: 20px;">Yakin ingin melakukan ini?</p><div style="display: flex; gap: 10px;"><button class="btn-action btn-danger" style="margin: 0; flex: 1;" onclick="eksekusiCabutPengumuman()">Ya, Lanjutkan!</button><button class="btn-batal" style="margin: 0; flex: 1;" onclick="tutupModal('modalConfirm')">Batal</button></div></div></div>
-        <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
@@ -351,32 +376,26 @@
         const PUB_DOMAIN = "pterodactyl.asta-official.my.id"; 
         const PUB_API = "ptla_65KZUN7MNwpbrZh10uiw6zII54Fs8mYPIVHvZB0VD7n";
          
-        // Default Public V2 masih mengikuti panel Public V2 di file manage_ptero_*_pub_v2.html.
-        // Kalau panel V2 beda, ubah domain/API di bawah ini.
         const PUB_V2_DOMAIN = "server.szxennofficial.my.id"; 
         const PUB_V2_API = "ptla_eZWkrfHaY0XXeoyBx4MpO6UfKrbEm6fJCCbVrF9ksCN"; 
 
         // Fungsi Tarik Data API
         function ambilStatistik() {
-            // Ambil Private
             fetch(`${WORKER_URL}https://${PRVT_DOMAIN}/api/application/servers`, { headers: { 'Authorization': `Bearer ${PRVT_API}` } })
             .then(res=>res.json())
             .then(data=>{ if(data.meta) document.getElementById('countPrivate').innerText = data.meta.pagination.total; })
             .catch(()=>document.getElementById('countPrivate').innerText = "Err");
             
-            // Ambil Public
             fetch(`${WORKER_URL}https://${PUB_DOMAIN}/api/application/servers`, { headers: { 'Authorization': `Bearer ${PUB_API}` } })
             .then(res=>res.json())
             .then(data=>{ if(data.meta) document.getElementById('countPublic').innerText = data.meta.pagination.total; })
             .catch(()=>document.getElementById('countPublic').innerText = "Err");
 
-            // Ambil Public V2
             fetch(`${WORKER_URL}https://${PUB_V2_DOMAIN}/api/application/servers`, { headers: { 'Authorization': `Bearer ${PUB_V2_API}` } })
             .then(res=>res.json())
             .then(data=>{ if(data.meta) document.getElementById('countPublicV2').innerText = data.meta.pagination.total; })
             .catch(()=>document.getElementById('countPublicV2').innerText = "Err");
 
-            // Ambil Pengguna dari Firebase
             if (role === 'pemilik' || role === 'partner_public' || role === 'partner_public_v2' || role === 'demo') {
                 database.ref('users').on('value', snap => {
                     let tUsers = 0, oCount = 0;
@@ -391,29 +410,30 @@
         ambilStatistik();
     </script>
 
-<script>
-(function userExpiryGuard(){
-    const guardRole = String(localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
-    const guardUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
-    if (!guardRole || guardRole === 'pemilik' || !guardUserId || !window.firebase) return;
-    const guardConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
-    if (!firebase.apps.length) firebase.initializeApp(guardConfig);
-    let __expiredHandled = false;
-    firebase.database().ref('users/' + guardUserId).on('value', async function(snapshot){
-        const data = snapshot.val() || {};
-        const expiredAt = Number(data.expiredAt || 0);
-        let blockMessage = '';
-        if (!expiredAt) {
-            blockMessage = 'Akun ' + String(data.username || '').replace(/</g,'&lt;') + ' belum diaktifkan oleh pemilik. Hubungi pemilik untuk mengatur expired akun.';
-        } else if (expiredAt <= Date.now()) {
-            blockMessage = 'Akun ' + String(data.username || '').replace(/</g,'&lt;') + ' sudah expired. Hubungi pemilik untuk perpanjangan.';
-        }
-        if (!blockMessage || __expiredHandled) return;
-        __expiredHandled = true;
-            await deleteUserServersAndLogout(guardUserId, blockMessage);
-    }, function(){});
-})();
     <script>
+        // User Expiry Guard & Delete Operations
+        (function userExpiryGuard(){
+            const guardRole = String(localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
+            const guardUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
+            if (!guardRole || guardRole === 'pemilik' || !guardUserId || !window.firebase) return;
+            const guardConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+            if (!firebase.apps.length) firebase.initializeApp(guardConfig);
+            let __expiredHandled = false;
+            firebase.database().ref('users/' + guardUserId).on('value', async function(snapshot){
+                const data = snapshot.val() || {};
+                const expiredAt = Number(data.expiredAt || 0);
+                let blockMessage = '';
+                if (!expiredAt) {
+                    blockMessage = 'Akun ' + String(data.username || '').replace(/</g,'&lt;') + ' belum diaktifkan oleh pemilik. Hubungi pemilik untuk mengatur expired akun.';
+                } else if (expiredAt <= Date.now()) {
+                    blockMessage = 'Akun ' + String(data.username || '').replace(/</g,'&lt;') + ' sudah expired. Hubungi pemilik untuk perpanjangan.';
+                }
+                if (!blockMessage || __expiredHandled) return;
+                __expiredHandled = true;
+                await deleteUserServersAndLogout(guardUserId, blockMessage);
+            }, function(){});
+        })();
+
         async function deleteUserServersAndLogout(userId, blockMessage) {
             const WORKER_URL = "https://restless-truth-9b75.amisterious09.workers.dev";
             const PTERO_APIS = [
@@ -452,12 +472,10 @@
             firebase.database().ref('users/' + userId + '/isOnline').set(false).catch(function(){});
             ['panel_user_id','user_id','user_id_ptero','panel_username','username','panel_role','role','panel_password','ptero_user_id'].forEach(function(k){ localStorage.removeItem(k); });
             alert(blockMessage);
-            window.location.replace(\'login.html\');
+            window.location.replace('login.html');
         }
-    </script>
 
-    <script>
-        // Countdown Timer (Improved - full date + seconds + Unlimited for pemilik)
+        // UPDATE: Countdown Timer dengan pemisah tag span yang bersih
         let expiryInterval;
         function startExpiryTimer(expiredAt) {
             const timerNav = document.getElementById('expiryTimerNav');
@@ -497,7 +515,8 @@
                 const dateObj = new Date(expiredAt);
                 const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 
-                const html = `<span class="timer-date">${dateStr}</span><span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}d</span>`;
+                // SPASI DITAMBAHKAN DI SINI UNTUK HTML YANG LEBIH RAPI
+                const html = `<span class="timer-date">${dateStr}</span> <span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}d</span>`;
 
                 if (timerNav) {
                     timerNav.innerHTML = html;
@@ -507,7 +526,7 @@
             }, 1000);
         }
 
-        // Fetch expiredAt from Firebase and start timer (works for all roles)
+        // Eksekusi Timer dari Firebase
         if (currentUserId) {
             database.ref('users/'+ currentUserId + '/expiredAt').on('value', (snapshot) => {
                 const expiredAt = Number(snapshot.val() || 0);
@@ -515,6 +534,5 @@
             });
         }
     </script>
-
 </body>
 </html>
