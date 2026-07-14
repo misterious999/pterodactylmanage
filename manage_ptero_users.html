@@ -211,7 +211,7 @@
                 <label>Pilih Tipe Server (Egg)</label>
                 <select id="newEggId" style="width: 100%; padding: 14px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); font-size: 14px; outline: none; cursor: pointer; appearance: none;">
                     <!-- Sesuai gambar 694041.jpg -->
-                    <option value="19" selected>NodeJsPrivate (WhatsApp Bot)</option>
+                    <option value="16" selected>NodeJsPrivate (WhatsApp Bot)</option>
                     <option value="20">Python Veldora</option>
                 </select>
             </div>
@@ -576,8 +576,8 @@
         // FITUR BARU: AUTOMATED ENVIRONMENT FETCHER
         // ==========================================
         async function getDynamicEnvironment(eggId) {
-            // FIX TERBARU: Ubah Nest ID ke 6 berdasarkan foto panel Pterodactyl kamu
-            const nestId = 6; 
+            // FIX TERBARU: Ubah Nest ID ke 5 berdasarkan foto panel Pterodactyl kamu
+            const nestId = 5; 
             
             try {
                 let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/nests/${nestId}/eggs/${eggId}?include=variables`, {
