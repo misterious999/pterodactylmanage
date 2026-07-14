@@ -198,9 +198,23 @@
             </div>
         </div>
         
-        <div class="grid-2" style="display: none;">
-            <input type="number" id="newLocId" value="1">
-            <input type="number" id="newEggId" value="15">
+        <!-- BAGIAN BARU: Dropdown Konfigurasi Egg -->
+        <div class="box-header" style="margin-top: 15px;">
+            <h3><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg> Konfigurasi Tipe Bot</h3>
+        </div>
+        <div class="grid-2">
+            <div>
+                <label>Location ID</label>
+                <input type="number" id="newLocId" value="1" placeholder="ID Lokasi">
+            </div>
+            <div>
+                <label>Pilih Tipe Server (Egg)</label>
+                <select id="newEggId" style="width: 100%; padding: 14px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); font-size: 14px; outline: none; cursor: pointer; appearance: none;">
+                    <!-- Sesuai gambar 694041.jpg -->
+                    <option value="19" selected>NodeJsPrivate (WhatsApp Bot)</option>
+                    <option value="20">Python Veldora</option>
+                </select>
+            </div>
         </div>
         
         <div id="roleContainer">
@@ -261,7 +275,6 @@
     <div id="modalSapuConfirm" class="mini-ai-overlay"><div class="mini-ai-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M19.36 2.72L20.78 4.14L15.06 9.85C16.13 11.39 16.28 13.24 15.38 14.44L9.06 8.12C10.26 7.22 12.11 7.37 13.65 8.44L19.36 2.72M5.93 17.57C3.92 15.56 2.69 13.16 2.35 10.92L7.23 15.8L5.93 17.57M11.66 11.33L10.33 10L3 17.33L4.33 18.66L11.66 11.33M20.65 19.3L15.3 14C15.65 16.24 14.41 18.65 12.4 20.65L20.65 19.3Z" /></svg></div><div class="mini-ai-header">Sapu Bersih</div><div class="mini-ai-body" id="sapuConfirmBody"></div><div class="ai-btn-group"><button id="btnEksekusiSapu" class="mini-ai-btn btn-warning-action" onclick="eksekusiSapuBersih()">Lanjutkan Eksekusi</button><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalSapuConfirm')">Batal</button></div></div></div>
     <div id="modalAiAlert" class="mini-ai-overlay" style="z-index: 999999;"><div class="mini-ai-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><div class="mini-ai-header" id="aiAlertTitle">PERHATIAN</div><div class="mini-ai-body" id="aiAlertBody">Pesan peringatan di sini.</div><div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" style="background: var(--warning);" onclick="tutupModal('modalAiAlert')">Mengerti</button></div></div></div>
     <div id="modalAiSuccess" class="mini-ai-overlay" style="z-index: 999999;"><div class="mini-ai-popup mode-success" id="popupSuccessMode"><div class="modal-icon-top" id="iconSuccessMode"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="mini-ai-header" id="aiSuccessTitle">BERHASIL</div><div class="mini-ai-body" id="aiSuccessBody">Proses sukses dilakukan.</div><div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" id="btnTutupSuccess" style="background: var(--success);" onclick="tutupModal('modalAiSuccess')">Tutup</button></div></div></div>
-
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -276,8 +289,8 @@
                 heading: 'Kelola User & Server (Private)',
                 subtitle: 'Bikin Akun + Server pelanggan VIP langsung dalam 1x proses otomatis.',
                 allowedRoles: ['pemilik', 'reseller_private', 'reseller', 'demo'],
-                domain: localStorage.getItem('prvt_domain') || 'privateserverzeroix.bypstar7.web.id',
-                api: localStorage.getItem('prvt_api') || 'ptla_FN9WdJ1WzLH1BlGyzyeoWtZGDl9roNeAd8VVmz7g5tF',
+                domain: localStorage.getItem('prvt_domain') || 'yetanzz.veldoraz.xyz',
+                api: localStorage.getItem('prvt_api') || 'ptla_UfzyGqvmcta8WStTy3FZGlIkPxGHsWVBMY0GjvwH67c',
                 daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : 'Buatanmu',
                 showRoleContainer: (role) => role === 'pemilik'
             },
@@ -483,7 +496,6 @@
             btn.innerHTML = `${spinnerSvg} Memindai...`; 
             btn.style.pointerEvents = "none";
             try {
-                // Helper: fetch semua halaman dari endpoint
                 async function fetchAllPages(endpoint) {
                     let all = [], page = 1, totalPages = 1;
                     do {
@@ -499,7 +511,6 @@
                     return all;
                 }
 
-                // Fetch servers dan users secara paralel
                 const [allServers, allUsers] = await Promise.all([
                     fetchAllPages('servers'),
                     fetchAllPages('users')
@@ -561,8 +572,64 @@
             }
         }
 
+        // ==========================================
+        // FITUR BARU: AUTOMATED ENVIRONMENT FETCHER
+        // ==========================================
+        async function getDynamicEnvironment(eggId) {
+            // FIX TERBARU: Ubah Nest ID ke 6 berdasarkan foto panel Pterodactyl kamu
+            const nestId = 6; 
+            
+            try {
+                let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/nests/${nestId}/eggs/${eggId}?include=variables`, {
+                    method: 'GET',
+                    headers: { 
+                        'Accept': 'application/json', 
+                        'Authorization': `Bearer ${PTERO_API}` 
+                    }
+                });
+                
+                if (!res.ok) throw new Error(`Gagal mengambil struktur Egg dari Nest ${nestId}`);
+                let data = await res.json();
+                
+                let dynamicEnv = {};
+                let variables = data.attributes.relationships.variables.data;
+                
+                for (let v of variables) {
+                    let attr = v.attributes;
+                    let envKey = attr.env_variable;
+                    let isRequired = attr.rules.includes('required');
+                    let defaultValue = attr.default_value;
+
+                    if (envKey === 'PY_FILE') dynamicEnv[envKey] = 'app.py';
+                    else if (envKey === 'REQUIREMENTS_FILE') dynamicEnv[envKey] = 'requirements.txt';
+                    else if (envKey === 'MAIN_FILE') dynamicEnv[envKey] = 'index.js';
+                    else if (envKey === 'CMD_RUN') dynamicEnv[envKey] = 'npm start';
+                    else if (envKey === 'INST') dynamicEnv[envKey] = 'npm';
+                    else if (envKey === 'USER_UPLOAD' || envKey === 'AUTO_UPDATE') dynamicEnv[envKey] = '0';
+                    else if (isRequired) dynamicEnv[envKey] = defaultValue || 'default_value'; 
+                }
+                
+                return dynamicEnv;
+            } catch (e) {
+                console.error("Fetcher Error:", e);
+                return { 
+                    "INST": "npm", 
+                    "USER_UPLOAD": "0", 
+                    "AUTO_UPDATE": "0", 
+                    "CMD_RUN": "npm start",
+                    "PY_FILE": "app.py", 
+                    "REQUIREMENTS_FILE": "requirements.txt", 
+                    "MAIN_FILE": "index.js"
+                };
+            }
+        }
+
+        // ==========================================
+        // FUNGSI BUAT 1 PAKET YANG DIPERBARUI
+        // ==========================================
         async function buatSatuPaket() {
             if (role === 'demo') return showAiAlert("<b>MODE DEMO:</b> Fitur ini dikunci.", "AKSES DITOLAK");
+            
             let username = document.getElementById('newUsername').value.trim(); 
             let password = document.getElementById('newPassword').value.trim(); 
             let email = document.getElementById('newEmail').value.trim(); 
@@ -584,7 +651,7 @@
             btn.style.pointerEvents = "none";
             
             try {
-                btn.innerHTML = `${spinnerSvg} 1/2: Membuat Akun...`;
+                btn.innerHTML = `${spinnerSvg} 1/3: Membuat Akun...`;
                 let userPayload = { 
                     "email": email, 
                     "username": username, 
@@ -605,19 +672,27 @@
                 if (!resUser.ok) throw new Error(await resUser.text()); 
                 let newUserId = (await resUser.json()).attributes.id; 
                 
-                btn.innerHTML = `${spinnerSvg} 2/2: Mendeploy Server...`;
+                btn.innerHTML = `${spinnerSvg} 2/3: Membaca Environment...`;
+                let dynamicEnvironmentData = await getDynamicEnvironment(parseInt(eggId));
+                
+                // Pilihan Cerdas Docker Image (Mengamankan jika Python dipilih)
+                let dockerImageFinal = "ghcr.io/parkervcp/yolks:nodejs_20";
+                if (eggId === "20") dockerImageFinal = "ghcr.io/parkervcp/yolks:python_3.9"; // Fallback ke python jika egg ID = 20
+
+                btn.innerHTML = `${spinnerSvg} 3/3: Mendeploy Server...`;
                 let serverPayload = { 
                     "name": serverName, 
                     "description": `Dibuat oleh ${myUsername}`, 
                     "user": newUserId, 
                     "egg": parseInt(eggId), 
-                    "docker_image": "ghcr.io/parkervcp/yolks:nodejs_20", 
+                    "docker_image": dockerImageFinal, 
                     "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z ${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z ${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo ${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
-                    "environment": { "INST": "npm", "USER_UPLOAD": "0", "AUTO_UPDATE": "0", "CMD_RUN": "npm start" }, 
+                    "environment": dynamicEnvironmentData, 
                     "limits": { "memory": parseInt(ram), "swap": 0, "disk": parseInt(disk), "io": 500, "cpu": parseInt(cpu) }, 
                     "feature_limits": { "databases": 5, "backups": 5, "allocations": 5 }, 
                     "deploy": { "locations": [parseInt(locId)], "dedicated_ip": false, "port_range": [] } 
                 };
+                
                 let resServer = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers`, { 
                     method: 'POST', 
                     headers: { 
@@ -663,7 +738,6 @@
             btn.innerHTML = `${spinnerSvg} Menghancurkan...`; 
             btn.style.pointerEvents = "none";
             try {
-                // Fetch semua halaman server
                 let allServers = [], page = 1, totalPages = 1;
                 do {
                     let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers?page=${page}`, { 
@@ -741,7 +815,6 @@ _Terima kasih telah berbelanja!_`;
 
         ambilDataPtero();
     </script>
-
     <script>
     (function userExpiryGuard(){
         const guardRole = String(localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
