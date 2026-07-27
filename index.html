@@ -183,10 +183,11 @@
             <button class="btn-action btn-success" style="padding: 10px; font-size: 12px; margin: 0;" onclick="simpanFotoProfil()">Perbarui Profil</button>
         </div>
         <div class="sidebar-menu">
-        <button class="sidebar-btn sidebar-btn-setting" onclick="window.location.href='settings.html'">
-    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> 
-    Pusat Pengaturan API
-</button>
+            <!-- TOMBOL PUSAT PENGATURAN API (Disembunyikan secara default, hanya untuk Pemilik) -->
+            <button id="btnPengaturanApi" class="sidebar-btn sidebar-btn-setting" style="display: none; background: rgba(245, 158, 11, 0.1); color: var(--warning); border-color: rgba(245, 158, 11, 0.3);" onclick="window.location.href='settings.html'">
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> 
+                Pusat Pengaturan API
+            </button>
             <button class="sidebar-btn sidebar-btn-setting" onclick="bukaModalPassword()"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg> Ganti Password</button>
             <button class="sidebar-btn sidebar-btn-logout" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg> Keluar Sistem</button>
         </div>
@@ -240,7 +241,7 @@
             <h3 class="section-title title-private">Manajemen Server Private</h3>
             <div class="menu-grid">
                 <a href="manage_ptero_users.html?mode=private" class="menu-card card-private"><div class="menu-card-header"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg><h3>Bikin 1 Paket (User + Server)</h3></div><p>Buat akun panel baru sekaligus langsung aktifkan server bot Private-nya.</p></a>
-                <a href="manage_ptero_servers.html" class="menu-card card-private"><div class="menu-card-header"><svg viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg><h3>Tambah Server Saja</h3></div><p>Bikin server Private tambahan buat pelanggan yang udah punya akun.</p></a>
+                <a href="manage_ptero_servers.html?mode=private" class="menu-card card-private"><div class="menu-card-header"><svg viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg><h3>Tambah Server Saja</h3></div><p>Bikin server Private tambahan buat pelanggan yang udah punya akun.</p></a>
             </div>
         </div>
 
@@ -279,6 +280,8 @@
     <div id="modalAlert" class="modal-overlay" style="z-index: 999999;"><div class="modal-box" style="border-top: 4px solid var(--warning);"><svg class="modal-icon warning" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg><h3 style="color: var(--warning);" id="alertTitle">PERHATIAN</h3><p id="alertBody" style="color: var(--text-main); font-size: 13px; margin-bottom: 20px;"></p><button class="btn-batal" style="width: 100%; border-color: var(--warning); color: var(--warning);" onclick="tutupModal('modalAlert')">Mengerti</button></div></div>
     <div id="modalSuccess" class="modal-overlay" style="z-index: 999999;"><div class="modal-box" style="border-top: 4px solid var(--success);"><svg class="modal-icon success" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg><h3 style="color: var(--success);">BERHASIL</h3><p id="successBody" style="color: var(--text-main); font-size: 13px; margin-bottom: 20px;"></p><button class="btn-action btn-success" onclick="tutupModal('modalSuccess')">Tutup</button></div></div>
     <div id="modalConfirm" class="modal-overlay" style="z-index: 999999;"><div class="modal-box" style="border-top: 4px solid var(--danger);"><svg class="modal-icon danger" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg><h3 style="color: var(--danger);">KONFIRMASI</h3><p id="confirmBody" style="color: var(--text-main); font-size: 13px; margin-bottom: 20px;">Yakin ingin melakukan ini?</p><div style="display: flex; gap: 10px;"><button class="btn-action btn-danger" style="margin: 0; flex: 1;" onclick="eksekusiCabutPengumuman()">Ya, Lanjutkan!</button><button class="btn-batal" style="margin: 0; flex: 1;" onclick="tutupModal('modalConfirm')">Batal</button></div></div></div>
+
+    <script src="config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -315,7 +318,7 @@
         // Cek Login
         if (!currentUserId || !roleRaw) { window.location.replace("login.html"); }
 
-        // Menerapkan Username ke Navbar & Sidebar (Bug Fixed)
+        // Menerapkan Username ke Navbar & Sidebar
         document.getElementById('navUser').innerText = username;
         document.getElementById('sidebarName').innerText = username;
         
@@ -333,7 +336,12 @@
             document.getElementById('sectionWeb').style.display = 'block'; document.getElementById('menuCctvLog').style.display = 'flex'; 
             document.getElementById('sectionPrivate').style.display = 'block'; document.getElementById('sectionPublic').style.display = 'block'; document.getElementById('sectionPublicV2').style.display = 'block';
             document.getElementById('boxTotalUserPanel').style.display = 'flex'; document.getElementById('boxOnlineUser').style.display = 'flex';
-            if(role === 'pemilik') { document.getElementById('boxPengumumanAdmin').style.display = 'block'; document.getElementById('menuExpired').style.display = 'block'; document.getElementById('btnPengaturanApi').style.display = 'flex'; } 
+            
+            if(role === 'pemilik') { 
+                document.getElementById('boxPengumumanAdmin').style.display = 'block'; 
+                document.getElementById('menuExpired').style.display = 'block'; 
+                document.getElementById('btnPengaturanApi').style.display = 'flex'; 
+            } 
         } else if (role === 'partner_public') {
             document.getElementById('sectionWeb').style.display = 'block'; document.getElementById('sectionPublic').style.display = 'block';
             document.getElementById('boxTotalUserPanel').style.display = 'flex'; document.getElementById('boxOnlineUser').style.display = 'flex';
@@ -350,8 +358,8 @@
             document.getElementById('sectionPublic').style.display = 'block'; 
         }
 
-        // Firebase Setup
-        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        // Firebase Setup Sinkron
+        const firebaseConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -362,10 +370,7 @@
                 database.ref('users/' + currentUserId + '/isOnline').onDisconnect().set(false);
                 database.ref('users/' + currentUserId + '/isOnline').set(true);
                 
-                // Setel URL Foto, kalau kosong pakai Avatar Bawaan
                 let avatarUrl = u.profilePic || `https://ui-avatars.com/api/?name=${username}&background=0d9488&color=fff&size=150`;
-                
-                // Terapkan ke gambar Sidebar DAN Navbar Atas
                 document.getElementById('sidebarProfilePic').src = avatarUrl;
                 document.getElementById('avatar').src = avatarUrl;
             }
@@ -386,15 +391,17 @@
             if (data && data.pesan && localStorage.getItem('last_read_announcement') != data.timestamp) { document.getElementById('teksIsiPengumuman').innerText = data.pesan; modal.style.display = 'flex'; modal.dataset.time = data.timestamp; } else modal.style.display = 'none';
         });
 
-        // 🔥 API PTERODACTYL (PRIVATE, PUBLIC, PUBLIC V2) 🔥
-        const WORKER_URL = "https://restless-truth-9b75.amisterious09.workers.dev/?"; 
-        const PRVT_DOMAIN = "privateserverzeroix.bypstar7.web.id"; 
-        const PRVT_API = "ptla_FN9WdJ1WzLH1BlGyzyeoWtZGDl9roNeAd8VVmz7g5tF"; 
-        const PUB_DOMAIN = "assistantzeroix.bypstar7.online"; 
-        const PUB_API = "ptla_WlmF4CJ2yI68CQEKcFeDieij2gXE67CESbqGISbXOeB";
+        // 🔥 API PTERODACTYL SINKRONISASI GLOBAL 🔥
+        const WORKER_URL = GlobalConfig.getWorkerUrl(); 
+        
+        const PRVT_DOMAIN = GlobalConfig.getPteroConfig('private').domain; 
+        const PRVT_API = GlobalConfig.getPteroConfig('private').api; 
+        
+        const PUB_DOMAIN = GlobalConfig.getPteroConfig('public').domain; 
+        const PUB_API = GlobalConfig.getPteroConfig('public').api;
          
-        const PUB_V2_DOMAIN = "assistantzeroix.bypstar7.online"; 
-        const PUB_V2_API = "ptla_WlmF4CJ2yI68CQEKcFeDieij2gXE67CESbqGISbXOeB"; 
+        const PUB_V2_DOMAIN = GlobalConfig.getPteroConfig('public_v2').domain; 
+        const PUB_V2_API = GlobalConfig.getPteroConfig('public_v2').api; 
 
         // Fungsi Tarik Data API
         function ambilStatistik() {
@@ -433,7 +440,7 @@
             const guardRole = String(localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
             const guardUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
             if (!guardRole || guardRole === 'pemilik' || !guardUserId || !window.firebase) return;
-            const guardConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+            const guardConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
             if (!firebase.apps.length) firebase.initializeApp(guardConfig);
             let __expiredHandled = false;
             firebase.database().ref('users/' + guardUserId).on('value', async function(snapshot){
@@ -452,7 +459,7 @@
         })();
 
         async function deleteUserServersAndLogout(userId, blockMessage) {
-            const WORKER_URL = "https://restless-truth-9b75.amisterious09.workers.dev";
+            const WORKER_URL = GlobalConfig.getWorkerUrl();
             const PTERO_APIS = [
                 { domain: PRVT_DOMAIN, api: PRVT_API },
                 { domain: PUB_DOMAIN, api: PUB_API },
@@ -478,7 +485,6 @@
                                     'Authorization': `Bearer ${pteroApi.api}`
                                 }
                             });
-                            console.log(`Server ${server.attributes.name} (${server.attributes.id}) deleted from ${pteroApi.domain}`);
                         }
                     }
                 } catch (e) {
@@ -492,7 +498,7 @@
             window.location.replace('login.html');
         }
 
-        // UPDATE: Countdown Timer dengan pemisah tag span yang bersih & padat
+        // Countdown Timer
         let expiryInterval;
         function startExpiryTimer(expiredAt) {
             const timerNav = document.getElementById('expiryTimerNav');
@@ -532,7 +538,6 @@
                 const dateObj = new Date(expiredAt);
                 const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 
-                // SPASI DITAMBAHKAN DI SINI
                 const html = `<span class="timer-date">${dateStr}</span> <span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}d</span>`;
 
                 if (timerNav) {
@@ -543,7 +548,6 @@
             }, 1000);
         }
 
-        // Eksekusi Timer dari Firebase
         if (currentUserId) {
             database.ref('users/'+ currentUserId + '/expiredAt').on('value', (snapshot) => {
                 const expiredAt = Number(snapshot.val() || 0);

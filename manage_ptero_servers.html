@@ -200,6 +200,8 @@
         <div class="grid-2" style="display: none;">
             <input type="number" id="locId" value="1">
             <input type="number" id="eggId" value="15">
+            <input type="number" id="nodeId" value="1">
+            <input type="number" id="nestId" value="5">
         </div>
 
         <button class="btn-tambah" onclick="buatServer()">
@@ -242,24 +244,23 @@
     <div id="modalAiAlert" class="mini-ai-overlay" style="z-index: 999999;"><div class="mini-ai-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><div class="mini-ai-header" id="aiAlertTitle">PERHATIAN</div><div class="mini-ai-body" id="aiAlertBody">Pesan peringatan di sini.</div><div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" style="background: var(--warning);" onclick="tutupModal('modalAiAlert')">Mengerti</button></div></div></div>
     <div id="modalAiSuccess" class="mini-ai-overlay" style="z-index: 999999;"><div class="mini-ai-popup mode-success" id="popupSuccessMode"><div class="modal-icon-top" id="iconSuccessMode"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="mini-ai-header" id="aiSuccessTitle">BERHASIL</div><div class="mini-ai-body" id="aiSuccessBody">Proses sukses dilakukan.</div><div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" id="btnTutupSuccess" style="background: var(--success);" onclick="tutupModal('modalAiSuccess')">Tutup</button></div></div></div>
 
+    <script src="config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
         // ============ MODE CONFIGURATION ============
-        // Tentukan mode berdasarkan URL atau localStorage
         const urlParams = new URLSearchParams(window.location.search);
         const modeParam = urlParams.get('mode') || localStorage.getItem('serverMode') || 'private';
         
-        // Konfigurasi per mode
         const modeConfig = {
             private: {
                 title: 'Kelola Server (Private)',
                 heading: 'Kelola Server (Private)',
                 subtitle: 'Tambah dan kelola server baru untuk pengguna yang sudah ada di Divisi Private.',
                 allowedRoles: ['pemilik', 'reseller_private', 'reseller'],
-                domain: localStorage.getItem('prvt_domain') || 'privateserverzeroix.bypstar7.web.id',
-                api: localStorage.getItem('prvt_api') || 'ptla_FN9WdJ1WzLH1BlGyzyeoWtZGDl9roNeAd8VVmz7g5tF',
+                domain: GlobalConfig.getPteroConfig('private').domain,
+                api: GlobalConfig.getPteroConfig('private').api,
                 daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : 'Buatanmu'
             },
             public: {
@@ -267,8 +268,8 @@
                 heading: 'Kelola Server (Public)',
                 subtitle: 'Tambah dan kelola server baru untuk pengguna yang sudah ada di Divisi Public.',
                 allowedRoles: ['pemilik', 'reseller_public', 'partner_public', 'demo'],
-                domain: 'assistantzeroix.bypstar7.online',
-                api: 'ptla_WlmF4CJ2yI68CQEKcFeDieij2gXE67CESbqGISbXOeB',
+                domain: GlobalConfig.getPteroConfig('public').domain,
+                api: GlobalConfig.getPteroConfig('public').api,
                 daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : (role === 'partner_public' ? '(Tim Kamu)' : (role === 'demo' ? '(Akun Demo)' : 'Buatanmu'))
             },
             public_v2: {
@@ -276,8 +277,8 @@
                 heading: 'Kelola Server (Public V2)',
                 subtitle: 'Tambah dan kelola server baru untuk pengguna yang sudah ada di Divisi Public V2.',
                 allowedRoles: ['pemilik', 'reseller_public_v2', 'partner_public_v2'],
-                domain: 'assistantzeroix.bypstar7.online',
-                api: 'ptla_WlmF4CJ2yI68CQEKcFeDieij2gXE67CESbqGISbXOeB',
+                domain: GlobalConfig.getPteroConfig('public_v2').domain,
+                api: GlobalConfig.getPteroConfig('public_v2').api,
                 daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : (role === 'partner_public_v2' ? '(Tim Kamu)' : 'Buatanmu')
             }
         };
@@ -290,18 +291,16 @@
         const role = roleRaw.trim().toLowerCase();
         const myUsername = localStorage.getItem('username') || localStorage.getItem('panel_username') || 'Unknown'; 
         
-        // Validasi akses
         if (!currentUserId || !config.allowedRoles.includes(role)) { 
             window.location.replace("index.html"); 
         }
         
-        // Set page title dan heading
         document.getElementById('pageTitle').innerText = config.title;
         document.getElementById('pageHeading').innerText = config.heading;
         document.getElementById('pageSubtitle').innerText = config.subtitle;
         document.getElementById('textDaftar').innerText = config.daftarLabel(role);
 
-        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        const firebaseConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -309,8 +308,21 @@
             database.ref('users/' + currentUserId + '/isOnline').set(true); 
             database.ref('users/' + currentUserId + '/isOnline').onDisconnect().set(false); 
         }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            const defaults = GlobalConfig.getDefaultDeploy();
+            let elLocId = document.getElementById('locId');
+            let elEggId = document.getElementById('eggId');
+            let elNodeId = document.getElementById('nodeId');
+            let elNestId = document.getElementById('nestId');
+            
+            if(elLocId) elLocId.value = defaults.locationId;
+            if(elEggId) elEggId.value = defaults.eggId;
+            if(elNodeId) elNodeId.value = defaults.nodeId;
+            if(elNestId) elNestId.value = defaults.nestId;
+        });
 
-        const WORKER_URL = "https://restless-truth-9b75.amisterious09.workers.dev";
+        const WORKER_URL = GlobalConfig.getWorkerUrl();
         const PTERO_DOMAIN = config.domain;
         const PTERO_API = config.api;
 
@@ -424,7 +436,6 @@
                     let oId = s.user; 
                     let oData = usersMap[oId] || { username: 'Unknown', maker: 'Unknown' };
                     
-                    // Filter berdasarkan role dan pembuat
                     const isOwner = role === 'pemilik' || (role.includes('partner') && config.allowedRoles.includes(role));
                     if (!isOwner && oData.maker !== myUsername) return; 
                     
@@ -452,6 +463,39 @@
             }
         }
 
+        // ==========================================
+        // FITUR BARU: AUTOMATED ENVIRONMENT FETCHER (Agar saat nambah server gak Error env variable)
+        // ==========================================
+        async function getDynamicEnvironment(nestId, eggId) {
+            try {
+                let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/nests/${nestId}/eggs/${eggId}?include=variables`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
+                });
+                if (!res.ok) throw new Error("Gagal mengambil Env");
+                let data = await res.json();
+                
+                let dynamicEnv = {};
+                let variables = data.attributes.relationships.variables.data;
+                for (let v of variables) {
+                    let attr = v.attributes;
+                    let envKey = attr.env_variable;
+                    let isRequired = attr.rules.includes('required');
+                    
+                    if (envKey === 'PY_FILE') dynamicEnv[envKey] = 'app.py';
+                    else if (envKey === 'REQUIREMENTS_FILE') dynamicEnv[envKey] = 'requirements.txt';
+                    else if (envKey === 'MAIN_FILE') dynamicEnv[envKey] = 'index.js';
+                    else if (envKey === 'CMD_RUN') dynamicEnv[envKey] = 'npm start';
+                    else if (envKey === 'INST') dynamicEnv[envKey] = 'npm';
+                    else if (envKey === 'USER_UPLOAD' || envKey === 'AUTO_UPDATE') dynamicEnv[envKey] = '0';
+                    else if (isRequired) dynamicEnv[envKey] = attr.default_value || 'default'; 
+                }
+                return dynamicEnv;
+            } catch (e) {
+                return { "INST": "npm", "USER_UPLOAD": "0", "AUTO_UPDATE": "0", "CMD_RUN": "npm start" };
+            }
+        }
+
         // ============ SERVER CREATION ============
         async function buatServer() {
             let uId = document.getElementById('userSelect').value; 
@@ -461,6 +505,7 @@
             let disk = document.getElementById('serverDisk').value; 
             let locId = document.getElementById('locId').value; 
             let eggId = document.getElementById('eggId').value;
+            let nestId = document.getElementById('nestId').value;
             
             if(!uId || !name || !ram || !cpu || !disk) return showAiAlert("Harap lengkapi semua data formulir!", "DATA TIDAK LENGKAP"); 
             
@@ -469,19 +514,23 @@
             btn.innerHTML = `${spinnerSvg} Sedang Deploy...`; 
             btn.style.pointerEvents = "none";
             
-            let payload = { 
-                "name": name, 
-                "user": parseInt(uId), 
-                "egg": parseInt(eggId), 
-                "docker_image": "ghcr.io/parkervcp/yolks:nodejs_20", 
-                "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z ${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z ${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo ${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
-                "environment": { "INST": "npm", "USER_UPLOAD": "0", "AUTO_UPDATE": "0", "CMD_RUN": "npm start" }, 
-                "limits": { "memory": parseInt(ram), "swap": 0, "disk": parseInt(disk), "io": 500, "cpu": parseInt(cpu) }, 
-                "feature_limits": { "databases": 5, "backups": 5, "allocations": 5 }, 
-                "deploy": { "locations": [parseInt(locId)], "dedicated_ip": false, "port_range": [] } 
-            };
-            
             try {
+                let dynamicEnv = await getDynamicEnvironment(parseInt(nestId), parseInt(eggId));
+                let dockerImg = "ghcr.io/parkervcp/yolks:nodejs_20";
+                if(eggId === "20") dockerImg = "ghcr.io/parkervcp/yolks:python_3.9"; // Fallback python
+                
+                let payload = { 
+                    "name": name, 
+                    "user": parseInt(uId), 
+                    "egg": parseInt(eggId), 
+                    "docker_image": dockerImg, 
+                    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z ${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z ${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo ${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
+                    "environment": dynamicEnv, 
+                    "limits": { "memory": parseInt(ram), "swap": 0, "disk": parseInt(disk), "io": 500, "cpu": parseInt(cpu) }, 
+                    "feature_limits": { "databases": 5, "backups": 5, "allocations": 5 }, 
+                    "deploy": { "locations": [parseInt(locId)], "dedicated_ip": false, "port_range": [] } 
+                };
+                
                 let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers`, { 
                     method: 'POST', 
                     headers: { 
@@ -633,7 +682,7 @@
         const guardRole = String(localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
         const guardUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
         if (!guardRole || guardRole === 'pemilik' || !guardUserId || !window.firebase) return;
-        const guardConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        const guardConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
         if (!firebase.apps.length) firebase.initializeApp(guardConfig);
         let __expiredHandled = false;
         firebase.database().ref('users/' + guardUserId).on('value', function(snapshot){
@@ -658,21 +707,17 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-        // Firebase Setup (re-initialize if not already)
-        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        const firebaseConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Proteksi Ganda Sesi User
-        const currentUserId = localStorage.getItem(\'panel_user_id\') || localStorage.getItem(\'user_id\') || localStorage.getItem(\'user_id_ptero\');
-        const roleRaw = localStorage.getItem(\'role\') || localStorage.getItem(\'panel_role\') || \'\';
+        const currentUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
+        const roleRaw = localStorage.getItem('role') || localStorage.getItem('panel_role') || '';
         const role = roleRaw.trim().toLowerCase();
 
-        // Countdown Timer (Improved - full date + seconds + ∞ Unlimited for pemilik)
         let expiryInterval;
         function startExpiryTimer(expiredAt) {
             const timerNav = document.getElementById('expiryTimerNav');
-
             if (!timerNav) return;
             clearInterval(expiryInterval);
 
@@ -704,7 +749,6 @@
             }, 1000);
         }
 
-        // Fetch expiredAt from Firebase and start timer (works for pemilik too)
         if (currentUserId) {
             database.ref('users/'+ currentUserId + '/expiredAt').on('value', (snapshot) => {
                 const expiredAt = Number(snapshot.val() || 0);
