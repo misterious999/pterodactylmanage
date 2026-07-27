@@ -7,14 +7,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-color: #0f172a; --card-bg: #1e293b; 
-            --primary: #0d9488; 
-            --primary-glow: rgba(13, 148, 136, 0.15);
+            --bg-color: #0a0f1e; --card-bg: rgba(15, 25, 50, 0.7); 
+            --primary: #3b82f6; 
+            --primary-glow: rgba(59, 130, 246, 0.15);
             --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
             --text-main: #f8fafc; --text-sub: #94a3b8; 
-            --input-bg: #0f172a; --border-color: rgba(255,255,255,0.08); 
+            --input-bg: #0f172a; --border-color: rgba(59, 130, 246, 0.12); 
         }
-        .expiry-timer { font-size: 12px; font-weight: 700; color: var(--text-main); background: var(--primary-glow); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(13, 148, 136, 0.3); margin-left: 15px; white-space: nowrap; transition: all 0.3s ease; display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+        .expiry-timer { font-size: 12px; font-weight: 700; color: var(--text-main); background: var(--primary-glow); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(59, 130, 246, 0.3); margin-left: 15px; white-space: nowrap; transition: all 0.3s ease; display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
         .expiry-timer.expired { color: var(--danger); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
         .timer-date { font-size: 10px; opacity: 0.8; font-weight: 500; }
         .timer-countdown { font-family: 'Courier New', Courier, monospace; font-size: 13px; letter-spacing: 0.5px; text-shadow: 0 0 5px var(--primary-glow); }
@@ -34,7 +34,7 @@
         }
         body { font-family: 'Inter', sans-serif; padding: 20px 5%; background-color: var(--bg-color); color: var(--text-main); margin: 0; max-width: 1200px; margin: auto; }
         
-        .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 10px 18px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.3); transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 10px 18px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600; border: 1px solid rgba(59, 130, 246, 0.3); transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .btn-back svg { width: 18px; height: 18px; fill: currentColor; transition: transform 0.3s; }
         .btn-back:hover { background: var(--primary); color: white; box-shadow: 0 6px 20px var(--primary-glow); transform: translateY(-2px); }
         .btn-back:hover svg { transform: translateX(-4px); }
@@ -43,7 +43,7 @@
         h2 svg { width: 22px; height: 22px; fill: var(--primary); }
         .sub-title { color: var(--text-sub); margin-bottom: 25px; font-size: 13px; line-height: 1.5; }
         
-        .box { background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); overflow-x: auto; }
+        .box { background: var(--card-bg); backdrop-filter: blur(16px); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); overflow-x: auto; }
         .box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap; gap: 10px; }
         .box-header h3 { margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
         .box-header h3 svg { width: 18px; height: 18px; fill: var(--primary); }
@@ -61,7 +61,7 @@
         .custom-select-trigger svg { width: 16px; height: 16px; fill: var(--text-sub); transition: transform 0.3s ease; }
         .custom-select-trigger.active svg { transform: rotate(180deg); fill: var(--primary); }
         
-        .custom-options { position: absolute; display: none; top: calc(100% + 5px); left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--primary); border-radius: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 99; overflow: hidden; animation: fadeIn 0.2s ease; }
+        .custom-options { position: absolute; display: none; top: calc(100% + 5px); left: 0; right: 0; background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid var(--primary); border-radius: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 99; overflow: hidden; animation: fadeIn 0.2s ease; }
         .custom-options.open { display: block; }
         .custom-option { padding: 12px 14px; font-size: 13px; color: var(--text-main); cursor: pointer; transition: 0.2s; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px; }
         .custom-option svg { width: 16px; height: 16px; fill: var(--text-sub); transition: 0.2s; }
@@ -69,9 +69,9 @@
         .custom-option:hover, .custom-option.selected { background: var(--primary-glow); color: var(--primary); padding-left: 20px; font-weight: 600; }
         .custom-option:hover svg, .custom-option.selected svg { fill: var(--primary); }
 
-        .btn-tambah { width: 100%; background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; cursor: pointer; border-radius: 10px; padding: 14px; font-weight: 700; transition: 0.3s; margin-top: 5px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px var(--primary-glow); }
+        .btn-tambah { width: 100%; background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; cursor: pointer; border-radius: 10px; padding: 14px; font-weight: 700; transition: 0.3s; margin-top: 5px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px var(--primary-glow); }
         .btn-tambah svg { width: 18px; height: 18px; fill: currentColor; }
-        .btn-tambah:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(13, 148, 136, 0.4); }
+        .btn-tambah:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4); }
         
         .btn-sapu { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); cursor: pointer; border-radius: 8px; padding: 8px 14px; font-weight: 600; transition: 0.3s; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
         .btn-sapu svg { width: 14px; height: 14px; fill: currentColor; }
@@ -79,7 +79,7 @@
         
         .search-container { position: relative; margin-bottom: 20px; }
         .search-container svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: var(--text-sub); }
-        .search-container input { padding-left: 40px; margin-bottom: 0; background: rgba(0,0,0,0.15); border-color: rgba(13, 148, 136, 0.3); }
+        .search-container input { padding-left: 40px; margin-bottom: 0; background: rgba(0,0,0,0.15); border-color: rgba(59, 130, 246, 0.3); }
         .search-container input:focus { background: var(--input-bg); border-color: var(--primary); }
 
         table { width: 100%; border-collapse: collapse; min-width: 600px; margin-top: 10px; }
@@ -94,12 +94,12 @@
         .badge { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
         .badge svg { width: 12px; height: 12px; fill: currentColor; }
         .badge-admin { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
-        .badge-user { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(13, 148, 136, 0.3); }
-        .reseller-tag { font-size: 10px; color: var(--primary); background: var(--primary-glow); padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 6px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.2);}
+        .badge-user { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.3); }
+        .reseller-tag { font-size: 10px; color: var(--primary); background: var(--primary-glow); padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 6px; font-weight: 600; border: 1px solid rgba(59, 130, 246, 0.2);}
 
         /* MODALS */
         .mini-ai-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s ease; }
-        .mini-ai-popup { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 380px; padding: 30px 25px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1px solid var(--border-color); }
+        .mini-ai-popup { background: var(--card-bg); backdrop-filter: blur(16px); border-radius: 20px; width: 100%; max-width: 380px; padding: 30px 25px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1px solid var(--border-color); }
         
         .modal-icon-top { width: 50px; height: 50px; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
         .modal-icon-top svg { width: 24px; height: 24px; }
@@ -107,7 +107,7 @@
         .mode-danger .modal-icon-top { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); } .mode-danger .modal-icon-top svg { fill: var(--danger); } .mode-danger .mini-ai-header { color: var(--danger); }
         .mode-success .modal-icon-top { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); } .mode-success .modal-icon-top svg { fill: var(--success); } .mode-success .mini-ai-header { color: var(--success); }
         .mode-warning .modal-icon-top { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); } .mode-warning .modal-icon-top svg { fill: var(--warning); } .mode-warning .mini-ai-header { color: var(--warning); }
-        .mode-info .modal-icon-top { background: var(--primary-glow); border: 1px solid rgba(13, 148, 136, 0.3); } .mode-info .modal-icon-top svg { fill: var(--primary); } .mode-info .mini-ai-header { color: var(--primary); }
+        .mode-info .modal-icon-top { background: var(--primary-glow); border: 1px solid rgba(59, 130, 246, 0.3); } .mode-info .modal-icon-top svg { fill: var(--primary); } .mode-info .mini-ai-header { color: var(--primary); }
 
         .mini-ai-header { font-size: 18px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
         .mini-ai-body { font-size: 13px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; }
@@ -122,7 +122,7 @@
         
         .ai-btn-group { display: flex; gap: 10px; }
         .mini-ai-btn { flex: 1; border: none; padding: 12px; font-weight: 700; font-size: 12px; border-radius: 10px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 6px;}
-        .btn-primary-action { background: var(--primary); color: white; } .btn-primary-action:hover { background: #0f766e; transform: translateY(-2px); }
+        .btn-primary-action { background: var(--primary); color: white; } .btn-primary-action:hover { background: #2563eb; transform: translateY(-2px); }
         .btn-danger-action { background: var(--danger); color: white; } .btn-danger-action:hover { background: #dc2626; transform: translateY(-2px); }
         .btn-warning-action { background: var(--warning); color: white; } .btn-warning-action:hover { background: #d97706; transform: translateY(-2px); }
         .btn-outline-action { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-sub); } .btn-outline-action:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
@@ -275,6 +275,7 @@
     <div id="modalSapuConfirm" class="mini-ai-overlay"><div class="mini-ai-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M19.36 2.72L20.78 4.14L15.06 9.85C16.13 11.39 16.28 13.24 15.38 14.44L9.06 8.12C10.26 7.22 12.11 7.37 13.65 8.44L19.36 2.72M5.93 17.57C3.92 15.56 2.69 13.16 2.35 10.92L7.23 15.8L5.93 17.57M11.66 11.33L10.33 10L3 17.33L4.33 18.66L11.66 11.33M20.65 19.3L15.3 14C15.65 16.24 14.41 18.65 12.4 20.65L20.65 19.3Z" /></svg></div><div class="mini-ai-header">Sapu Bersih</div><div class="mini-ai-body" id="sapuConfirmBody"></div><div class="ai-btn-group"><button id="btnEksekusiSapu" class="mini-ai-btn btn-warning-action" onclick="eksekusiSapuBersih()">Lanjutkan Eksekusi</button><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalSapuConfirm')">Batal</button></div></div></div>
     <div id="modalAiAlert" class="mini-ai-overlay" style="z-index: 999999;"><div class="mini-ai-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><div class="mini-ai-header" id="aiAlertTitle">PERHATIAN</div><div class="mini-ai-body" id="aiAlertBody">Pesan peringatan di sini.</div><div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" style="background: var(--warning);" onclick="tutupModal('modalAiAlert')">Mengerti</button></div></div></div>
     <div id="modalAiSuccess" class="mini-ai-overlay" style="z-index: 999999;"><div class="mini-ai-popup mode-success" id="popupSuccessMode"><div class="modal-icon-top" id="iconSuccessMode"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="mini-ai-header" id="aiSuccessTitle">BERHASIL</div><div class="mini-ai-body" id="aiSuccessBody">Proses sukses dilakukan.</div><div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" id="btnTutupSuccess" style="background: var(--success);" onclick="tutupModal('modalAiSuccess')">Tutup</button></div></div></div>
+    <script src="config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -289,8 +290,8 @@
                 heading: 'Kelola User & Server (Private)',
                 subtitle: 'Bikin Akun + Server pelanggan VIP langsung dalam 1x proses otomatis.',
                 allowedRoles: ['pemilik', 'reseller_private', 'reseller', 'demo'],
-                domain: localStorage.getItem('prvt_domain') || 'privateserverzeroix.bypstar7.web.id',
-                api: localStorage.getItem('prvt_api') || 'ptla_FN9WdJ1WzLH1BlGyzyeoWtZGDl9roNeAd8VVmz7g5tF',
+                domain: GlobalConfig.getPteroConfig('private').domain,
+                api: GlobalConfig.getPteroConfig('private').api,
                 daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : 'Buatanmu',
                 showRoleContainer: (role) => role === 'pemilik'
             },
@@ -299,8 +300,8 @@
                 heading: 'Kelola User & Server (Public)',
                 subtitle: 'Bikin Akun + Server pelanggan Public langsung dalam 1x proses otomatis.',
                 allowedRoles: ['pemilik', 'reseller_public', 'partner_public', 'demo'],
-                domain: 'assistantzeroix.bypstar7.online',
-                api: 'ptla_WlmF4CJ2yI68CQEKcFeDieij2gXE67CESbqGISbXOeB',
+                domain: GlobalConfig.getPteroConfig('public').domain,
+                api: GlobalConfig.getPteroConfig('public').api,
                 daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : (role === 'partner_public' ? '(Tim Kamu)' : (role === 'demo' ? '(Akun Demo)' : 'Buatanmu')),
                 showRoleContainer: (role) => role === 'pemilik' || role === 'partner_public' || role === 'demo'
             },
@@ -309,8 +310,8 @@
                 heading: 'Kelola User & Server (Public V2)',
                 subtitle: 'Bikin Akun + Server pelanggan Public V2 langsung dalam 1x proses otomatis.',
                 allowedRoles: ['pemilik', 'reseller_public_v2', 'partner_public_v2'],
-                domain: 'assistantzeroix.bypstar7.online',
-                api: 'ptla_WlmF4CJ2yI68CQEKcFeDieij2gXE67CESbqGISbXOeB',
+                domain: GlobalConfig.getPteroConfig('public').domain,
+                api: GlobalConfig.getPteroConfig('public').api,
                 daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : (role === 'partner_public_v2' ? '(Tim Kamu)' : 'Buatanmu'),
                 showRoleContainer: (role) => role === 'pemilik' || role === 'partner_public_v2'
             }
@@ -337,7 +338,7 @@
             document.getElementById('roleContainer').style.display = 'none';
         }
 
-        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        const firebaseConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -346,7 +347,7 @@
             database.ref('users/' + currentUserId + '/isOnline').onDisconnect().set(false);
         }
 
-        const WORKER_URL = "https://restless-truth-9b75.amisterious09.workers.dev";
+        const WORKER_URL = GlobalConfig.getWorkerUrl().replace(/\?$/, "");
         const PTERO_DOMAIN = config.domain;
         const PTERO_API = config.api;
 
@@ -820,7 +821,7 @@ _Terima kasih telah berbelanja!_`;
         const guardRole = String(localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
         const guardUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
         if (!guardRole || guardRole === 'pemilik' || !guardUserId || !window.firebase) return;
-        const guardConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
+        const guardConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
         if (!firebase.apps.length) firebase.initializeApp(guardConfig);
         let __expiredHandled = false;
         firebase.database().ref('users/' + guardUserId).on('value', function(snapshot){
@@ -841,63 +842,36 @@ _Terima kasih telah berbelanja!_`;
         }, function(){});
     })();
     </script>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-        // Firebase Setup (re-initialize if not already)
-        const firebaseConfig = { databaseURL: "https://cobaaja-ac5d0-default-rtdb.firebaseio.com" };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        // Proteksi Ganda Sesi User
-        const currentUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
-        const roleRaw = localStorage.getItem('role') || localStorage.getItem('panel_role') || '';
-        const role = roleRaw.trim().toLowerCase();
-
-        // Countdown Timer
-        let expiryInterval;
+    (function expiryTimerBlock(){
+        var uid = localStorage.getItem("panel_user_id") || localStorage.getItem("user_id") || localStorage.getItem("user_id_ptero");
+        var r = String(localStorage.getItem("role") || localStorage.getItem("panel_role") || "").trim().toLowerCase();
+        if (!uid || !window.firebase) return;
+        var db = firebase.database();
+        var expiryInterval;
         function startExpiryTimer(expiredAt) {
-            const timerNav = document.getElementById('expiryTimerNav');
-
+            var timerNav = document.getElementById("expiryTimerNav");
             if (!timerNav) return;
             clearInterval(expiryInterval);
-
-            if (role === 'pemilik') {
-                timerNav.innerHTML = '<span class="timer-unlimited">∞ Unlimited</span>';
-                return;
-            }
-
-            expiryInterval = setInterval(() => {
-                const now = Date.now();
-                const timeLeft = expiredAt - now;
-
-                if (timeLeft <= 0) {
-                    timerNav.innerHTML = '<span class="timer-countdown" style="color:var(--danger)">EXPIRED</span>';
-                    timerNav.classList.add('expired');
-                    clearInterval(expiryInterval);
-                    return;
-                }
-
-                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-                const dateObj = new Date(expiredAt);
-                const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                
-                timerNav.innerHTML = `<span class="timer-date">${dateStr}</span><span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}d</span>`;
+            if (r === "pemilik") { timerNav.innerHTML = "<span class=timer-unlimited>∞ Unlimited</span>"; return; }
+            expiryInterval = setInterval(function() {
+                var now = Date.now();
+                var timeLeft = expiredAt - now;
+                if (timeLeft <= 0) { timerNav.innerHTML = "<span style=color:var(--danger)>EXPIRED</span>"; timerNav.classList.add("expired"); clearInterval(expiryInterval); return; }
+                var days = Math.floor(timeLeft / 86400000);
+                var hours = Math.floor((timeLeft % 86400000) / 3600000);
+                var minutes = Math.floor((timeLeft % 3600000) / 60000);
+                var seconds = Math.floor((timeLeft % 60000) / 1000);
+                var dateObj = new Date(expiredAt);
+                var dateStr = dateObj.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) + ", " + dateObj.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+                timerNav.innerHTML = "<span class=timer-date>" + dateStr + "</span><span class=timer-countdown>Sisa: " + days + "h " + hours + "j " + minutes + "m " + seconds + "d</span>";
             }, 1000);
         }
-
-        // Fetch expiredAt from Firebase and start timer
-        if (currentUserId) {
-            database.ref('users/'+ currentUserId + '/expiredAt').on('value', (snapshot) => {
-                const expiredAt = Number(snapshot.val() || 0);
-                startExpiryTimer(expiredAt);
-            });
-        }
+        db.ref("users/" + uid + "/expiredAt").on("value", function(snapshot) {
+            var expiredAt = Number(snapshot.val() || 0);
+            startExpiryTimer(expiredAt);
+        });
+    })();
     </script>
 </body>
 </html>

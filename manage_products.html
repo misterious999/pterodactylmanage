@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Produk Toko - Panel Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0a0f1e;
+            --card-bg: rgba(15, 25, 50, 0.7);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --primary-glow: rgba(59, 130, 246, 0.15);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --border-color: rgba(59, 130, 246, 0.12);
+            --glass-bg: rgba(15, 23, 42, 0.6);
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 24px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        .topbar { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand-icon { width: 42px; height: 42px; border-radius: 14px; background: var(--primary-glow); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .brand-icon svg { width: 24px; height: 24px; fill: var(--primary); }
+        h1 { margin: 0; font-size: 22px; letter-spacing: -0.4px; }
+        .subtitle { margin: 4px 0 0; color: var(--text-sub); font-size: 13px; }
+        .back-btn { color: var(--text-main); text-decoration: none; border: 1px solid var(--border-color); border-radius: 12px; padding: 11px 16px; background: var(--card-bg); backdrop-filter: blur(12px); font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .back-btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
+
+        .grid { display: grid; grid-template-columns: 380px 1fr; gap: 20px; align-items: start; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+        .card { background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid var(--border-color); border-radius: 18px; padding: 24px; box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
+        .card-title { margin: 0 0 6px; color: var(--primary); font-size: 16px; display: flex; align-items: center; gap: 8px; font-weight: 700; }
+        .card-title svg { width: 20px; height: 20px; fill: currentColor; }
+        .card-desc { color: var(--text-sub); font-size: 12px; line-height: 1.6; margin: 0 0 18px; }
+
+        label { display: block; color: var(--text-sub); font-weight: 700; font-size: 11px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, textarea { width: 100%; padding: 12px 14px; background: rgba(10, 15, 30, 0.8); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 10px; outline: none; font-family: 'Inter', sans-serif; font-size: 13px; transition: 0.2s; }
+        input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        textarea { resize: vertical; min-height: 70px; }
+        .field { margin-bottom: 14px; }
+
+        .btn { border: none; border-radius: 12px; padding: 12px 16px; font-weight: 700; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 13px; }
+        .btn svg { width: 18px; height: 18px; fill: currentColor; }
+        .btn-primary { background: var(--primary); color: white; width: 100%; }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 8px 20px var(--primary-glow); }
+        .btn-danger { background: rgba(239, 68, 68, 0.12); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.25); padding: 8px 12px; font-size: 12px; }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
+        .btn-edit { background: rgba(59, 130, 246, 0.1); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.25); padding: 8px 12px; font-size: 12px; }
+        .btn-edit:hover { background: rgba(59, 130, 246, 0.2); }
+        .btn-cancel { background: rgba(148, 163, 184, 0.1); color: var(--text-sub); border: 1px solid var(--border-color); width: 100%; margin-top: 8px; }
+
+        .product-list { display: flex; flex-direction: column; gap: 14px; }
+        .product-item { background: rgba(10, 15, 30, 0.5); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; display: flex; gap: 14px; align-items: center; transition: 0.2s; }
+        .product-item:hover { border-color: var(--primary); }
+        .product-item-img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; background: rgba(59, 130, 246, 0.05); flex-shrink: 0; }
+        .product-item-info { flex: 1; min-width: 0; }
+        .product-item-name { font-weight: 700; font-size: 14px; color: var(--text-main); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .product-item-price { font-size: 15px; font-weight: 800; color: var(--primary); }
+        .product-item-discount { font-size: 11px; color: var(--success); font-weight: 600; }
+        .product-item-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+        .alert { display: none; margin-bottom: 14px; border-radius: 12px; padding: 12px 14px; font-size: 13px; line-height: 1.5; border: 1px solid transparent; }
+        .alert.ok { display: block; background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.25); }
+        .alert.err { display: block; background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: rgba(239, 68, 68, 0.25); }
+
+        .empty { text-align: center; padding: 40px 10px; color: var(--text-sub); font-size: 13px; }
+
+        .access-denied { display: none; min-height: 70vh; align-items: center; justify-content: center; text-align: center; }
+        .access-denied .card { max-width: 420px; }
+    </style>
+</head>
+<body>
+    <div id="accessDenied" class="access-denied">
+        <div class="card">
+            <h2 style="color: var(--danger); margin-top: 0;">Akses Ditolak</h2>
+            <p class="subtitle">Halaman ini hanya untuk role <b>pemilik</b>.</p>
+            <a class="back-btn" href="index.html" style="margin-top: 18px;">Kembali ke Dashboard</a>
+        </div>
+    </div>
+
+    <div id="app" class="container" style="display: none;">
+        <div class="topbar">
+            <div class="brand">
+                <div class="brand-icon"><svg viewBox="0 0 24 24"><path d="M18.36 9l.6 3H5.04l.6-3h12.72M20 4H4v2h16V4zm0 3H4l-1 5v2h1v6h10v-6h4v6h2v-6h1v-2l-1-5zM6 18v-4h6v4H6z"/></svg></div>
+                <div>
+                    <h1>Kelola Produk Toko</h1>
+                    <p class="subtitle">Tambah, edit, dan hapus produk yang tampil di halaman utama.</p>
+                </div>
+            </div>
+            <a href="index.html" class="back-btn">
+                <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                Dashboard
+            </a>
+        </div>
+
+        <div id="alertBox" class="alert"></div>
+
+        <div class="grid">
+            <div class="card">
+                <h2 class="card-title"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> <span id="formTitle">Tambah Produk</span></h2>
+                <p class="card-desc">Isi detail produk. Semua field wajib kecuali kode diskon dan deskripsi.</p>
+                <div class="field"><label>Nama Produk</label><input id="prodNama" type="text" placeholder="Contoh: Paket Bot Private 1 Bulan"></div>
+                <div class="field"><label>Harga (Rupiah, angka saja)</label><input id="prodHarga" type="number" placeholder="50000"></div>
+                <div class="field"><label>URL Gambar Produk</label><input id="prodGambar" type="url" placeholder="https://..."></div>
+                <div class="field"><label>Kode Diskon (Opsional)</label><input id="prodDiskon" type="text" placeholder="DISKON10"></div>
+                <div class="field"><label>Deskripsi Singkat (Opsional)</label><textarea id="prodDeskripsi" placeholder="Deskripsi produk..."></textarea></div>
+                <button class="btn btn-primary" id="btnSimpan" onclick="simpanProduk()">
+                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Simpan Produk
+                </button>
+                <button class="btn btn-cancel" id="btnBatal" style="display: none;" onclick="batalEdit()">Batal Edit</button>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title" style="color: var(--warning);"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg> Daftar Produk</h2>
+                <p class="card-desc">Produk yang tampil di halaman utama toko.</p>
+                <div class="product-list" id="productList">
+                    <div class="empty">Memuat data...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        const currentUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
+        const role = String(localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
+        const username = localStorage.getItem('username') || localStorage.getItem('panel_username') || 'Unknown';
+
+        if (!currentUserId || role !== 'pemilik') {
+            document.getElementById('accessDenied').style.display = 'flex';
+            setTimeout(() => window.location.replace('index.html'), 2500);
+        } else {
+            document.getElementById('app').style.display = 'block';
+        }
+
+        const firebaseConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const productsRef = database.ref('store_products');
+
+        let editingKey = null;
+
+        function showAlert(msg, type) {
+            const el = document.getElementById('alertBox');
+            el.className = 'alert ' + type;
+            el.innerText = msg;
+            setTimeout(() => el.className = 'alert', 4000);
+        }
+
+        function formatRupiah(num) {
+            return 'Rp ' + Number(num).toLocaleString('id-ID');
+        }
+
+        function simpanProduk() {
+            const nama = document.getElementById('prodNama').value.trim();
+            const harga = document.getElementById('prodHarga').value.trim();
+            const gambar = document.getElementById('prodGambar').value.trim();
+            const diskon = document.getElementById('prodDiskon').value.trim();
+            const deskripsi = document.getElementById('prodDeskripsi').value.trim();
+
+            if (!nama || !harga) {
+                showAlert('Nama dan harga produk wajib diisi!', 'err');
+                return;
+            }
+
+            const data = {
+                nama,
+                harga: Number(harga),
+                gambar: gambar || '',
+                diskon: diskon || '',
+                deskripsi: deskripsi || '',
+                updatedAt: Date.now(),
+                updatedBy: username
+            };
+
+            const now = Date.now();
+            let ref;
+            let actionText;
+
+            if (editingKey) {
+                ref = productsRef.child(editingKey).update(data);
+                actionText = `Mengedit produk toko: ${nama}`;
+            } else {
+                data.createdAt = now;
+                data.createdBy = username;
+                ref = productsRef.push(data);
+                actionText = `Menambah produk toko baru: ${nama}`;
+            }
+
+            Promise.resolve(ref).then(() => {
+                return database.ref('activity_logs').push({
+                    uid: currentUserId, username, role,
+                    action: actionText,
+                    timestamp: now
+                });
+            }).then(() => {
+                showAlert(editingKey ? 'Produk berhasil diperbarui!' : 'Produk berhasil ditambahkan!', 'ok');
+                resetForm();
+            }).catch(e => {
+                showAlert('Gagal menyimpan: ' + e.message, 'err');
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('prodNama').value = '';
+            document.getElementById('prodHarga').value = '';
+            document.getElementById('prodGambar').value = '';
+            document.getElementById('prodDiskon').value = '';
+            document.getElementById('prodDeskripsi').value = '';
+            editingKey = null;
+            document.getElementById('formTitle').innerText = 'Tambah Produk';
+            document.getElementById('btnBatal').style.display = 'none';
+        }
+
+        function editProduk(key, data) {
+            editingKey = key;
+            document.getElementById('prodNama').value = data.nama || '';
+            document.getElementById('prodHarga').value = data.harga || '';
+            document.getElementById('prodGambar').value = data.gambar || '';
+            document.getElementById('prodDiskon').value = data.diskon || '';
+            document.getElementById('prodDeskripsi').value = data.deskripsi || '';
+            document.getElementById('formTitle').innerText = 'Edit Produk';
+            document.getElementById('btnBatal').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function batalEdit() {
+            resetForm();
+        }
+
+        function hapusProduk(key, nama) {
+            if (!confirm(`Yakin hapus produk "${nama}"?`)) return;
+            const now = Date.now();
+            productsRef.child(key).remove().then(() => {
+                return database.ref('activity_logs').push({
+                    uid: currentUserId, username, role,
+                    action: `Menghapus produk toko: ${nama}`,
+                    timestamp: now
+                });
+            }).then(() => {
+                showAlert('Produk berhasil dihapus.', 'ok');
+            }).catch(e => {
+                showAlert('Gagal menghapus: ' + e.message, 'err');
+            });
+        }
+
+        // Realtime listener
+        productsRef.on('value', (snapshot) => {
+            const container = document.getElementById('productList');
+            const data = snapshot.val();
+            if (!data || Object.keys(data).length === 0) {
+                container.innerHTML = '<div class="empty">Belum ada produk. Tambahkan produk pertama!</div>';
+                return;
+            }
+
+            let html = '';
+            Object.keys(data).forEach(key => {
+                const p = data[key];
+                html += `
+                <div class="product-item">
+                    <img src="${p.gambar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.nama) + '&background=1e3a5f&color=3b82f6&size=120'}" 
+                         alt="${p.nama}" class="product-item-img"
+                         onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.nama)}&background=1e3a5f&color=3b82f6&size=120'">
+                    <div class="product-item-info">
+                        <div class="product-item-name">${p.nama}</div>
+                        <div class="product-item-price">${formatRupiah(p.harga)}</div>
+                        ${p.diskon ? `<div class="product-item-discount">Diskon: ${p.diskon}</div>` : ''}
+                    </div>
+                    <div class="product-item-actions">
+                        <button class="btn btn-edit" onclick='editProduk("${key}", ${JSON.stringify(p).replace(/'/g, "&#39;")})'>Edit</button>
+                        <button class="btn btn-danger" onclick='hapusProduk("${key}", "${p.nama.replace(/"/g, '&quot;')}")'>Hapus</button>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        });
+    </script>
+</body>
+</html>

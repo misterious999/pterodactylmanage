@@ -13,5 +13,40 @@
       "lastLoginAt": 0,
       "expiredStatus": "exempt"
     }
+  },
+  "store_products": {
+    "prod_001": {
+      "nama": "Panel Bot Private 1 Bulan",
+      "harga": 25000,
+      "gambar": "https://ui-avatars.com/api/?name=Private+Panel&background=1e3a5f&color=3b82f6&size=400",
+      "diskon": "HEMAT10",
+      "deskripsi": "Panel Pterodactyl private server untuk bot Discord/WhatsApp. RAM 1GB, CPU 100%, Storage 5GB.",
+      "createdAt": 1710000000000,
+      "createdBy": "admin",
+      "updatedAt": 1710000000000,
+      "updatedBy": "admin"
+    },
+    "prod_002": {
+      "nama": "Panel Bot Public 1 Bulan",
+      "harga": 15000,
+      "gambar": "https://ui-avatars.com/api/?name=Public+Panel&background=1e3a5f&color=3b82f6&size=400",
+      "diskon": "",
+      "deskripsi": "Panel Pterodactyl public server untuk bot. RAM 512MB, CPU 50%, Storage 2GB.",
+      "createdAt": 1710000000000,
+      "createdBy": "admin",
+      "updatedAt": 1710000000000,
+      "updatedBy": "admin"
+    },
+    "prod_003": {
+      "nama": "Panel VPS Premium 1 Bulan",
+      "harga": 50000,
+      "gambar": "https://ui-avatars.com/api/?name=VPS+Premium&background=1e3a5f&color=3b82f6&size=400",
+      "diskon": "VPS20OFF",
+      "deskripsi": "VPS Premium dengan panel Pterodactyl. RAM 2GB, CPU 200%, Storage 10GB, Unlimited bandwidth.",
+      "createdAt": 1710000000000,
+      "createdBy": "admin",
+      "updatedAt": 1710000000000,
+      "updatedBy": "admin"
+    }
   }
 }

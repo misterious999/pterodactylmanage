@@ -7,13 +7,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-color: #0f172a; --card-bg: #1e293b; --primary: #0d9488; 
-            --primary-glow: rgba(13, 148, 136, 0.15); --success: #10b981; --danger: #ef4444; 
-            --warning: #f59e0b; --text-main: #f8fafc; --text-sub: #94a3b8; --border-color: rgba(255,255,255,0.08); 
+            --bg-color: #0a0f1e; --card-bg: rgba(15, 25, 50, 0.7); --primary: #3b82f6; 
+            --primary-glow: rgba(59, 130, 246, 0.15); --success: #10b981; --danger: #ef4444; 
+            --warning: #f59e0b; --text-main: #f8fafc; --text-sub: #94a3b8; --border-color: rgba(59, 130, 246, 0.12); 
         }
         body { font-family: 'Inter', sans-serif; padding: 20px 5%; background-color: var(--bg-color); color: var(--text-main); margin: 0; max-width: 900px; margin: auto; overflow-x: hidden; }
         
-        .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 10px 16px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 13px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.3); transition: 0.3s; }
+        .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 10px 16px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 13px; font-weight: 600; border: 1px solid rgba(59, 130, 246, 0.3); transition: 0.3s; }
         .btn-back:hover { background: var(--primary); color: white; }
         
         h2 { font-weight: 800; margin-bottom: 5px; border-left: 4px solid var(--primary); padding-left: 12px; display: flex; align-items: center; gap: 10px; font-size: 20px; text-transform: uppercase; }
@@ -30,8 +30,8 @@
         .grid-2 { display: grid; grid-template-columns: 1fr; gap: 0 15px; }
         @media (min-width: 600px) { .grid-2 { grid-template-columns: repeat(2, 1fr); } }
 
-        .btn-save { width: 100%; background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; box-shadow: 0 5px 15px var(--primary-glow); margin-bottom: 30px; }
-        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(13, 148, 136, 0.4); }
+        .btn-save { width: 100%; background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; box-shadow: 0 5px 15px var(--primary-glow); margin-bottom: 30px; }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); }
     </style>
 </head>
 <body>

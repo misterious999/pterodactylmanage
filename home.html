@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroixDark - Panel Pterodactyl Hosting</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0a0f1e;
+            --card-bg: rgba(15, 25, 50, 0.7);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --primary-glow: rgba(59, 130, 246, 0.25);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --border-color: rgba(59, 130, 246, 0.15);
+            --glass-bg: rgba(15, 23, 42, 0.6);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-gradient {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.04) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-brand {
+            display: flex; align-items: center; gap: 12px;
+            font-size: 20px; font-weight: 800;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .nav-brand svg { width: 32px; height: 32px; fill: var(--primary); filter: drop-shadow(0 0 8px var(--primary-glow)); }
+        .btn-login-nav {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-login-nav:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--primary-glow); }
+
+        /* Hero Section */
+        .hero {
+            position: relative; z-index: 1;
+            text-align: center;
+            padding: 80px 5% 60px;
+        }
+        .hero h1 {
+            font-size: clamp(28px, 5vw, 48px);
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        .hero p {
+            color: var(--text-sub);
+            font-size: 16px;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            line-height: 1.7;
+        }
+        .hero-badges {
+            display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px;
+        }
+        .hero-badge {
+            padding: 6px 16px;
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            backdrop-filter: blur(8px);
+        }
+
+        /* Products Section */
+        .section-title {
+            text-align: center;
+            position: relative; z-index: 1;
+            margin-bottom: 40px;
+            padding: 0 5%;
+        }
+        .section-title h2 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+        .section-title p {
+            color: var(--text-sub);
+            font-size: 14px;
+        }
+
+        .products-grid {
+            position: relative; z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            padding: 0 5% 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: 0.3s;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .product-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--primary);
+            box-shadow: 0 16px 48px var(--primary-glow);
+        }
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: rgba(59, 130, 246, 0.05);
+            display: block;
+        }
+        .product-body {
+            padding: 20px;
+        }
+        .product-name {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+        .product-desc {
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        .product-price {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .product-discount {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 16px;
+        }
+        .btn-beli {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #25d366, #128c7e);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-beli:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3); }
+        .btn-beli svg { width: 18px; height: 18px; fill: currentColor; }
+
+        .empty-products {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-sub);
+            font-size: 14px;
+            grid-column: 1 / -1;
+        }
+
+        /* Footer */
+        .footer {
+            position: relative; z-index: 1;
+            text-align: center;
+            padding: 30px 5%;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-sub);
+            font-size: 12px;
+        }
+        .footer b { color: var(--primary); }
+
+        /* Loading */
+        .loading-spinner {
+            display: flex; align-items: center; justify-content: center;
+            padding: 60px; grid-column: 1 / -1;
+        }
+        .loading-spinner::after {
+            content: '';
+            width: 36px; height: 36px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 640px) {
+            .hero { padding: 50px 5% 40px; }
+            .products-grid { grid-template-columns: 1fr; }
+            .navbar { padding: 12px 4%; }
+            .nav-brand { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <nav class="navbar">
+        <div class="nav-brand">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            ZeroixDark
+        </div>
+        <a href="login.html" class="btn-login-nav">Login Panel</a>
+    </nav>
+
+    <section class="hero">
+        <h1>Panel Pterodactyl Hosting</h1>
+        <p>Solusi hosting panel terbaik untuk bot dan server Anda. Performa tinggi, uptime stabil, dan harga terjangkau.</p>
+        <div class="hero-badges">
+            <span class="hero-badge">⚡ High Performance</span>
+            <span class="hero-badge">🛡️ 99.9% Uptime</span>
+            <span class="hero-badge">🚀 Auto Deploy</span>
+            <span class="hero-badge">💬 24/7 Support</span>
+        </div>
+    </section>
+
+    <div class="section-title">
+        <h2>Produk & Layanan</h2>
+        <p>Pilih paket yang sesuai kebutuhan Anda</p>
+    </div>
+
+    <div class="products-grid" id="productsContainer">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2024 <b>ZeroixDark Panel</b> — Powered by Pterodactyl</p>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const WA_NUMBER = '62895416479539';
+
+        function formatRupiah(num) {
+            return 'Rp ' + Number(num).toLocaleString('id-ID');
+        }
+
+        function buatLinkWA(produk) {
+            let teks = `Halo, saya ingin membeli produk:\n\n`;
+            teks += `📦 Produk: ${produk.nama}\n`;
+            teks += `💰 Harga: ${formatRupiah(produk.harga)}\n`;
+            if (produk.diskon) {
+                teks += `🎟️ Kode Diskon: ${produk.diskon}\n`;
+            }
+            teks += `\nMohon informasi lebih lanjut. Terima kasih!`;
+            return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(teks)}`;
+        }
+
+        function renderProducts(products) {
+            const container = document.getElementById('productsContainer');
+            if (!products || Object.keys(products).length === 0) {
+                container.innerHTML = '<div class="empty-products">Belum ada produk tersedia saat ini.</div>';
+                return;
+            }
+
+            let html = '';
+            Object.keys(products).forEach(key => {
+                const p = products[key];
+                html += `
+                <div class="product-card">
+                    <img src="${p.gambar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.nama) + '&background=1e3a5f&color=3b82f6&size=400'}" 
+                         alt="${p.nama}" class="product-img" 
+                         onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.nama)}&background=1e3a5f&color=3b82f6&size=400'">
+                    <div class="product-body">
+                        <div class="product-name">${p.nama}</div>
+                        ${p.deskripsi ? `<div class="product-desc">${p.deskripsi}</div>` : ''}
+                        <div class="product-price">${formatRupiah(p.harga)}</div>
+                        ${p.diskon ? `<div class="product-discount">🎟️ Kode: ${p.diskon}</div>` : ''}
+                        <a href="${buatLinkWA(p)}" target="_blank" class="btn-beli">
+                            <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            Beli via WhatsApp
+                        </a>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // Load products from Firebase
+        database.ref('store_products').on('value', (snapshot) => {
+            renderProducts(snapshot.val());
+        }, (error) => {
+            document.getElementById('productsContainer').innerHTML = '<div class="empty-products">Gagal memuat produk. Silakan refresh halaman.</div>';
+        });
+    </script>
+</body>
+</html>

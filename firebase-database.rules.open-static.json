@@ -25,6 +25,13 @@
     },
     "pengumuman_global": {
       ".validate": "newData.val() == null || newData.hasChildren(['pesan','timestamp'])"
+    },
+    "store_products": {
+      ".read": true,
+      ".write": true,
+      "$productId": {
+        ".validate": "newData.hasChildren(['nama','harga'])"
+      }
     }
   }
 }
