@@ -11,18 +11,26 @@
             --primary-glow: rgba(13, 148, 136, 0.15); --success: #10b981; --danger: #ef4444; 
             --warning: #f59e0b; --text-main: #f8fafc; --text-sub: #94a3b8; --border-color: rgba(255,255,255,0.08); 
         }
-        body { font-family: 'Inter', sans-serif; padding: 30px 5%; background-color: var(--bg-color); color: var(--text-main); margin: 0; max-width: 900px; margin: auto; }
-        .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 25px; padding: 10px 18px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.3); transition: 0.3s; }
+        body { font-family: 'Inter', sans-serif; padding: 20px 5%; background-color: var(--bg-color); color: var(--text-main); margin: 0; max-width: 900px; margin: auto; overflow-x: hidden; }
+        
+        .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 10px 16px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 13px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.3); transition: 0.3s; }
         .btn-back:hover { background: var(--primary); color: white; }
-        h2 { font-weight: 800; margin-bottom: 5px; border-left: 4px solid var(--primary); padding-left: 12px; display: flex; align-items: center; gap: 10px; font-size: 22px; text-transform: uppercase; }
-        .sub-title { color: var(--text-sub); margin-bottom: 30px; font-size: 14px; }
-        .box { background: var(--card-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
-        .box h3 { margin-top: 0; color: var(--primary); font-size: 16px; text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; }
-        input { width: 100%; padding: 12px 16px; margin-bottom: 18px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-size: 14px; box-sizing: border-box; outline: none; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 15px; }
-        .btn-save { width: 100%; background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; box-shadow: 0 5px 15px var(--primary-glow); }
+        
+        h2 { font-weight: 800; margin-bottom: 5px; border-left: 4px solid var(--primary); padding-left: 12px; display: flex; align-items: center; gap: 10px; font-size: 20px; text-transform: uppercase; }
+        .sub-title { color: var(--text-sub); margin-bottom: 25px; font-size: 13px; line-height: 1.5; }
+        
+        .box { background: var(--card-bg); padding: 20px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); box-sizing: border-box; width: 100%; }
+        .box h3 { margin-top: 0; color: var(--primary); font-size: 14px; text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        
+        label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        input { width: 100%; padding: 12px 14px; margin-bottom: 15px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-size: 13px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(15, 23, 42, 0.9); }
+        
+        /* Grid responsif: 1 kolom di HP, 2 kolom di layar besar */
+        .grid-2 { display: grid; grid-template-columns: 1fr; gap: 0 15px; }
+        @media (min-width: 600px) { .grid-2 { grid-template-columns: repeat(2, 1fr); } }
+
+        .btn-save { width: 100%; background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; box-shadow: 0 5px 15px var(--primary-glow); margin-bottom: 30px; }
         .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(13, 148, 136, 0.4); }
     </style>
 </head>
@@ -30,16 +38,16 @@
 
     <a href="index.html" class="btn-back">← Kembali ke Dashboard</a>
     
-    <h2>⚙️ Pusat Pengaturan Sistem</h2>
-    <p class="sub-title">Kelola koneksi API Pterodactyl, Worker, Firebase, serta parameter default server dalam satu panel.</p>
+    <h2>⚙️ Pusat Pengaturan</h2>
+    <p class="sub-title">Kelola koneksi API Pterodactyl, Worker, Firebase, serta parameter default server.</p>
 
     <div class="box">
-        <h3>🌐 Konfigurasi Jaringan & Database</h3>
+        <h3>🌐 Koneksi Jaringan & Database</h3>
         <label>URL Worker CORS</label>
         <input type="text" id="cfgWorker" placeholder="https://...workers.dev/?">
         
         <label>Firebase Database URL</label>
-        <input type="text" id="cfgFirebase" placeholder="https://...firebaseio.com">
+        <input type="text" id="cfgFirebase" placeholder="https://...firebaseio.com" style="margin-bottom: 0;">
     </div>
 
     <div class="box">
@@ -48,34 +56,44 @@
             <div>
                 <label>Domain Private Pterodactyl</label>
                 <input type="text" id="prvtDomain" placeholder="privateserver.com">
+            </div>
+            <div>
                 <label>API Key (PTLA) Private</label>
                 <input type="text" id="prvtApi" placeholder="ptla_...">
             </div>
+        </div>
+        <div class="grid-2">
             <div>
                 <label>Domain Public Pterodactyl</label>
                 <input type="text" id="pubDomain" placeholder="publicserver.com">
+            </div>
+            <div>
                 <label>API Key (PTLA) Public</label>
-                <input type="text" id="pubApi" placeholder="ptla_...">
+                <input type="text" id="pubApi" placeholder="ptla_..." style="margin-bottom: 0;">
             </div>
         </div>
     </div>
 
     <div class="box">
-        <h3>🚀 Parameter Default Deploy (Egg, Location, Node)</h3>
+        <h3>🚀 Parameter Default Deploy</h3>
         <div class="grid-2">
             <div>
                 <label>Default Location ID</label>
                 <input type="number" id="defLocId" placeholder="1">
-                
+            </div>
+            <div>
                 <label>Default Egg ID</label>
                 <input type="number" id="defEggId" placeholder="15">
             </div>
+        </div>
+        <div class="grid-2">
             <div>
                 <label>Default Nest ID</label>
                 <input type="number" id="defNestId" placeholder="5">
-                
+            </div>
+            <div>
                 <label>Default Node ID (Opsional)</label>
-                <input type="number" id="defNodeId" placeholder="1">
+                <input type="number" id="defNodeId" placeholder="1" style="margin-bottom: 0;">
             </div>
         </div>
     </div>
