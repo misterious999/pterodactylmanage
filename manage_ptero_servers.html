@@ -322,7 +322,8 @@
             if(elNestId) elNestId.value = defaults.nestId;
         });
 
-        const WORKER_URL = GlobalConfig.getWorkerUrl().replace(/\?$/, '');
+        let rawWorker = GlobalConfig.getWorkerUrl();
+        const WORKER_URL = rawWorker.endsWith('?') ? rawWorker : rawWorker + (rawWorker.endsWith('/') ? '?' : '/?');
         const PTERO_DOMAIN = config.domain;
         const PTERO_API = config.api;
 
@@ -703,36 +704,58 @@
         }, function(){});
     })();
     </script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-    (function expiryTimerBlock(){
-        var uid = localStorage.getItem("panel_user_id") || localStorage.getItem("user_id") || localStorage.getItem("user_id_ptero");
-        var r = String(localStorage.getItem("role") || localStorage.getItem("panel_role") || "").trim().toLowerCase();
-        if (!uid || !window.firebase) return;
-        var db = firebase.database();
-        var expiryInterval;
+        const firebaseConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const currentUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
+        const roleRaw = localStorage.getItem('role') || localStorage.getItem('panel_role') || '';
+        const role = roleRaw.trim().toLowerCase();
+
+        let expiryInterval;
         function startExpiryTimer(expiredAt) {
-            var timerNav = document.getElementById("expiryTimerNav");
+            const timerNav = document.getElementById('expiryTimerNav');
             if (!timerNav) return;
             clearInterval(expiryInterval);
-            if (r === "pemilik") { timerNav.innerHTML = "<span class=timer-unlimited>∞ Unlimited</span>"; return; }
-            expiryInterval = setInterval(function() {
-                var now = Date.now();
-                var timeLeft = expiredAt - now;
-                if (timeLeft <= 0) { timerNav.innerHTML = "<span style=color:var(--danger)>EXPIRED</span>"; timerNav.classList.add("expired"); clearInterval(expiryInterval); return; }
-                var days = Math.floor(timeLeft / 86400000);
-                var hours = Math.floor((timeLeft % 86400000) / 3600000);
-                var minutes = Math.floor((timeLeft % 3600000) / 60000);
-                var seconds = Math.floor((timeLeft % 60000) / 1000);
-                var dateObj = new Date(expiredAt);
-                var dateStr = dateObj.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) + ", " + dateObj.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-                timerNav.innerHTML = "<span class=timer-date>" + dateStr + "</span><span class=timer-countdown>Sisa: " + days + "h " + hours + "j " + minutes + "m " + seconds + "d</span>";
+
+            if (role === 'pemilik') {
+                timerNav.innerHTML = '<span class="timer-unlimited">∞ Unlimited</span>';
+                return;
+            }
+
+            expiryInterval = setInterval(() => {
+                const now = Date.now();
+                const timeLeft = expiredAt - now;
+
+                if (timeLeft <= 0) {
+                    timerNav.innerHTML = '<span class="timer-countdown" style="color:var(--danger)">EXPIRED</span>';
+                    timerNav.classList.add('expired');
+                    clearInterval(expiryInterval);
+                    return;
+                }
+
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                const dateObj = new Date(expiredAt);
+                const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                timerNav.innerHTML = `<span class="timer-date">${dateStr}</span><span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}d</span>`;
             }, 1000);
         }
-        db.ref("users/" + uid + "/expiredAt").on("value", function(snapshot) {
-            var expiredAt = Number(snapshot.val() || 0);
-            startExpiryTimer(expiredAt);
-        });
-    })();
+
+        if (currentUserId) {
+            database.ref('users/'+ currentUserId + '/expiredAt').on('value', (snapshot) => {
+                const expiredAt = Number(snapshot.val() || 0);
+                startExpiryTimer(expiredAt);
+            });
+        }
     </script>
 </body>
 </html>
