@@ -166,7 +166,7 @@
             const harga = document.getElementById('prodHarga').value.trim();
             const gambar = document.getElementById('prodGambar').value.trim();
             const diskon = document.getElementById('prodDiskon').value.trim();
-            const deskripsi = document.getElementById('prodDeskripsi').value.trim();
+            const deskripsi = document.getElementById('prodDeskripsi').value;
 
             if (!nama || !harga) {
                 showAlert('Nama dan harga produk wajib diisi!', 'err');
@@ -266,11 +266,15 @@
             let html = '';
             Object.keys(data).forEach(key => {
                 const p = data[key];
+                const fallbackImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.nama) + '&background=1e3a5f&color=3b82f6&size=120';
+                const imgSrc = (p.gambar && p.gambar.trim()) ? p.gambar.trim() : fallbackImg;
+                const safeSrc = imgSrc.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                const safeFallback = fallbackImg.replace(/'/g, '&#39;');
                 html += `
                 <div class="product-item">
-                    <img src="${p.gambar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.nama) + '&background=1e3a5f&color=3b82f6&size=120'}" 
-                         alt="${p.nama}" class="product-item-img"
-                         onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.nama)}&background=1e3a5f&color=3b82f6&size=120'">
+                    <img src="${safeSrc}" 
+                         alt="${(p.nama||'').replace(/"/g, '&quot;')}" class="product-item-img" loading="lazy"
+                         onerror="this.onerror=null;this.src='${safeFallback}'">
                     <div class="product-item-info">
                         <div class="product-item-name">${p.nama}</div>
                         <div class="product-item-price">${formatRupiah(p.harga)}</div>

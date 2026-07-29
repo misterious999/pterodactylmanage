@@ -160,7 +160,7 @@
             width: 100%;
             height: 180px;
             object-fit: cover;
-            background: rgba(59, 130, 246, 0.05);
+            background: rgba(59, 130, 246, 0.1) url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233b82f6" opacity="0.3"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>') center/40px no-repeat;
             display: block;
         }
         .product-body {
@@ -177,6 +177,8 @@
             color: var(--text-sub);
             line-height: 1.6;
             margin-bottom: 12px;
+            white-space: pre-line;
+            word-break: break-word;
         }
         .product-price {
             font-size: 22px;
@@ -329,14 +331,19 @@
             let html = '';
             Object.keys(products).forEach(key => {
                 const p = products[key];
+                const fallbackImg = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.nama) + '&background=1e3a5f&color=3b82f6&size=400';
+                const imgSrc = (p.gambar && p.gambar.trim()) ? p.gambar.trim() : fallbackImg;
+                const safeSrc = imgSrc.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                const safeFallback = fallbackImg.replace(/'/g, '&#39;');
+                const deskripsiHtml = p.deskripsi ? p.deskripsi.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
                 html += `
                 <div class="product-card">
-                    <img src="${p.gambar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.nama) + '&background=1e3a5f&color=3b82f6&size=400'}" 
-                         alt="${p.nama}" class="product-img" 
-                         onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.nama)}&background=1e3a5f&color=3b82f6&size=400'">
+                    <img src="${safeSrc}" 
+                         alt="${(p.nama||'').replace(/"/g, '&quot;')}" class="product-img" loading="lazy"
+                         onerror="this.onerror=null;this.src='${safeFallback}'">
                     <div class="product-body">
                         <div class="product-name">${p.nama}</div>
-                        ${p.deskripsi ? `<div class="product-desc">${p.deskripsi}</div>` : ''}
+                        ${deskripsiHtml ? `<div class="product-desc">${deskripsiHtml}</div>` : ''}
                         <div class="product-price">${formatRupiah(p.harga)}</div>
                         ${p.diskon ? `<div class="product-discount">🎟️ Kode: ${p.diskon}</div>` : ''}
                         <a href="${buatLinkWA(p)}" target="_blank" class="btn-beli">
