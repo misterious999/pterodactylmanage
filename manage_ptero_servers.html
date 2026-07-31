@@ -322,8 +322,7 @@
             if(elNestId) elNestId.value = defaults.nestId;
         });
 
-        let rawWorker = GlobalConfig.getWorkerUrl();
-        const WORKER_URL = rawWorker.endsWith('?') ? rawWorker : rawWorker + (rawWorker.endsWith('/') ? '?' : '/?');
+        const WORKER_URL = GlobalConfig.getWorkerUrl().replace(/[\/?]+$/, '');
         const PTERO_DOMAIN = config.domain;
         const PTERO_API = config.api;
 
