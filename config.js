@@ -8,7 +8,7 @@ const GlobalConfig = {
         if (mode === 'private') {
             return {
                 domain: localStorage.getItem('prvt_domain') || "zerosystempriv.bypstar7.web.id",
-                api: localStorage.getItem('prvt_api') || "ptla_FN9WdJ1WzLH1BlGyzyeoWtZGDl9roNeAd8VVmz7g5tF"
+                api: localStorage.getItem('prvt_api') || "ptla_7p3wxOhXAJLAu5C46hzp6lYDRBpcHa7wkvmll7cEgRU"
             };
         } else {
             // Public & Public V2
