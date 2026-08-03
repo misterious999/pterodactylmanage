@@ -7,7 +7,7 @@ const GlobalConfig = {
     getPteroConfig: (mode = 'private') => {
         if (mode === 'private') {
             return {
-                domain: localStorage.getItem('prvt_domain') || "privateserverzeroix.bypstar7.web.id",
+                domain: localStorage.getItem('prvt_domain') || "zerosystempriv.bypstar7.web.id",
                 api: localStorage.getItem('prvt_api') || "ptla_FN9WdJ1WzLH1BlGyzyeoWtZGDl9roNeAd8VVmz7g5tF"
             };
         } else {
