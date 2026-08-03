@@ -7,18 +7,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-color: #0a0f1e; --card-bg: rgba(15, 25, 50, 0.7); 
-            --primary: #3b82f6; 
-            --primary-glow: rgba(59, 130, 246, 0.15);
+            --bg-color: #0f172a; --card-bg: #1e293b; 
+            --primary: #0d9488; 
+            --primary-glow: rgba(13, 148, 136, 0.15);
             --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
             --text-main: #f8fafc; --text-sub: #94a3b8; 
-            --border-color: rgba(59, 130, 246, 0.12); 
+            --border-color: rgba(255,255,255,0.08); 
         }
-        .expiry-timer { font-size: 12px; font-weight: 700; color: var(--text-main); background: var(--primary-glow); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(59, 130, 246, 0.3); margin-left: 15px; white-space: nowrap; }
+        .expiry-timer { font-size: 12px; font-weight: 700; color: var(--text-main); background: var(--primary-glow); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(13, 148, 136, 0.3); margin-left: 15px; white-space: nowrap; }
         .expiry-timer.expired { color: var(--danger); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
         body { font-family: 'Inter', sans-serif; padding: 30px 5%; background-color: var(--bg-color); color: var(--text-main); margin: 0; max-width: 1200px; margin: auto; }
         
-        .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 25px; padding: 10px 18px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600; border: 1px solid rgba(59, 130, 246, 0.3); transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 25px; padding: 10px 18px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.3); transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .btn-back svg { width: 18px; height: 18px; fill: currentColor; transition: transform 0.3s; }
         .btn-back:hover { background: var(--primary); color: white; box-shadow: 0 6px 20px var(--primary-glow); transform: translateY(-2px); }
         .btn-back:hover svg { transform: translateX(-4px); }
@@ -26,7 +26,7 @@
         h2 { font-weight: 800; margin-bottom: 5px; color: var(--text-main); border-left: 4px solid var(--primary); padding-left: 12px; display: flex; align-items: center; gap: 10px; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
         h2 svg { width: 24px; height: 24px; fill: var(--primary); }
         .sub-title { color: var(--text-sub); margin-bottom: 35px; font-size: 14px; line-height: 1.5; }
-                .box { background: var(--card-bg); backdrop-filter: blur(16px); padding: 30px; border-radius: 20px; border: 1px solid var(--border-color); margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow-x: auto; }
+                .box { background: var(--card-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--border-color); margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow-x: auto; }
         .box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; flex-wrap: wrap; gap: 15px; }
         .box-header h3 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 10px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
         .box-header h3 svg { width: 20px; height: 20px; fill: var(--primary); }
@@ -48,7 +48,7 @@
         .action-text { color: var(--text-main); font-size: 14px; line-height: 1.6; }
                 /* MODALS */
         .mini-ai-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s ease; }
-        .mini-ai-popup { background: var(--card-bg); backdrop-filter: blur(16px); border-radius: 24px; width: 100%; max-width: 400px; padding: 35px 30px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.6); border: 1px solid var(--border-color); }
+        .mini-ai-popup { background: var(--card-bg); border-radius: 24px; width: 100%; max-width: 400px; padding: 35px 30px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.6); border: 1px solid var(--border-color); }
         
         .modal-icon-top { width: 60px; height: 60px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
         .modal-icon-top svg { width: 30px; height: 30px; }
@@ -61,7 +61,7 @@
         
         .ai-btn-group { display: flex; gap: 12px; }
         .mini-ai-btn { flex: 1; border: none; padding: 14px; font-weight: 700; font-size: 13px; border-radius: 12px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; }
-        .btn-primary-action { background: var(--primary); color: white; } .btn-primary-action:hover { background: #2563eb; transform: translateY(-2px); }
+        .btn-primary-action { background: var(--primary); color: white; } .btn-primary-action:hover { background: #0f766e; transform: translateY(-2px); }
         .btn-danger-action { background: var(--danger); color: white; } .btn-danger-action:hover { background: #dc2626; transform: translateY(-2px); }
         .btn-outline-action { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-sub); } .btn-outline-action:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
 
@@ -130,8 +130,9 @@
             <div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" style="background: var(--success);" onclick="tutupModal('modalSukses')">Tutup</button></div>
         </div>
     </div>
-        <script src="config.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    
+    <script src="config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
