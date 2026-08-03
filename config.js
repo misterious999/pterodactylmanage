@@ -7,14 +7,12 @@ const GlobalConfig = {
     getPteroConfig: (mode = 'private') => {
         if (mode === 'private') {
             return {
-                // 👇 GANTI dengan Domain dan API Key Private kamu yang BENAR & AKTIF
                 domain: localStorage.getItem('prvt_domain') || "zerosystempriv.bypstar7.web.id",
                 api: localStorage.getItem('prvt_api') || "ptla_FN9WdJ1WzLH1BlGyzyeoWtZGDl9roNeAd8VVmz7g5tF"
             };
         } else {
             // Public & Public V2
             return {
-                // 👇 GANTI dengan Domain dan API Key Public kamu yang BENAR & AKTIF
                 domain: localStorage.getItem('pub_domain') || "assistantzeroix.bypstar7.online",
                 api: localStorage.getItem('pub_api') || "ptla_WlmF4CJ2yI68CQEKcFeDieij2gXE67CESbqGISbXOeB"
             };
