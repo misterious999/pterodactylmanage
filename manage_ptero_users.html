@@ -110,7 +110,7 @@
         .mode-info .modal-icon-top { background: var(--primary-glow); border: 1px solid rgba(13, 148, 136, 0.3); } .mode-info .modal-icon-top svg { fill: var(--primary); } .mode-info .mini-ai-header { color: var(--primary); }
 
         .mini-ai-header { font-size: 18px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        .mini-ai-body { font-size: 13px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; }
+        .mini-ai-body { font-size: 13px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; white-space: pre-wrap; }
         
         .info-detail-ai { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; text-align: left; margin-bottom: 20px; }
         .detail-row { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
@@ -198,19 +198,17 @@
             </div>
         </div>
         
-        <!-- BAGIAN BARU: Dropdown Konfigurasi Egg -->
         <div class="box-header" style="margin-top: 15px;">
             <h3><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg> Konfigurasi Tipe Bot</h3>
         </div>
         <div class="grid-2">
             <div>
                 <label>Location ID</label>
-                <input type="number" id="newLocId" value="1" placeholder="ID Lokasi">
+                <input type="number" id="newLocId" value="1" placeholder="ID Lokasi (Default: 1)">
             </div>
             <div>
                 <label>Pilih Tipe Server (Egg)</label>
                 <select id="newEggId" style="width: 100%; padding: 14px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); font-size: 14px; outline: none; cursor: pointer; appearance: none;">
-                    <!-- Sesuai gambar 694041.jpg -->
                     <option value="15" selected>NodeJsPrivate (WhatsApp Bot)</option>
                     <option value="20">Python Veldora</option>
                 </select>
@@ -252,11 +250,27 @@
             <input type="text" id="searchInput" onkeyup="cariDataTabel()" placeholder="Cari username, email, atau ID..." autocomplete="off">
         </div>
         <table id="tabelPtero">
-            <tr><th>ID</th><th>Username</th><th>Email</th><th>Status</th><th>Aksi</th></tr>
+            <tr><th>ID</th><th>Username</th><th>Email</th><th>Masa Aktif</th><th>Aksi</th></tr>
             <tr><td colspan="5" style="text-align: center; color: var(--text-sub); padding: 30px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Mengambil data...</td></tr>
         </table>
     </div>
 
+    <!-- MODAL TAMBAH EXPIRED PTERO -->
+    <div id="modalTambahExpiredPtero" class="mini-ai-overlay">
+        <div class="mini-ai-popup mode-info">
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+            <div class="mini-ai-header">SET EXPIRED USER</div>
+            <div class="mini-ai-body">Masukkan jumlah hari untuk memperpanjang masa aktif user Pterodactyl <b id="expPteroUsername" style="color:var(--text-main);"></b>.</div>
+            <input type="number" id="inputHariExpired" placeholder="Contoh: 30 (Dalam Hitungan Hari)" style="margin-bottom: 20px;">
+            <input type="hidden" id="expPteroId">
+            <div class="ai-btn-group">
+                <button class="mini-ai-btn btn-primary-action" onclick="simpanExpiredPtero()">Simpan</button>
+                <button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalTambahExpiredPtero')">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL LAINNYA -->
     <div id="modalScreenshot" class="mini-ai-overlay">
         <div class="mini-ai-popup mode-info">
             <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
@@ -281,7 +295,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // ============ MODE CONFIGURATION ============
+        // ============ INIT & CONFIGURATION ============
         const urlParams = new URLSearchParams(window.location.search);
         const modeParam = urlParams.get('mode') || localStorage.getItem('userMode') || 'private';
         
@@ -320,7 +334,6 @@
 
         const config = modeConfig[modeParam] || modeConfig.private;
         
-        // ============ AUTHENTICATION & INIT ============
         const currentUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
         const roleRaw = localStorage.getItem('role') || localStorage.getItem('panel_role') || '';
         const role = roleRaw.trim().toLowerCase();
@@ -354,6 +367,9 @@
 
         const spinnerSvg = `<svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite; width:18px; fill:currentColor;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg>`;
 
+        // ==========================================
+        // FUNGSI MODAL & UTILS
+        // ==========================================
         function tutupModal(id) { 
             const modal = document.getElementById(id);
             if (modal) modal.style.display = 'none'; 
@@ -390,10 +406,8 @@
         
         function pilihRole(event, value, text) {
             if (!event || !event.target) return;
-            
             document.getElementById('newRole').value = value;
             let icon = value === 'true' ? `<svg viewBox="0 0 24 24" style="width:14px;margin-right:6px;vertical-align:middle;fill:currentColor;"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>` : `<svg viewBox="0 0 24 24" style="width:14px;margin-right:6px;vertical-align:middle;fill:currentColor;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
-            
             document.getElementById('customSelectText').innerHTML = icon + text;
             let options = document.querySelectorAll('.custom-option');
             options.forEach(opt => opt.classList.remove('selected'));
@@ -410,32 +424,133 @@
             } 
         });
 
+        // ==========================================
+        // FITUR TAMBAH EXPIRED PTERODACTYL
+        // ==========================================
+        function bukaModalExpired(id, username, currentExpire) {
+            if (role === 'demo') return showAiAlert("<b>MODE DEMO:</b> Fitur ini dikunci.", "AKSES DITOLAK");
+            document.getElementById('expPteroId').value = id;
+            document.getElementById('expPteroUsername').innerText = username;
+            document.getElementById('expPteroId').setAttribute('data-current', currentExpire || 0);
+            document.getElementById('inputHariExpired').value = "";
+            document.getElementById('modalTambahExpiredPtero').style.display = 'flex';
+        }
+
+        async function simpanExpiredPtero() {
+            let btn = document.querySelector('#modalTambahExpiredPtero .btn-primary-action');
+            let id = document.getElementById('expPteroId').value;
+            let currentExpire = parseInt(document.getElementById('expPteroId').getAttribute('data-current') || 0);
+            let username = document.getElementById('expPteroUsername').innerText;
+            let hari = parseInt(document.getElementById('inputHariExpired').value);
+
+            if (!hari || hari <= 0) return showAiAlert("Masukkan jumlah hari yang valid!", "ERROR");
+
+            btn.innerText = "Menyimpan...";
+            btn.style.pointerEvents = "none";
+
+            let tambahMs = hari * 24 * 60 * 60 * 1000;
+            let newExpire = (currentExpire > Date.now()) ? (currentExpire + tambahMs) : (Date.now() + tambahMs); 
+
+            let domainKey = PTERO_DOMAIN.replace(/\./g, '_');
+            await database.ref(`ptero_users_expired/${domainKey}/${id}`).set({
+                expiredAt: newExpire,
+                username: username,
+                maker: myUsername 
+            });
+
+            btn.innerText = "Simpan";
+            btn.style.pointerEvents = "auto";
+            tutupModal('modalTambahExpiredPtero');
+            showAiSuccess(`Masa aktif <b>${hari} Hari</b> berhasil ditambahkan untuk User ${username}.`);
+            ambilDataPtero(); 
+        }
+
+        async function prosesHapusUserPteroOtomatis(userId, username) {
+            try {
+                let allServers = [], page = 1, totalPages = 1;
+                do {
+                    let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers?page=${page}`, {
+                        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
+                    });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    let data = await res.json();
+                    allServers = allServers.concat((data && data.data) ? data.data : []);
+                    totalPages = (data && data.meta) ? data.meta.pagination.total_pages : 1;
+                    page++;
+                } while (page <= totalPages);
+
+                let serversMilikUser = allServers.filter(s => s.attributes.user === parseInt(userId));
+                for (let server of serversMilikUser) {
+                    await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers/${server.attributes.id}/force`, {
+                        method: 'DELETE',
+                        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
+                    });
+                }
+                
+                await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
+                });
+
+                let domainKey = PTERO_DOMAIN.replace(/\./g, '_');
+                await database.ref(`ptero_users_expired/${domainKey}/${userId}`).remove();
+                
+                ambilDataPtero(); 
+            } catch(e) {
+                console.error("Auto delete error:", e);
+            }
+        }
+
+        // SWEEPER (Penyapu) Khusus Expired Pterodactyl
+        async function sweeperPteroExpiredLokal() {
+            let domainKey = PTERO_DOMAIN.replace(/\./g, '_');
+            let snap = await database.ref(`ptero_users_expired/${domainKey}`).once('value');
+            let expData = snap.val();
+            if (!expData) return;
+            
+            let now = Date.now();
+            for (let key in expData) {
+                let data = expData[key];
+                if (data.expiredAt <= now && (role === 'pemilik' || data.maker === myUsername) && !data.isDeleting) {
+                    database.ref(`ptero_users_expired/${domainKey}/${key}/isDeleting`).set(true);
+                    await prosesHapusUserPteroOtomatis(key, data.username);
+                }
+            }
+        }
+
+        // ==========================================
+        // RENDER DATA TABEL
+        // ==========================================
         async function ambilDataPtero() {
             try {
-                document.getElementById('tabelPtero').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">⏳ Memuat data user dari semua halaman...</td></tr>`;
-                let allUsers = [];
-                let currentPage = 1;
-                let totalPages = 1;
+                document.getElementById('tabelPtero').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">⏳ Memuat data user dan masa aktif...</td></tr>`;
+                
+                let domainKey = PTERO_DOMAIN.replace(/\./g, '_');
+                const [snapExp, allUsersResponse] = await Promise.all([
+                    database.ref(`ptero_users_expired/${domainKey}`).once('value'),
+                    (async () => {
+                        let all = [], page = 1, totalPages = 1;
+                        do {
+                            let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users?page=${page}`, { 
+                                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` } 
+                            });
+                            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                            let data = await res.json();
+                            all = all.concat((data && data.data) ? data.data : []);
+                            totalPages = (data && data.meta) ? data.meta.pagination.total_pages : 1;
+                            page++;
+                        } while (page <= totalPages);
+                        return all;
+                    })()
+                ]);
 
-                do {
-                    let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users?page=${currentPage}`, { 
-                        headers: { 
-                            'Accept': 'application/json', 
-                            'Authorization': `Bearer ${PTERO_API}` 
-                        } 
-                    });
-                    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-                    let data = await res.json();
-                    const users = (data && data.data) ? data.data : [];
-                    allUsers = allUsers.concat(users);
-                    totalPages = (data && data.meta) ? data.meta.pagination.total_pages : 1;
-                    currentPage++;
-                } while (currentPage <= totalPages);
+                let expiredData = snapExp.val() || {};
+                let allUsers = allUsersResponse;
 
-                let tabel = `<tr><th>ID</th><th>Username</th><th>Email</th><th>Status</th><th>Aksi</th></tr>`;
+                let tabel = `<tr><th>ID</th><th>Username</th><th>Email</th><th>Masa Aktif</th><th>Aksi</th></tr>`;
                 let countDisplayed = 0;
+                
                 const svgCrown = `<svg viewBox="0 0 24 24"><path d="M12 1.5l3.09 6.3 6.91 1-5 4.87 1.18 6.88L12 17.25l-6.18 3.25L7 13.62 2 8.75l6.91-1L12 1.5z"/></svg>`;
-                const svgUser = `<svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
                 const svgTrash = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
 
                 allUsers.forEach(user => {
@@ -444,12 +559,30 @@
                     if(role === 'demo' && u.last_name !== 'admin' && u.last_name !== 'Admin' && u.last_name !== 'User') return;
 
                     countDisplayed++;
-                    let status = u.root_admin ? `<span class="badge badge-admin">${svgCrown} Admin</span>` : `<span class="badge badge-user">${svgUser} Member</span>`;
                     let namaPembuat = u.last_name; if (namaPembuat === 'User' || namaPembuat === 'Admin') namaPembuat = 'admin'; 
                     let makerTag = (role === 'pemilik' || role === 'demo') ? `<br><span class="reseller-tag">Oleh: ${namaPembuat}</span>` : '';
-                    let tombolHapus = u.id !== 1 ? `<button class="btn-hapus" id="btnHapus_${u.id}" onclick="munculkanModalHapusConfirm(${u.id}, '${u.username}')">${svgTrash} Hapus 1 Paket</button>` : `<span style="color:var(--text-sub); font-size:12px; font-weight:bold;">Sistem Pusat</span>`;
+                    let tombolHapus = u.id !== 1 ? `<button class="btn-hapus" id="btnHapus_${u.id}" onclick="munculkanModalHapusConfirm(${u.id}, '${u.username}')">${svgTrash} Hapus</button>` : `<span style="color:var(--text-sub); font-size:12px; font-weight:bold;">Sistem Pusat</span>`;
                     
-                    tabel += `<tr><td style="color: var(--text-sub); font-weight: bold;">#${u.id}</td><td style="font-weight: 700; color: var(--text-main); font-size:15px;">${u.username}${makerTag}</td><td style="color: var(--text-sub); font-size: 13px;">${u.email}</td><td>${status}</td><td>${tombolHapus}</td></tr>`;
+                    let expInfo = expiredData[u.id];
+                    let kolomExpired = '';
+                    
+                    if (u.id === 1) {
+                        kolomExpired = `<span style="color:var(--text-sub); font-size:12px; font-weight:bold;">${svgCrown} Superadmin</span>`;
+                    } else if (expInfo && expInfo.expiredAt) {
+                        let sisaWaktu = expInfo.expiredAt - Date.now();
+                        if (sisaWaktu > 0) {
+                            kolomExpired = `<div style="display:flex; align-items:center; gap:8px;">
+                                <span class="ptero-countdown-timer badge badge-admin" data-expire="${expInfo.expiredAt}" style="font-family:monospace; font-size:11px; font-weight:800;">Menghitung...</span>
+                                <button class="btn-sapu" style="padding: 4px 8px;" onclick="bukaModalExpired(${u.id}, '${u.username}', ${expInfo.expiredAt})" title="Tambah Waktu">+</button>
+                            </div>`;
+                        } else {
+                            kolomExpired = `<span class="badge" style="background:rgba(239, 68, 68, 0.1); color:var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);">EXPIRED (Proses Hapus)</span>`;
+                        }
+                    } else {
+                        kolomExpired = `<button class="btn-sapu" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.3);" onclick="bukaModalExpired(${u.id}, '${u.username}', 0)">Set Expired</button>`;
+                    }
+
+                    tabel += `<tr><td style="color: var(--text-sub); font-weight: bold;">#${u.id}</td><td style="font-weight: 700; color: var(--text-main); font-size:14px;">${u.username}${makerTag}</td><td style="color: var(--text-sub); font-size: 13px;">${u.email}</td><td>${kolomExpired}</td><td>${tombolHapus}</td></tr>`;
                 });
 
                 if (countDisplayed === 0) tabel += `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">Belum ada akun yang bisa ditampilkan.</td></tr>`;
@@ -458,6 +591,28 @@
                 document.getElementById('tabelPtero').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">Error: ${e.message}</td></tr>`; 
             }
         }
+
+        setInterval(() => {
+            document.querySelectorAll('.ptero-countdown-timer').forEach(el => {
+                let exp = parseInt(el.getAttribute('data-expire'));
+                let sisa = exp - Date.now();
+                
+                if (sisa <= 0) {
+                    el.innerText = "EXPIRED";
+                    el.style.color = "var(--danger)";
+                    el.style.background = "rgba(239, 68, 68, 0.1)";
+                    el.style.borderColor = "var(--danger)";
+                } else {
+                    let d = Math.floor(sisa / (1000 * 60 * 60 * 24));
+                    let h = Math.floor((sisa % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    let m = Math.floor((sisa % (1000 * 60 * 60)) / (1000 * 60));
+                    let s = Math.floor((sisa % (1000 * 60)) / 1000);
+                    el.innerText = `${d}h ${h}j ${m}m ${s}d`;
+                }
+            });
+        }, 1000);
+
+        setInterval(sweeperPteroExpiredLokal, 30000);
 
         function cariDataTabel() {
             let input = document.getElementById("searchInput").value.toLowerCase(); 
@@ -555,14 +710,13 @@
             btn.style.pointerEvents = "none";
             try { 
                 let terhapus = 0; 
+                let domainKey = PTERO_DOMAIN.replace(/\./g, '_');
                 for (let u of targetHantuGlobal) { 
                     await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users/${u.id}`, { 
                         method: 'DELETE', 
-                        headers: { 
-                            'Accept': 'application/json', 
-                            'Authorization': `Bearer ${PTERO_API}` 
-                        } 
+                        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` } 
                     }); 
+                    await database.ref(`ptero_users_expired/${domainKey}/${u.id}`).remove();
                     terhapus++; 
                 } 
                 showAiSuccess(`Sapu bersih selesai!<br>Total <b>${terhapus} User Hantu</b> dimusnahkan.`, "CLEAR!", false); 
@@ -575,24 +729,60 @@
         }
 
         // ==========================================
-        // FITUR BARU: AUTOMATED ENVIRONMENT FETCHER
+        // AUTO-DEPLOY LOGIC RADAR (SCAN PORT KOSONG)
         // ==========================================
-        async function getDynamicEnvironment(eggId) {
-            // FIX TERBARU: Ubah Nest ID ke 5 berdasarkan foto panel Pterodactyl kamu
-            const nestId = 5; 
+        async function getFreeNodeAndAllocation(locId) {
+            // 1. Fetch semua node
+            let resNodes = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/nodes`, {
+                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
+            });
+            if (!resNodes.ok) throw new Error("Gagal mengambil data Node dari Pterodactyl.");
+            let nodesData = await resNodes.json();
             
+            // 2. Filter node berdasarkan Location ID yang diminta
+            let nodesInLoc = nodesData.data.filter(n => n.attributes.location_id === parseInt(locId));
+            if (nodesInLoc.length === 0) throw new Error(`Tidak ditemukan Node pada Location ID ${locId}`);
+
+            // 3. Scan setiap node untuk mencari Port yang belum terpakai (assigned = false)
+            for (let node of nodesInLoc) {
+                let nodeId = node.attributes.id;
+                let page = 1;
+                let totalPages = 1;
+                do {
+                    let resAlloc = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/nodes/${nodeId}/allocations?page=${page}`, {
+                        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
+                    });
+                    if (!resAlloc.ok) break; 
+                    let allocData = await resAlloc.json();
+                    
+                    let freeAlloc = allocData.data.find(a => a.attributes.assigned === false);
+                    if (freeAlloc) {
+                        return { nodeId: nodeId, allocId: freeAlloc.attributes.id, port: freeAlloc.attributes.port };
+                    }
+                    totalPages = allocData.meta.pagination.total_pages;
+                    page++;
+                } while (page <= totalPages);
+            }
+            
+            throw new Error(`Semua port penuh! Tidak ada Allocation (Port) kosong tersisa di Location ID ${locId}.`);
+        }
+
+        async function getDynamicEnvironment(eggId) {
+            let nestId = 5; 
+            try {
+                if(GlobalConfig && GlobalConfig.getDefaultDeploy) {
+                    nestId = parseInt(GlobalConfig.getDefaultDeploy().nestId) || 5;
+                }
+            } catch(e) {}
+
             try {
                 let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/nests/${nestId}/eggs/${eggId}?include=variables`, {
                     method: 'GET',
-                    headers: { 
-                        'Accept': 'application/json', 
-                        'Authorization': `Bearer ${PTERO_API}` 
-                    }
+                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
                 });
                 
-                if (!res.ok) throw new Error(`Gagal mengambil struktur Egg dari Nest ${nestId}`);
+                if (!res.ok) throw new Error(`Gagal mengambil struktur Egg`);
                 let data = await res.json();
-                
                 let dynamicEnv = {};
                 let variables = data.attributes.relationships.variables.data;
                 
@@ -610,25 +800,12 @@
                     else if (envKey === 'USER_UPLOAD' || envKey === 'AUTO_UPDATE') dynamicEnv[envKey] = '0';
                     else if (isRequired) dynamicEnv[envKey] = defaultValue || 'default_value'; 
                 }
-                
                 return dynamicEnv;
             } catch (e) {
-                console.error("Fetcher Error:", e);
-                return { 
-                    "INST": "npm", 
-                    "USER_UPLOAD": "0", 
-                    "AUTO_UPDATE": "0", 
-                    "CMD_RUN": "npm start",
-                    "PY_FILE": "app.py", 
-                    "REQUIREMENTS_FILE": "requirements.txt", 
-                    "MAIN_FILE": "index.js"
-                };
+                return { "INST": "npm", "USER_UPLOAD": "0", "AUTO_UPDATE": "0", "CMD_RUN": "npm start", "PY_FILE": "app.py", "REQUIREMENTS_FILE": "requirements.txt", "MAIN_FILE": "index.js" };
             }
         }
 
-        // ==========================================
-        // FUNGSI BUAT 1 PAKET YANG DIPERBARUI
-        // ==========================================
         async function buatSatuPaket() {
             if (role === 'demo') return showAiAlert("<b>MODE DEMO:</b> Fitur ini dikunci.", "AKSES DITOLAK");
             
@@ -639,11 +816,12 @@
             let ram = document.getElementById('newRam').value; 
             let cpu = document.getElementById('newCpu').value; 
             let disk = document.getElementById('newDisk').value; 
-            let locId = document.getElementById('newLocId').value; 
-            let eggId = document.getElementById('newEggId').value; 
+            
+            let locId = document.getElementById('newLocId').value;
+            let eggId = document.getElementById('newEggId').value;
             let isAdmin = document.getElementById('newRole').value === "true"; 
             
-            if(!username || !password || !email || !serverName || !ram || !cpu || !disk) { 
+            if(!username || !password || !email || !serverName || !ram || !cpu || !disk || !locId || !eggId) { 
                 showAiAlert("Harap isi semua kolom formulir secara lengkap!", "DATA KOSONG"); 
                 return; 
             }
@@ -653,7 +831,7 @@
             btn.style.pointerEvents = "none";
             
             try {
-                btn.innerHTML = `${spinnerSvg} 1/3: Membuat Akun...`;
+                btn.innerHTML = `${spinnerSvg} 1/4: Membuat Akun...`;
                 let userPayload = { 
                     "email": email, 
                     "username": username, 
@@ -664,47 +842,49 @@
                 };
                 let resUser = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users`, { 
                     method: 'POST', 
-                    headers: { 
-                        'Accept': 'application/json', 
-                        'Content-Type': 'application/json', 
-                        'Authorization': `Bearer ${PTERO_API}` 
-                    }, 
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }, 
                     body: JSON.stringify(userPayload) 
                 });
+                
                 if (!resUser.ok) throw new Error(await resUser.text()); 
                 let newUserId = (await resUser.json()).attributes.id; 
                 
-                btn.innerHTML = `${spinnerSvg} 2/3: Membaca Environment...`;
+                // RADAR PENCARI PORT KOSONG BERAKSI DI SINI!
+                btn.innerHTML = `${spinnerSvg} 2/4: Mencari Port Kosong...`;
+                let allocData = await getFreeNodeAndAllocation(locId);
+
+                btn.innerHTML = `${spinnerSvg} 3/4: Membaca Environment...`;
                 let dynamicEnvironmentData = await getDynamicEnvironment(parseInt(eggId));
                 
-                // Pilihan Cerdas Docker Image (Mengamankan jika Python dipilih)
                 let dockerImageFinal = "ghcr.io/parkervcp/yolks:nodejs_20";
-                if (eggId === "20") dockerImageFinal = "ghcr.io/parkervcp/yolks:python_3.9"; // Fallback ke python jika egg ID = 20
+                if (eggId.toString() === "20") dockerImageFinal = "ghcr.io/parkervcp/yolks:python_3.9"; 
 
-                btn.innerHTML = `${spinnerSvg} 3/3: Mendeploy Server...`;
+                btn.innerHTML = `${spinnerSvg} 4/4: Mendeploy Server...`;
                 let serverPayload = { 
                     "name": serverName, 
                     "description": `Dibuat oleh ${myUsername}`, 
                     "user": newUserId, 
+                    "node": allocData.nodeId,
+                    "allocation": {
+                        "default": allocData.allocId
+                    },
                     "egg": parseInt(eggId), 
                     "docker_image": dockerImageFinal, 
                     "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z ${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z ${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo ${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
                     "environment": dynamicEnvironmentData, 
                     "limits": { "memory": parseInt(ram), "swap": 0, "disk": parseInt(disk), "io": 500, "cpu": parseInt(cpu) }, 
-                    "feature_limits": { "databases": 5, "backups": 5, "allocations": 5 }, 
-                    "deploy": { "locations": [parseInt(locId)], "dedicated_ip": false, "port_range": [] } 
+                    "feature_limits": { "databases": 5, "backups": 5, "allocations": 1 }
                 };
                 
                 let resServer = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers`, { 
                     method: 'POST', 
-                    headers: { 
-                        'Accept': 'application/json', 
-                        'Content-Type': 'application/json', 
-                        'Authorization': `Bearer ${PTERO_API}` 
-                    }, 
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }, 
                     body: JSON.stringify(serverPayload) 
                 });
-                if (!resServer.ok) throw new Error(await resServer.text());
+                
+                if (!resServer.ok) {
+                    throw new Error(await resServer.text());
+                }
                 
                 btn.innerHTML = originalText; 
                 btn.style.pointerEvents = "auto"; 
@@ -717,7 +897,7 @@
             } catch(e) { 
                 btn.innerHTML = originalText; 
                 btn.style.pointerEvents = "auto"; 
-                showAiAlert(`${e.message}`, "GAGAL DEPLOY"); 
+                showAiAlert(`<div style="text-align: left; white-space: pre-wrap;">${e.message}</div>`, "GAGAL DEPLOY"); 
             }
         }
 
@@ -751,24 +931,24 @@
                     totalPages = (data && data.meta) ? data.meta.pagination.total_pages : 1;
                     page++;
                 } while (page <= totalPages);
+                
                 let serversMilikUser = allServers.filter(s => s.attributes.user === userId);
                 for (let server of serversMilikUser) { 
                     await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers/${server.attributes.id}/force`, { 
                         method: 'DELETE', 
-                        headers: { 
-                            'Accept': 'application/json', 
-                            'Authorization': `Bearer ${PTERO_API}` 
-                        } 
+                        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` } 
                     }); 
                 }
+                
                 let resUser = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users/${userId}`, { 
                     method: 'DELETE', 
-                    headers: { 
-                        'Accept': 'application/json', 
-                        'Authorization': `Bearer ${PTERO_API}` 
-                    } 
+                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` } 
                 });
                 if (!resUser.ok) throw new Error(await resUser.text()); 
+                
+                let domainKey = PTERO_DOMAIN.replace(/\./g, '_');
+                await database.ref(`ptero_users_expired/${domainKey}/${userId}`).remove();
+
                 showAiSuccess(`User <b style="color: #ef4444;">${username}</b> musnah!`, "DUAARR!! MUSNAH!", true); 
                 ambilDataPtero(); 
             } catch (e) { 
@@ -810,9 +990,7 @@ _Terima kasih telah berbelanja!_`;
                 setTimeout(() => { 
                     btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Teks`; 
                 }, 2000); 
-            }).catch(() => {
-                showAiAlert("Gagal menyalin ke clipboard", "ERROR");
-            });
+            }).catch(() => showAiAlert("Gagal menyalin ke clipboard", "ERROR"));
         }
 
         ambilDataPtero();
@@ -842,58 +1020,6 @@ _Terima kasih telah berbelanja!_`;
             window.location.replace('login.html');
         }, function(){});
     })();
-    </script>
-
-    <script>
-        const guardConfigTimer = { databaseURL: GlobalConfig.getFirebaseUrl() };
-        if (!firebase.apps.length) firebase.initializeApp(guardConfigTimer);
-        const databaseTimer = firebase.database();
-
-        const currentUserIdTimer = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
-        const roleRawTimer = localStorage.getItem('role') || localStorage.getItem('panel_role') || '';
-        const roleTimer = roleRawTimer.trim().toLowerCase();
-
-        let expiryInterval;
-        function startExpiryTimer(expiredAt) {
-            const timerNav = document.getElementById('expiryTimerNav');
-
-            if (!timerNav) return;
-            clearInterval(expiryInterval);
-
-            if (roleTimer === 'pemilik') {
-                timerNav.innerHTML = '<span class="timer-unlimited">∞ Unlimited</span>';
-                return;
-            }
-
-            expiryInterval = setInterval(() => {
-                const now = Date.now();
-                const timeLeft = expiredAt - now;
-
-                if (timeLeft <= 0) {
-                    timerNav.innerHTML = '<span class="timer-countdown" style="color:var(--danger)">EXPIRED</span>';
-                    timerNav.classList.add('expired');
-                    clearInterval(expiryInterval);
-                    return;
-                }
-
-                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-                const dateObj = new Date(expiredAt);
-                const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                
-                timerNav.innerHTML = `<span class="timer-date">${dateStr}</span><span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}d</span>`;
-            }, 1000);
-        }
-
-        if (currentUserIdTimer) {
-            databaseTimer.ref('users/'+ currentUserIdTimer + '/expiredAt').on('value', (snapshot) => {
-                const expiredAt = Number(snapshot.val() || 0);
-                startExpiryTimer(expiredAt);
-            });
-        }
     </script>
 </body>
 </html>

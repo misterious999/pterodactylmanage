@@ -197,6 +197,7 @@
             </div>
         </div>
 
+        <!-- Hidden configs diisi otomatis oleh script -->
         <div class="grid-2" style="display: none;">
             <input type="number" id="locId" value="1">
             <input type="number" id="eggId" value="15">
@@ -316,10 +317,10 @@
             let elNodeId = document.getElementById('nodeId');
             let elNestId = document.getElementById('nestId');
             
-            if(elLocId) elLocId.value = defaults.locationId;
-            if(elEggId) elEggId.value = defaults.eggId;
-            if(elNodeId) elNodeId.value = defaults.nodeId;
-            if(elNestId) elNestId.value = defaults.nestId;
+            if(elLocId) elLocId.value = defaults.locationId || 1;
+            if(elEggId) elEggId.value = defaults.eggId || 15;
+            if(elNodeId) elNodeId.value = defaults.nodeId || 1;
+            if(elNestId) elNestId.value = defaults.nestId || 5;
         });
 
         const WORKER_URL = GlobalConfig.getWorkerUrl().replace(/[\/?]+$/, '');
@@ -464,8 +465,41 @@
         }
 
         // ==========================================
-        // FITUR BARU: AUTOMATED ENVIRONMENT FETCHER (Agar saat nambah server gak Error env variable)
+        // AUTO-DEPLOY LOGIC RADAR (SCAN PORT KOSONG)
         // ==========================================
+        async function getFreeNodeAndAllocation(locId) {
+            let resNodes = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/nodes`, {
+                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
+            });
+            if (!resNodes.ok) throw new Error("Gagal mengambil data Node dari Pterodactyl.");
+            let nodesData = await resNodes.json();
+            
+            let nodesInLoc = nodesData.data.filter(n => n.attributes.location_id === parseInt(locId));
+            if (nodesInLoc.length === 0) throw new Error(`Tidak ditemukan Node pada Location ID ${locId}`);
+
+            for (let node of nodesInLoc) {
+                let nodeId = node.attributes.id;
+                let page = 1;
+                let totalPages = 1;
+                do {
+                    let resAlloc = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/nodes/${nodeId}/allocations?page=${page}`, {
+                        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
+                    });
+                    if (!resAlloc.ok) break; 
+                    let allocData = await resAlloc.json();
+                    
+                    let freeAlloc = allocData.data.find(a => a.attributes.assigned === false);
+                    if (freeAlloc) {
+                        return { nodeId: nodeId, allocId: freeAlloc.attributes.id, port: freeAlloc.attributes.port };
+                    }
+                    totalPages = allocData.meta.pagination.total_pages;
+                    page++;
+                } while (page <= totalPages);
+            }
+            
+            throw new Error(`Semua port penuh! Tidak ada Allocation (Port) kosong tersisa di Location ID ${locId}.`);
+        }
+
         async function getDynamicEnvironment(nestId, eggId) {
             try {
                 let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/nests/${nestId}/eggs/${eggId}?include=variables`, {
@@ -503,32 +537,45 @@
             let ram = document.getElementById('serverRam').value; 
             let cpu = document.getElementById('serverCpu').value;
             let disk = document.getElementById('serverDisk').value; 
-            let locId = document.getElementById('locId').value; 
-            let eggId = document.getElementById('eggId').value;
-            let nestId = document.getElementById('nestId').value;
+            
+            // Ambil dari hidden input yang terisi otomatis dari config.js
+            let locId = document.getElementById('locId').value || "1"; 
+            let eggId = document.getElementById('eggId').value || "15";
+            let nestId = document.getElementById('nestId').value || "5";
             
             if(!uId || !name || !ram || !cpu || !disk) return showAiAlert("Harap lengkapi semua data formulir!", "DATA TIDAK LENGKAP"); 
             
             let btn = document.querySelector('.btn-tambah'); 
             let originalText = btn.innerHTML;
-            btn.innerHTML = `${spinnerSvg} Sedang Deploy...`; 
+            btn.innerHTML = `${spinnerSvg} 1/3: Mencari Port...`; 
             btn.style.pointerEvents = "none";
             
             try {
+                // RADAR PENCARI PORT KOSONG BERAKSI DI SINI!
+                let allocData = await getFreeNodeAndAllocation(locId);
+
+                btn.innerHTML = `${spinnerSvg} 2/3: Membaca Env...`; 
                 let dynamicEnv = await getDynamicEnvironment(parseInt(nestId), parseInt(eggId));
                 let dockerImg = "ghcr.io/parkervcp/yolks:nodejs_20";
-                if(eggId === "20") dockerImg = "ghcr.io/parkervcp/yolks:python_3.9"; // Fallback python
+                if(eggId === "20") dockerImg = "ghcr.io/parkervcp/yolks:python_3.9"; 
                 
+                btn.innerHTML = `${spinnerSvg} 3/3: Deploying...`; 
                 let payload = { 
                     "name": name, 
                     "user": parseInt(uId), 
+                    
+                    // Kita paksa Pterodactyl pakai Node dan Port kosong yang Radar kita temukan
+                    "node": allocData.nodeId,
+                    "allocation": {
+                        "default": allocData.allocId
+                    },
+                    
                     "egg": parseInt(eggId), 
                     "docker_image": dockerImg, 
                     "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z ${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z ${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo ${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
                     "environment": dynamicEnv, 
                     "limits": { "memory": parseInt(ram), "swap": 0, "disk": parseInt(disk), "io": 500, "cpu": parseInt(cpu) }, 
-                    "feature_limits": { "databases": 5, "backups": 5, "allocations": 5 }, 
-                    "deploy": { "locations": [parseInt(locId)], "dedicated_ip": false, "port_range": [] } 
+                    "feature_limits": { "databases": 5, "backups": 5, "allocations": 1 }
                 };
                 
                 let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers`, { 
@@ -541,7 +588,10 @@
                     body: JSON.stringify(payload) 
                 });
                 
-                if(!res.ok) throw new Error(await res.text());
+                if(!res.ok) {
+                    let errText = await res.text();
+                    throw new Error(errText);
+                }
                 
                 btn.innerHTML = originalText; 
                 btn.style.pointerEvents = "auto";
