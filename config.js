@@ -14,7 +14,7 @@ const GlobalConfig = {
             // Public & Public V2
             return {
                 domain: localStorage.getItem('pub_domain') || "assistantzeroix.bypstar7.online",
-                api: localStorage.getItem('pub_api') || "ptla_WlmF4CJ2yI68CQEKcFeDieij2gXE67CESbqGISbXOeB"
+                api: localStorage.getItem('pub_api') || "ptla_KASW3a3bUSwykJaB5OzzGTaoX7mm7vDJgo50Rsms2yz"
             };
         }
     },
