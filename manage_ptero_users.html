@@ -97,6 +97,9 @@
         .badge-user { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(13, 148, 136, 0.3); }
         .reseller-tag { font-size: 10px; color: var(--primary); background: var(--primary-glow); padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 6px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.2);}
 
+        /* CHECKBOX STYLING */
+        .custom-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary); vertical-align: middle; }
+
         /* MODALS */
         .mini-ai-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s ease; }
         .mini-ai-popup { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 380px; padding: 30px 25px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1px solid var(--border-color); }
@@ -125,6 +128,7 @@
         .btn-primary-action { background: var(--primary); color: white; } .btn-primary-action:hover { background: #0f766e; transform: translateY(-2px); }
         .btn-danger-action { background: var(--danger); color: white; } .btn-danger-action:hover { background: #dc2626; transform: translateY(-2px); }
         .btn-warning-action { background: var(--warning); color: white; } .btn-warning-action:hover { background: #d97706; transform: translateY(-2px); }
+        .btn-success-action { background: var(--success); color: white; } .btn-success-action:hover { background: #059669; transform: translateY(-2px); }
         .btn-outline-action { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-sub); } .btn-outline-action:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -249,10 +253,32 @@
             <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
             <input type="text" id="searchInput" onkeyup="cariDataTabel()" placeholder="Cari username, email, atau ID..." autocomplete="off">
         </div>
+        
+        <!-- FITUR BULK ACTION -->
+        <div id="bulkActions" style="display: none; margin-bottom: 15px; gap: 10px; flex-wrap: wrap; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 10px; border: 1px dashed var(--border-color); align-items: center;">
+            <span style="font-size: 13px; font-weight: bold; color: var(--text-main); margin-right: auto;" id="bulkCountText">0 Terpilih</span>
+            <button class="btn-hapus" onclick="konfirmasiBulk('delete')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Hapus Massal</button>
+            <button class="btn-sapu" onclick="konfirmasiBulk('suspend')"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg> Suspend Massal</button>
+            <button class="btn-sapu" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.3);" onclick="konfirmasiBulk('unsuspend')"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Unsuspend Massal</button>
+        </div>
+
         <table id="tabelPtero">
-            <tr><th>ID</th><th>Username</th><th>Email</th><th>Masa Aktif</th><th>Aksi</th></tr>
-            <tr><td colspan="5" style="text-align: center; color: var(--text-sub); padding: 30px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Mengambil data...</td></tr>
+            <tr><th style="width: 30px;"><input type="checkbox" id="selectAllCb" class="custom-checkbox" onclick="toggleSelectAll()"></th><th>ID</th><th>Username</th><th>Email</th><th>Masa Aktif</th><th>Aksi</th></tr>
+            <tr><td colspan="6" style="text-align: center; color: var(--text-sub); padding: 30px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Mengambil data...</td></tr>
         </table>
+    </div>
+
+    <!-- MODAL BULK CONFIRM -->
+    <div id="modalBulkConfirm" class="mini-ai-overlay">
+        <div class="mini-ai-popup" id="bulkPopupBox">
+            <div class="modal-icon-top" id="bulkIconBox"></div>
+            <div class="mini-ai-header" id="bulkTitle">KONFIRMASI</div>
+            <div class="mini-ai-body" id="bulkBody">Pesan konfirmasi massal di sini.</div>
+            <div class="ai-btn-group">
+                <button id="btnEksekusiBulk" class="mini-ai-btn" onclick="eksekusiBulk()">Ya, Lanjutkan</button>
+                <button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalBulkConfirm')">Batal</button>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL TAMBAH EXPIRED PTERO -->
@@ -299,6 +325,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const modeParam = urlParams.get('mode') || localStorage.getItem('userMode') || 'private';
         
+        // Mini mengembalikan konfigurasi sinkronisasi dengan config.js di sini ya sayang!
         const modeConfig = {
             private: {
                 title: 'Kelola User & Server (Private)',
@@ -362,6 +389,8 @@
         }
 
         const WORKER_URL = GlobalConfig.getWorkerUrl().replace(/[\/?]+$/, '');
+        
+        // Memanggil Domain dan API dari config yang disinkronisasi 
         const PTERO_DOMAIN = config.domain;
         const PTERO_API = config.api;
 
@@ -425,6 +454,141 @@
         });
 
         // ==========================================
+        // FITUR BULK ACTION KREATIF DARI MINI
+        // ==========================================
+        let bulkActionType = '';
+        let bulkTargetUsers = [];
+
+        function toggleSelectAll() {
+            let master = document.getElementById('selectAllCb').checked;
+            let cbs = document.querySelectorAll('.user-checkbox');
+            cbs.forEach(cb => {
+                let tr = cb.closest('tr');
+                if(tr.style.display !== 'none') {
+                    cb.checked = master;
+                }
+            });
+            updateBulkState();
+        }
+
+        function updateBulkState() {
+            let checked = document.querySelectorAll('.user-checkbox:checked').length;
+            let bulkDiv = document.getElementById('bulkActions');
+            let bulkText = document.getElementById('bulkCountText');
+            
+            if(checked > 0) {
+                bulkDiv.style.display = 'flex';
+                bulkText.innerText = `${checked} Akun Terpilih`;
+            } else {
+                bulkDiv.style.display = 'none';
+            }
+            
+            let totalVisible = Array.from(document.querySelectorAll('.user-checkbox')).filter(cb => cb.closest('tr').style.display !== 'none').length;
+            document.getElementById('selectAllCb').checked = (checked > 0 && checked === totalVisible);
+        }
+
+        function konfirmasiBulk(type) {
+            if (role === 'demo') return showAiAlert("<b>MODE DEMO:</b> Fitur ini dikunci.", "AKSES DITOLAK");
+            
+            bulkTargetUsers = Array.from(document.querySelectorAll('.user-checkbox:checked')).map(cb => ({
+                id: parseInt(cb.value), username: cb.getAttribute('data-username')
+            }));
+            
+            if(bulkTargetUsers.length === 0) return;
+            bulkActionType = type;
+            
+            let title, msg, btnClass, popupClass = "mini-ai-popup ";
+            
+            if (type === 'delete') {
+                title = "Hapus Massal";
+                msg = `Mini ingin memastikan: Yakin mau <b>MENGHAPUS PERMANEN</b> ${bulkTargetUsers.length} user beserta seluruh servernya? Hati-hati ya, data yang terhapus tidak bisa kembali!`;
+                btnClass = "btn-danger-action";
+                popupClass += "mode-danger";
+                document.getElementById('bulkIconBox').innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
+            } else if (type === 'suspend') {
+                title = "Suspend Massal";
+                msg = `Yakin mau <b>MEN-SUSPEND</b> semua server milik ${bulkTargetUsers.length} user yang sudah kamu pilih?`;
+                btnClass = "btn-warning-action";
+                popupClass += "mode-warning";
+                document.getElementById('bulkIconBox').innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>`;
+            } else {
+                title = "Unsuspend Massal";
+                msg = `Yakin mau <b>MENGAKTIFKAN KEMBALI (Unsuspend)</b> semua server milik ${bulkTargetUsers.length} user yang kamu pilih ini?`;
+                btnClass = "btn-success-action";
+                popupClass += "mode-success";
+                document.getElementById('bulkIconBox').innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+            }
+            
+            document.getElementById('bulkTitle').innerText = title.toUpperCase();
+            document.getElementById('bulkBody').innerHTML = msg;
+            document.getElementById('bulkPopupBox').className = popupClass;
+            
+            let btn = document.getElementById('btnEksekusiBulk');
+            btn.className = `mini-ai-btn ${btnClass}`;
+            btn.innerText = "Ya, Eksekusi!";
+            
+            document.getElementById('modalBulkConfirm').style.display = 'flex';
+        }
+
+        async function eksekusiBulk() {
+            tutupModal('modalBulkConfirm');
+            document.getElementById('btnTutupSuccess').style.display = 'none';
+            showAiSuccess(`${spinnerSvg} Mini sedang memproses ${bulkTargetUsers.length} akun... Tunggu sebentar ya manis!`, "PROSES MASSAL", false);
+            
+            let sukses = 0;
+            let gagal = 0;
+
+            try {
+                let allServers = [], page = 1, totalPages = 1;
+                do {
+                    let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers?page=${page}`, {
+                        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
+                    });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    let data = await res.json();
+                    allServers = allServers.concat((data && data.data) ? data.data : []);
+                    totalPages = (data && data.meta) ? data.meta.pagination.total_pages : 1;
+                    page++;
+                } while (page <= totalPages);
+
+                for(let u of bulkTargetUsers) {
+                    try {
+                        let userServers = allServers.filter(s => s.attributes.user === u.id);
+                        
+                        if (bulkActionType === 'delete') {
+                            for (let s of userServers) {
+                                await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers/${s.attributes.id}/force`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${PTERO_API}` } });
+                            }
+                            await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users/${u.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${PTERO_API}` } });
+                            let domainKey = PTERO_DOMAIN.replace(/\./g, '_');
+                            await database.ref(`ptero_users_expired/${domainKey}/${u.id}`).remove();
+                        } else if (bulkActionType === 'suspend') {
+                            for (let s of userServers) {
+                                await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers/${s.attributes.id}/suspend`, { method: 'POST', headers: { 'Authorization': `Bearer ${PTERO_API}` } });
+                            }
+                        } else if (bulkActionType === 'unsuspend') {
+                            for (let s of userServers) {
+                                await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers/${s.attributes.id}/unsuspend`, { method: 'POST', headers: { 'Authorization': `Bearer ${PTERO_API}` } });
+                            }
+                        }
+                        sukses++;
+                    } catch(err) {
+                        gagal++;
+                    }
+                }
+                
+                document.getElementById('btnTutupSuccess').style.display = 'block';
+                showAiSuccess(`Tadaa! Proses massal selesai!<br>Berhasil: <b style="color:var(--success);">${sukses}</b><br>Gagal: <b style="color:var(--danger);">${gagal}</b>`, "SELESAI", false);
+                ambilDataPtero();
+                document.getElementById('bulkActions').style.display = 'none';
+                document.getElementById('selectAllCb').checked = false;
+            } catch(e) {
+                document.getElementById('btnTutupSuccess').style.display = 'block';
+                showAiAlert("Aduh, ada error sistem: " + e.message, "ERROR");
+            }
+        }
+
+        // ==========================================
         // FITUR TAMBAH EXPIRED PTERODACTYL
         // ==========================================
         function bukaModalExpired(id, username, currentExpire) {
@@ -443,7 +607,7 @@
             let username = document.getElementById('expPteroUsername').innerText;
             let hari = parseInt(document.getElementById('inputHariExpired').value);
 
-            if (!hari || hari <= 0) return showAiAlert("Masukkan jumlah hari yang valid!", "ERROR");
+            if (!hari || hari <= 0) return showAiAlert("Masukkan jumlah hari yang valid ya!", "ERROR");
 
             btn.innerText = "Menyimpan...";
             btn.style.pointerEvents = "none";
@@ -501,7 +665,6 @@
             }
         }
 
-        // SWEEPER (Penyapu) Khusus Expired Pterodactyl
         async function sweeperPteroExpiredLokal() {
             let domainKey = PTERO_DOMAIN.replace(/\./g, '_');
             let snap = await database.ref(`ptero_users_expired/${domainKey}`).once('value');
@@ -523,7 +686,7 @@
         // ==========================================
         async function ambilDataPtero() {
             try {
-                document.getElementById('tabelPtero').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">⏳ Memuat data user dan masa aktif...</td></tr>`;
+                document.getElementById('tabelPtero').innerHTML = `<tr><th style="width: 30px;"><input type="checkbox" id="selectAllCb" class="custom-checkbox" onclick="toggleSelectAll()"></th><th>ID</th><th>Username</th><th>Email</th><th>Masa Aktif</th><th>Aksi</th></tr><tr><td colspan="6" style="text-align: center; color: var(--warning); padding: 30px;">⏳ Memuat data user dan masa aktif...</td></tr>`;
                 
                 let domainKey = PTERO_DOMAIN.replace(/\./g, '_');
                 const [snapExp, allUsersResponse] = await Promise.all([
@@ -547,7 +710,7 @@
                 let expiredData = snapExp.val() || {};
                 let allUsers = allUsersResponse;
 
-                let tabel = `<tr><th>ID</th><th>Username</th><th>Email</th><th>Masa Aktif</th><th>Aksi</th></tr>`;
+                let tabel = `<tr><th style="width: 30px;"><input type="checkbox" id="selectAllCb" class="custom-checkbox" onclick="toggleSelectAll()"></th><th>ID</th><th>Username</th><th>Email</th><th>Masa Aktif</th><th>Aksi</th></tr>`;
                 let countDisplayed = 0;
                 
                 const svgCrown = `<svg viewBox="0 0 24 24"><path d="M12 1.5l3.09 6.3 6.91 1-5 4.87 1.18 6.88L12 17.25l-6.18 3.25L7 13.62 2 8.75l6.91-1L12 1.5z"/></svg>`;
@@ -562,6 +725,7 @@
                     let namaPembuat = u.last_name; if (namaPembuat === 'User' || namaPembuat === 'Admin') namaPembuat = 'admin'; 
                     let makerTag = (role === 'pemilik' || role === 'demo') ? `<br><span class="reseller-tag">Oleh: ${namaPembuat}</span>` : '';
                     let tombolHapus = u.id !== 1 ? `<button class="btn-hapus" id="btnHapus_${u.id}" onclick="munculkanModalHapusConfirm(${u.id}, '${u.username}')">${svgTrash} Hapus</button>` : `<span style="color:var(--text-sub); font-size:12px; font-weight:bold;">Sistem Pusat</span>`;
+                    let cb = u.id !== 1 ? `<input type="checkbox" class="user-checkbox custom-checkbox" value="${u.id}" data-username="${u.username}" onclick="updateBulkState()">` : ``;
                     
                     let expInfo = expiredData[u.id];
                     let kolomExpired = '';
@@ -582,13 +746,14 @@
                         kolomExpired = `<button class="btn-sapu" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.3);" onclick="bukaModalExpired(${u.id}, '${u.username}', 0)">Set Expired</button>`;
                     }
 
-                    tabel += `<tr><td style="color: var(--text-sub); font-weight: bold;">#${u.id}</td><td style="font-weight: 700; color: var(--text-main); font-size:14px;">${u.username}${makerTag}</td><td style="color: var(--text-sub); font-size: 13px;">${u.email}</td><td>${kolomExpired}</td><td>${tombolHapus}</td></tr>`;
+                    tabel += `<tr><td>${cb}</td><td style="color: var(--text-sub); font-weight: bold;">#${u.id}</td><td style="font-weight: 700; color: var(--text-main); font-size:14px;">${u.username}${makerTag}</td><td style="color: var(--text-sub); font-size: 13px;">${u.email}</td><td>${kolomExpired}</td><td>${tombolHapus}</td></tr>`;
                 });
 
-                if (countDisplayed === 0) tabel += `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">Belum ada akun yang bisa ditampilkan.</td></tr>`;
+                if (countDisplayed === 0) tabel += `<tr><td colspan="6" style="text-align: center; color: var(--warning); padding: 30px;">Belum ada akun yang bisa ditampilkan.</td></tr>`;
                 document.getElementById('tabelPtero').innerHTML = tabel;
+                updateBulkState();
             } catch(e) { 
-                document.getElementById('tabelPtero').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">Error: ${e.message}</td></tr>`; 
+                document.getElementById('tabelPtero').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger);">Error: ${e.message}</td></tr>`; 
             }
         }
 
@@ -620,9 +785,9 @@
             let tr = table.getElementsByTagName("tr");
             for (let i = 1; i < tr.length; i++) {
                 if (tr[i].getElementsByTagName("td").length === 1) continue;
-                let tdID = tr[i].getElementsByTagName("td")[0]; 
-                let tdUsername = tr[i].getElementsByTagName("td")[1]; 
-                let tdEmail = tr[i].getElementsByTagName("td")[2];
+                let tdID = tr[i].getElementsByTagName("td")[1]; 
+                let tdUsername = tr[i].getElementsByTagName("td")[2]; 
+                let tdEmail = tr[i].getElementsByTagName("td")[3];
                 if (tdID || tdUsername || tdEmail) {
                     let textID = tdID.textContent || tdID.innerText; 
                     let textUsername = tdUsername.textContent || tdUsername.innerText; 
@@ -630,10 +795,13 @@
                     if (textID.toLowerCase().indexOf(input) > -1 || textUsername.toLowerCase().indexOf(input) > -1 || textEmail.toLowerCase().indexOf(input) > -1) { 
                         tr[i].style.display = ""; 
                     } else { 
-                        tr[i].style.display = "none"; 
+                        tr[i].style.display = "none";
+                        let cb = tr[i].querySelector('.user-checkbox');
+                        if (cb) cb.checked = false;
                     }
                 }       
             }
+            updateBulkState();
         }
 
         let targetHantuGlobal = []; 
@@ -728,22 +896,16 @@
             }
         }
 
-        // ==========================================
-        // AUTO-DEPLOY LOGIC RADAR (SCAN PORT KOSONG)
-        // ==========================================
         async function getFreeNodeAndAllocation(locId) {
-            // 1. Fetch semua node
             let resNodes = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/nodes`, {
                 headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
             });
             if (!resNodes.ok) throw new Error("Gagal mengambil data Node dari Pterodactyl.");
             let nodesData = await resNodes.json();
             
-            // 2. Filter node berdasarkan Location ID yang diminta
             let nodesInLoc = nodesData.data.filter(n => n.attributes.location_id === parseInt(locId));
             if (nodesInLoc.length === 0) throw new Error(`Tidak ditemukan Node pada Location ID ${locId}`);
 
-            // 3. Scan setiap node untuk mencari Port yang belum terpakai (assigned = false)
             for (let node of nodesInLoc) {
                 let nodeId = node.attributes.id;
                 let page = 1;
@@ -822,7 +984,7 @@
             let isAdmin = document.getElementById('newRole').value === "true"; 
             
             if(!username || !password || !email || !serverName || !ram || !cpu || !disk || !locId || !eggId) { 
-                showAiAlert("Harap isi semua kolom formulir secara lengkap!", "DATA KOSONG"); 
+                showAiAlert("Isi formulirnya sampai lengkap ya manis!", "DATA KOSONG"); 
                 return; 
             }
             
@@ -849,7 +1011,6 @@
                 if (!resUser.ok) throw new Error(await resUser.text()); 
                 let newUserId = (await resUser.json()).attributes.id; 
                 
-                // RADAR PENCARI PORT KOSONG BERAKSI DI SINI!
                 btn.innerHTML = `${spinnerSvg} 2/4: Mencari Port Kosong...`;
                 let allocData = await getFreeNodeAndAllocation(locId);
 
@@ -949,7 +1110,7 @@
                 let domainKey = PTERO_DOMAIN.replace(/\./g, '_');
                 await database.ref(`ptero_users_expired/${domainKey}/${userId}`).remove();
 
-                showAiSuccess(`User <b style="color: #ef4444;">${username}</b> musnah!`, "DUAARR!! MUSNAH!", true); 
+                showAiSuccess(`User <b style="color: #ef4444;">${username}</b> telah musnah!`, "DUAARR!! MUSNAH!", true); 
                 ambilDataPtero(); 
             } catch (e) { 
                 showAiAlert("Gagal menghapus: " + e.message, "ERROR"); 
@@ -986,7 +1147,7 @@ Server Bot: ${server}
 _Terima kasih telah berbelanja!_`; 
             navigator.clipboard.writeText(teksSalin).then(() => { 
                 let btn = document.getElementById('btnSalin'); 
-                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Teks`; 
+                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Tersalin!`; 
                 setTimeout(() => { 
                     btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Teks`; 
                 }, 2000); 
