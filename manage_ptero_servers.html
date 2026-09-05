@@ -733,9 +733,7 @@
         }
 
         function salinTestimoni() {
-            let owner = document.getElementById('resServerOwner').innerText; 
-            let server = document.getElementById('resServerName').innerText; 
-            let teksSalin = `Transaksi Berhasil ✅ \n\n📦 Produk : Tambah Server Bot\n📦 Total Barang : 1 Server\n📆 Garansi Aktif : Ya\n⚖️ Total Harga : (Isi Sendiri)\n📝 Catatan : Server ${server} milik ${owner} aktif & siap pakai\n \nTerimakasih Telah Berbelanja di toko kami🤗\n\nlanjutt gess... 🔥🔥🔥\n\n✅ Banyak pilihan pembayaran\n✅ Pengiriman Cepat\n✅ Notifikasi transaksi otomatis\n✅ Praktis, aman, & nyaman`; 
+            let teksSalin = `Transaksi Berhasil ✅ \n\n📦 \`Produk :\` Panel Pterodactyl\n📦 \`Spesifikasi :\` Unlimited Ram\n📆 \`Garansi Aktif :\` Ya\n⚖️ \`Total Harga :\` 10rb\n📝 \`Catatan :\` Garansi aktif full 30h\n \nTerimakasih Telah Berbelanja di toko kami🤗\n\n✅ Banyak pilihan pembayaran\n✅ Pengiriman Cepat\n✅ Notifikasi transaksi otomatis\n✅ Praktis, aman, & nyaman\n\n_*Selalu Order Di Website Official Kami :*_\nhttps://pterodactylmanage.vercel.app/store`; 
             
             navigator.clipboard.writeText(teksSalin).then(() => { 
                 let btn = document.getElementById('btnSalinTesti'); 
