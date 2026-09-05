@@ -307,7 +307,12 @@
                 <div class="detail-row"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96z"/></svg> Akses Panel</div><div class="detail-value"><a id="resLink" href="#" target="_blank" style="color: var(--primary); text-decoration: none;"></a></div></div>
                 <div class="detail-row" style="border: none; padding: 0;"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> Spesifikasi Server</div><div class="detail-value">Server: <span id="resServer" style="color: var(--success);"></span></div></div>
             </div>
-            <div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" onclick="salinDataBuyer()" id="btnSalin"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Teks</button><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalScreenshot')">Tutup</button></div>
+            
+            <div class="ai-btn-group" style="flex-wrap: wrap;">
+                <button class="mini-ai-btn btn-primary-action" onclick="salinStrukPanel()" id="btnSalinStruk"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Data Panel</button>
+                <button class="mini-ai-btn btn-success-action" onclick="salinTestimoni()" id="btnSalinTesti"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Testimoni</button>
+                <button class="mini-ai-btn btn-outline-action" style="flex-basis: 100%;" onclick="tutupModal('modalScreenshot')">Tutup</button>
+            </div>
         </div>
     </div>
 
@@ -1126,30 +1131,36 @@
             document.getElementById('resLink').href = `https://${PTERO_DOMAIN}`; 
             document.getElementById('resServer').innerText = serverName; 
             document.getElementById('modalScreenshot').style.display = 'flex'; 
-            let btnSalin = document.getElementById('btnSalin'); 
-            if(btnSalin) { 
-                btnSalin.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Teks`; 
-            } 
         }
         
-        function salinDataBuyer() { 
+        function salinStrukPanel() { 
             let user = document.getElementById('resUser').innerText; 
             let pass = document.getElementById('resPass').innerText; 
             let link = document.getElementById('resLink').innerText; 
             let server = document.getElementById('resServer').innerText; 
-            let teksSalin = `*AKSES BERHASIL DIBUAT*
-
-Username: ${user}
-Password: ${pass}
-Link Panel: ${link}
-Server Bot: ${server}
-
-_Terima kasih telah berbelanja!_`; 
+            let teksSalin = `✅ *DATA AKUN PANEL BERHASIL DIBUAT*\n\nUsername: ${user}\nPassword: ${pass}\nLink Panel: ${link}\nServer Bot: ${server}\n\n_Catatan: Harap simpan data akun ini baik-baik dan jangan berikan password ke siapapun!_`; 
+            
             navigator.clipboard.writeText(teksSalin).then(() => { 
-                let btn = document.getElementById('btnSalin'); 
-                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Tersalin!`; 
+                let btn = document.getElementById('btnSalinStruk'); 
+                let originalHtml = btn.innerHTML;
+                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Tersalin!`; 
                 setTimeout(() => { 
-                    btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Teks`; 
+                    btn.innerHTML = originalHtml; 
+                }, 2000); 
+            }).catch(() => showAiAlert("Gagal menyalin ke clipboard", "ERROR"));
+        }
+
+        function salinTestimoni() {
+            let user = document.getElementById('resUser').innerText; 
+            let server = document.getElementById('resServer').innerText; 
+            let teksSalin = `Transaksi Berhasil ✅ \n\n📦 Produk : Panel Pterodactyl & Server Bot\n📦 Total Barang : 1 Paket\n📆 Garansi Aktif : Ya\n⚖️ Total Harga : (Isi Sendiri)\n📝 Catatan : Data akun ${user} aktif & aman\n \nTerimakasih Telah Berbelanja di toko kami🤗\n\nlanjutt gess... 🔥🔥🔥\n\n✅ Banyak pilihan pembayaran\n✅ Pengiriman Cepat\n✅ Notifikasi transaksi otomatis\n✅ Praktis, aman, & nyaman`; 
+            
+            navigator.clipboard.writeText(teksSalin).then(() => { 
+                let btn = document.getElementById('btnSalinTesti'); 
+                let originalHtml = btn.innerHTML;
+                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Tersalin!`; 
+                setTimeout(() => { 
+                    btn.innerHTML = originalHtml; 
                 }, 2000); 
             }).catch(() => showAiAlert("Gagal menyalin ke clipboard", "ERROR"));
         }
