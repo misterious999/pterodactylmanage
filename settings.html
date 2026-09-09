@@ -41,6 +41,14 @@
     <h2>⚙️ Pusat Pengaturan</h2>
     <p class="sub-title">Kelola koneksi API Pterodactyl, Worker, Firebase, serta parameter default server.</p>
 
+    <!-- PENGATURAN TOKO BARU -->
+    <div class="box">
+        <h3>🛒 Pengaturan Toko (Public Store)</h3>
+        <label>Kategori Produk (Pisahkan dengan koma)</label>
+        <input type="text" id="storeCategories" placeholder="Contoh: Panel, Sewa Server, Script Bot, Jasa Install" style="margin-bottom: 0;">
+        <p style="font-size: 11px; color: var(--text-sub); margin-top: 8px;">Kategori ini akan ditarik ke Firebase dan muncul otomatis sebagai tombol filter di halaman Store pembeli.</p>
+    </div>
+
     <div class="box">
         <h3>🌐 Koneksi Jaringan & Database</h3>
         <label>URL Worker CORS</label>
@@ -116,6 +124,9 @@
     <button class="btn-save" onclick="simpanPengaturan()">Simpan Seluruh Pengaturan</button>
 
     <script src="config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <script>
         // Validasi Akses Pemilik
         const role = (localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
@@ -124,8 +135,19 @@
             window.location.replace('index.html');
         }
 
+        // Inisialisasi Firebase untuk Kategori Store
+        const firebaseConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         // Muat data saat halaman dibuka
         window.addEventListener('DOMContentLoaded', () => {
+            // Ambil Kategori Store dari Firebase
+            database.ref('store_settings/categories').once('value').then(snap => {
+                document.getElementById('storeCategories').value = snap.val() || "Panel Pterodactyl, Sewa Server, Script & Bot";
+            }).catch(e => console.log("Gagal memuat kategori:", e));
+
+            // Ambil data Ptero dari LocalStorage
             document.getElementById('cfgWorker').value = localStorage.getItem('cfg_worker_url') || "https://restless-truth-9b75.amisterious09.workers.dev/?";
             document.getElementById('cfgFirebase').value = localStorage.getItem('cfg_firebase_url') || "https://cobaaja-ac5d0-default-rtdb.firebaseio.com";
             
@@ -145,6 +167,7 @@
         });
 
         function simpanPengaturan() {
+            // Simpan data Ptero ke LocalStorage
             localStorage.setItem('cfg_worker_url', document.getElementById('cfgWorker').value.trim());
             localStorage.setItem('cfg_firebase_url', document.getElementById('cfgFirebase').value.trim());
             
@@ -162,8 +185,16 @@
             localStorage.setItem('default_nest_id', document.getElementById('defNestId').value.trim());
             localStorage.setItem('default_node_id', document.getElementById('defNodeId').value.trim());
 
-            alert("✅ Pengaturan berhasil disimpan dan langsung diterapkan ke seluruh sistem!");
-            window.location.replace('index.html');
+            // Simpan Kategori Store ke Firebase biar bisa dibaca Publik
+            let cats = document.getElementById('storeCategories').value.trim();
+            if(!cats) cats = "Panel Pterodactyl, Sewa Server, Script & Bot"; // Default safety
+            
+            database.ref('store_settings/categories').set(cats).then(() => {
+                alert("✅ Pengaturan dan Kategori Store berhasil disimpan!");
+                window.location.replace('index.html');
+            }).catch(e => {
+                alert("Gagal menyimpan kategori ke Firebase: " + e.message);
+            });
         }
     </script>
 </body>

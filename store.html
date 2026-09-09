@@ -189,7 +189,7 @@
             text-align: center;
             font-size: 24px;
             font-weight: 800;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -203,6 +203,42 @@
             height: 2px;
             background: var(--primary);
             opacity: 0.5;
+        }
+
+        /* Filter Kategori */
+        .category-filter {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding: 0 5%;
+        }
+
+        .btn-category {
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text-sub);
+            border: 1px solid var(--border-color);
+            padding: 10px 22px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: capitalize;
+        }
+
+        .btn-category:hover {
+            color: var(--text-main);
+            border-color: rgba(13, 148, 136, 0.5);
+        }
+
+        .btn-category.active {
+            background: linear-gradient(135deg, var(--primary), #059669);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            transform: scale(1.05);
         }
 
         /* Grid Produk */
@@ -229,6 +265,12 @@
             flex-direction: column;
             position: relative;
             overflow: hidden;
+            animation: fadeInPop 0.4s ease forwards;
+        }
+
+        @keyframes fadeInPop {
+            0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .product-card::before {
@@ -272,6 +314,23 @@
             transform: scale(1.08);
         }
 
+        .category-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(13, 148, 136, 0.3);
+            z-index: 2;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .product-title {
             font-size: 19px;
             font-weight: 700;
@@ -286,7 +345,7 @@
             line-height: 1.6;
             margin-bottom: 25px;
             flex-grow: 1;
-            white-space: pre-line; /* Update: Mencegah teks numpuk, support fitur enter baris baru */
+            white-space: pre-line;
         }
 
         .product-price-box {
@@ -431,7 +490,6 @@
     <!-- Seksi Spesifikasi Sistem Bawaan -->
     <div class="specs-section">
         <div class="specs-grid">
-            
             <div class="spec-card">
                 <div class="spec-icon">
                     <svg viewBox="0 0 24 24"><path d="M21 11.01L3 11v2h18zM3 16h12v2H3zM21 6H3v2.01L21 8z"/></svg>
@@ -471,12 +529,16 @@
                     <p>Sistem basis <b>Linux (x64)</b> dan dukungan <b>NodeJS</b>. Mudah instal script bot apapun.</p>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- Judul Katalog -->
     <div class="section-title">KATALOG LAYANAN</div>
+
+    <!-- Tombol Filter Kategori Bakal Diisi Otomatis via JS -->
+    <div class="category-filter" id="categoryFilter">
+        <button class="btn-category active" onclick="filterKategori('Semua', this)">Semua Layanan</button>
+        <!-- Tombol lainnya diload dari Firebase -->
+    </div>
 
     <!-- Grid Etalase Produk -->
     <div class="container">
@@ -504,52 +566,80 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        let globalProducts = [];
+        const nomorWhatsApp = "62895416479539"; // Nomor WhatsApp Lu
+
         function formatRupiah(angka) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
         }
 
-        // Ambil data dari Firebase secara Real-time
-        database.ref('store_products').on('value', (snapshot) => {
-            const wadahKatalog = document.getElementById('katalogProduk');
-            const dataProduk = snapshot.val();
+        // --- RENDER TOMBOL KATEGORI OTOMATIS DARI FIREBASE ---
+        database.ref('store_settings/categories').on('value', (snap) => {
+            let catString = snap.val() || "Panel Pterodactyl, Sewa Server, Script & Bot";
+            let cats = catString.split(',').map(s => s.trim()).filter(s => s);
+            
+            let filterDiv = document.getElementById('categoryFilter');
+            let currentActive = document.querySelector('.btn-category.active');
+            let activeFilter = currentActive ? currentActive.innerText : 'Semua Layanan';
+            
+            // Render ulang tombol-tombolnya
+            let html = `<button class="btn-category ${activeFilter === 'Semua Layanan' ? 'active' : ''}" onclick="filterKategori('Semua', this)">Semua Layanan</button>`;
+            
+            cats.forEach(c => {
+                let isActive = (activeFilter === c) ? 'active' : '';
+                html += `<button class="btn-category ${isActive}" onclick="filterKategori('${c}', this)">${c}</button>`;
+            });
+            
+            filterDiv.innerHTML = html;
+        });
 
-            if (!dataProduk || Object.keys(dataProduk).length === 0) {
+        // --- RENDER PRODUK ---
+        function renderProducts(kategoriFilter) {
+            const wadahKatalog = document.getElementById('katalogProduk');
+            let filteredProducts = globalProducts;
+
+            // Proses Penyaringan (Filtering)
+            if (kategoriFilter !== 'Semua') {
+                filteredProducts = globalProducts.filter(p => {
+                    const nama = (p.nama || '').toLowerCase();
+                    const kat = (p.kategori || '').toLowerCase();
+                    const target = kategoriFilter.toLowerCase();
+                    
+                    // Nyari kesamaan di field kategori, atau kalau kosong nyari di field nama
+                    return kat.includes(target) || nama.includes(target);
+                });
+            }
+
+            // Kalau kosong di kategori tertentu
+            if (filteredProducts.length === 0) {
                 wadahKatalog.innerHTML = `
                     <div class="loading-state" style="color: var(--warning);">
                         <svg viewBox="0 0 24 24" style="fill: var(--warning); animation: none; margin-bottom: 15px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                        <br><span style="font-weight: 600;">Belum ada produk yang dijual saat ini.</span>
+                        <br><span style="font-weight: 600;">Belum ada produk di kategori ini.</span>
                     </div>`;
                 return;
             }
 
             let html = '';
-            // Ganti Nomor WhatsApp di bawah ini dengan nomor kamu (Gunakan awalan 62 tanpa +)
-            const nomorWhatsApp = "62895416479539"; 
-
-            Object.keys(dataProduk).forEach(key => {
-                const p = dataProduk[key];
-                
-                // Membersihkan teks agar aman untuk URL API
+            filteredProducts.forEach(p => {
                 const namaAman = encodeURIComponent((p.nama || 'Produk').substring(0, 15));
-                
-                // Siapkan Gambar Cadangan (Fallback)
-                const fallbackUtama = `https://ui-avatars.com/api/?name=${namaAman}&background=1e293b&color=0d9488&size=400`;
                 const fallbackDarurat = `https://placehold.co/400x250/1e293b/0d9488?text=Foto+Layanan`;
+                let imgSrc = `https://ui-avatars.com/api/?name=${namaAman}&background=1e293b&color=0d9488&size=400`;
                 
-                // Cek apakah user mengisi URL/Upload gambar
-                let imgSrc = fallbackUtama;
                 if (p.gambar && typeof p.gambar === 'string' && p.gambar.trim() !== '') {
                     imgSrc = p.gambar.trim();
                 }
                 
-                // Format Pesan WhatsApp
                 const pesanWA = encodeURIComponent(`Halo min, saya tertarik untuk membeli produk:\n\n*${p.nama}*\nHarga: ${formatRupiah(p.harga)}\n\nApakah masih tersedia?`);
                 const linkWA = `https://wa.me/${nomorWhatsApp}?text=${pesanWA}`;
 
-                // Inject ke HTML
+                let textKategori = p.kategori ? p.kategori : 'Layanan';
+                let badgeHTML = `<div class="category-badge">${textKategori}</div>`;
+
                 html += `
                 <div class="product-card">
                     <div class="img-container">
+                        ${badgeHTML}
                         <img src="${imgSrc}" alt="${p.nama}" class="product-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackDarurat}';">
                     </div>
                     <h3 class="product-title">${p.nama}</h3>
@@ -571,6 +661,38 @@
             });
 
             wadahKatalog.innerHTML = html;
+        }
+
+        // --- FUNGSI KLIK FILTER KATEGORI ---
+        function filterKategori(kategori, btnElement) {
+            document.querySelectorAll('.btn-category').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            btnElement.classList.add('active');
+            renderProducts(kategori);
+        }
+
+        // --- AMBIL DATA PRODUK DARI FIREBASE ---
+        database.ref('store_products').on('value', (snapshot) => {
+            const dataProduk = snapshot.val();
+            globalProducts = [];
+
+            if (dataProduk) {
+                Object.keys(dataProduk).forEach(key => {
+                    globalProducts.push(dataProduk[key]);
+                });
+            }
+
+            // Pertahankan filter yang lagi kepilih pas data kerestart/nambah
+            const activeBtn = document.querySelector('.btn-category.active');
+            if (activeBtn) {
+                const onclickText = activeBtn.getAttribute('onclick');
+                const filterMatch = onclickText.match(/'([^']+)'/);
+                const filterStr = filterMatch ? filterMatch[1] : 'Semua';
+                renderProducts(filterStr);
+            } else {
+                renderProducts('Semua');
+            }
         });
     </script>
 </body>
