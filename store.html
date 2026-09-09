@@ -610,15 +610,18 @@
             const wadahKatalog = document.getElementById('katalogProduk');
             let filteredProducts = globalProducts;
 
-            // Proses Penyaringan (Filtering)
+            // Proses Penyaringan (Filtering EXACT MATCH)
             if (kategoriFilter !== 'Semua') {
                 filteredProducts = globalProducts.filter(p => {
                     const nama = (p.nama || '').toLowerCase();
-                    const kat = (p.kategori || '').toLowerCase();
-                    const target = kategoriFilter.toLowerCase();
+                    const kat = (p.kategori || '').trim().toLowerCase();
+                    const target = kategoriFilter.trim().toLowerCase();
                     
-                    // Nyari kesamaan di field kategori, atau kalau kosong nyari di field nama
-                    return kat.includes(target) || nama.includes(target);
+                    if (kat !== '') {
+                        return kat === target; // Cek SAMA PERSIS
+                    } else {
+                        return nama.includes(target); // Fallback ke nama kalau kategori di database kosong
+                    }
                 });
             }
 
