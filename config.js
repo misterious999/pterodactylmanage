@@ -10,11 +10,20 @@ const GlobalConfig = {
                 domain: localStorage.getItem('prvt_domain') || "zerosystempriv.bypstar7.web.id",
                 api: localStorage.getItem('prvt_api') || "ptla_7p3wxOhXAJLAu5C46hzp6lYDRBpcHa7wkvmll7cEgRU"
             };
-        } else {
-            // Public & Public V2
+        } else if (mode === 'public') {
             return {
                 domain: localStorage.getItem('pub_domain') || "assistantzeroix.bypstar7.online",
                 api: localStorage.getItem('pub_api') || "ptla_HZElNCRfcJTbanqt3UsDYHnhd3wzjbjdE3GcvjPa1ek"
+            };
+        } else if (mode === 'public_v2') {
+            return {
+                domain: localStorage.getItem('pub_v2_domain') || "https://zeropublikv2.bypstar7.online",
+                api: localStorage.getItem('pub_v2_api') || "ptla_v5kHvYJygy8eyAAGc5y1GxoZpoSIxfdTHlEj0oXJJzR"
+            };
+        } else {
+            return {
+                domain: "localhost",
+                api: "ptla_none"
             };
         }
     },

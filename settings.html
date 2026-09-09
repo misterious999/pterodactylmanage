@@ -52,6 +52,7 @@
 
     <div class="box">
         <h3>🔒 Kredensial Pterodactyl Panel</h3>
+        <!-- Pengaturan Private -->
         <div class="grid-2">
             <div>
                 <label>Domain Private Pterodactyl</label>
@@ -62,6 +63,8 @@
                 <input type="text" id="prvtApi" placeholder="ptla_...">
             </div>
         </div>
+        
+        <!-- Pengaturan Public -->
         <div class="grid-2">
             <div>
                 <label>Domain Public Pterodactyl</label>
@@ -69,7 +72,19 @@
             </div>
             <div>
                 <label>API Key (PTLA) Public</label>
-                <input type="text" id="pubApi" placeholder="ptla_..." style="margin-bottom: 0;">
+                <input type="text" id="pubApi" placeholder="ptla_...">
+            </div>
+        </div>
+        
+        <!-- Pengaturan Public V2 -->
+        <div class="grid-2">
+            <div>
+                <label>Domain Public V2 Pterodactyl</label>
+                <input type="text" id="pubV2Domain" placeholder="publicv2.com">
+            </div>
+            <div>
+                <label>API Key (PTLA) Public V2</label>
+                <input type="text" id="pubV2Api" placeholder="ptla_..." style="margin-bottom: 0;">
             </div>
         </div>
     </div>
@@ -119,6 +134,9 @@
             
             document.getElementById('pubDomain').value = localStorage.getItem('pub_domain') || "assistantzeroix.bypstar7.online";
             document.getElementById('pubApi').value = localStorage.getItem('pub_api') || "ptla_HZElNCRfcJTbanqt3UsDYHnhd3wzjbjdE3GcvjPa1ek";
+            
+            document.getElementById('pubV2Domain').value = localStorage.getItem('pub_v2_domain') || "v2.https://zeropublikv2.bypstar7.online";
+            document.getElementById('pubV2Api').value = localStorage.getItem('pub_v2_api') || "ptla_v5kHvYJygy8eyAAGc5y1GxoZpoSIxfdTHlEj0oXJJzR";
 
             document.getElementById('defLocId').value = localStorage.getItem('default_loc_id') || "1";
             document.getElementById('defEggId').value = localStorage.getItem('default_egg_id') || "15";
@@ -135,6 +153,9 @@
             
             localStorage.setItem('pub_domain', document.getElementById('pubDomain').value.trim());
             localStorage.setItem('pub_api', document.getElementById('pubApi').value.trim());
+            
+            localStorage.setItem('pub_v2_domain', document.getElementById('pubV2Domain').value.trim());
+            localStorage.setItem('pub_v2_api', document.getElementById('pubV2Api').value.trim());
 
             localStorage.setItem('default_loc_id', document.getElementById('defLocId').value.trim());
             localStorage.setItem('default_egg_id', document.getElementById('defEggId').value.trim());
