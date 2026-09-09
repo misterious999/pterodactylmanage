@@ -17,7 +17,7 @@ const GlobalConfig = {
             };
         } else if (mode === 'public_v2') {
             return {
-                domain: localStorage.getItem('pub_v2_domain') || "https://zeropublikv2.bypstar7.online",
+                domain: localStorage.getItem('pub_v2_domain') || "zeropublikv2.bypstar7.online",
                 api: localStorage.getItem('pub_v2_api') || "ptla_v5kHvYJygy8eyAAGc5y1GxoZpoSIxfdTHlEj0oXJJzR"
             };
         } else {
