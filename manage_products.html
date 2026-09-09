@@ -60,7 +60,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            white-space: nowrap; /* Mencegah teks turun ke baris baru */
+            white-space: nowrap; 
         }
 
         .btn-back svg {
@@ -77,15 +77,13 @@
         }
 
         .btn-back:hover svg {
-            transform: translateX(-4px); /* Animasi panah geser saat disentuh */
+            transform: translateX(-4px);
         }
 
-        /* Responsif HP untuk Header */
         @media (max-width: 600px) {
             .header h1 { font-size: 18px; }
             .btn-back { padding: 8px 12px; font-size: 12px; }
         }
-        /* ----------------------------------------- */
 
         .card {
             background: var(--card-bg);
@@ -188,6 +186,7 @@
             padding: 6px 12px;
             font-size: 12px;
             margin-right: 5px;
+            border-radius: 6px;
         }
 
         .btn-edit { background: var(--warning); }
@@ -202,6 +201,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
+            min-width: 700px;
         }
 
         th, td {
@@ -223,6 +223,17 @@
             border-radius: 8px;
             object-fit: cover;
             background: #000;
+        }
+        
+        .kategori-badge {
+            background: rgba(13, 148, 136, 0.2);
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* --- STYLING MODAL POP-UP KUSTOM --- */
@@ -281,6 +292,17 @@
             </a>
         </div>
 
+        <!-- FORM KELOLA KATEGORI TOKO -->
+        <div class="card" style="margin-bottom: 25px;">
+            <h2 style="margin-top: 0; font-size: 18px; margin-bottom: 15px; color: var(--warning);">🛒 Kelola Kategori Toko</h2>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>Daftar Kategori (Pisahkan dengan koma)</label>
+                <input type="text" id="storeCategories" placeholder="Contoh: Panel Pterodactyl, Sewa Server, Script & Bot">
+                <p style="font-size: 11px; color: var(--text-sub); margin-top: 8px;">Kategori ini akan otomatis menjadi tombol menu utama di halaman Store pembeli.</p>
+            </div>
+            <button type="button" class="btn-save" style="width: auto; padding: 10px 20px; font-size: 13px; background: var(--warning);" onclick="simpanKategoriManual()">Simpan Kategori</button>
+        </div>
+
         <!-- Form Tambah/Edit Produk -->
         <div class="card">
             <h2 id="formTitle" style="margin-top: 0; font-size: 18px; margin-bottom: 20px;">Tambah Produk Baru</h2>
@@ -292,6 +314,15 @@
                         <label>Nama Produk</label>
                         <input type="text" id="nama" placeholder="Contoh: Server RAM 4GB" required>
                     </div>
+
+                    <!-- Kategori dengan DataList -->
+                    <div class="form-group">
+                        <label>Kategori Produk</label>
+                        <input type="text" id="kategori" list="kategoriList" placeholder="Pilih atau ketik kategori baru..." required>
+                        <datalist id="kategoriList">
+                            <!-- Diisi Otomatis via JS -->
+                        </datalist>
+                    </div>
                     
                     <div class="form-group">
                         <label>Harga (Angka saja)</label>
@@ -299,17 +330,17 @@
                     </div>
 
                     <div class="form-group">
+                        <label>Label Promo / Diskon (Opsional)</label>
+                        <input type="text" id="diskon" placeholder="Contoh: Diskon 20% atau Terlaris">
+                    </div>
+
+                    <div class="form-group full-width">
                         <label>Upload Foto Produk (Opsional)</label>
                         <input type="file" id="fileGambar" accept="image/*">
                         <div class="image-preview-container">
                             <img id="previewGambar" src="" alt="Preview">
                             <span id="previewTeks" style="font-size: 11px; color: var(--text-sub);">Belum ada foto</span>
                         </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Label Promo / Diskon (Opsional)</label>
-                        <input type="text" id="diskon" placeholder="Contoh: Diskon 20% atau Terlaris">
                     </div>
 
                     <div class="form-group full-width">
@@ -331,9 +362,9 @@
                     <thead>
                         <tr>
                             <th>Gambar</th>
-                            <th>Nama Produk</th>
-                            <th>Harga</th>
-                            <th>Promo</th>
+                            <th>Info Produk</th>
+                            <th>Kategori</th>
+                            <th>Harga & Promo</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -434,11 +465,40 @@
         const btnCancelEdit = document.getElementById('btnCancelEdit');
         
         let fotoDataFinal = ""; 
+        let currentCategories = []; // Menyimpan kategori dari firebase
 
         function formatRupiah(angka) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
         }
 
+        // --- SISTEM TARIK & SIMPAN KATEGORI ---
+        database.ref('store_settings/categories').on('value', (snap) => {
+            let catString = snap.val() || "Panel Pterodactyl, Sewa Server, Script & Bot";
+            document.getElementById('storeCategories').value = catString; // Isi box input
+            currentCategories = catString.split(',').map(s => s.trim()).filter(s => s);
+            
+            const datalist = document.getElementById('kategoriList');
+            if (datalist) {
+                datalist.innerHTML = '';
+                currentCategories.forEach(c => {
+                    const option = document.createElement('option');
+                    option.value = c;
+                    datalist.appendChild(option);
+                });
+            }
+        });
+
+        window.simpanKategoriManual = function() {
+            let cats = document.getElementById('storeCategories').value.trim();
+            if(!cats) cats = "Panel Pterodactyl, Sewa Server, Script & Bot"; // Default aman
+            database.ref('store_settings/categories').set(cats).then(() => {
+                showModal('success', 'Berhasil', 'Daftar Kategori berhasil diperbarui!');
+            }).catch(e => {
+                showModal('error', 'Gagal', 'Gagal menyimpan kategori: ' + e.message);
+            });
+        };
+
+        // --- SISTEM CONVERT GAMBAR ---
         document.getElementById('fileGambar').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -479,6 +539,7 @@
             reader.readAsDataURL(file);
         });
 
+        // --- RENDER TABEL PRODUK ---
         productRef.on('value', (snapshot) => {
             const data = snapshot.val();
             tableBody.innerHTML = '';
@@ -493,12 +554,15 @@
                 const fallbackImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nama)}&background=1e3a5f&color=3b82f6`;
                 const imgDisplay = item.gambar ? item.gambar : fallbackImg;
                 
+                const diskonBadge = item.diskon ? `<br><span style="display:inline-block; margin-top:5px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">${item.diskon}</span>` : '';
+                const kategoriTeks = item.kategori ? item.kategori : 'Umum';
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><img src="${imgDisplay}" class="prod-img-preview" onerror="this.src='${fallbackImg}'"></td>
                     <td><strong>${item.nama}</strong><br><small style="color:var(--text-sub)">${item.deskripsi.substring(0, 40)}...</small></td>
-                    <td>${formatRupiah(item.harga)}</td>
-                    <td>${item.diskon ? `<span style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 3px 8px; border-radius: 4px; font-size: 11px;">${item.diskon}</span>` : '-'}</td>
+                    <td><span class="kategori-badge">${kategoriTeks}</span></td>
+                    <td><strong>${formatRupiah(item.harga)}</strong>${diskonBadge}</td>
                     <td>
                         <button class="btn-action btn-edit" onclick="editProduct('${key}')">Edit</button>
                         <button class="btn-action btn-delete" onclick="deleteProduct('${key}')">Hapus</button>
@@ -508,12 +572,16 @@
             });
         });
 
+        // --- SUBMIT FORM ---
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             
             const id = document.getElementById('productId').value;
+            const inputKategori = document.getElementById('kategori').value.trim();
+
             const productData = {
                 nama: document.getElementById('nama').value,
+                kategori: inputKategori,
                 harga: parseInt(document.getElementById('harga').value),
                 diskon: document.getElementById('diskon').value,
                 deskripsi: document.getElementById('deskripsi').value,
@@ -522,6 +590,15 @@
 
             if (id && fotoDataFinal === "") {
                 delete productData.gambar; 
+            }
+
+            // --- AUTO TAMBAH KATEGORI JIKA BELUM ADA ---
+            if (inputKategori) {
+                const isKategoriBaru = !currentCategories.some(c => c.toLowerCase() === inputKategori.toLowerCase());
+                if (isKategoriBaru) {
+                    currentCategories.push(inputKategori);
+                    database.ref('store_settings/categories').set(currentCategories.join(', '));
+                }
             }
 
             if (id) {
@@ -541,12 +618,14 @@
             }
         });
 
+        // --- EDIT & HAPUS ---
         window.editProduct = function(key) {
             productRef.child(key).once('value').then((snapshot) => {
                 const data = snapshot.val();
                 if(data) {
                     document.getElementById('productId').value = key;
                     document.getElementById('nama').value = data.nama;
+                    document.getElementById('kategori').value = data.kategori || '';
                     document.getElementById('harga').value = data.harga;
                     document.getElementById('diskon').value = data.diskon || '';
                     document.getElementById('deskripsi').value = data.deskripsi;
