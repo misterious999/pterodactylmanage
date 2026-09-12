@@ -93,30 +93,31 @@
         .search-container input { padding-left: 40px; margin-bottom: 0; background: rgba(0,0,0,0.15); border-color: rgba(13, 148, 136, 0.3); }
         .search-container input:focus { background: var(--input-bg); border-color: var(--primary); }
 
-        /* MODALS */
-        .mini-ai-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s ease; }
-        .mini-ai-popup { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 380px; padding: 30px 25px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1px solid var(--border-color); }
+        /* MODALS ENTERPRISE UI */
+        .system-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s ease; }
+        .system-modal-popup { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 380px; padding: 30px 25px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1px solid var(--border-color); }
         
         .modal-icon-top { width: 50px; height: 50px; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
         .modal-icon-top svg { width: 24px; height: 24px; }
         
-        .mode-danger .modal-icon-top { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); } .mode-danger .modal-icon-top svg { fill: var(--danger); } .mode-danger .mini-ai-header { color: var(--danger); }
-        .mode-success .modal-icon-top { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); } .mode-success .modal-icon-top svg { fill: var(--success); } .mode-success .mini-ai-header { color: var(--success); }
-        .mode-warning .modal-icon-top { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); } .mode-warning .modal-icon-top svg { fill: var(--warning); } .mode-warning .mini-ai-header { color: var(--warning); }
-        .mode-info .modal-icon-top { background: var(--primary-glow); border: 1px solid rgba(13, 148, 136, 0.3); } .mode-info .modal-icon-top svg { fill: var(--primary); } .mode-info .mini-ai-header { color: var(--primary); }
+        .mode-danger .modal-icon-top { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); } .mode-danger .modal-icon-top svg { fill: var(--danger); } .mode-danger .system-modal-header { color: var(--danger); }
+        .mode-success .modal-icon-top { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); } .mode-success .modal-icon-top svg { fill: var(--success); } .mode-success .system-modal-header { color: var(--success); }
+        .mode-warning .modal-icon-top { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); } .mode-warning .modal-icon-top svg { fill: var(--warning); } .mode-warning .system-modal-header { color: var(--warning); }
+        .mode-info .modal-icon-top { background: var(--primary-glow); border: 1px solid rgba(13, 148, 136, 0.3); } .mode-info .modal-icon-top svg { fill: var(--primary); } .mode-info .system-modal-header { color: var(--primary); }
 
-        .mini-ai-header { font-size: 18px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        .mini-ai-body { font-size: 13px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; }
+        .system-modal-header { font-size: 18px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .system-modal-body { font-size: 13px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; white-space: pre-wrap; }
         
-        .info-detail-ai { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; text-align: left; margin-bottom: 20px; }
+        .info-detail-system { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; text-align: left; margin-bottom: 20px; }
         .detail-row { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
         .detail-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
         .detail-label { font-size: 10px; color: var(--text-sub); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
         .detail-label svg { width: 12px; height: 12px; fill: var(--text-sub); }
         .detail-value { font-size: 14px; font-weight: 600; color: var(--text-main); word-break: break-all; }
+        .value-highlight { color: var(--primary); }
         
-        .ai-btn-group { display: flex; gap: 10px; }
-        .mini-ai-btn { flex: 1; border: none; padding: 12px; font-weight: 700; font-size: 12px; border-radius: 10px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 6px;}
+        .system-btn-group { display: flex; gap: 10px; }
+        .system-btn { flex: 1; border: none; padding: 12px; font-weight: 700; font-size: 12px; border-radius: 10px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 6px;}
         .btn-primary-action { background: var(--primary); color: white; } .btn-primary-action:hover { background: #0f766e; transform: translateY(-2px); }
         .btn-danger-action { background: var(--danger); color: white; } .btn-danger-action:hover { background: #dc2626; transform: translateY(-2px); }
         .btn-warning-action { background: var(--warning); color: white; } .btn-warning-action:hover { background: #d97706; transform: translateY(-2px); }
@@ -125,6 +126,7 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInPop { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -182,7 +184,7 @@
                     <option value="100" selected>100%</option>
                     <option value="150">150%</option>
                     <option value="200">200%</option>
-                    <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited 🚀</option>
+                    <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited</option>
                 </select>
             </div>
             <div>
@@ -192,7 +194,7 @@
                     <option value="2048" selected>2 GB</option>
                     <option value="5120">5 GB</option>
                     <option value="10240">10 GB</option>
-                    <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited 🚀</option>
+                    <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited</option>
                 </select>
             </div>
         </div>
@@ -205,7 +207,7 @@
         </div>
 
         <button class="btn-tambah" onclick="buatServer()">
-            Deploy Server Sekarang
+            Jalankan Deploy
             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
         </button>
     </div>
@@ -220,71 +222,72 @@
         </div>
         <table id="tabelServer">
             <tr><th>ID</th><th>Nama Server</th><th>Pemilik</th><th>Status</th><th>Aksi</th></tr>
-            <tr><td colspan="5" style="text-align: center; color: var(--text-sub); padding: 30px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Mengambil data server...</td></tr>
+            <tr><td colspan="5" style="text-align: center; color: var(--text-sub); padding: 30px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Sinkronisasi data server...</td></tr>
         </table>
     </div>
 
-    <div id="modalScreenshot" class="mini-ai-overlay">
-        <div class="mini-ai-popup mode-info">
-            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
-            <div class="mini-ai-header">SERVER DEPLOYED</div>
-            <p style="margin-bottom: 15px; color: var(--text-sub); font-size: 12px;">Server berhasil dibuat! Silakan kirimkan informasi ini ke pelanggan.</p>
-            <div class="info-detail-ai">
-                <div class="detail-row"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> Informasi Server</div><div class="detail-value">Server: <span id="resServerName" style="color: white; font-weight: bold;"></span></div><div class="detail-value">Owner: <span id="resServerOwner" style="color: var(--warning); font-weight: bold;"></span></div></div>
-                <div class="detail-row" style="border: none; padding: 0;"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96z"/></svg> Link Panel</div><div class="detail-value"><a id="resLink" href="#" target="_blank" style="color: var(--primary); text-decoration: none;"></a></div></div>
+    <!-- MODAL HASIL DEPLOY -->
+    <div id="modalScreenshot" class="system-modal-overlay">
+        <div class="system-modal-popup mode-success">
+            <div class="modal-icon-top" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);"><svg viewBox="0 0 24 24" style="fill: var(--success);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+            <div class="system-modal-header" style="color: var(--success);">ALOKASI SERVER BERHASIL</div>
+            <p style="margin-bottom: 15px; color: var(--text-sub); font-size: 12px;">Instansi server baru telah dibuat dan terasosiasi.</p>
+            <div class="info-detail-system">
+                <div class="detail-row"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> Keterangan Server</div><div class="detail-value">Server: <span id="resServerName" style="color: white; font-weight: bold;"></span></div><div class="detail-value">Owner: <span id="resServerOwner" style="color: var(--warning); font-weight: bold;"></span></div></div>
+                <div class="detail-row" style="border: none; padding: 0;"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96z"/></svg> Portal Akses</div><div class="detail-value"><a id="resLink" href="#" target="_blank" style="color: var(--primary); text-decoration: none;"></a></div></div>
             </div>
             
-            <div class="ai-btn-group" style="flex-wrap: wrap;">
-                <button class="mini-ai-btn btn-primary-action" onclick="salinStrukServer()" id="btnSalinStruk"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Data Server</button>
-                <button class="mini-ai-btn btn-success-action" onclick="salinTestimoni()" id="btnSalinTesti"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Testimoni</button>
-                <button class="mini-ai-btn btn-outline-action" style="flex-basis: 100%;" onclick="tutupModal('modalScreenshot')">Tutup</button>
+            <div class="system-btn-group" style="flex-wrap: wrap;">
+                <button class="system-btn btn-primary-action" onclick="salinStrukServer()" id="btnSalinStruk"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Kredensial</button>
+                <button class="system-btn btn-success-action" id="btnSalinTesti"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Format Transaksi</button>
+                <button class="system-btn btn-outline-action" style="flex-basis: 100%;" onclick="tutupModal('modalScreenshot')">Tutup</button>
             </div>
         </div>
     </div>
 
-    <div id="modalHapusConfirm" class="mini-ai-overlay"><div class="mini-ai-popup mode-danger"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></div><div class="mini-ai-header">HAPUS SERVER?</div><div class="mini-ai-body">Yakin ingin menghapus server <b style="color: var(--danger);" id="delServerName"></b>?<br><br>Tindakan ini permanen dan data server akan hancur selamanya!</div><div class="ai-btn-group"><button id="btnKonfirmasiHapus" class="mini-ai-btn btn-danger-action" onclick="prosesHapusServer()">Hapus Permanen</button><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalHapusConfirm')">Batal</button></div></div></div>
-    <div id="modalSuspendConfirm" class="mini-ai-overlay"><div class="mini-ai-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/></svg></div><div class="mini-ai-header">BEKUKAN SERVER?</div><div class="mini-ai-body">Yakin ingin membekukan (Suspend) server <b style="color: var(--warning);" id="suspendServerName"></b>?<br><br>Pelanggan tidak akan bisa menyalakan servernya.</div><div class="ai-btn-group"><button id="btnKonfirmasiSuspend" class="mini-ai-btn btn-warning-action" onclick="prosesSuspendServer()">Ya, Bekukan</button><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalSuspendConfirm')">Batal</button></div></div></div>
-    <div id="modalUnsuspendConfirm" class="mini-ai-overlay"><div class="mini-ai-popup mode-success"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg></div><div class="mini-ai-header">BUKA BEKU SERVER?</div><div class="mini-ai-body">Yakin ingin membuka status beku (Unsuspend) server <b style="color: var(--success);" id="unsuspendServerName"></b>?<br><br>Server akan kembali normal.</div><div class="ai-btn-group"><button id="btnKonfirmasiUnsuspend" class="mini-ai-btn btn-success-action" onclick="prosesUnsuspendServer()">Buka Akses</button><button class="mini-ai-btn btn-outline-action" onclick="tutupModal('modalUnsuspendConfirm')">Batal</button></div></div></div>
+    <!-- MODAL CONFIRMATION & ALERT -->
+    <div id="modalHapusConfirm" class="system-modal-overlay"><div class="system-modal-popup mode-danger"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></div><div class="system-modal-header">PENGHAPUSAN PERMANEN</div><div class="system-modal-body">Validasi penghapusan instansi server: <b style="color: var(--danger);" id="delServerName"></b>?<br><br>Operasi ini bersifat destruktif dan data tidak dapat dipulihkan.</div><div class="system-btn-group"><button id="btnKonfirmasiHapus" class="system-btn btn-danger-action" onclick="prosesHapusServer()">Eksekusi</button><button class="system-btn btn-outline-action" onclick="tutupModal('modalHapusConfirm')">Batal</button></div></div></div>
+    <div id="modalSuspendConfirm" class="system-modal-overlay"><div class="system-modal-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/></svg></div><div class="system-modal-header">RESTRIKSI SISTEM</div><div class="system-modal-body">Bekukan (Suspend) akses dan instansi server: <b style="color: var(--warning);" id="suspendServerName"></b>?<br><br>Pengguna tidak akan memiliki otorisasi operasional.</div><div class="system-btn-group"><button id="btnKonfirmasiSuspend" class="system-btn btn-warning-action" onclick="prosesSuspendServer()">Bekukan Akses</button><button class="system-btn btn-outline-action" onclick="tutupModal('modalSuspendConfirm')">Batal</button></div></div></div>
+    <div id="modalUnsuspendConfirm" class="system-modal-overlay"><div class="system-modal-popup mode-success"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg></div><div class="system-modal-header">PEMULIHAN AKSES</div><div class="system-modal-body">Pulihkan otorisasi operasional (Unsuspend) untuk instansi server: <b style="color: var(--success);" id="unsuspendServerName"></b>?</div><div class="system-btn-group"><button id="btnKonfirmasiUnsuspend" class="system-btn btn-success-action" onclick="prosesUnsuspendServer()">Cabut Restriksi</button><button class="system-btn btn-outline-action" onclick="tutupModal('modalUnsuspendConfirm')">Batal</button></div></div></div>
     
-    <div id="modalAiAlert" class="mini-ai-overlay" style="z-index: 999999;"><div class="mini-ai-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><div class="mini-ai-header" id="aiAlertTitle">PERHATIAN</div><div class="mini-ai-body" id="aiAlertBody">Pesan peringatan di sini.</div><div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" style="background: var(--warning);" onclick="tutupModal('modalAiAlert')">Mengerti</button></div></div></div>
-    <div id="modalAiSuccess" class="mini-ai-overlay" style="z-index: 999999;"><div class="mini-ai-popup mode-success" id="popupSuccessMode"><div class="modal-icon-top" id="iconSuccessMode"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="mini-ai-header" id="aiSuccessTitle">BERHASIL</div><div class="mini-ai-body" id="aiSuccessBody">Proses sukses dilakukan.</div><div class="ai-btn-group"><button class="mini-ai-btn btn-primary-action" id="btnTutupSuccess" style="background: var(--success);" onclick="tutupModal('modalAiSuccess')">Tutup</button></div></div></div>
+    <div id="modalAiAlert" class="system-modal-overlay" style="z-index: 999999;"><div class="system-modal-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><div class="system-modal-header" id="aiAlertTitle">PERINGATAN SISTEM</div><div class="system-modal-body" id="aiAlertBody">Pesan peringatan.</div><div class="system-btn-group"><button class="system-btn btn-primary-action" style="background: var(--warning);" onclick="tutupModal('modalAiAlert')">Mengerti</button></div></div></div>
+    <div id="modalAiSuccess" class="system-modal-overlay" style="z-index: 999999;"><div class="system-modal-popup mode-success" id="popupSuccessMode"><div class="modal-icon-top" id="iconSuccessMode"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="system-modal-header" id="aiSuccessTitle">STATUS OK</div><div class="system-modal-body" id="aiSuccessBody">Operasi berhasil diselesaikan.</div><div class="system-btn-group"><button class="system-btn btn-primary-action" id="btnTutupSuccess" style="background: var(--success);" onclick="tutupModal('modalAiSuccess')">Tutup</button></div></div></div>
 
     <script src="config.js"></script>
+    <script src="api-services.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // ============ MODE CONFIGURATION ============
+        // ============ CONFIGURATION ============
         const urlParams = new URLSearchParams(window.location.search);
         const modeParam = urlParams.get('mode') || localStorage.getItem('serverMode') || 'private';
+        const apiPtero = new PteroAPI(modeParam); 
         
         const modeConfig = {
             private: {
                 title: 'Kelola Server (Private)',
                 heading: 'Kelola Server (Private)',
-                subtitle: 'Tambah dan kelola server baru untuk pengguna yang sudah ada di Divisi Private.',
+                subtitle: 'Tambah instansi server baru untuk entitas yang berelasi di Divisi Private.',
                 allowedRoles: ['pemilik', 'reseller_private', 'reseller'],
-                domain: GlobalConfig.getPteroConfig('private').domain,
-                api: GlobalConfig.getPteroConfig('private').api,
-                daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : 'Buatanmu'
+                domain: apiPtero.domain,
+                daftarLabel: (role) => role === 'pemilik' ? '(Seluruh Entitas)' : 'Jaringan Anda'
             },
             public: {
                 title: 'Kelola Server (Public)',
                 heading: 'Kelola Server (Public)',
-                subtitle: 'Tambah dan kelola server baru untuk pengguna yang sudah ada di Divisi Public.',
+                subtitle: 'Tambah instansi server baru untuk entitas yang berelasi di Divisi Publik.',
                 allowedRoles: ['pemilik', 'reseller_public', 'partner_public', 'demo'],
-                domain: GlobalConfig.getPteroConfig('public').domain,
-                api: GlobalConfig.getPteroConfig('public').api,
-                daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : (role === 'partner_public' ? '(Tim Kamu)' : (role === 'demo' ? '(Akun Demo)' : 'Buatanmu'))
+                domain: apiPtero.domain,
+                daftarLabel: (role) => role === 'pemilik' ? '(Seluruh Entitas)' : (role === 'partner_public' ? '(Jaringan Tim)' : (role === 'demo' ? '(Sesi Demo)' : 'Jaringan Anda'))
             },
             public_v2: {
                 title: 'Kelola Server (Public V2)',
                 heading: 'Kelola Server (Public V2)',
-                subtitle: 'Tambah dan kelola server baru untuk pengguna yang sudah ada di Divisi Public V2.',
+                subtitle: 'Tambah instansi server baru untuk entitas yang berelasi di Divisi Publik V2.',
                 allowedRoles: ['pemilik', 'reseller_public_v2', 'partner_public_v2'],
-                domain: GlobalConfig.getPteroConfig('public_v2').domain,
-                api: GlobalConfig.getPteroConfig('public_v2').api,
-                daftarLabel: (role) => role === 'pemilik' ? '(Semua Reseller)' : (role === 'partner_public_v2' ? '(Tim Kamu)' : 'Buatanmu')
+                domain: apiPtero.domain,
+                daftarLabel: (role) => role === 'pemilik' ? '(Seluruh Entitas)' : (role === 'partner_public_v2' ? '(Jaringan Tim)' : 'Jaringan Anda')
             }
         };
 
@@ -315,7 +318,9 @@
         }
         
         window.addEventListener('DOMContentLoaded', () => {
-            const defaults = GlobalConfig.getDefaultDeploy();
+            let defaults = { locationId: 1, eggId: 15, nodeId: 1, nestId: 5 };
+            if(window.GlobalConfig && GlobalConfig.getDefaultDeploy) defaults = GlobalConfig.getDefaultDeploy();
+            
             let elLocId = document.getElementById('locId');
             let elEggId = document.getElementById('eggId');
             let elNodeId = document.getElementById('nodeId');
@@ -327,36 +332,32 @@
             if(elNestId) elNestId.value = defaults.nestId || 5;
         });
 
-        const WORKER_URL = GlobalConfig.getWorkerUrl().replace(/[\/?]+$/, '');
-        const PTERO_DOMAIN = config.domain;
-        const PTERO_API = config.api;
-
         const spinnerSvg = `<svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite; width:16px; height:16px; fill:currentColor;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg>`;
 
-        // ============ MODAL FUNCTIONS ============
+        // ============ UI HELPERS ============
         function tutupModal(id) { 
             const modal = document.getElementById(id);
             if (modal) modal.style.display = 'none'; 
         }
         
-        function showAiAlert(p, j = "PERHATIAN") { 
+        function showAiAlert(p, j = "PERINGATAN SISTEM") { 
             document.getElementById('aiAlertTitle').innerText = j; 
             document.getElementById('aiAlertBody').innerHTML = p; 
             document.getElementById('modalAiAlert').style.display = 'flex'; 
         }
         
-        function showAiSuccess(p, j = "BERHASIL", isDanger = false) {
+        function showAiSuccess(p, j = "STATUS OK", isDanger = false) {
             document.getElementById('aiSuccessTitle').innerText = j; 
             document.getElementById('aiSuccessBody').innerHTML = p;
             let popup = document.getElementById('popupSuccessMode'); 
             let iconBox = document.getElementById('iconSuccessMode'); 
             let btn = document.getElementById('btnTutupSuccess');
             if(isDanger) { 
-                popup.className = "mini-ai-popup mode-danger"; 
+                popup.className = "system-modal-popup mode-danger"; 
                 iconBox.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`; 
                 btn.style.background = "var(--danger)"; 
             } else { 
-                popup.className = "mini-ai-popup mode-success"; 
+                popup.className = "system-modal-popup mode-success"; 
                 iconBox.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`; 
                 btn.style.background = "var(--success)"; 
             }
@@ -371,18 +372,10 @@
                 let totalPages = 1; 
                 usersMap = {};
                 let select = document.getElementById('userSelect'); 
-                select.innerHTML = '<option value="">-- Sedang Memuat Semua User... --</option>';
+                select.innerHTML = '<option value="">-- Sedang Memuat Data... --</option>';
 
                 do {
-                    let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/users?page=${currentPage}`, { 
-                        headers: { 
-                            'Accept': 'application/json', 
-                            'Authorization': `Bearer ${PTERO_API}` 
-                        } 
-                    });
-                    
-                    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-                    let data = await res.json();
+                    let data = await apiPtero.getUsers(currentPage);
                     
                     data.data.forEach(user => {
                         let u = user.attributes; 
@@ -393,40 +386,32 @@
                         if (role === 'pemilik' || (role.includes('partner') && config.allowedRoles.includes(role))) show = true; 
                         else if (u.last_name === myUsername) show = true;
                         
-                        if (show && u.id !== 1) select.innerHTML += `<option value="${u.id}">${u.username} (Oleh: ${pembuat})</option>`;
+                        if (show && u.id !== 1) select.innerHTML += `<option value="${u.id}">${u.username} (Author: ${pembuat})</option>`;
                     });
                     
-                    totalPages = data.meta.pagination.total_pages; 
+                    totalPages = data.meta ? data.meta.pagination.total_pages : 1; 
                     currentPage++;
                 } while (currentPage <= totalPages);
                 
-                select.options[0].text = '-- Pilih User --'; 
+                select.options[0].text = '-- Tetapkan Entitas Pengguna --'; 
                 ambilDataServers(); 
             } catch(e) { 
-                showAiAlert("Gagal memuat data user: " + e.message, "ERROR"); 
+                showAiAlert("Malfunctions identifikasi data pengguna: " + e.message, "KESALAHAN KONEKSI"); 
             }
         }
 
         async function ambilDataServers() {
             try {
-                document.getElementById('tabelServer').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">⏳ Sedang menyapu bersih data server dari semua halaman...</td></tr>`;
+                document.getElementById('tabelServer').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">${spinnerSvg}<br>Mengambil matriks server...</td></tr>`;
                 
                 let currentPage = 1; 
                 let totalPages = 1; 
                 let allServers = [];
 
                 do {
-                    let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers?page=${currentPage}`, { 
-                        headers: { 
-                            'Accept': 'application/json', 
-                            'Authorization': `Bearer ${PTERO_API}` 
-                        } 
-                    });
-                    
-                    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-                    let data = await res.json();
-                    allServers = allServers.concat(data.data); 
-                    totalPages = data.meta.pagination.total_pages; 
+                    let data = await apiPtero.getServers(currentPage);
+                    allServers = allServers.concat(data.data || []); 
+                    totalPages = data.meta ? data.meta.pagination.total_pages : 1; 
                     currentPage++;
                 } while (currentPage <= totalPages);
 
@@ -439,7 +424,7 @@
                 allServers.forEach(srv => {
                     let s = srv.attributes; 
                     let oId = s.user; 
-                    let oData = usersMap[oId] || { username: 'Unknown', maker: 'Unknown' };
+                    let oData = usersMap[oId] || { username: 'Tidak Teridentifikasi', maker: 'Sistem' };
                     
                     const isOwner = role === 'pemilik' || (role.includes('partner') && config.allowedRoles.includes(role));
                     if (!isOwner && oData.maker !== myUsername) return; 
@@ -447,7 +432,7 @@
                     count++;
                     let sBadge = s.suspended ? `<span class="badge badge-suspended"><span class="status-dot dot-danger"></span> Suspended</span>` : `<span class="badge badge-active"><span class="status-dot dot-success"></span> Active</span>`;
                     if (s.status === 'installing') sBadge = `<span class="badge badge-install"><span class="status-dot dot-warning"></span> Installing</span>`;
-                    let mTag = isOwner ? `<br><span class="reseller-tag">Reseller: ${oData.maker}</span>` : '';
+                    let mTag = isOwner ? `<br><span class="reseller-tag">Author: ${oData.maker}</span>` : '';
                     
                     let btnLock = s.suspended ? 
                                   `<button class="btn-action-small btn-unsuspend" title="Buka Suspend Server" onclick="konfirmasiUnsuspend(${s.id}, '${s.name}')">${iconUnlock}</button>` : 
@@ -461,65 +446,49 @@
                     tabel += `<tr><td style="color:var(--text-sub); font-weight:bold;">#${s.id}</td><td style="font-weight:700; color:var(--text-main); font-size:14px;">${s.name}</td><td><span style="color:var(--primary); font-weight:bold;">${oData.username}</span>${mTag}</td><td>${sBadge}</td><td>${btnAction}</td></tr>`;
                 });
                 
-                if (count === 0) tabel += `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">Belum ada server yang bisa ditampilkan.</td></tr>`;
+                if (count === 0) tabel += `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">Database server kosong atau di luar jangkauan otorisasi.</td></tr>`;
                 document.getElementById('tabelServer').innerHTML = tabel;
             } catch(e) { 
-                document.getElementById('tabelServer').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">Error: ${e.message}</td></tr>`; 
+                document.getElementById('tabelServer').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">Malfunctions Sinkronisasi: ${e.message}</td></tr>`; 
             }
         }
 
         // ==========================================
-        // AUTO-DEPLOY LOGIC RADAR (SCAN PORT KOSONG)
+        // AUTO-DEPLOY ALGORITHMS
         // ==========================================
         async function getFreeNodeAndAllocation(locId) {
-            let resNodes = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/nodes`, {
-                headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
-            });
-            if (!resNodes.ok) throw new Error("Gagal mengambil data Node dari Pterodactyl.");
-            let nodesData = await resNodes.json();
-            
+            let nodesData = await apiPtero.getNodes();
             let nodesInLoc = nodesData.data.filter(n => n.attributes.location_id === parseInt(locId));
-            if (nodesInLoc.length === 0) throw new Error(`Tidak ditemukan Node pada Location ID ${locId}`);
+            if (nodesInLoc.length === 0) throw new Error(`Konfigurasi Location ID ${locId} gagal, tidak ada Node yang tersedia.`);
 
             for (let node of nodesInLoc) {
                 let nodeId = node.attributes.id;
                 let page = 1;
                 let totalPages = 1;
                 do {
-                    let resAlloc = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/nodes/${nodeId}/allocations?page=${page}`, {
-                        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
-                    });
-                    if (!resAlloc.ok) break; 
-                    let allocData = await resAlloc.json();
-                    
+                    let allocData = await apiPtero.getNodeAllocations(nodeId, page);
                     let freeAlloc = allocData.data.find(a => a.attributes.assigned === false);
                     if (freeAlloc) {
                         return { nodeId: nodeId, allocId: freeAlloc.attributes.id, port: freeAlloc.attributes.port };
                     }
-                    totalPages = allocData.meta.pagination.total_pages;
+                    totalPages = allocData.meta ? allocData.meta.pagination.total_pages : 1;
                     page++;
                 } while (page <= totalPages);
             }
-            
-            throw new Error(`Semua port penuh! Tidak ada Allocation (Port) kosong tersisa di Location ID ${locId}.`);
+            throw new Error(`Traffic Padat: Seluruh port terisi pada Location ID ${locId}. Hubungi Administrator.`);
         }
 
         async function getDynamicEnvironment(nestId, eggId) {
             try {
-                let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/nests/${nestId}/eggs/${eggId}?include=variables`, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${PTERO_API}` }
-                });
-                if (!res.ok) throw new Error("Gagal mengambil Env");
-                let data = await res.json();
-                
+                let data = await apiPtero.getEggVariables(nestId, eggId);
                 let dynamicEnv = {};
                 let variables = data.attributes.relationships.variables.data;
+                
                 for (let v of variables) {
                     let attr = v.attributes;
                     let envKey = attr.env_variable;
                     let isRequired = attr.rules.includes('required');
-                    
+
                     if (envKey === 'PY_FILE') dynamicEnv[envKey] = 'app.py';
                     else if (envKey === 'REQUIREMENTS_FILE') dynamicEnv[envKey] = 'requirements.txt';
                     else if (envKey === 'MAIN_FILE') dynamicEnv[envKey] = 'index.js';
@@ -538,42 +507,41 @@
         async function buatServer() {
             let uId = document.getElementById('userSelect').value; 
             let name = document.getElementById('serverName').value.trim();
-            let ram = document.getElementById('serverRam').value; 
+            
+            let ramSelect = document.getElementById('serverRam');
+            let ram = ramSelect.value;
+            let ramLabel = ramSelect.options[ramSelect.selectedIndex].text;
+            
             let cpu = document.getElementById('serverCpu').value;
             let disk = document.getElementById('serverDisk').value; 
             
-            // Ambil dari hidden input yang terisi otomatis dari config.js
             let locId = document.getElementById('locId').value || "1"; 
             let eggId = document.getElementById('eggId').value || "15";
             let nestId = document.getElementById('nestId').value || "5";
             
-            if(!uId || !name || !ram || !cpu || !disk) return showAiAlert("Harap lengkapi semua data formulir!", "DATA TIDAK LENGKAP"); 
+            if(!uId || !name || !ram || !cpu || !disk) return showAiAlert("Kesalahan validasi data. Seluruh field mandatory harus diisi.", "INTEGRITAS DATA GAGAL"); 
             
             let btn = document.querySelector('.btn-tambah'); 
             let originalText = btn.innerHTML;
-            btn.innerHTML = `${spinnerSvg} 1/3: Mencari Port...`; 
+            btn.innerHTML = `${spinnerSvg} Scanning Traffic Node...`; 
             btn.style.pointerEvents = "none";
             
             try {
-                // RADAR PENCARI PORT KOSONG BERAKSI DI SINI!
                 let allocData = await getFreeNodeAndAllocation(locId);
 
-                btn.innerHTML = `${spinnerSvg} 2/3: Membaca Env...`; 
+                btn.innerHTML = `${spinnerSvg} Loading Environment...`; 
                 let dynamicEnv = await getDynamicEnvironment(parseInt(nestId), parseInt(eggId));
                 let dockerImg = "ghcr.io/parkervcp/yolks:nodejs_20";
                 if(eggId === "20") dockerImg = "ghcr.io/parkervcp/yolks:python_3.9"; 
                 
-                btn.innerHTML = `${spinnerSvg} 3/3: Deploying...`; 
+                btn.innerHTML = `${spinnerSvg} Server Execution...`; 
                 let payload = { 
                     "name": name, 
                     "user": parseInt(uId), 
-                    
-                    // Kita paksa Pterodactyl pakai Node dan Port kosong yang Radar kita temukan
                     "node": allocData.nodeId,
                     "allocation": {
                         "default": allocData.allocId
                     },
-                    
                     "egg": parseInt(eggId), 
                     "docker_image": dockerImg, 
                     "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z ${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z ${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo ${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
@@ -582,40 +550,20 @@
                     "feature_limits": { "databases": 5, "backups": 5, "allocations": 1 }
                 };
                 
-                let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers`, { 
-                    method: 'POST', 
-                    headers: { 
-                        'Accept': 'application/json', 
-                        'Content-Type': 'application/json', 
-                        'Authorization': `Bearer ${PTERO_API}` 
-                    }, 
-                    body: JSON.stringify(payload) 
-                });
-                
-                if(!res.ok) {
-                    let errText = await res.text();
-                    if (errText.includes("NoViableNodeException")) {
-                        throw new Error(`Gagal Alokasi Otomatis!\n\nPenyebab:\n1. Location ID (${locId}) salah atau tidak terhubung ke Node.\n2. Limit Port (Allocation) pada Node habis.\n3. RAM/Disk pada Node tidak mencukupi untuk request ini.`);
-                    }
-                    throw new Error(errText);
-                }
+                await apiPtero.createServer(payload);
                 
                 btn.innerHTML = originalText; 
                 btn.style.pointerEvents = "auto";
                 let sText = document.getElementById('userSelect').options[document.getElementById('userSelect').selectedIndex].text; 
                 let cName = sText.split(' (')[0]; 
                 
-                document.getElementById('resServerName').innerText = name; 
-                document.getElementById('resServerOwner').innerText = cName;
-                document.getElementById('resLink').innerText = `https://${PTERO_DOMAIN}`; 
-                document.getElementById('resLink').href = `https://${PTERO_DOMAIN}`;
-                document.getElementById('modalScreenshot').style.display = 'flex'; 
+                munculkanModalStruk(cName, "Gunakan Sandi Akun Identitas", "Email Terdaftar", name, ramLabel);
                 document.getElementById('serverName').value = ""; 
                 ambilDataServers();
             } catch(e) { 
                 btn.innerHTML = originalText; 
                 btn.style.pointerEvents = "auto"; 
-                showAiAlert(`<div style="text-align: left; white-space: pre-wrap;">${e.message}</div>`, "GAGAL DEPLOY"); 
+                showAiAlert(`<div style="text-align: left; white-space: pre-wrap;">${e.message}</div>`, "SYSTEM HALT"); 
             }
         }
 
@@ -630,26 +578,18 @@
         async function prosesHapusServer() {
             tutupModal('modalHapusConfirm'); 
             let btn = document.getElementById('btnKonfirmasiHapus'); 
-            btn.innerText = "⏳..."; 
+            btn.innerHTML = `${spinnerSvg} Executing...`; 
             btn.style.pointerEvents = "none";
             
             try {
-                let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers/${targetDelId}/force`, { 
-                    method: 'DELETE', 
-                    headers: { 
-                        'Accept': 'application/json', 
-                        'Authorization': `Bearer ${PTERO_API}` 
-                    } 
-                });
-                
-                if(!res.ok) throw new Error(await res.text()); 
-                showAiSuccess("Server berhasil dihapus permanen.", "TERHAPUS", true); 
+                await apiPtero.deleteServer(targetDelId);
+                showAiSuccess("Instansi server berhasil dihancurkan secara permanen.", "DESTRUKSI BERHASIL", true); 
                 ambilDataServers();
             } catch(e) { 
-                showAiAlert("Gagal hapus: " + e.message, "ERROR"); 
+                showAiAlert("Kegagalan API Internal: " + e.message, "KESALAHAN"); 
             }
             
-            btn.innerText = "Hapus Permanen"; 
+            btn.innerText = "Eksekusi"; 
             btn.style.pointerEvents = "auto";
         }
 
@@ -662,21 +602,12 @@
         
         async function prosesSuspendServer() {
             tutupModal('modalSuspendConfirm');
-            
             try {
-                let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers/${targetSuspendId}/suspend`, { 
-                    method: 'POST', 
-                    headers: { 
-                        'Accept': 'application/json', 
-                        'Authorization': `Bearer ${PTERO_API}` 
-                    } 
-                });
-                
-                if(!res.ok) throw new Error(await res.text()); 
-                showAiSuccess("Server berhasil dibekukan sementara. Akses dimatikan.", "SERVER SUSPENDED", false); 
+                await apiPtero.suspendServer(targetSuspendId);
+                showAiSuccess("Instansi server berhasil direstriksi (Suspended).", "STATUS TERKUNCI", false); 
                 ambilDataServers();
             } catch(e) { 
-                showAiAlert("Gagal suspend: " + e.message, "ERROR"); 
+                showAiAlert("Kegagalan operasi restriksi: " + e.message, "KESALAHAN"); 
             }
         }
 
@@ -689,21 +620,12 @@
         
         async function prosesUnsuspendServer() {
             tutupModal('modalUnsuspendConfirm');
-            
             try {
-                let res = await fetch(`${WORKER_URL}/?https://${PTERO_DOMAIN}/api/application/servers/${targetUnsuspendId}/unsuspend`, { 
-                    method: 'POST', 
-                    headers: { 
-                        'Accept': 'application/json', 
-                        'Authorization': `Bearer ${PTERO_API}` 
-                    } 
-                });
-                
-                if(!res.ok) throw new Error(await res.text()); 
-                showAiSuccess("Server berhasil dibuka kembali. Akses normal.", "SERVER AKTIF", false); 
+                await apiPtero.unsuspendServer(targetUnsuspendId);
+                showAiSuccess("Status restriksi dicabut. Operasional server kembali normal.", "PEMULIHAN SUKSES", false); 
                 ambilDataServers();
             } catch(e) { 
-                showAiAlert("Gagal unsuspend: " + e.message, "ERROR"); 
+                showAiAlert("Kegagalan pemulihan otorisasi: " + e.message, "KESALAHAN"); 
             }
         }
 
@@ -717,6 +639,18 @@
                 tr[i].style.display = tr[i].innerText.toLowerCase().indexOf(input) > -1 ? "" : "none"; 
             } 
         }
+
+        function munculkanModalStruk(user, pass, email, serverName, ramLabel) { 
+            document.getElementById('resServerName').innerText = serverName; 
+            document.getElementById('resServerOwner').innerText = user; 
+            document.getElementById('resLink').innerText = `https://${config.domain}`; 
+            document.getElementById('resLink').href = `https://${config.domain}`; 
+            
+            let btnTesti = document.getElementById('btnSalinTesti');
+            btnTesti.setAttribute('onclick', `salinTestimoni('${ramLabel}')`);
+            
+            document.getElementById('modalScreenshot').style.display = 'flex'; 
+        }
         
         function salinStrukServer() { 
             let owner = document.getElementById('resServerOwner').innerText; 
@@ -727,20 +661,59 @@
             navigator.clipboard.writeText(teksSalin).then(() => { 
                 let btn = document.getElementById('btnSalinStruk'); 
                 let originalHtml = btn.innerHTML;
-                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Tersalin!`; 
+                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Disalin!`; 
                 setTimeout(() => { btn.innerHTML = originalHtml; }, 2000); 
-            }).catch(() => showAiAlert("Gagal menyalin ke clipboard", "ERROR"));
+            }).catch(() => showAiAlert("Sinkronisasi Clipboard gagal ditransmisi.", "ERROR CLIPOARD"));
         }
 
-        function salinTestimoni() {
-            let teksSalin = `Transaksi Berhasil ✅ \n\n📦 \`Produk :\` Panel Pterodactyl\n📦 \`Spesifikasi :\` Unlimited Ram\n📆 \`Garansi Aktif :\` Ya\n⚖️ \`Total Harga :\` 10rb\n📝 \`Catatan :\` Garansi aktif full 30h\n \nTerimakasih Telah Berbelanja di toko kami🤗\n\n✅ Banyak pilihan pembayaran\n✅ Pengiriman Cepat\n✅ Notifikasi transaksi otomatis\n✅ Praktis, aman, & nyaman\n\n_*Selalu Order Di Website Official Kami :*_\nhttps://pterodactylmanage.vercel.app/store`; 
+        async function salinTestimoni(ramLabel) {
+            let btn = document.getElementById('btnSalinTesti'); 
+            let originalHtml = btn.innerHTML;
             
-            navigator.clipboard.writeText(teksSalin).then(() => { 
-                let btn = document.getElementById('btnSalinTesti'); 
-                let originalHtml = btn.innerHTML;
-                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Tersalin!`; 
-                setTimeout(() => { btn.innerHTML = originalHtml; }, 2000); 
-            }).catch(() => showAiAlert("Gagal menyalin ke clipboard", "ERROR"));
+            btn.innerHTML = `${spinnerSvg} Mengambil Harga...`; 
+            btn.style.pointerEvents = "none";
+            
+            try {
+                let snap = await database.ref('store_products').once('value');
+                let products = snap.val() || {};
+                
+                let hargaFinal = "Harga Custom"; 
+                let cleanRam = ramLabel.toLowerCase().replace(/\s+/g, ''); 
+                
+                for (let key in products) {
+                    let namaProdukDB = (products[key].nama || '').toLowerCase().replace(/\s+/g, '');
+                    if (namaProdukDB.includes(cleanRam.replace('🚀', ''))) {
+                        hargaFinal = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(products[key].harga);
+                        break; 
+                    }
+                }
+
+                let teksSalin = `Transaksi Berhasil ✅ \n\n` +
+                                `📦 \`Produk :\` Layanan Add Server\n` +
+                                `📦 \`Spesifikasi :\` ${ramLabel} RAM\n` +
+                                `📆 \`Garansi Aktif :\` Ya\n` +
+                                `⚖️ \`Total Harga :\` ${hargaFinal}\n` +
+                                `📝 \`Catatan :\` Garansi aktif full 30 Hari\n \n` +
+                                `Terimakasih Telah Berbelanja di toko kami 🤗\n\n` +
+                                `✅ Banyak pilihan pembayaran\n` +
+                                `✅ Pengiriman Cepat\n` +
+                                `✅ Notifikasi transaksi otomatis\n` +
+                                `✅ Praktis, aman, & nyaman\n\n` +
+                                `_*Selalu Order Di Website Official Kami :*_\n` +
+                                `https://pterodactylmanage.vercel.app/store`; 
+                
+                await navigator.clipboard.writeText(teksSalin);
+                
+                btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Disalin!`; 
+            } catch (e) {
+                showAiAlert("Gagal merakit testimoni otomatis: " + e.message, "ERROR CLIPBOARD");
+                btn.innerHTML = originalHtml;
+            }
+
+            setTimeout(() => { 
+                btn.innerHTML = originalHtml; 
+                btn.style.pointerEvents = "auto";
+            }, 2000); 
         }
         
         // Initialize
@@ -760,9 +733,9 @@
             const expiredAt = Number(data.expiredAt || 0);
             let blockMessage = '';
             if (!expiredAt) {
-                blockMessage = 'Akun ' + String(data.username || '').replace(/</g,'&lt;') + ' belum diaktifkan oleh pemilik. Hubungi pemilik untuk mengatur expired akun.';
+                blockMessage = 'Otorisasi ditangguhkan. Hubungi Administrator sistem utama.';
             } else if (expiredAt <= Date.now()) {
-                blockMessage = 'Akun ' + String(data.username || '').replace(/</g,'&lt;') + ' sudah expired. Hubungi pemilik untuk perpanjangan.';
+                blockMessage = 'Masa berlaku lisensi akun Anda telah usai.';
             }
             if (!blockMessage || __expiredHandled) return;
             __expiredHandled = true;
@@ -774,24 +747,16 @@
     })();
     </script>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-        const firebaseConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        const currentUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
-        const roleRaw = localStorage.getItem('role') || localStorage.getItem('panel_role') || '';
-        const role = roleRaw.trim().toLowerCase();
-
+        // Timer Sidebar Setup
+        const roleTimer = roleRaw.trim().toLowerCase();
         let expiryInterval;
         function startExpiryTimer(expiredAt) {
             const timerNav = document.getElementById('expiryTimerNav');
             if (!timerNav) return;
             clearInterval(expiryInterval);
 
-            if (role === 'pemilik') {
+            if (roleTimer === 'pemilik') {
                 timerNav.innerHTML = '<span class="timer-unlimited">∞ Unlimited</span>';
                 return;
             }
@@ -815,7 +780,7 @@
                 const dateObj = new Date(expiredAt);
                 const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 
-                timerNav.innerHTML = `<span class="timer-date">${dateStr}</span><span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}d</span>`;
+                timerNav.innerHTML = `<span class="timer-date">${dateStr}</span><span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}s</span>`;
             }, 1000);
         }
 

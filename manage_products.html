@@ -7,386 +7,198 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #0d9488;
-            --primary-hover: #0f766e;
-            --bg-dark: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
-            --danger: #ef4444;
-            --warning: #f59e0b;
+            --primary: #0d9488; --primary-hover: #0f766e; --primary-glow: rgba(13, 148, 136, 0.15);
+            --bg-dark: #0f172a; --card-bg: #1e293b;
+            --text-main: #f8fafc; --text-sub: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1); --input-bg: rgba(0, 0, 0, 0.2);
+            --danger: #ef4444; --warning: #f59e0b; --success: #10b981;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 20px 5%; }
+        .container { max-width: 1000px; margin: 0 auto; }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px; }
+        .header h1 { font-size: 24px; margin: 0; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px;}
+        .header h1 svg { width: 24px; height: 24px; fill: var(--primary); }
 
-        /* --- PERBAIKAN HEADER & TOMBOL KEMBALI --- */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            gap: 15px;
-        }
+        .btn-back { background: var(--primary-glow); color: var(--primary); text-decoration: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; transition: all 0.3s ease; border: 1px solid rgba(13, 148, 136, 0.3); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .btn-back svg { width: 16px; height: 16px; fill: currentColor; transition: transform 0.3s ease; }
+        .btn-back:hover { background: var(--primary); color: white; transform: translateY(-2px); box-shadow: 0 4px 15px var(--primary-glow); }
+        .btn-back:hover svg { transform: translateX(-4px); }
 
-        .header h1 {
-            font-size: 24px;
-            margin: 0;
-            color: var(--text-main);
-            line-height: 1.2;
-        }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .card h2 { margin-top: 0; font-size: 16px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 12px; color: var(--primary); }
 
-        .btn-back {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-sub);
-            text-decoration: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap; 
-        }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group.full-width { grid-column: 1 / -1; }
 
-        .btn-back svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-            transition: transform 0.3s ease;
-        }
+        label { display: block; margin-bottom: 8px; font-size: 11px; color: var(--text-sub); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        input[type="text"], input[type="number"], textarea { width: 100%; padding: 12px 14px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 10px; box-sizing: border-box; font-family: inherit; font-size: 13px; transition: 0.3s; outline: none;}
+        input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(15, 23, 42, 0.8); }
 
-        .btn-back:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-color: rgba(255,255,255,0.25);
-        }
+        input[type="file"] { width: 100%; padding: 10px; background: var(--input-bg); border: 1px dashed var(--border); color: var(--text-sub); border-radius: 10px; box-sizing: border-box; cursor: pointer; transition: 0.3s; }
+        input[type="file"]:hover { border-color: var(--primary); background: rgba(13, 148, 136, 0.05); }
 
-        .btn-back:hover svg {
-            transform: translateX(-4px);
-        }
+        .image-preview-container { margin-top: 10px; width: 100%; max-width: 250px; height: 140px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .image-preview-container img { width: 100%; height: 100%; object-fit: cover; display: none; }
 
-        @media (max-width: 600px) {
-            .header h1 { font-size: 18px; }
-            .btn-back { padding: 8px 12px; font-size: 12px; }
-        }
+        button { cursor: pointer; border: none; border-radius: 10px; font-weight: 700; color: white; transition: 0.3s; display: inline-flex; justify-content: center; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-save { background: linear-gradient(135deg, var(--primary), #059669); padding: 14px 20px; width: 100%; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 15px var(--primary-glow); }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(13, 148, 136, 0.4); }
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-        }
+        .btn-action { padding: 8px 12px; font-size: 11px; margin-right: 5px; border-radius: 8px; }
+        .btn-edit { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .btn-edit:hover { background: var(--warning); color: white; }
+        .btn-delete { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .btn-delete:hover { background: var(--danger); color: white; }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 700px; }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid var(--border); font-size: 13px; }
+        th { color: var(--text-sub); font-weight: 700; background: rgba(0, 0, 0, 0.2); text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; border-radius: 8px 8px 0 0;}
+        tr:hover { background: rgba(255,255,255,0.02); }
 
-        .form-group {
-            margin-bottom: 15px;
-        }
+        .prod-img-preview { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; background: #000; border: 1px solid var(--border); }
+        .kategori-badge { background: var(--primary-glow); color: var(--primary); padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid rgba(13, 148, 136, 0.3); }
 
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
+        /* ENTERPRISE MODALS */
+        .system-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s ease; }
+        .system-modal-popup { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 380px; padding: 30px 25px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1px solid var(--border-color); }
+        .modal-icon-top { width: 50px; height: 50px; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        .modal-icon-top svg { width: 24px; height: 24px; }
+        .mode-danger .modal-icon-top { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); } .mode-danger .modal-icon-top svg { fill: var(--danger); } .mode-danger .system-modal-header { color: var(--danger); }
+        .mode-success .modal-icon-top { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); } .mode-success .modal-icon-top svg { fill: var(--success); } .mode-success .system-modal-header { color: var(--success); }
+        .system-modal-header { font-size: 18px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .system-modal-body { font-size: 13px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; white-space: pre-wrap; }
+        .system-btn-group { display: flex; gap: 10px; }
+        .system-btn { flex: 1; border: none; padding: 12px; font-weight: 700; font-size: 12px; border-radius: 10px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 6px;}
+        .btn-primary-action { background: var(--primary); color: white; } .btn-primary-action:hover { background: #0f766e; transform: translateY(-2px); }
+        .btn-danger-action { background: var(--danger); color: white; } .btn-danger-action:hover { background: #dc2626; transform: translateY(-2px); }
+        .btn-outline-action { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-sub); } .btn-outline-action:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 13px;
-            color: var(--text-sub);
-            font-weight: 600;
-        }
-
-        input[type="text"], input[type="number"], textarea {
-            width: 100%;
-            padding: 10px 12px;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        input[type="file"] {
-            width: 100%;
-            padding: 8px;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px dashed var(--border);
-            color: var(--text-sub);
-            border-radius: 8px;
-            box-sizing: border-box;
-            cursor: pointer;
-        }
-
-        .image-preview-container {
-            margin-top: 10px;
-            width: 100%;
-            max-width: 200px;
-            height: 120px;
-            border-radius: 8px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .image-preview-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-
-        button {
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            color: white;
-            transition: 0.2s;
-        }
-
-        .btn-save {
-            background: var(--primary);
-            padding: 12px 20px;
-            width: 100%;
-            font-size: 15px;
-            margin-top: 10px;
-        }
-
-        .btn-save:hover { background: var(--primary-hover); }
-
-        .btn-action {
-            padding: 6px 12px;
-            font-size: 12px;
-            margin-right: 5px;
-            border-radius: 6px;
-        }
-
-        .btn-edit { background: var(--warning); }
-        .btn-delete { background: var(--danger); }
-
-        /* Table Styles */
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            min-width: 700px;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 15px;
-            border-bottom: 1px solid var(--border);
-            font-size: 14px;
-        }
-
-        th {
-            color: var(--text-sub);
-            font-weight: 600;
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        .prod-img-preview {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            object-fit: cover;
-            background: #000;
-        }
-        
-        .kategori-badge {
-            background: rgba(13, 148, 136, 0.2);
-            color: var(--primary);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* --- STYLING MODAL POP-UP KUSTOM --- */
-        .modal-overlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0, 0, 0, 0.75); 
-            backdrop-filter: blur(5px); 
-            z-index: 9999; 
-            align-items: center; justify-content: center; 
-            padding: 20px; box-sizing: border-box; 
-            opacity: 0; transition: opacity 0.3s ease;
-        }
-        
-        .modal-overlay.show {
-            display: flex;
-            opacity: 1;
-        }
-
-        .modal-box { 
-            background: var(--card-bg); 
-            border: 1px solid var(--border); 
-            border-radius: 16px; 
-            padding: 30px; 
-            width: 100%; max-width: 380px; 
-            text-align: center; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        .modal-overlay.show .modal-box {
-            transform: scale(1);
-        }
-
-        .modal-icon { width: 55px; height: 55px; margin: 0 auto 15px auto; }
-        .modal-box h3 { margin-top: 0; font-size: 20px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;}
-        .modal-box p { color: var(--text-sub); font-size: 14px; margin-bottom: 25px; line-height: 1.6; }
-        
-        .btn-modal { padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; font-size: 13px; }
-        .btn-modal-ok { color: white; border: none; flex: 1; }
-        .btn-modal-cancel { background: transparent; color: var(--text-sub); border: 1px solid var(--border); flex: 1; }
-        .btn-modal-cancel:hover { background: rgba(255,255,255,0.05); color: white; }
+        @keyframes fadeInPop { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="header">
-            <h1>Kelola Produk Etalase</h1>
-            <!-- TOMBOL KEMBALI MENGARAH KE INDEX.HTML -->
+            <h1><svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg> Kelola Etalase Produk</h1>
             <a href="index.html" class="btn-back">
                 <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
                 Kembali
             </a>
         </div>
 
-        <!-- FORM KELOLA KATEGORI TOKO -->
-        <div class="card" style="margin-bottom: 25px;">
-            <h2 style="margin-top: 0; font-size: 18px; margin-bottom: 15px; color: var(--warning);">🛒 Kelola Kategori Toko</h2>
-            <div class="form-group" style="margin-bottom: 10px;">
-                <label>Daftar Kategori (Pisahkan dengan koma)</label>
-                <input type="text" id="storeCategories" placeholder="Contoh: Panel Pterodactyl, Sewa Server, Script & Bot">
-                <p style="font-size: 11px; color: var(--text-sub); margin-top: 8px;">Kategori ini akan otomatis menjadi tombol menu utama di halaman Store pembeli.</p>
+        <div class="card">
+            <h2 style="color: var(--warning); border-bottom-color: rgba(245, 158, 11, 0.3);">
+                <svg viewBox="0 0 24 24" style="fill:var(--warning); width:18px;"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+                Pengaturan Kategori & Kontak
+            </h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nomor WhatsApp Pembayaran</label>
+                    <input type="text" id="storeWhatsapp" placeholder="Contoh: 628123456789 (Gunakan 62)">
+                    <p style="font-size: 10px; color: var(--text-sub); margin-top: 6px;">Otomatis mengubah tujuan order pada halaman Store pelanggan.</p>
+                </div>
+                <div class="form-group">
+                    <label>Kategori Produk (Pisahkan Koma)</label>
+                    <input type="text" id="storeCategories" placeholder="Contoh: VPS, Panel Pterodactyl, Script">
+                    <p style="font-size: 10px; color: var(--text-sub); margin-top: 6px;">Menjadi tab navigasi otomatis di etalase produk.</p>
+                </div>
             </div>
-            <button type="button" class="btn-save" style="width: auto; padding: 10px 20px; font-size: 13px; background: var(--warning);" onclick="simpanKategoriManual()">Simpan Kategori</button>
+            <button type="button" class="btn-save" style="width: auto; background: var(--warning); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);" onclick="simpanPengaturanToko()">
+                <svg viewBox="0 0 24 24" style="width:16px; fill:white;"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg> Simpan Konfigurasi
+            </button>
         </div>
 
-        <!-- Form Tambah/Edit Produk -->
         <div class="card">
-            <h2 id="formTitle" style="margin-top: 0; font-size: 18px; margin-bottom: 20px;">Tambah Produk Baru</h2>
+            <h2 id="formTitle">
+                <svg viewBox="0 0 24 24" style="fill:var(--primary); width:18px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg> 
+                Registrasi Produk Baru
+            </h2>
             <form id="productForm">
                 <input type="hidden" id="productId">
                 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Nama Produk</label>
-                        <input type="text" id="nama" placeholder="Contoh: Server RAM 4GB" required>
+                        <label>Nama/Spesifikasi Layanan</label>
+                        <input type="text" id="nama" placeholder="Contoh: Server RAM 4GB" autocomplete="off" required>
                     </div>
 
-                    <!-- Kategori dengan DataList -->
                     <div class="form-group">
-                        <label>Kategori Produk</label>
-                        <input type="text" id="kategori" list="kategoriList" placeholder="Pilih atau ketik kategori baru..." required>
-                        <datalist id="kategoriList">
-                            <!-- Diisi Otomatis via JS -->
-                        </datalist>
+                        <label>Kategori Etalase</label>
+                        <input type="text" id="kategori" list="kategoriList" placeholder="Ketik atau pilih kategori..." autocomplete="off" required>
+                        <datalist id="kategoriList"></datalist>
                     </div>
                     
                     <div class="form-group">
-                        <label>Harga (Angka saja)</label>
+                        <label>Harga Layanan (Angka)</label>
                         <input type="number" id="harga" placeholder="Contoh: 15000" required>
                     </div>
 
                     <div class="form-group">
-                        <label>Label Promo / Diskon (Opsional)</label>
-                        <input type="text" id="diskon" placeholder="Contoh: Diskon 20% atau Terlaris">
+                        <label>Label Promo Khusus (Opsional)</label>
+                        <input type="text" id="diskon" placeholder="Contoh: Diskon 20% / Flash Sale" autocomplete="off">
                     </div>
 
                     <div class="form-group full-width">
-                        <label>Upload Foto Produk (Opsional)</label>
+                        <label>Upload Media Produk (Auto-Upload ke ImgBB)</label>
                         <input type="file" id="fileGambar" accept="image/*">
                         <div class="image-preview-container">
                             <img id="previewGambar" src="" alt="Preview">
-                            <span id="previewTeks" style="font-size: 11px; color: var(--text-sub);">Belum ada foto</span>
+                            <span id="previewTeks" style="font-size: 11px; color: var(--text-sub); font-weight: 600;">Belum ada media terlampir</span>
                         </div>
                     </div>
 
                     <div class="form-group full-width">
-                        <label>Deskripsi Singkat</label>
-                        <textarea id="deskripsi" rows="3" placeholder="Masukkan detail spesifikasi layanan..." required></textarea>
+                        <label>Deskripsi & Syarat Ketentuan</label>
+                        <textarea id="deskripsi" rows="4" placeholder="Jabarkan detail spesifikasi, fitur, dan garansi layanan..." required></textarea>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-save" id="btnSubmit">Simpan Produk</button>
-                <button type="button" class="btn-save" id="btnCancelEdit" style="display: none; background: #64748b; margin-top: 10px;" onclick="resetForm()">Batal Edit</button>
+                <button type="submit" class="btn-save" id="btnSubmit">
+                    <svg viewBox="0 0 24 24" style="width:16px; fill:white;"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg> Publish Produk
+                </button>
+                <button type="button" class="btn-save" id="btnCancelEdit" style="display: none; background: transparent; border: 1px solid var(--border); color: var(--text-main); box-shadow: none;" onclick="resetForm()">Batalkan Modifikasi</button>
             </form>
         </div>
 
-        <!-- Tabel Daftar Produk -->
         <div class="card">
-            <h2 style="margin-top: 0; font-size: 18px; margin-bottom: 15px;">Daftar Produk Aktif</h2>
+            <h2>
+                <svg viewBox="0 0 24 24" style="fill:var(--primary); width:18px;"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> 
+                Direktori Layanan Aktif
+            </h2>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>Gambar</th>
-                            <th>Info Produk</th>
-                            <th>Kategori</th>
-                            <th>Harga & Promo</th>
-                            <th>Aksi</th>
+                            <th>Media</th>
+                            <th>Identifikasi Produk</th>
+                            <th>Klasifikasi</th>
+                            <th>Tarif Dasar</th>
+                            <th>Operasional</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <tr>
-                            <td colspan="5" style="text-align: center; color: var(--text-sub);">Memuat data...</td>
-                        </tr>
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-sub); padding: 30px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Sinkronisasi pangkalan data...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- MODAL CUSTOM UNTUK ALERT & CONFIRM -->
-    <div id="customModal" class="modal-overlay">
-        <div class="modal-box" id="modalBox">
-            <div id="modalIconContainer"></div>
-            <h3 id="modalTitle">PERHATIAN</h3>
-            <p id="modalMessage"></p>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-modal btn-modal-cancel" id="modalCancelBtn" style="display: none;">Batal</button>
-                <button class="btn-modal btn-modal-ok" id="modalOkBtn">OK</button>
+    <!-- MODAL ALERT/SUCCESS/CONFIRM ENTERPRISE -->
+    <div id="sysModal" class="system-modal-overlay">
+        <div class="system-modal-popup" id="sysModalBox">
+            <div class="modal-icon-top" id="sysModalIcon"></div>
+            <div class="system-modal-header" id="sysModalTitle">SISTEM</div>
+            <div class="system-modal-body" id="sysModalMessage"></div>
+            <div class="system-btn-group">
+                <button class="system-btn btn-danger-action" id="sysModalOk" style="display: none;">Eksekusi</button>
+                <button class="system-btn btn-primary-action" id="sysModalClose">Tutup</button>
             </div>
         </div>
     </div>
@@ -397,60 +209,52 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // --- SISTEM MODAL POP-UP KUSTOM ---
-        function showModal(type, title, message, onConfirmCallback = null) {
-            const overlay = document.getElementById('customModal');
-            const box = document.getElementById('modalBox');
-            const iconContainer = document.getElementById('modalIconContainer');
-            const titleEl = document.getElementById('modalTitle');
-            const messageEl = document.getElementById('modalMessage');
-            const btnOk = document.getElementById('modalOkBtn');
-            const btnCancel = document.getElementById('modalCancelBtn');
+        // --- Otorisasi Keamanan ---
+        const role = (localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
+        if (role !== 'pemilik') {
+            alert("Akses Restriksi: Halaman ini memerlukan otorisasi tingkat Administrator/Pemilik.");
+            window.location.replace('index.html');
+        }
 
-            btnOk.onclick = null;
-            btnCancel.onclick = null;
+        // --- SISTEM MODAL KUSTOM ENTERPRISE ---
+        function openSysModal(type, title, message, onConfirm = null) {
+            const overlay = document.getElementById('sysModal');
+            const box = document.getElementById('sysModalBox');
+            const icon = document.getElementById('sysModalIcon');
+            const btnOk = document.getElementById('sysModalOk');
+            const btnClose = document.getElementById('sysModalClose');
+
+            document.getElementById('sysModalTitle').innerText = title;
+            document.getElementById('sysModalMessage').innerHTML = message;
             
-            titleEl.innerText = title;
-            messageEl.innerText = message;
-            btnOk.innerText = 'OK';
-            btnCancel.style.display = 'none';
-
-            let iconSvg = '';
-
+            btnOk.style.display = 'none';
+            btnClose.innerText = 'Tutup';
+            btnClose.className = 'system-btn btn-primary-action';
+            
             if (type === 'success') {
-                box.style.borderTop = '4px solid var(--primary)';
-                titleEl.style.color = 'var(--primary)';
-                btnOk.style.background = 'var(--primary)';
-                iconSvg = `<svg class="modal-icon" style="fill: var(--primary);" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
+                box.className = 'system-modal-popup mode-success';
+                icon.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
+                btnClose.style.background = 'var(--success)';
             } else if (type === 'error') {
-                box.style.borderTop = '4px solid var(--danger)';
-                titleEl.style.color = 'var(--danger)';
-                btnOk.style.background = 'var(--danger)';
-                iconSvg = `<svg class="modal-icon" style="fill: var(--danger);" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
+                box.className = 'system-modal-popup mode-danger';
+                icon.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
+                btnClose.style.background = 'var(--danger)';
             } else if (type === 'confirm') {
-                box.style.borderTop = '4px solid var(--danger)';
-                titleEl.style.color = 'var(--danger)';
-                btnOk.style.background = 'var(--danger)';
-                btnOk.innerText = 'Ya, Hapus!';
-                btnCancel.style.display = 'block';
-                iconSvg = `<svg class="modal-icon" style="fill: var(--danger);" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
+                box.className = 'system-modal-popup mode-danger';
+                icon.innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
+                btnOk.style.display = 'block';
+                btnClose.innerText = 'Batal';
+                btnClose.className = 'system-btn btn-outline-action';
+                btnClose.style.background = 'transparent';
+                
+                btnOk.onclick = () => {
+                    overlay.style.display = 'none';
+                    if (onConfirm) onConfirm();
+                };
             }
 
-            iconContainer.innerHTML = iconSvg;
-
-            btnOk.onclick = () => {
-                overlay.classList.remove('show');
-                setTimeout(() => overlay.style.display = 'none', 300);
-                if (onConfirmCallback) onConfirmCallback();
-            };
-
-            btnCancel.onclick = () => {
-                overlay.classList.remove('show');
-                setTimeout(() => overlay.style.display = 'none', 300);
-            };
-
+            btnClose.onclick = () => overlay.style.display = 'none';
             overlay.style.display = 'flex';
-            setTimeout(() => overlay.classList.add('show'), 10);
         }
 
         const firebaseConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
@@ -465,18 +269,25 @@
         const btnCancelEdit = document.getElementById('btnCancelEdit');
         
         let fotoDataFinal = ""; 
-        let currentCategories = []; // Menyimpan kategori dari firebase
+        let currentCategories = []; 
+        let isUploading = false;
+        
+        const spinnerSvg = `<svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite; width:16px; fill:currentColor;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg>`;
 
         function formatRupiah(angka) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
         }
 
-        // --- SISTEM TARIK & SIMPAN KATEGORI ---
-        database.ref('store_settings/categories').on('value', (snap) => {
-            let catString = snap.val() || "Panel Pterodactyl, Sewa Server, Script & Bot";
-            document.getElementById('storeCategories').value = catString; // Isi box input
-            currentCategories = catString.split(',').map(s => s.trim()).filter(s => s);
+        // --- SISTEM TARIK & SIMPAN PENGATURAN TOKO ---
+        database.ref('store_settings').on('value', (snap) => {
+            let settings = snap.val() || {};
+            let catString = settings.categories || "Panel Pterodactyl, Sewa Server, Script & Bot";
+            let waNumber = settings.whatsapp || "62895416479539";
             
+            document.getElementById('storeCategories').value = catString; 
+            document.getElementById('storeWhatsapp').value = waNumber;
+            
+            currentCategories = catString.split(',').map(s => s.trim()).filter(s => s);
             const datalist = document.getElementById('kategoriList');
             if (datalist) {
                 datalist.innerHTML = '';
@@ -488,13 +299,17 @@
             }
         });
 
-        window.simpanKategoriManual = function() {
+        window.simpanPengaturanToko = function() {
             let cats = document.getElementById('storeCategories').value.trim();
-            if(!cats) cats = "Panel Pterodactyl, Sewa Server, Script & Bot"; // Default aman
-            database.ref('store_settings/categories').set(cats).then(() => {
-                showModal('success', 'Berhasil', 'Daftar Kategori berhasil diperbarui!');
+            let wa = document.getElementById('storeWhatsapp').value.trim();
+            
+            if(!cats) cats = "Panel Pterodactyl, Sewa Server, Script & Bot"; 
+            if(!wa) wa = "62895416479539";
+            
+            database.ref('store_settings').update({ categories: cats, whatsapp: wa }).then(() => {
+                openSysModal('success', 'KONFIGURASI TERSIMPAN', 'Data nomor WhatsApp dan arsitektur kategori telah diperbarui pada sistem etalase publik.');
             }).catch(e => {
-                showModal('error', 'Gagal', 'Gagal menyimpan kategori: ' + e.message);
+                openSysModal('error', 'KEGAGALAN SISTEM', 'Sinkronisasi gagal: ' + e.message);
             });
         };
 
@@ -503,14 +318,14 @@
             const file = e.target.files[0];
             if (!file) return;
 
-            document.getElementById('previewTeks').innerText = "Memproses foto...";
+            document.getElementById('previewTeks').innerHTML = `${spinnerSvg} Merender kompresi...`;
 
             const reader = new FileReader();
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_SIZE = 500; 
+                    const MAX_SIZE = 800; // Resolusi pas biar jernih tapi file kecil
                     let width = img.width;
                     let height = img.height;
 
@@ -527,7 +342,8 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    fotoDataFinal = canvas.toDataURL('image/jpeg', 0.6); 
+                    // Tetap simpan sementara sebagai Base64 di Frontend untuk Preview dan Upload ImgBB
+                    fotoDataFinal = canvas.toDataURL('image/jpeg', 0.8); 
                     
                     const previewImg = document.getElementById('previewGambar');
                     previewImg.src = fotoDataFinal;
@@ -545,76 +361,114 @@
             tableBody.innerHTML = '';
 
             if (!data) {
-                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Belum ada produk. Silakan tambah di atas.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">Pangkalan data produk kosong. Silakan publikasikan layanan baru.</td></tr>';
                 return;
             }
 
             Object.keys(data).forEach(key => {
                 const item = data[key];
                 const fallbackImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nama)}&background=1e3a5f&color=3b82f6`;
+                
+                // Img Display: Bisa URL ImgBB, Base64 (legacy), atau Fallback
                 const imgDisplay = item.gambar ? item.gambar : fallbackImg;
                 
                 const diskonBadge = item.diskon ? `<br><span style="display:inline-block; margin-top:5px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">${item.diskon}</span>` : '';
-                const kategoriTeks = item.kategori ? item.kategori : 'Umum';
+                const kategoriTeks = item.kategori ? item.kategori : 'Sistem Umum';
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><img src="${imgDisplay}" class="prod-img-preview" onerror="this.src='${fallbackImg}'"></td>
-                    <td><strong>${item.nama}</strong><br><small style="color:var(--text-sub)">${item.deskripsi.substring(0, 40)}...</small></td>
+                    <td><strong style="font-size:14px; color:var(--text-main);">${item.nama}</strong><br><small style="color:var(--text-sub)">${item.deskripsi.substring(0, 45)}...</small></td>
                     <td><span class="kategori-badge">${kategoriTeks}</span></td>
-                    <td><strong>${formatRupiah(item.harga)}</strong>${diskonBadge}</td>
+                    <td><strong style="color:var(--success); font-size:14px;">${formatRupiah(item.harga)}</strong>${diskonBadge}</td>
                     <td>
-                        <button class="btn-action btn-edit" onclick="editProduct('${key}')">Edit</button>
-                        <button class="btn-action btn-delete" onclick="deleteProduct('${key}')">Hapus</button>
+                        <button class="btn-action btn-edit" onclick="editProduct('${key}')">Modifikasi</button>
+                        <button class="btn-action btn-delete" onclick="deleteProduct('${key}')">Cabut</button>
                     </td>
                 `;
                 tableBody.appendChild(tr);
             });
         });
 
-        // --- SUBMIT FORM ---
-        form.addEventListener('submit', (e) => {
+        // --- SUBMIT FORM & UPLOAD KE IMGBB ---
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (isUploading) return;
             
             const id = document.getElementById('productId').value;
             const inputKategori = document.getElementById('kategori').value.trim();
+            const originalBtnHtml = btnSubmit.innerHTML;
 
-            const productData = {
-                nama: document.getElementById('nama').value,
-                kategori: inputKategori,
-                harga: parseInt(document.getElementById('harga').value),
-                diskon: document.getElementById('diskon').value,
-                deskripsi: document.getElementById('deskripsi').value,
-                gambar: fotoDataFinal
-            };
+            isUploading = true;
+            btnSubmit.innerHTML = `${spinnerSvg} Memvalidasi Entitas...`;
+            btnSubmit.style.pointerEvents = 'none';
 
-            if (id && fotoDataFinal === "") {
-                delete productData.gambar; 
-            }
+            let finalImageUrl = fotoDataFinal; // Bisa link url lama kalau cuma ngedit teks
 
-            // --- AUTO TAMBAH KATEGORI JIKA BELUM ADA ---
-            if (inputKategori) {
-                const isKategoriBaru = !currentCategories.some(c => c.toLowerCase() === inputKategori.toLowerCase());
-                if (isKategoriBaru) {
-                    currentCategories.push(inputKategori);
-                    database.ref('store_settings/categories').set(currentCategories.join(', '));
+            try {
+                // DETEKSI LOGIC: Kalau dataFinal mengandung "data:image" artinya ada foto BARU yang di-upload dari device
+                if (fotoDataFinal && fotoDataFinal.startsWith('data:image')) {
+                    btnSubmit.innerHTML = `${spinnerSvg} Mengunggah ke Server Gambar...`;
+                    
+                    const IMGBB_API_KEY = "dd6dfe82e68580df6aa5205dbdbbe22c"; 
+                    
+                    // Hilangkan prefix 'data:image/jpeg;base64,' agar format bersih dan diterima ImgBB
+                    const base64Clean = fotoDataFinal.split(',')[1];
+                    
+                    const formData = new FormData();
+                    formData.append("image", base64Clean);
+
+                    const uploadRes = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const uploadData = await uploadRes.json();
+                    if (uploadData.success) {
+                        finalImageUrl = uploadData.data.url; // Dapet direct link dari ImgBB
+                    } else {
+                        throw new Error("Gagal mengunggah gambar ke server pihak ketiga.");
+                    }
                 }
-            }
 
-            if (id) {
-                productRef.child(id).update(productData)
-                    .then(() => {
-                        showModal('success', 'Berhasil', 'Data produk berhasil diperbarui.');
-                        resetForm();
-                    })
-                    .catch(err => showModal('error', 'Gagal', 'Terjadi kesalahan: ' + err.message));
-            } else {
-                productRef.push(productData)
-                    .then(() => {
-                        showModal('success', 'Berhasil', 'Produk baru berhasil ditambahkan ke etalase.');
-                        resetForm();
-                    })
-                    .catch(err => showModal('error', 'Gagal', 'Terjadi kesalahan: ' + err.message));
+                btnSubmit.innerHTML = `${spinnerSvg} Sinkronisasi Database...`;
+
+                const productData = {
+                    nama: document.getElementById('nama').value,
+                    kategori: inputKategori,
+                    harga: parseInt(document.getElementById('harga').value),
+                    diskon: document.getElementById('diskon').value,
+                    deskripsi: document.getElementById('deskripsi').value
+                };
+
+                if (finalImageUrl !== "") {
+                    productData.gambar = finalImageUrl;
+                }
+
+                // Auto Registrasi Kategori Baru
+                if (inputKategori) {
+                    const isKategoriBaru = !currentCategories.some(c => c.toLowerCase() === inputKategori.toLowerCase());
+                    if (isKategoriBaru) {
+                        currentCategories.push(inputKategori);
+                        await database.ref('store_settings').update({ categories: currentCategories.join(', ') });
+                    }
+                }
+
+                if (id) {
+                    await productRef.child(id).update(productData);
+                    openSysModal('success', 'MODIFIKASI BERHASIL', 'Atribut layanan berhasil diperbarui di etalase publik.');
+                } else {
+                    await productRef.push(productData);
+                    openSysModal('success', 'PUBLIKASI BERHASIL', 'Layanan baru telah didistribusikan ke etalase publik.');
+                }
+                
+                resetForm();
+            } catch (err) {
+                openSysModal('error', 'INTEGRITAS GAGAL', 'Sistem menolak operasi: ' + err.message);
+            } finally {
+                isUploading = false;
+                btnSubmit.innerHTML = originalBtnHtml;
+                btnSubmit.style.pointerEvents = 'auto';
             }
         });
 
@@ -639,28 +493,34 @@
                         previewImg.src = data.gambar;
                         previewImg.style.display = 'block';
                         previewTeks.style.display = 'none';
-                        fotoDataFinal = "";
+                        // Keep old URL in memory, if user doesn't pick a new file, this URL stays.
+                        fotoDataFinal = data.gambar; 
                     } else {
                         previewImg.style.display = 'none';
                         previewImg.src = '';
                         previewTeks.style.display = 'block';
-                        previewTeks.innerText = "Belum ada foto";
+                        previewTeks.innerText = "Belum ada media terlampir";
+                        fotoDataFinal = "";
                     }
                     
-                    formTitle.innerText = "Edit Produk";
-                    btnSubmit.innerText = "Simpan Perubahan";
-                    btnSubmit.style.background = "var(--warning)";
+                    formTitle.innerHTML = `<svg viewBox="0 0 24 24" style="fill:var(--warning); width:18px;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg> Modifikasi Atribut Layanan`;
+                    btnSubmit.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px; fill:white;"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg> Terapkan Modifikasi`;
+                    btnSubmit.style.background = "linear-gradient(135deg, var(--warning), #d97706)";
+                    btnSubmit.style.boxShadow = "0 4px 15px rgba(245, 158, 11, 0.3)";
                     btnCancelEdit.style.display = "block";
-                    window.scrollTo(0, 0);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             });
         };
 
         window.deleteProduct = function(key) {
-            showModal('confirm', 'Hapus Produk', 'Apakah Anda yakin ingin menghapus produk ini? Produk akan hilang dari etalase pelanggan.', () => {
-                productRef.child(key).remove()
-                    .then(() => showModal('success', 'Terhapus', 'Produk berhasil dihapus dari sistem.'))
-                    .catch(err => showModal('error', 'Gagal', 'Terjadi kesalahan saat menghapus: ' + err.message));
+            openSysModal('confirm', 'PENCABUTAN LAYANAN', 'Sistem akan menghapus layanan ini secara permanen dari pangkalan data dan etalase publik. Lanjutkan?', async () => {
+                try {
+                    await productRef.child(key).remove();
+                    openSysModal('success', 'EKSEKUSI BERHASIL', 'Layanan berhasil dicabut dari pangkalan data.');
+                } catch (err) {
+                    openSysModal('error', 'INTEGRITAS GAGAL', 'Sistem menolak operasi: ' + err.message);
+                }
             });
         };
 
@@ -671,11 +531,12 @@
             document.getElementById('previewGambar').style.display = 'none';
             document.getElementById('previewGambar').src = '';
             document.getElementById('previewTeks').style.display = 'block';
-            document.getElementById('previewTeks').innerText = "Belum ada foto";
+            document.getElementById('previewTeks').innerText = "Belum ada media terlampir";
             
-            formTitle.innerText = "Tambah Produk Baru";
-            btnSubmit.innerText = "Simpan Produk";
-            btnSubmit.style.background = "var(--primary)";
+            formTitle.innerHTML = `<svg viewBox="0 0 24 24" style="fill:var(--primary); width:18px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg> Registrasi Produk Baru`;
+            btnSubmit.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px; fill:white;"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg> Publish Produk`;
+            btnSubmit.style.background = "linear-gradient(135deg, var(--primary), #059669)";
+            btnSubmit.style.boxShadow = "0 4px 15px var(--primary-glow)";
             btnCancelEdit.style.display = "none";
         }
     </script>
