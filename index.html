@@ -500,10 +500,12 @@
             document.getElementById('sectionWeb').style.display = 'block'; document.getElementById('sectionPublic').style.display = 'block';
             document.getElementById('boxTotalUserPanel').style.display = 'flex'; document.getElementById('boxOnlineUser').style.display = 'flex';
             document.getElementById('titleTotalUser').innerText = "Jaringan Anda"; 
+            document.getElementById('menuExpired').style.display = 'flex'; // <--- Buka Gembok Menu Expired buat Partner
         } else if (role === 'partner_public_v2') {
             document.getElementById('sectionWeb').style.display = 'block'; document.getElementById('sectionPublicV2').style.display = 'block';
             document.getElementById('boxTotalUserPanel').style.display = 'flex'; document.getElementById('boxOnlineUser').style.display = 'flex';
             document.getElementById('titleTotalUser').innerText = "Jaringan V2 Anda"; 
+            document.getElementById('menuExpired').style.display = 'flex'; // <--- Buka Gembok Menu Expired buat Partner V2
         } else if (role.includes('private') || role === 'reseller') { 
             document.getElementById('sectionPrivate').style.display = 'block'; 
         } else if (role === 'reseller_public_v2') { 
