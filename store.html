@@ -2,7 +2,8 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- FIX PORTRAIT: Kunci zoom dan maksimalkan skala biar pas di layar HP -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Toko Layanan & Server - ZeroixDark</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -17,13 +18,16 @@
             --success: #10b981;
         }
         
-        body {
+        /* FIX PORTRAIT: Tambah html dan set max-width biar gak ada overscroll ke samping */
+        html, body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-dark);
             color: var(--text-main);
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
             background-image: 
                 radial-gradient(circle at 15% 50%, rgba(13, 148, 136, 0.05), transparent 25%),
                 radial-gradient(circle at 85% 30%, rgba(13, 148, 136, 0.05), transparent 25%);
@@ -102,6 +106,70 @@
             height: 600px;
             background: radial-gradient(circle, rgba(13, 148, 136, 0.15) 0%, transparent 60%);
             z-index: -1;
+        }
+
+        /* --- STATISTIK PENGUNJUNG & LIKES --- */
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 25px; /* Margin dirubah biar jarak sama teks pas */
+        }
+
+        .stat-badge {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-badge svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .stat-badge.views {
+            color: #38bdf8;
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .stat-badge.likes {
+            color: #94a3b8;
+            border-color: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .stat-badge.likes:hover {
+            background: rgba(244, 63, 94, 0.1);
+            color: #fb7185;
+            border-color: rgba(251, 113, 133, 0.4);
+            transform: scale(1.05);
+        }
+
+        .stat-badge.likes.active {
+            background: rgba(244, 63, 94, 0.15);
+            color: #f43f5e;
+            border-color: #f43f5e;
+        }
+
+        .stat-badge.likes.active svg {
+            animation: heartBeat 0.4s ease-in-out;
+        }
+
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
         }
 
         .hero h1 {
@@ -488,8 +556,23 @@
 
     <!-- Header Promosi -->
     <div class="hero">
+        
         <h1>Layanan Server & Bot <span>Premium</span></h1>
         <p>Infrastruktur server kelas atas untuk menunjang performa proyek bot dan web Anda, dikelola secara profesional dengan garansi uptime tinggi.</p>
+        
+        <!-- BAGIAN STATISTIK (VIEWS & LIKES) UDAH PINDAH KE BAWAH TEKS -->
+        <div class="hero-stats">
+            <div class="stat-badge views">
+                <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                <span id="viewCount">...</span>x Dilihat
+            </div>
+            
+            <div class="stat-badge likes" id="likeBtn" onclick="toggleLike()">
+                <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <span id="likeCount">...</span> Suka
+            </div>
+        </div>
+        
     </div>
 
     <!-- Seksi Spesifikasi Sistem Bawaan -->
@@ -709,6 +792,59 @@
                 renderProducts('Semua');
             }
         });
+
+        // --- SISTEM STATISTIK PENGUNJUNG & LIKES (FIREBASE) ---
+        const statsRef = database.ref('store_stats');
+        const viewCountEl = document.getElementById('viewCount');
+        const likeCountEl = document.getElementById('likeCount');
+        const likeBtnEl = document.getElementById('likeBtn');
+
+        // 1. Logika Views (Dilihat) - Pakai LocalStorage biar gak spam hitungan
+        if (!localStorage.getItem('hasVisitedZeroixDark')) {
+            // Gunakan transaction biar aman kalau ada yang buka web bebarengan
+            statsRef.child('views').transaction((currentViews) => {
+                return (currentViews || 0) + 1;
+            }, (error, committed) => {
+                if (committed) {
+                    localStorage.setItem('hasVisitedZeroixDark', 'true');
+                }
+            });
+        }
+
+        // Update UI secara Realtime kalau ada yang buka web dari device lain
+        statsRef.child('views').on('value', (snap) => {
+            viewCountEl.innerText = snap.val() || 0;
+        });
+
+        // 2. Logika Likes (Suka)
+        let hasLiked = localStorage.getItem('hasLikedZeroixDark') === 'true';
+        if (hasLiked) {
+            likeBtnEl.classList.add('active'); // Warna jadi merah menyala kalau udah like
+        }
+
+        // Update UI Likes Realtime
+        statsRef.child('likes').on('value', (snap) => {
+            likeCountEl.innerText = snap.val() || 0;
+        });
+
+        // 3. Fungsi Eksekusi Tombol Like (Bisa Like / Unlike)
+        window.toggleLike = function() {
+            hasLiked = !hasLiked; // Balikkan status
+            
+            if (hasLiked) {
+                likeBtnEl.classList.add('active');
+                localStorage.setItem('hasLikedZeroixDark', 'true');
+            } else {
+                likeBtnEl.classList.remove('active');
+                localStorage.setItem('hasLikedZeroixDark', 'false');
+            }
+
+            // Update ke Firebase
+            statsRef.child('likes').transaction((currentLikes) => {
+                let newLikes = (currentLikes || 0) + (hasLiked ? 1 : -1);
+                return newLikes < 0 ? 0 : newLikes; // Jaga-jaga biar angka gak minus
+            });
+        };
     </script>
 </body>
 </html>
