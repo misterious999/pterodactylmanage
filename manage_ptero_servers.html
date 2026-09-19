@@ -265,6 +265,10 @@
 
     <!-- MODAL CONFIRMATION & ALERT -->
     <div id="modalHapusConfirm" class="system-modal-overlay"><div class="system-modal-popup mode-danger"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></div><div class="system-modal-header">PENGHAPUSAN PERMANEN</div><div class="system-modal-body">Validasi penghapusan instansi server: <b style="color: var(--danger);" id="delServerName"></b>?<br><br>Operasi ini bersifat destruktif dan data tidak dapat dipulihkan.</div><div class="system-btn-group"><button id="btnKonfirmasiHapus" class="system-btn btn-danger-action" onclick="prosesHapusServer()">Eksekusi</button><button class="system-btn btn-outline-action" onclick="tutupModal('modalHapusConfirm')">Batal</button></div></div></div>
+    
+    <!-- MODAL HAPUS TIMER -->
+    <div id="modalHapusTimerConfirm" class="system-modal-overlay"><div class="system-modal-popup mode-danger"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></div><div class="system-modal-header">HAPUS MASA AKTIF</div><div class="system-modal-body">Yakin ingin menghapus batas waktu untuk server <b style="color: var(--danger);" id="delTimerServerName"></b>?<br><br>Server akan menjadi permanen (Unlimited).</div><div class="system-btn-group"><button id="btnKonfirmasiHapusTimer" class="system-btn btn-danger-action" onclick="prosesHapusTimerServer()">Hapus Timer</button><button class="system-btn btn-outline-action" onclick="tutupModal('modalHapusTimerConfirm')">Batal</button></div></div></div>
+
     <div id="modalSuspendConfirm" class="system-modal-overlay"><div class="system-modal-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/></svg></div><div class="system-modal-header">RESTRIKSI SISTEM</div><div class="system-modal-body">Bekukan (Suspend) akses dan instansi server: <b style="color: var(--warning);" id="suspendServerName"></b>?<br><br>Pengguna tidak akan memiliki otorisasi operasional.</div><div class="system-btn-group"><button id="btnKonfirmasiSuspend" class="system-btn btn-warning-action" onclick="prosesSuspendServer()">Bekukan Akses</button><button class="system-btn btn-outline-action" onclick="tutupModal('modalSuspendConfirm')">Batal</button></div></div></div>
     <div id="modalUnsuspendConfirm" class="system-modal-overlay"><div class="system-modal-popup mode-success"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg></div><div class="system-modal-header">PEMULIHAN AKSES</div><div class="system-modal-body">Pulihkan otorisasi operasional (Unsuspend) untuk instansi server: <b style="color: var(--success);" id="unsuspendServerName"></b>?</div><div class="system-btn-group"><button id="btnKonfirmasiUnsuspend" class="system-btn btn-success-action" onclick="prosesUnsuspendServer()">Cabut Restriksi</button><button class="system-btn btn-outline-action" onclick="tutupModal('modalUnsuspendConfirm')">Batal</button></div></div></div>
     
@@ -457,7 +461,7 @@
                     if (s.status === 'installing') sBadge = `<span class="badge badge-install"><span class="status-dot dot-warning"></span> Installing</span>`;
                     let mTag = isOwner ? `<br><span class="reseller-tag">Author: ${oData.maker}</span>` : '';
                     
-                    // Eksekusi Logika Masa Aktif Server
+                    // Eksekusi Logika Masa Aktif Server & Tombol Hapus Expired
                     let expInfo = expiredData[s.id];
                     let kolomExpired = '';
                     if (expInfo && expInfo.expiredAt) {
@@ -466,6 +470,7 @@
                             kolomExpired = `<div style="display:flex; align-items:center; gap:8px;">
                                 <span class="ptero-server-countdown badge badge-admin" data-expire="${expInfo.expiredAt}" style="font-family:monospace; font-size:11px; font-weight:800;">Menghitung...</span>
                                 <button class="btn-action-small" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);" onclick="bukaModalExpiredServer(${s.id}, '${s.name}', ${expInfo.expiredAt})" title="Tambah Waktu">+</button>
+                                <button class="btn-action-small" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);" onclick="konfirmasiHapusTimer(${s.id}, '${s.name}')" title="Hapus Masa Aktif"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
                             </div>`;
                         } else {
                             kolomExpired = `<span class="badge" style="background:rgba(239, 68, 68, 0.1); color:var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);">EXPIRED (Hapus Otonom)</span>`;
@@ -532,6 +537,27 @@
             tutupModal('modalTambahExpiredServer');
             showAiSuccess(`Masa aktif <b>${hari} Hari</b> berhasil ditambahkan untuk Server ${serverName}.`, "BERHASIL DIUPDATE");
             ambilDataServers(); 
+        }
+
+        // Fungsi khusus hapus timer
+        let targetDelTimerId = null;
+        function konfirmasiHapusTimer(id, name) {
+            if (role === 'demo') return showAiAlert("Akses terkunci di mode demo.", "AKSES DITOLAK");
+            targetDelTimerId = id;
+            document.getElementById('delTimerServerName').innerText = name;
+            document.getElementById('modalHapusTimerConfirm').style.display = 'flex';
+        }
+
+        async function prosesHapusTimerServer() {
+            tutupModal('modalHapusTimerConfirm');
+            try {
+                let domainKey = config.domain.replace(/\./g, '_');
+                await database.ref(`ptero_servers_expired/${domainKey}/${targetDelTimerId}`).remove();
+                showAiSuccess("Timer masa aktif berhasil dihapus. Server kini Unlimited.", "TIMER DIHAPUS", false);
+                ambilDataServers();
+            } catch (e) {
+                showAiAlert("Gagal menghapus timer: " + e.message, "ERROR");
+            }
         }
 
         async function sweeperServerExpiredLokal() {
