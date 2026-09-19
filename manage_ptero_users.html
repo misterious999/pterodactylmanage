@@ -278,7 +278,7 @@
     <!-- MODAL TAMBAH EXPIRED PTERO -->
     <div id="modalTambahExpiredPtero" class="system-modal-overlay">
         <div class="system-modal-popup mode-info">
-            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8-8 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
             <div class="system-modal-header">KONFIGURASI SIKLUS AKTIF</div>
             <div class="system-modal-body">Alokasikan durasi perpanjangan layanan untuk ID Pengguna: <b id="expPteroUsername" style="color:var(--text-main);"></b>.</div>
             <input type="number" id="inputHariExpired" placeholder="Durasi (Hari)" style="margin-bottom: 20px;">
@@ -286,6 +286,19 @@
             <div class="system-btn-group">
                 <button class="system-btn btn-primary-action" onclick="simpanExpiredPtero()">Simpan Regulasi</button>
                 <button class="system-btn btn-outline-action" onclick="tutupModal('modalTambahExpiredPtero')">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL HAPUS TIMER USER -->
+    <div id="modalHapusTimerUserConfirm" class="system-modal-overlay">
+        <div class="system-modal-popup mode-danger">
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></div>
+            <div class="system-modal-header">HAPUS MASA AKTIF</div>
+            <div class="system-modal-body">Yakin ingin menghapus batas waktu untuk pengguna <b style="color: var(--danger);" id="delTimerUsername"></b>?<br><br>Akun akan menjadi permanen (Unlimited).</div>
+            <div class="system-btn-group">
+                <button id="btnKonfirmasiHapusTimerUser" class="system-btn btn-danger-action" onclick="prosesHapusTimerUser()">Hapus Timer</button>
+                <button class="system-btn btn-outline-action" onclick="tutupModal('modalHapusTimerUserConfirm')">Batal</button>
             </div>
         </div>
     </div>
@@ -525,7 +538,7 @@
         async function eksekusiBulk() {
             tutupModal('modalBulkConfirm');
             document.getElementById('btnTutupSuccess').style.display = 'none';
-            showAiSuccess(`${spinnerSvg} Operasi batch sedang berlangsung pada ${bulkTargetUsers.length} entitas...`, "PROSES BERJALAN", false);
+            showAiSuccess(`${spinnerSvg} Operasi batch sedang berlangsung pada${bulkTargetUsers.length} entitas...`, "PROSES BERJALAN", false);
             
             let sukses = 0;
             let gagal = 0;
@@ -567,7 +580,7 @@
                 }
                 
                 document.getElementById('btnTutupSuccess').style.display = 'block';
-                showAiSuccess(`Eksekusi batch telah diselesaikan.\nTarget Berhasil: <b style="color:var(--success);">${sukses}</b> | Target Gagal: <b style="color:var(--danger);">${gagal}</b>`, "STATUS OK", false);
+                showAiSuccess(`Eksekusi batch telah diselesaikan.\nTarget Berhasil: <b style="color:var(--success);">${sukses}</b> \vert{} Target Gagal: <b style="color:var(--danger);">${gagal}</b>`, "STATUS OK", false);
                 ambilDataPtero();
                 document.getElementById('bulkActions').style.display = 'none';
                 document.getElementById('selectAllCb').checked = false;
@@ -616,6 +629,27 @@
             tutupModal('modalTambahExpiredPtero');
             showAiSuccess(`Validitas akun ${username} berhasil diperpanjang <b>${hari} hari</b> dari siklus saat ini.`, "ALOKASI BERHASIL");
             ambilDataPtero(); 
+        }
+
+        // Fungsi khusus hapus timer user
+        let targetDelTimerUserId = null;
+        function konfirmasiHapusTimerUser(id, name) {
+            if (role === 'demo') return showAiAlert("Fungsionalitas dinonaktifkan pada sesi Demo.", "AKSES DITOLAK");
+            targetDelTimerUserId = id;
+            document.getElementById('delTimerUsername').innerText = name;
+            document.getElementById('modalHapusTimerUserConfirm').style.display = 'flex';
+        }
+
+        async function prosesHapusTimerUser() {
+            tutupModal('modalHapusTimerUserConfirm');
+            try {
+                let domainKey = config.domain.replace(/\./g, '_');
+                await database.ref(`ptero_users_expired/${domainKey}/${targetDelTimerUserId}`).remove();
+                showAiSuccess("Timer masa aktif berhasil dihapus. Akun kini Unlimited.", "TIMER DIHAPUS", false);
+                ambilDataPtero();
+            } catch (e) {
+                showAiAlert("Gagal menghapus timer: " + e.message, "KESALAHAN");
+            }
         }
 
         async function prosesHapusUserPteroOtomatis(userId, username) {
@@ -713,6 +747,7 @@
                             kolomExpired = `<div style="display:flex; align-items:center; gap:8px;">
                                 <span class="ptero-countdown-timer badge badge-admin" data-expire="${expInfo.expiredAt}" style="font-family:monospace; font-size:11px; font-weight:800;">Processing...</span>
                                 <button class="btn-sapu" style="padding: 4px 8px;" onclick="bukaModalExpired(${u.id}, '${u.username}', ${expInfo.expiredAt})" title="Modifikasi Durasi">+</button>
+                                <button class="btn-sapu" style="padding: 4px 8px; background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);" onclick="konfirmasiHapusTimerUser(${u.id}, '${u.username}')" title="Hapus Masa Aktif"><svg viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
                             </div>`;
                         } else {
                             kolomExpired = `<span class="badge" style="background:rgba(239, 68, 68, 0.1); color:var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);">EXPIRED (Purging)</span>`;
@@ -982,7 +1017,7 @@
                     },
                     "egg": parseInt(eggId), 
                     "docker_image": dockerImageFinal, 
-                    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z ${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z ${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo ${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
+                    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
                     "environment": dynamicEnvironmentData, 
                     "limits": { "memory": parseInt(ram), "swap": 0, "disk": parseInt(disk), "io": 500, "cpu": parseInt(cpu) }, 
                     "feature_limits": { "databases": 5, "backups": 5, "allocations": 1 }
