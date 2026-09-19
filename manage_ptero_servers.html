@@ -81,6 +81,9 @@
         .badge-active { background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.3); }
         .badge-suspended { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
         
+        /* Badge Khusus Countdown Server */
+        .badge-admin { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; }
+
         .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; }
         .dot-warning { background-color: var(--warning); box-shadow: 0 0 8px var(--warning); }
         .dot-success { background-color: var(--success); box-shadow: 0 0 8px var(--success); }
@@ -221,8 +224,8 @@
             <input type="text" id="searchInput" onkeyup="cariDataTabel()" placeholder="Cari nama server, user, atau ID..." autocomplete="off">
         </div>
         <table id="tabelServer">
-            <tr><th>ID</th><th>Nama Server</th><th>Pemilik</th><th>Status</th><th>Aksi</th></tr>
-            <tr><td colspan="5" style="text-align: center; color: var(--text-sub); padding: 30px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Sinkronisasi data server...</td></tr>
+            <tr><th>ID</th><th>Nama Server</th><th>Pemilik</th><th>Masa Aktif</th><th>Status</th><th>Aksi</th></tr>
+            <tr><td colspan="6" style="text-align: center; color: var(--text-sub); padding: 30px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Sinkronisasi data server...</td></tr>
         </table>
     </div>
 
@@ -241,6 +244,21 @@
                 <button class="system-btn btn-primary-action" onclick="salinStrukServer()" id="btnSalinStruk"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Kredensial</button>
                 <button class="system-btn btn-success-action" id="btnSalinTesti"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Format Transaksi</button>
                 <button class="system-btn btn-outline-action" style="flex-basis: 100%;" onclick="tutupModal('modalScreenshot')">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL TAMBAH EXPIRED SERVER -->
+    <div id="modalTambahExpiredServer" class="system-modal-overlay">
+        <div class="system-modal-popup mode-info">
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8-8 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+            <div class="system-modal-header">SET EXPIRED SERVER</div>
+            <div class="system-modal-body">Masukkan jumlah hari untuk memperpanjang masa aktif server <b id="expServerName" style="color:var(--text-main);"></b>.</div>
+            <input type="number" id="inputHariExpiredServer" placeholder="Contoh: 30 (Dalam Hitungan Hari)" style="margin-bottom: 20px;">
+            <input type="hidden" id="expServerId">
+            <div class="system-btn-group">
+                <button class="system-btn btn-primary-action" onclick="simpanExpiredServer()">Simpan Waktu</button>
+                <button class="system-btn btn-outline-action" onclick="tutupModal('modalTambahExpiredServer')">Batal</button>
             </div>
         </div>
     </div>
@@ -402,7 +420,8 @@
 
         async function ambilDataServers() {
             try {
-                document.getElementById('tabelServer').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">${spinnerSvg}<br>Mengambil matriks server...</td></tr>`;
+                let domainKey = config.domain.replace(/\./g, '_');
+                document.getElementById('tabelServer').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--warning); padding: 30px;">${spinnerSvg}<br>Mengambil matriks server & data masa aktif...</td></tr>`;
                 
                 let currentPage = 1; 
                 let totalPages = 1; 
@@ -415,7 +434,11 @@
                     currentPage++;
                 } while (currentPage <= totalPages);
 
-                let tabel = `<tr><th>ID</th><th>Nama Server</th><th>Pemilik</th><th>Status</th><th>Aksi</th></tr>`; 
+                // Mengambil data expired khusus server dari database
+                let snapExp = await database.ref(`ptero_servers_expired/${domainKey}`).once('value');
+                let expiredData = snapExp.val() || {};
+
+                let tabel = `<tr><th>ID</th><th>Nama Server</th><th>Pemilik</th><th>Masa Aktif</th><th>Status</th><th>Aksi</th></tr>`; 
                 let count = 0;
                 const iconTrash = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
                 const iconLock = `<svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/></svg>`;
@@ -434,6 +457,23 @@
                     if (s.status === 'installing') sBadge = `<span class="badge badge-install"><span class="status-dot dot-warning"></span> Installing</span>`;
                     let mTag = isOwner ? `<br><span class="reseller-tag">Author: ${oData.maker}</span>` : '';
                     
+                    // Eksekusi Logika Masa Aktif Server
+                    let expInfo = expiredData[s.id];
+                    let kolomExpired = '';
+                    if (expInfo && expInfo.expiredAt) {
+                        let sisaWaktu = expInfo.expiredAt - Date.now();
+                        if (sisaWaktu > 0) {
+                            kolomExpired = `<div style="display:flex; align-items:center; gap:8px;">
+                                <span class="ptero-server-countdown badge badge-admin" data-expire="${expInfo.expiredAt}" style="font-family:monospace; font-size:11px; font-weight:800;">Menghitung...</span>
+                                <button class="btn-action-small" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);" onclick="bukaModalExpiredServer(${s.id}, '${s.name}', ${expInfo.expiredAt})" title="Tambah Waktu">+</button>
+                            </div>`;
+                        } else {
+                            kolomExpired = `<span class="badge" style="background:rgba(239, 68, 68, 0.1); color:var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);">EXPIRED (Hapus Otonom)</span>`;
+                        }
+                    } else {
+                        kolomExpired = `<button class="badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); cursor: pointer;" onclick="bukaModalExpiredServer(${s.id}, '${s.name}', 0)">Set Expired</button>`;
+                    }
+
                     let btnLock = s.suspended ? 
                                   `<button class="btn-action-small btn-unsuspend" title="Buka Suspend Server" onclick="konfirmasiUnsuspend(${s.id}, '${s.name}')">${iconUnlock}</button>` : 
                                   `<button class="btn-action-small btn-suspend" title="Suspend Server" onclick="konfirmasiSuspend(${s.id}, '${s.name}')">${iconLock}</button>`;
@@ -443,15 +483,102 @@
                         ${btnLock}
                     </div>`;
 
-                    tabel += `<tr><td style="color:var(--text-sub); font-weight:bold;">#${s.id}</td><td style="font-weight:700; color:var(--text-main); font-size:14px;">${s.name}</td><td><span style="color:var(--primary); font-weight:bold;">${oData.username}</span>${mTag}</td><td>${sBadge}</td><td>${btnAction}</td></tr>`;
+                    tabel += `<tr><td style="color:var(--text-sub); font-weight:bold;">#${s.id}</td><td style="font-weight:700; color:var(--text-main); font-size:14px;">${s.name}</td><td><span style="color:var(--primary); font-weight:bold;">${oData.username}</span>${mTag}</td><td>${kolomExpired}</td><td>${sBadge}</td><td>${btnAction}</td></tr>`;
                 });
                 
-                if (count === 0) tabel += `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">Database server kosong atau di luar jangkauan otorisasi.</td></tr>`;
+                if (count === 0) tabel += `<tr><td colspan="6" style="text-align: center; color: var(--warning); padding: 30px;">Database server kosong atau di luar jangkauan otorisasi.</td></tr>`;
                 document.getElementById('tabelServer').innerHTML = tabel;
             } catch(e) { 
-                document.getElementById('tabelServer').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger);">Malfunctions Sinkronisasi: ${e.message}</td></tr>`; 
+                document.getElementById('tabelServer').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger);">Malfunctions Sinkronisasi: ${e.message}</td></tr>`; 
             }
         }
+
+        // ==========================================
+        // SISTEM EXPIRED SERVER (MANUAL & AUTOSWEEPER)
+        // ==========================================
+        function bukaModalExpiredServer(id, serverName, currentExpire) {
+            if (role === 'demo') return showAiAlert("Akses terkunci di mode demo.", "AKSES DITOLAK");
+            document.getElementById('expServerId').value = id;
+            document.getElementById('expServerName').innerText = serverName;
+            document.getElementById('expServerId').setAttribute('data-current', currentExpire || 0);
+            document.getElementById('inputHariExpiredServer').value = "";
+            document.getElementById('modalTambahExpiredServer').style.display = 'flex';
+        }
+
+        async function simpanExpiredServer() {
+            let btn = document.querySelector('#modalTambahExpiredServer .btn-primary-action');
+            let id = document.getElementById('expServerId').value;
+            let currentExpire = parseInt(document.getElementById('expServerId').getAttribute('data-current') || 0);
+            let serverName = document.getElementById('expServerName').innerText;
+            let hari = parseInt(document.getElementById('inputHariExpiredServer').value);
+
+            if (!hari || hari <= 0) return showAiAlert("Masukkan jumlah hari yang valid.", "KESALAHAN INPUT");
+
+            btn.innerText = "Menyimpan...";
+            btn.style.pointerEvents = "none";
+
+            let tambahMs = hari * 24 * 60 * 60 * 1000;
+            let newExpire = (currentExpire > Date.now()) ? (currentExpire + tambahMs) : (Date.now() + tambahMs); 
+
+            let domainKey = config.domain.replace(/\./g, '_');
+            await database.ref(`ptero_servers_expired/${domainKey}/${id}`).set({
+                expiredAt: newExpire,
+                serverName: serverName,
+                maker: myUsername 
+            });
+
+            btn.innerText = "Simpan Waktu";
+            btn.style.pointerEvents = "auto";
+            tutupModal('modalTambahExpiredServer');
+            showAiSuccess(`Masa aktif <b>${hari} Hari</b> berhasil ditambahkan untuk Server ${serverName}.`, "BERHASIL DIUPDATE");
+            ambilDataServers(); 
+        }
+
+        async function sweeperServerExpiredLokal() {
+            let domainKey = config.domain.replace(/\./g, '_');
+            let snap = await database.ref(`ptero_servers_expired/${domainKey}`).once('value');
+            let expData = snap.val();
+            if (!expData) return;
+            
+            let now = Date.now();
+            for (let key in expData) {
+                let data = expData[key];
+                // Mengeksekusi server yang expired, dan hanya yang belum di proses hapus (mencegah loop)
+                if (data.expiredAt <= now && (role === 'pemilik' || data.maker === myUsername) && !data.isDeleting) {
+                    database.ref(`ptero_servers_expired/${domainKey}/${key}/isDeleting`).set(true);
+                    try {
+                        await apiPtero.deleteServer(key);
+                        await database.ref(`ptero_servers_expired/${domainKey}/${key}`).remove();
+                        console.log(`[Auto-Sweeper] Server ${data.serverName} berhasil dihancurkan karena expired.`);
+                        ambilDataServers(); 
+                    } catch(e) {
+                        console.error("[Auto-Sweeper] Error penghapusan otonom:", e);
+                    }
+                }
+            }
+        }
+
+        setInterval(() => {
+            document.querySelectorAll('.ptero-server-countdown').forEach(el => {
+                let exp = parseInt(el.getAttribute('data-expire'));
+                let sisa = exp - Date.now();
+                
+                if (sisa <= 0) {
+                    el.innerText = "EXPIRED";
+                    el.style.color = "var(--danger)";
+                    el.style.background = "rgba(239, 68, 68, 0.1)";
+                    el.style.borderColor = "var(--danger)";
+                } else {
+                    let d = Math.floor(sisa / (1000 * 60 * 60 * 24));
+                    let h = Math.floor((sisa % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    let m = Math.floor((sisa % (1000 * 60 * 60)) / (1000 * 60));
+                    let s = Math.floor((sisa % (1000 * 60)) / 1000);
+                    el.innerText = `${d}h ${h}j ${m}m ${s}d`;
+                }
+            });
+        }, 1000);
+
+        setInterval(sweeperServerExpiredLokal, 30000);
 
         // ==========================================
         // AUTO-DEPLOY ALGORITHMS
@@ -544,7 +671,7 @@
                     },
                     "egg": parseInt(eggId), 
                     "docker_image": dockerImg, 
-                    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z ${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z ${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo ${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
+                    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
                     "environment": dynamicEnv, 
                     "limits": { "memory": parseInt(ram), "swap": 0, "disk": parseInt(disk), "io": 500, "cpu": parseInt(cpu) }, 
                     "feature_limits": { "databases": 5, "backups": 5, "allocations": 1 }
@@ -583,6 +710,8 @@
             
             try {
                 await apiPtero.deleteServer(targetDelId);
+                let domainKey = config.domain.replace(/\./g, '_');
+                await database.ref(`ptero_servers_expired/${domainKey}/${targetDelId}`).remove(); // Hapus timer expired juga
                 showAiSuccess("Instansi server berhasil dihancurkan secara permanen.", "DESTRUKSI BERHASIL", true); 
                 ambilDataServers();
             } catch(e) { 
