@@ -54,7 +54,7 @@
         .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 15px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
         
-        .btn-tambah { width: 100%; background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; cursor: pointer; border-radius: 10px; padding: 14px; font-weight: 700; transition: 0.3s; margin-top: 5px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px var(--primary-glow); }
+        .btn-tambah { width: 100%; background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; cursor: border-radius: 10px; padding: 14px; font-weight: 700; transition: 0.3s; margin-top: 5px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px var(--primary-glow); }
         .btn-tambah svg { width: 18px; height: 18px; fill: currentColor; }
         .btn-tambah:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(13, 148, 136, 0.4); }
         
@@ -96,39 +96,383 @@
         .search-container input { padding-left: 40px; margin-bottom: 0; background: rgba(0,0,0,0.15); border-color: rgba(13, 148, 136, 0.3); }
         .search-container input:focus { background: var(--input-bg); border-color: var(--primary); }
 
-        /* MODALS ENTERPRISE UI */
-        .system-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s ease; }
-        .system-modal-popup { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 380px; padding: 30px 25px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1px solid var(--border-color); }
+        /* ENTERPRISE POPUP / MODAL SYSTEM */
+        .system-modal-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(7, 11, 20, 0.82); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            z-index: 99999; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+            box-sizing: border-box; 
+            animation: fadeInModal 0.25s ease; 
+        }
         
-        .modal-icon-top { width: 50px; height: 50px; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-        .modal-icon-top svg { width: 24px; height: 24px; }
-        
-        .mode-danger .modal-icon-top { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); } .mode-danger .modal-icon-top svg { fill: var(--danger); } .mode-danger .system-modal-header { color: var(--danger); }
-        .mode-success .modal-icon-top { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); } .mode-success .modal-icon-top svg { fill: var(--success); } .mode-success .system-modal-header { color: var(--success); }
-        .mode-warning .modal-icon-top { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); } .mode-warning .modal-icon-top svg { fill: var(--warning); } .mode-warning .system-modal-header { color: var(--warning); }
-        .mode-info .modal-icon-top { background: var(--primary-glow); border: 1px solid rgba(13, 148, 136, 0.3); } .mode-info .modal-icon-top svg { fill: var(--primary); } .mode-info .system-modal-header { color: var(--primary); }
+        .system-modal-popup { 
+            background: rgba(15, 23, 42, 0.94); 
+            border-radius: 24px; 
+            width: 100%; 
+            max-width: 420px; 
+            padding: 32px 28px; 
+            text-align: center; 
+            color: var(--text-main); 
+            position: relative; 
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.08); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px); 
+            animation: scaleUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+            box-sizing: border-box;
+        }
 
-        .system-modal-header { font-size: 18px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        .system-modal-body { font-size: 13px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; white-space: pre-wrap; }
-        
-        .info-detail-system { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; text-align: left; margin-bottom: 20px; }
-        .detail-row { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+        .modal-icon-top { 
+            width: 56px; 
+            height: 56px; 
+            margin: 0 auto 18px auto; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 50%; 
+        }
+        .modal-icon-top svg { width: 26px; height: 26px; }
+
+        .mode-danger .modal-icon-top { 
+            background: rgba(239, 68, 68, 0.12); 
+            border: 1px solid rgba(239, 68, 68, 0.35); 
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.2); 
+        }
+        .mode-danger .modal-icon-top svg { fill: var(--danger); }
+        .mode-danger .system-modal-header { color: var(--danger); text-align: center; }
+
+        .mode-success .modal-icon-top { 
+            background: rgba(16, 185, 129, 0.12); 
+            border: 1px solid rgba(16, 185, 129, 0.35); 
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.2); 
+        }
+        .mode-success .modal-icon-top svg { fill: var(--success); }
+        .mode-success .system-modal-header { color: var(--success); text-align: center; }
+
+        .mode-warning .modal-icon-top { 
+            background: rgba(245, 158, 11, 0.12); 
+            border: 1px solid rgba(245, 158, 11, 0.35); 
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.2); 
+        }
+        .mode-warning .modal-icon-top svg { fill: var(--warning); }
+        .mode-warning .system-modal-header { color: var(--warning); text-align: center; }
+
+        .mode-info .modal-icon-top { 
+            background: var(--primary-glow); 
+            border: 1px solid rgba(13, 148, 136, 0.35); 
+            box-shadow: 0 0 25px var(--primary-glow); 
+        }
+        .mode-info .modal-icon-top svg { fill: var(--primary); }
+        .mode-info .system-modal-header { color: var(--primary); text-align: center; }
+
+        .system-modal-header { 
+            font-size: 18px; 
+            font-weight: 800; 
+            margin-bottom: 10px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.8px; 
+            text-align: center; 
+        }
+        .system-modal-body { 
+            font-size: 13px; 
+            color: var(--text-sub); 
+            line-height: 1.6; 
+            margin-bottom: 24px; 
+            text-align: center; 
+            word-break: break-word; 
+            white-space: pre-wrap; 
+        }
+
+        .info-detail-system { 
+            background: rgba(0, 0, 0, 0.25); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 16px; 
+            padding: 18px; 
+            text-align: left; 
+            margin-bottom: 22px; 
+        }
+        .detail-row { 
+            margin-bottom: 12px; 
+            padding-bottom: 12px; 
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.06); 
+        }
         .detail-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-        .detail-label { font-size: 10px; color: var(--text-sub); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
-        .detail-label svg { width: 12px; height: 12px; fill: var(--text-sub); }
-        .detail-value { font-size: 14px; font-weight: 600; color: var(--text-main); word-break: break-all; }
+        .detail-label { 
+            font-size: 10px; 
+            color: var(--text-sub); 
+            text-transform: uppercase; 
+            font-weight: 800; 
+            letter-spacing: 0.8px; 
+            margin-bottom: 5px; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+        }
+        .detail-label svg { width: 14px; height: 14px; fill: var(--text-sub); }
+        .detail-value { font-size: 14px; font-weight: 700; color: var(--text-main); word-break: break-all; }
         .value-highlight { color: var(--primary); }
+
+        .modal-input {
+            width: 100%;
+            padding: 13px 16px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .modal-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .system-btn-group { display: flex; gap: 12px; justify-content: center; }
+        .system-btn { 
+            flex: 1; 
+            border: none; 
+            padding: 13px 16px; 
+            font-weight: 700; 
+            font-size: 12px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: 0.25s ease; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            display: inline-flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 6px; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); 
+            text-decoration: none; 
+            box-sizing: border-box;
+        }
+        .btn-primary-action { 
+            background: linear-gradient(135deg, var(--primary), #059669); 
+            color: white; 
+            box-shadow: 0 4px 15px var(--primary-glow); 
+        } 
+        .btn-primary-action:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(13, 148, 136, 0.45); 
+        }
+        .btn-danger-action { 
+            background: linear-gradient(135deg, #ef4444, #dc2626); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25); 
+        } 
+        .btn-danger-action:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.45); 
+        }
+        .btn-warning-action { 
+            background: linear-gradient(135deg, #f59e0b, #d97706); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25); 
+        } 
+        .btn-warning-action:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.45); 
+        }
+        .btn-success-action { 
+            background: linear-gradient(135deg, #10b981, #059669); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25); 
+        } 
+        .btn-success-action:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.45); 
+        }
+        .btn-outline-action { 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            color: var(--text-main); 
+            box-shadow: none; 
+        } 
+        .btn-outline-action:hover { 
+            background: rgba(255, 255, 255, 0.1); 
+            border-color: rgba(255, 255, 255, 0.2); 
+            transform: translateY(-2px); 
+        }
+
+        /* CUSTOM SELECT PICKER MODAL (THEMED DIALOG REPLACING NATIVE WHITE POPUP) */
+        .select-picker-popup {
+            background: rgba(15, 23, 42, 0.96);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 420px;
+            max-height: 82vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-main);
+            position: relative;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            animation: scaleUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        .select-picker-header {
+            padding: 20px 24px 16px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.25);
+        }
+        .select-picker-title-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            text-align: left;
+        }
+        .select-picker-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .select-picker-subtitle {
+            font-size: 11px;
+            color: var(--text-sub);
+        }
+        .select-picker-close-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-sub);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .select-picker-close-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+        .select-picker-list {
+            padding: 10px 14px;
+            overflow-y: auto;
+            max-height: calc(82vh - 80px);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overscroll-behavior: contain;
+        }
+        .select-picker-item {
+            padding: 14px 18px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s ease;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            border: 1px solid transparent;
+        }
+        .select-picker-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--primary);
+        }
+        .select-picker-item.selected {
+            background: rgba(13, 148, 136, 0.14);
+            border-color: rgba(13, 148, 136, 0.35);
+            color: #38bdf8;
+        }
+        .select-picker-radio {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.28);
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+        .select-picker-item.selected .select-picker-radio {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+        .select-picker-item.selected .select-picker-radio::after {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 6px var(--primary);
+        }
         
-        .system-btn-group { display: flex; gap: 10px; }
-        .system-btn { flex: 1; border: none; padding: 12px; font-weight: 700; font-size: 12px; border-radius: 10px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 6px;}
-        .btn-primary-action { background: var(--primary); color: white; } .btn-primary-action:hover { background: #0f766e; transform: translateY(-2px); }
-        .btn-danger-action { background: var(--danger); color: white; } .btn-danger-action:hover { background: #dc2626; transform: translateY(-2px); }
-        .btn-warning-action { background: var(--warning); color: white; } .btn-warning-action:hover { background: #d97706; transform: translateY(-2px); }
-        .btn-success-action { background: var(--success); color: white; } .btn-success-action:hover { background: #059669; transform: translateY(-2px); }
-        .btn-outline-action { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-sub); } .btn-outline-action:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
+        .custom-select-trigger {
+            width: 100%;
+            padding: 13px 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 14px;
+            box-sizing: border-box;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            user-select: none;
+        }
+        .custom-select-trigger:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+            background: rgba(15, 23, 42, 0.85);
+        }
+        .custom-select-trigger svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--text-sub);
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        select option {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 8px;
+        }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeInPop { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleUpModal { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -151,11 +495,15 @@
             <h3><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg> Deploy Server Baru</h3>
         </div>
         
-        <div class="select-wrapper">
+        <div class="select-wrapper" style="position: relative; margin-bottom: 15px;">
             <label>Pilih Pemilik Server (User):</label>
-            <select id="userSelect">
+            <select id="userSelect" style="display: none;">
                 <option value="">⏳ Memuat daftar user...</option>
             </select>
+            <div class="custom-select-trigger" id="trigger_userSelect" onclick="bukaModalSelect('userSelect', 'PILIH PEMILIK SERVER', 'Tautkan kepemilikan akun panel')">
+                <span id="label_userSelect">⏳ Memuat daftar user...</span>
+                <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+            </div>
         </div>
         
         <div class="input-group">
@@ -166,7 +514,7 @@
         <div class="grid-3">
             <div>
                 <label>RAM Server</label>
-                <select id="serverRam">
+                <select id="serverRam" style="display: none;">
                     <option value="1024">1 GB</option>
                     <option value="2048">2 GB</option>
                     <option value="3072">3 GB</option>
@@ -179,26 +527,44 @@
                     <option value="10240">10 GB</option>
                     <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited 🚀</option>
                 </select>
+                <div class="custom-select-trigger" id="trigger_serverRam" onclick="bukaModalSelect('serverRam', 'PILIH RAM SERVER', 'Alokasi memori operasional server')">
+                    <span id="label_serverRam">4 GB</span>
+                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </div>
             </div>
             <div>
                 <label>CPU Limit</label>
-                <select id="serverCpu">
+                <select id="serverCpu" style="display: none;">
                     <option value="50">50%</option>
                     <option value="100" selected>100%</option>
                     <option value="150">150%</option>
                     <option value="200">200%</option>
                     <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited</option>
                 </select>
+                <div class="custom-select-trigger" id="trigger_serverCpu" onclick="bukaModalSelect('serverCpu', 'PILIH CPU LIMIT', 'Kapasitas pemrosesan komputasi')">
+                    <span id="label_serverCpu">100%</span>
+                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </div>
             </div>
             <div>
                 <label>Disk Space</label>
-                <select id="serverDisk">
+                <select id="serverDisk" style="display: none;">
                     <option value="1024">1 GB</option>
                     <option value="2048" selected>2 GB</option>
+                    <option value="3072">3 GB</option>
+                    <option value="4096">4 GB</option>
                     <option value="5120">5 GB</option>
+                    <option value="6144">6 GB</option>
+                    <option value="7168">7 GB</option>
+                    <option value="8192">8 GB</option>
+                    <option value="9216">9 GB</option>
                     <option value="10240">10 GB</option>
-                    <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited</option>
+                    <option value="0" style="color: var(--warning); font-weight: bold;">Unlimited 🚀</option>
                 </select>
+                <div class="custom-select-trigger" id="trigger_serverDisk" onclick="bukaModalSelect('serverDisk', 'PILIH DISK SPACE', 'Penyimpanan berkas & database server')">
+                    <span id="label_serverDisk">2 GB</span>
+                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </div>
             </div>
         </div>
 
@@ -229,20 +595,44 @@
         </table>
     </div>
 
+    <!-- MODAL AKSES DITOLAK -->
+    <div id="modalAksesDitolak" class="system-modal-overlay" style="z-index: 999999;">
+        <div class="system-modal-popup mode-danger">
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>
+            <div class="system-modal-header">Otorisasi Ditolak</div>
+            <div class="system-modal-body" id="teksAksesDitolakServer">Akses Ditolak.<br><br><small>Menendang koneksi dalam 3 detik...</small></div>
+            <div class="system-btn-group"><button class="system-btn btn-danger-action" onclick="window.location.replace('login.html')">Kembali ke Login</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL CUSTOM SELECT PICKER (THEMED DIALOG REPLACING DEFAULT BROWSER POPUP) -->
+    <div id="modalSelectPicker" class="system-modal-overlay" onclick="tutupModalSelect(event)">
+        <div class="select-picker-popup" onclick="event.stopPropagation()">
+            <div class="select-picker-header">
+                <div class="select-picker-title-wrap">
+                    <span id="selectPickerTitle" class="select-picker-title">PILIH OPSI</span>
+                    <span id="selectPickerSubtitle" class="select-picker-subtitle">Tentukan konfigurasi alokasi layanan</span>
+                </div>
+                <button class="select-picker-close-btn" onclick="tutupModalSelectDirect()">&times;</button>
+            </div>
+            <div class="select-picker-list" id="selectPickerList"></div>
+        </div>
+    </div>
+
     <!-- MODAL HASIL DEPLOY -->
     <div id="modalScreenshot" class="system-modal-overlay">
         <div class="system-modal-popup mode-success">
-            <div class="modal-icon-top" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);"><svg viewBox="0 0 24 24" style="fill: var(--success);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
-            <div class="system-modal-header" style="color: var(--success);">ALOKASI SERVER BERHASIL</div>
-            <p style="margin-bottom: 15px; color: var(--text-sub); font-size: 12px;">Instansi server baru telah dibuat dan terasosiasi.</p>
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+            <div class="system-modal-header">ALOKASI SERVER BERHASIL</div>
+            <p style="margin-bottom: 18px; color: var(--text-sub); font-size: 13px; line-height: 1.5;">Instansi server baru telah dibuat dan terasosiasi.</p>
             <div class="info-detail-system">
-                <div class="detail-row"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> Keterangan Server</div><div class="detail-value">Server: <span id="resServerName" style="color: white; font-weight: bold;"></span></div><div class="detail-value">Owner: <span id="resServerOwner" style="color: var(--warning); font-weight: bold;"></span></div></div>
-                <div class="detail-row" style="border: none; padding: 0;"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96z"/></svg> Portal Akses</div><div class="detail-value"><a id="resLink" href="#" target="_blank" style="color: var(--primary); text-decoration: none;"></a></div></div>
+                <div class="detail-row"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> Keterangan Server</div><div class="detail-value" style="margin-bottom: 4px;">Server: <span id="resServerName" style="color: white; font-weight: 700;"></span></div><div class="detail-value">Owner: <span id="resServerOwner" style="color: var(--warning); font-weight: 700;"></span></div></div>
+                <div class="detail-row" style="border: none; padding: 0;"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96z"/></svg> Portal Akses</div><div class="detail-value"><a id="resLink" href="#" target="_blank" style="color: var(--primary); text-decoration: none; word-break: break-all;"></a></div></div>
             </div>
             
             <div class="system-btn-group" style="flex-wrap: wrap;">
-                <button class="system-btn btn-primary-action" onclick="salinStrukServer()" id="btnSalinStruk"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Kredensial</button>
-                <button class="system-btn btn-success-action" id="btnSalinTesti"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Format Transaksi</button>
+                <button class="system-btn btn-primary-action" onclick="salinStrukServer()" id="btnSalinStruk"><svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:currentColor;"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Salin Kredensial</button>
+                <button class="system-btn btn-success-action" id="btnSalinTesti"><svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:currentColor;"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Format Transaksi</button>
                 <button class="system-btn btn-outline-action" style="flex-basis: 100%;" onclick="tutupModal('modalScreenshot')">Tutup</button>
             </div>
         </div>
@@ -254,7 +644,7 @@
             <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8-8 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
             <div class="system-modal-header">SET EXPIRED SERVER</div>
             <div class="system-modal-body">Masukkan jumlah hari untuk memperpanjang masa aktif server <b id="expServerName" style="color:var(--text-main);"></b>.</div>
-            <input type="number" id="inputHariExpiredServer" placeholder="Contoh: 30 (Dalam Hitungan Hari)" style="margin-bottom: 20px;">
+            <input type="number" id="inputHariExpiredServer" placeholder="Contoh: 30 (Dalam Hitungan Hari)" class="modal-input">
             <input type="hidden" id="expServerId">
             <div class="system-btn-group">
                 <button class="system-btn btn-primary-action" onclick="simpanExpiredServer()">Simpan Waktu</button>
@@ -270,10 +660,12 @@
     <div id="modalHapusTimerConfirm" class="system-modal-overlay"><div class="system-modal-popup mode-danger"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></div><div class="system-modal-header">HAPUS MASA AKTIF</div><div class="system-modal-body">Yakin ingin menghapus batas waktu untuk server <b style="color: var(--danger);" id="delTimerServerName"></b>?<br><br>Server akan menjadi permanen (Unlimited).</div><div class="system-btn-group"><button id="btnKonfirmasiHapusTimer" class="system-btn btn-danger-action" onclick="prosesHapusTimerServer()">Hapus Timer</button><button class="system-btn btn-outline-action" onclick="tutupModal('modalHapusTimerConfirm')">Batal</button></div></div></div>
 
     <div id="modalSuspendConfirm" class="system-modal-overlay"><div class="system-modal-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/></svg></div><div class="system-modal-header">RESTRIKSI SISTEM</div><div class="system-modal-body">Bekukan (Suspend) akses dan instansi server: <b style="color: var(--warning);" id="suspendServerName"></b>?<br><br>Pengguna tidak akan memiliki otorisasi operasional.</div><div class="system-btn-group"><button id="btnKonfirmasiSuspend" class="system-btn btn-warning-action" onclick="prosesSuspendServer()">Bekukan Akses</button><button class="system-btn btn-outline-action" onclick="tutupModal('modalSuspendConfirm')">Batal</button></div></div></div>
+    
     <div id="modalUnsuspendConfirm" class="system-modal-overlay"><div class="system-modal-popup mode-success"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg></div><div class="system-modal-header">PEMULIHAN AKSES</div><div class="system-modal-body">Pulihkan otorisasi operasional (Unsuspend) untuk instansi server: <b style="color: var(--success);" id="unsuspendServerName"></b>?</div><div class="system-btn-group"><button id="btnKonfirmasiUnsuspend" class="system-btn btn-success-action" onclick="prosesUnsuspendServer()">Cabut Restriksi</button><button class="system-btn btn-outline-action" onclick="tutupModal('modalUnsuspendConfirm')">Batal</button></div></div></div>
     
-    <div id="modalAiAlert" class="system-modal-overlay" style="z-index: 999999;"><div class="system-modal-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><div class="system-modal-header" id="aiAlertTitle">PERINGATAN SISTEM</div><div class="system-modal-body" id="aiAlertBody">Pesan peringatan.</div><div class="system-btn-group"><button class="system-btn btn-primary-action" style="background: var(--warning);" onclick="tutupModal('modalAiAlert')">Mengerti</button></div></div></div>
-    <div id="modalAiSuccess" class="system-modal-overlay" style="z-index: 999999;"><div class="system-modal-popup mode-success" id="popupSuccessMode"><div class="modal-icon-top" id="iconSuccessMode"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="system-modal-header" id="aiSuccessTitle">STATUS OK</div><div class="system-modal-body" id="aiSuccessBody">Operasi berhasil diselesaikan.</div><div class="system-btn-group"><button class="system-btn btn-primary-action" id="btnTutupSuccess" style="background: var(--success);" onclick="tutupModal('modalAiSuccess')">Tutup</button></div></div></div>
+    <div id="modalAiAlert" class="system-modal-overlay" style="z-index: 999999;"><div class="system-modal-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><div class="system-modal-header" id="aiAlertTitle">PERINGATAN SISTEM</div><div class="system-modal-body" id="aiAlertBody">Pesan peringatan.</div><div class="system-btn-group"><button class="system-btn btn-warning-action" onclick="tutupModal('modalAiAlert')">Mengerti</button></div></div></div>
+    
+    <div id="modalAiSuccess" class="system-modal-overlay" style="z-index: 999999;"><div class="system-modal-popup mode-success" id="popupSuccessMode"><div class="modal-icon-top" id="iconSuccessMode"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="system-modal-header" id="aiSuccessTitle">STATUS OK</div><div class="system-modal-body" id="aiSuccessBody">Operasi berhasil diselesaikan.</div><div class="system-btn-group"><button class="system-btn btn-success-action" id="btnTutupSuccess" onclick="tutupModal('modalAiSuccess')">Tutup</button></div></div></div>
 
     <script src="config.js"></script>
     <script src="api-services.js"></script>
@@ -281,6 +673,78 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
+        // ==========================================
+        // SISTEM CUSTOM SELECT PICKER MODAL (ANTI-WHITE DEFAULT)
+        // ==========================================
+        let activeCustomSelectId = null;
+
+        function bukaModalSelect(selectId, title, subtitle) {
+            const selectEl = document.getElementById(selectId);
+            if (!selectEl) return;
+            activeCustomSelectId = selectId;
+            
+            const titleEl = document.getElementById('selectPickerTitle');
+            if (titleEl) titleEl.innerText = title || 'PILIH OPSI';
+
+            const subEl = document.getElementById('selectPickerSubtitle');
+            if (subEl) subEl.innerText = subtitle || 'Tentukan konfigurasi alokasi layanan';
+            
+            const listEl = document.getElementById('selectPickerList');
+            listEl.innerHTML = '';
+            
+            const currentVal = String(selectEl.value);
+            
+            Array.from(selectEl.options).forEach((opt, idx) => {
+                const item = document.createElement('div');
+                const isSelected = String(opt.value) === currentVal || (!selectEl.value && idx === selectEl.selectedIndex);
+                item.className = 'select-picker-item' + (isSelected ? ' selected' : '');
+                
+                let optText = opt.text;
+                let isWarning = (opt.getAttribute('style') && opt.getAttribute('style').includes('warning')) || opt.value === '0';
+                let extraStyle = isWarning ? 'color: var(--warning); font-weight: bold;' : '';
+                
+                item.innerHTML = `
+                    <span class="select-item-text" style="${extraStyle}">${optText}</span>
+                    <span class="select-picker-radio"></span>
+                `;
+                
+                item.onclick = function() {
+                    selectEl.value = opt.value;
+                    selectEl.selectedIndex = idx;
+                    
+                    const labelEl = document.getElementById('label_' + selectId);
+                    if (labelEl) labelEl.innerText = opt.text;
+                    
+                    selectEl.dispatchEvent(new Event('change'));
+                    tutupModalSelectDirect();
+                };
+                
+                listEl.appendChild(item);
+            });
+            
+            document.getElementById('modalSelectPicker').style.display = 'flex';
+        }
+
+        function tutupModalSelect(e) {
+            if (e.target && e.target.id === 'modalSelectPicker') {
+                tutupModalSelectDirect();
+            }
+        }
+
+        function tutupModalSelectDirect() {
+            const modal = document.getElementById('modalSelectPicker');
+            if (modal) modal.style.display = 'none';
+            activeCustomSelectId = null;
+        }
+
+        function syncCustomSelect(selectId) {
+            const selectEl = document.getElementById(selectId);
+            const labelEl = document.getElementById('label_' + selectId);
+            if (selectEl && labelEl && selectEl.selectedIndex >= 0 && selectEl.options[selectEl.selectedIndex]) {
+                labelEl.innerText = selectEl.options[selectEl.selectedIndex].text;
+            }
+        }
+
         // ============ CONFIGURATION ============
         const urlParams = new URLSearchParams(window.location.search);
         const modeParam = urlParams.get('mode') || localStorage.getItem('serverMode') || 'private';
@@ -340,6 +804,11 @@
         }
         
         window.addEventListener('DOMContentLoaded', () => {
+            syncCustomSelect('serverRam');
+            syncCustomSelect('serverCpu');
+            syncCustomSelect('serverDisk');
+            syncCustomSelect('userSelect');
+            
             let defaults = { locationId: 1, eggId: 15, nodeId: 1, nestId: 5 };
             if(window.GlobalConfig && GlobalConfig.getDefaultDeploy) defaults = GlobalConfig.getDefaultDeploy();
             
@@ -377,11 +846,13 @@
             if(isDanger) { 
                 popup.className = "system-modal-popup mode-danger"; 
                 iconBox.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`; 
-                btn.style.background = "var(--danger)"; 
+                btn.className = "system-btn btn-danger-action";
+                btn.style.background = "";
             } else { 
                 popup.className = "system-modal-popup mode-success"; 
                 iconBox.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`; 
-                btn.style.background = "var(--success)"; 
+                btn.className = "system-btn btn-success-action";
+                btn.style.background = "";
             }
             document.getElementById('modalAiSuccess').style.display = 'flex';
         }
@@ -398,8 +869,9 @@
 
                 do {
                     let data = await apiPtero.getUsers(currentPage);
+                    let items = (data && data.data) ? data.data : [];
                     
-                    data.data.forEach(user => {
+                    items.forEach(user => {
                         let u = user.attributes; 
                         let pembuat = (u.last_name === 'User' || u.last_name === 'Admin') ? 'admin' : u.last_name;
                         usersMap[u.id] = { username: u.username, maker: pembuat }; 
@@ -411,11 +883,12 @@
                         if (show && u.id !== 1) select.innerHTML += `<option value="${u.id}">${u.username} (Author: ${pembuat})</option>`;
                     });
                     
-                    totalPages = data.meta ? data.meta.pagination.total_pages : 1; 
+                    totalPages = (data && data.meta && data.meta.pagination && data.meta.pagination.total_pages) ? data.meta.pagination.total_pages : 1; 
                     currentPage++;
                 } while (currentPage <= totalPages);
                 
                 select.options[0].text = '-- Tetapkan Entitas Pengguna --'; 
+                syncCustomSelect('userSelect'); 
                 ambilDataServers(); 
             } catch(e) { 
                 showAiAlert("Malfunctions identifikasi data pengguna: " + e.message, "KESALAHAN KONEKSI"); 
@@ -433,12 +906,12 @@
 
                 do {
                     let data = await apiPtero.getServers(currentPage);
-                    allServers = allServers.concat(data.data || []); 
-                    totalPages = data.meta ? data.meta.pagination.total_pages : 1; 
+                    let items = (data && data.data) ? data.data : [];
+                    allServers = allServers.concat(items); 
+                    totalPages = (data && data.meta && data.meta.pagination && data.meta.pagination.total_pages) ? data.meta.pagination.total_pages : 1; 
                     currentPage++;
                 } while (currentPage <= totalPages);
 
-                // Mengambil data expired khusus server dari database
                 let snapExp = await database.ref(`ptero_servers_expired/${domainKey}`).once('value');
                 let expiredData = snapExp.val() || {};
 
@@ -449,7 +922,7 @@
                 const iconUnlock = `<svg viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg>`;
 
                 allServers.forEach(srv => {
-                    let s = srv.attributes; 
+                    let s = srv.attributes || {}; 
                     let oId = s.user; 
                     let oData = usersMap[oId] || { username: 'Tidak Teridentifikasi', maker: 'Sistem' };
                     
@@ -461,7 +934,6 @@
                     if (s.status === 'installing') sBadge = `<span class="badge badge-install"><span class="status-dot dot-warning"></span> Installing</span>`;
                     let mTag = isOwner ? `<br><span class="reseller-tag">Author: ${oData.maker}</span>` : '';
                     
-                    // Eksekusi Logika Masa Aktif Server & Tombol Hapus Expired
                     let expInfo = expiredData[s.id];
                     let kolomExpired = '';
                     if (expInfo && expInfo.expiredAt) {
@@ -539,7 +1011,6 @@
             ambilDataServers(); 
         }
 
-        // Fungsi khusus hapus timer
         let targetDelTimerId = null;
         function konfirmasiHapusTimer(id, name) {
             if (role === 'demo') return showAiAlert("Akses terkunci di mode demo.", "AKSES DITOLAK");
@@ -569,13 +1040,11 @@
             let now = Date.now();
             for (let key in expData) {
                 let data = expData[key];
-                // Mengeksekusi server yang expired, dan hanya yang belum di proses hapus (mencegah loop)
                 if (data.expiredAt <= now && (role === 'pemilik' || data.maker === myUsername) && !data.isDeleting) {
                     database.ref(`ptero_servers_expired/${domainKey}/${key}/isDeleting`).set(true);
                     try {
                         await apiPtero.deleteServer(key);
                         await database.ref(`ptero_servers_expired/${domainKey}/${key}`).remove();
-                        console.log(`[Auto-Sweeper] Server ${data.serverName} berhasil dihancurkan karena expired.`);
                         ambilDataServers(); 
                     } catch(e) {
                         console.error("[Auto-Sweeper] Error penghapusan otonom:", e);
@@ -611,20 +1080,30 @@
         // ==========================================
         async function getFreeNodeAndAllocation(locId) {
             let nodesData = await apiPtero.getNodes();
-            let nodesInLoc = nodesData.data.filter(n => n.attributes.location_id === parseInt(locId));
-            if (nodesInLoc.length === 0) throw new Error(`Konfigurasi Location ID ${locId} gagal, tidak ada Node yang tersedia.`);
+            let nodes = (nodesData && nodesData.data) ? nodesData.data : [];
+            let targetLocId = parseInt(locId) || 1;
+            let nodesInLoc = nodes.filter(n => n.attributes && parseInt(n.attributes.location_id) === targetLocId);
+
+            if (nodesInLoc.length === 0 && nodes.length > 0) {
+                console.warn(`Location ID ${targetLocId} tidak ditemukan, menggunakan node yang tersedia.`);
+                nodesInLoc = nodes;
+            }
+            if (nodesInLoc.length === 0) {
+                throw new Error(`Konfigurasi Location ID ${locId} gagal: Tidak ada Node yang tersedia di panel.`);
+            }
 
             for (let node of nodesInLoc) {
-                let nodeId = node.attributes.id;
+                let nodeId = node.attributes ? node.attributes.id : node.id;
                 let page = 1;
                 let totalPages = 1;
                 do {
                     let allocData = await apiPtero.getNodeAllocations(nodeId, page);
-                    let freeAlloc = allocData.data.find(a => a.attributes.assigned === false);
+                    let allocs = (allocData && allocData.data) ? allocData.data : [];
+                    let freeAlloc = allocs.find(a => a.attributes && a.attributes.assigned === false);
                     if (freeAlloc) {
                         return { nodeId: nodeId, allocId: freeAlloc.attributes.id, port: freeAlloc.attributes.port };
                     }
-                    totalPages = allocData.meta ? allocData.meta.pagination.total_pages : 1;
+                    totalPages = (allocData && allocData.meta && allocData.meta.pagination && allocData.meta.pagination.total_pages) ? allocData.meta.pagination.total_pages : 1;
                     page++;
                 } while (page <= totalPages);
             }
@@ -672,7 +1151,7 @@
             let eggId = document.getElementById('eggId').value || "15";
             let nestId = document.getElementById('nestId').value || "5";
             
-            if(!uId || !name || !ram || !cpu || !disk) return showAiAlert("Kesalahan validasi data. Seluruh field mandatory harus diisi.", "INTEGRITAS DATA GAGAL"); 
+            if(!uId || !name || ram === '' || cpu === '' || disk === '') return showAiAlert("Kesalahan validasi data. Seluruh field mandatory harus diisi.", "INTEGRITAS DATA GAGAL"); 
             
             let btn = document.querySelector('.btn-tambah'); 
             let originalText = btn.innerHTML;
@@ -697,7 +1176,7 @@
                     },
                     "egg": parseInt(eggId), 
                     "docker_image": dockerImg, 
-                    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
+                    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export$line; done fi; /usr/local/bin/${CMD_RUN};", 
                     "environment": dynamicEnv, 
                     "limits": { "memory": parseInt(ram), "swap": 0, "disk": parseInt(disk), "io": 500, "cpu": parseInt(cpu) }, 
                     "feature_limits": { "databases": 5, "backups": 5, "allocations": 1 }
@@ -712,6 +1191,10 @@
                 
                 munculkanModalStruk(cName, "Gunakan Sandi Akun Identitas", "Email Terdaftar", name, ramLabel);
                 document.getElementById('serverName').value = ""; 
+                syncCustomSelect('serverRam');
+                syncCustomSelect('serverCpu');
+                syncCustomSelect('serverDisk');
+                syncCustomSelect('userSelect');
                 ambilDataServers();
             } catch(e) { 
                 btn.innerHTML = originalText; 
@@ -737,7 +1220,7 @@
             try {
                 await apiPtero.deleteServer(targetDelId);
                 let domainKey = config.domain.replace(/\./g, '_');
-                await database.ref(`ptero_servers_expired/${domainKey}/${targetDelId}`).remove(); // Hapus timer expired juga
+                await database.ref(`ptero_servers_expired/${domainKey}/${targetDelId}`).remove();
                 showAiSuccess("Instansi server berhasil dihancurkan secara permanen.", "DESTRUKSI BERHASIL", true); 
                 ambilDataServers();
             } catch(e) { 
@@ -790,7 +1273,7 @@
             let tr = document.getElementById("tabelServer").getElementsByTagName("tr"); 
             
             for (let i = 1; i < tr.length; i++) { 
-                if (tr[i].getElementsByTagName("td").length === 1) continue; 
+                if (tr[i].getElementsByTagName("td").length <= 1) continue; 
                 tr[i].style.display = tr[i].innerText.toLowerCase().indexOf(input) > -1 ? "" : "none"; 
             } 
         }
@@ -867,11 +1350,10 @@
 
             setTimeout(() => { 
                 btn.innerHTML = originalHtml; 
-                btn.style.pointerEvents = "auto";
+                btn.style.pointerEvents = "auto"; 
             }, 2000); 
         }
         
-        // Initialize
         ambilDataUsers();
     </script>
 
@@ -896,55 +1378,17 @@
             __expiredHandled = true;
             firebase.database().ref('users/' + guardUserId + '/isOnline').set(false).catch(function(){});
             ['panel_user_id','user_id','user_id_ptero','panel_username','username','panel_role','role','panel_password','ptero_user_id'].forEach(function(k){ localStorage.removeItem(k); });
-            alert(blockMessage);
-            window.location.replace('login.html');
+            const modalGuard = document.getElementById('modalAksesDitolak');
+            if (modalGuard) {
+                const bodyEl = document.getElementById('teksAksesDitolakServer') || modalGuard.querySelector('.system-modal-body');
+                if (bodyEl) bodyEl.innerHTML = blockMessage + '<br><br><small>Menendang koneksi dalam 3 detik...</small>';
+                modalGuard.style.display = 'flex';
+                setTimeout(function(){ window.location.replace('login.html'); }, 3000);
+            } else {
+                window.location.replace('login.html');
+            }
         }, function(){});
     })();
-    </script>
-
-    <script>
-        // Timer Sidebar Setup
-        const roleTimer = roleRaw.trim().toLowerCase();
-        let expiryInterval;
-        function startExpiryTimer(expiredAt) {
-            const timerNav = document.getElementById('expiryTimerNav');
-            if (!timerNav) return;
-            clearInterval(expiryInterval);
-
-            if (roleTimer === 'pemilik') {
-                timerNav.innerHTML = '<span class="timer-unlimited">∞ Unlimited</span>';
-                return;
-            }
-
-            expiryInterval = setInterval(() => {
-                const now = Date.now();
-                const timeLeft = expiredAt - now;
-
-                if (timeLeft <= 0) {
-                    timerNav.innerHTML = '<span class="timer-countdown" style="color:var(--danger)">EXPIRED</span>';
-                    timerNav.classList.add('expired');
-                    clearInterval(expiryInterval);
-                    return;
-                }
-
-                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-                const dateObj = new Date(expiredAt);
-                const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                
-                timerNav.innerHTML = `<span class="timer-date">${dateStr}</span><span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}s</span>`;
-            }, 1000);
-        }
-
-        if (currentUserId) {
-            database.ref('users/'+ currentUserId + '/expiredAt').on('value', (snapshot) => {
-                const expiredAt = Number(snapshot.val() || 0);
-                startExpiryTimer(expiredAt);
-            });
-        }
     </script>
 </body>
 </html>

@@ -56,7 +56,7 @@
         .custom-select-trigger.active svg { transform: rotate(180deg); fill: var(--primary); }
         .custom-select-trigger:focus, .custom-select-trigger:hover { border-color: var(--primary); }
         
-        .custom-options { position: absolute; display: none; top: calc(100% + 8px); left: 0; right: 0; background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 99; overflow: hidden; animation: fadeIn 0.2s ease; }
+        .custom-options { position: absolute; display: none; top: calc(100% + 8px); left: 0; right: 0; background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 99; overflow: hidden; animation: fadeInModal 0.2s ease; }
         .custom-options.open { display: block; }
         .custom-option { padding: 14px 16px; font-size: 13px; color: var(--text-main); cursor: pointer; transition: 0.2s; border-bottom: 1px dashed rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px; }
         .custom-option svg { width: 18px; height: 18px; fill: var(--text-sub); }
@@ -82,36 +82,230 @@
         .btn-hapus svg { width: 14px; height: 14px; fill: currentColor; }
         .btn-hapus:hover { background: var(--danger); color: white; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3); transform: scale(1.05);}
 
-        /* ENTERPRISE MODALS */
-        .system-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 11, 20, 0.85); backdrop-filter: blur(10px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s ease; }
-        .system-modal-popup { background: var(--card-bg); border-radius: 24px; width: 100%; max-width: 420px; padding: 35px 30px; text-align: left; color: var(--text-main); position: relative; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(25px);}
+        /* ENTERPRISE POPUP / MODAL SYSTEM */
+        .system-modal-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(7, 11, 20, 0.82); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            z-index: 99999; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+            box-sizing: border-box; 
+            animation: fadeInModal 0.25s ease; 
+        }
         
-        .modal-icon-top { width: 50px; height: 50px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-        .modal-icon-top svg { width: 24px; height: 24px; }
-        
-        .mode-danger .modal-icon-top { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); box-shadow: 0 0 20px rgba(239,68,68,0.15);} .mode-danger .modal-icon-top svg { fill: var(--danger); } .mode-danger .system-modal-header { color: var(--danger); text-align: center; }
-        .mode-success .modal-icon-top { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); box-shadow: 0 0 20px rgba(16,185,129,0.15);} .mode-success .modal-icon-top svg { fill: var(--success); } .mode-success .system-modal-header { color: var(--success); text-align: center;}
-        .mode-warning .modal-icon-top { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); box-shadow: 0 0 20px rgba(245,158,11,0.15);} .mode-warning .modal-icon-top svg { fill: var(--warning); } .mode-warning .system-modal-header { color: var(--warning); text-align: center;}
-        .mode-info .modal-icon-top { background: var(--primary-glow); border: 1px solid rgba(13, 148, 136, 0.3); box-shadow: 0 0 20px var(--primary-glow);} .mode-info .modal-icon-top svg { fill: var(--primary); } .mode-info .system-modal-header { color: var(--primary); text-align: center;}
+        .system-modal-popup { 
+            background: rgba(15, 23, 42, 0.94); 
+            border-radius: 24px; 
+            width: 100%; 
+            max-width: 420px; 
+            padding: 32px 28px; 
+            text-align: center; 
+            color: var(--text-main); 
+            position: relative; 
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.08); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px); 
+            animation: scaleUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+            box-sizing: border-box;
+        }
 
-        .system-modal-header { font-size: 18px; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .system-modal-body { font-size: 13px; color: var(--text-sub); line-height: 1.6; margin-bottom: 25px; text-align: center;}
-        
-        .info-detail-ai { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; text-align: left; margin-bottom: 25px; }
-        .detail-row { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+        .modal-icon-top { 
+            width: 56px; 
+            height: 56px; 
+            margin: 0 auto 18px auto; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 50%; 
+        }
+        .modal-icon-top svg { width: 26px; height: 26px; }
+
+        .mode-danger .modal-icon-top { 
+            background: rgba(239, 68, 68, 0.12); 
+            border: 1px solid rgba(239, 68, 68, 0.35); 
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.2); 
+        }
+        .mode-danger .modal-icon-top svg { fill: var(--danger); }
+        .mode-danger .system-modal-header { color: var(--danger); text-align: center; }
+
+        .mode-success .modal-icon-top { 
+            background: rgba(16, 185, 129, 0.12); 
+            border: 1px solid rgba(16, 185, 129, 0.35); 
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.2); 
+        }
+        .mode-success .modal-icon-top svg { fill: var(--success); }
+        .mode-success .system-modal-header { color: var(--success); text-align: center; }
+
+        .mode-warning .modal-icon-top { 
+            background: rgba(245, 158, 11, 0.12); 
+            border: 1px solid rgba(245, 158, 11, 0.35); 
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.2); 
+        }
+        .mode-warning .modal-icon-top svg { fill: var(--warning); }
+        .mode-warning .system-modal-header { color: var(--warning); text-align: center; }
+
+        .mode-info .modal-icon-top { 
+            background: var(--primary-glow); 
+            border: 1px solid rgba(13, 148, 136, 0.35); 
+            box-shadow: 0 0 25px var(--primary-glow); 
+        }
+        .mode-info .modal-icon-top svg { fill: var(--primary); }
+        .mode-info .system-modal-header { color: var(--primary); text-align: center; }
+
+        .system-modal-header { 
+            font-size: 18px; 
+            font-weight: 800; 
+            margin-bottom: 10px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.8px; 
+            text-align: center; 
+        }
+        .system-modal-body { 
+            font-size: 13px; 
+            color: var(--text-sub); 
+            line-height: 1.6; 
+            margin-bottom: 24px; 
+            text-align: center; 
+            word-break: break-word; 
+            white-space: pre-wrap; 
+        }
+
+        .info-detail-ai, .info-detail-system { 
+            background: rgba(0, 0, 0, 0.25); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 16px; 
+            padding: 18px; 
+            text-align: left; 
+            margin-bottom: 22px; 
+        }
+        .detail-row { 
+            margin-bottom: 12px; 
+            padding-bottom: 12px; 
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.06); 
+        }
         .detail-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-        .detail-label { font-size: 10px; color: var(--text-sub); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+        .detail-label { 
+            font-size: 10px; 
+            color: var(--text-sub); 
+            text-transform: uppercase; 
+            font-weight: 800; 
+            letter-spacing: 0.8px; 
+            margin-bottom: 5px; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+        }
         .detail-label svg { width: 14px; height: 14px; fill: var(--text-sub); }
-        .detail-value { font-size: 15px; font-weight: 700; color: var(--text-main); word-break: break-all; }
+        .detail-value { font-size: 14px; font-weight: 700; color: var(--text-main); word-break: break-all; }
         .value-highlight { color: var(--primary); }
-        
-        .system-btn-group { display: flex; gap: 12px; }
-        .system-btn { flex: 1; border: none; padding: 14px; font-weight: 800; font-size: 12px; border-radius: 12px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: center; align-items: center; gap: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);}
-        .btn-primary-action { background: linear-gradient(135deg, var(--primary), #059669); color: white; } .btn-primary-action:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(13, 148, 136, 0.4); }
-        .btn-danger-action { background: var(--danger); color: white; } .btn-danger-action:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4); }
-        .btn-outline-action { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); box-shadow: none;} .btn-outline-action:hover { background: rgba(255,255,255,0.05); border-color: white;}
 
-        @keyframes fadeInPop { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-input {
+            width: 100%;
+            padding: 13px 16px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .modal-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .system-btn-group { display: flex; gap: 12px; justify-content: center; }
+        .system-btn { 
+            flex: 1; 
+            border: none; 
+            padding: 13px 16px; 
+            font-weight: 700; 
+            font-size: 12px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: 0.25s ease; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            display: inline-flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 6px; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); 
+            text-decoration: none; 
+            box-sizing: border-box;
+        }
+        .btn-primary-action { 
+            background: linear-gradient(135deg, var(--primary), #059669); 
+            color: white; 
+            box-shadow: 0 4px 15px var(--primary-glow); 
+        } 
+        .btn-primary-action:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(13, 148, 136, 0.45); 
+        }
+        .btn-danger-action { 
+            background: linear-gradient(135deg, #ef4444, #dc2626); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25); 
+        } 
+        .btn-danger-action:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.45); 
+        }
+        .btn-warning-action { 
+            background: linear-gradient(135deg, #f59e0b, #d97706); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25); 
+        } 
+        .btn-warning-action:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.45); 
+        }
+        .btn-success-action { 
+            background: linear-gradient(135deg, #10b981, #059669); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25); 
+        } 
+        .btn-success-action:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.45); 
+        }
+        .btn-outline-action { 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            color: var(--text-main); 
+            box-shadow: none; 
+        } 
+        .btn-outline-action:hover { 
+            background: rgba(255, 255, 255, 0.1); 
+            border-color: rgba(255, 255, 255, 0.2); 
+            transform: translateY(-2px); 
+        }
+
+        select option {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 8px;
+        }
+
+        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleUpModal { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -221,12 +415,21 @@
         </div>
     </div>
 
+    <div id="modalAiSuccess" class="system-modal-overlay" style="z-index: 999999;">
+        <div class="system-modal-popup mode-success" id="popupSuccessMode">
+            <div class="modal-icon-top" id="iconSuccessMode"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+            <div class="system-modal-header" id="aiSuccessTitle">STATUS OK</div>
+            <div class="system-modal-body" id="aiSuccessBody">Operasi berhasil diselesaikan.</div>
+            <div class="system-btn-group"><button class="system-btn btn-success-action" id="btnTutupSuccess" onclick="tutupModal('modalAiSuccess')">Tutup</button></div>
+        </div>
+    </div>
+
     <div id="modalPeringatan" class="system-modal-overlay">
         <div class="system-modal-popup mode-warning">
             <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>
             <div class="system-modal-header">Peringatan Sistem</div>
             <div class="system-modal-body" id="teksPeringatan"></div>
-            <div class="system-btn-group"><button class="system-btn btn-outline-action" onclick="tutupModal('modalPeringatan')">Mengerti</button></div>
+            <div class="system-btn-group"><button class="system-btn btn-warning-action" onclick="tutupModal('modalPeringatan')">Mengerti</button></div>
         </div>
     </div>
     
@@ -267,6 +470,25 @@
         }
 
         function tutupModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        function showAiSuccess(p, j = "STATUS OK", isDanger = false) {
+            document.getElementById('aiSuccessTitle').innerText = j;
+            document.getElementById('aiSuccessBody').innerHTML = p;
+            let popup = document.getElementById('popupSuccessMode');
+            let iconBox = document.getElementById('iconSuccessMode');
+            let btn = document.getElementById('btnTutupSuccess');
+            if(isDanger) {
+                popup.className = "system-modal-popup mode-danger";
+                iconBox.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
+                btn.className = "system-btn btn-danger-action";
+            } else {
+                popup.className = "system-modal-popup mode-success";
+                iconBox.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
+                btn.className = "system-btn btn-success-action";
+            }
+            document.getElementById('modalAiSuccess').style.display = 'flex';
+        }
+
         function showPeringatan(p) { document.getElementById('teksPeringatan').innerHTML = p; document.getElementById('modalPeringatan').style.display = 'flex'; }
 
         // Render Opsi Dropdown Berdasarkan Role
@@ -328,26 +550,30 @@
                 
                 const svgShield = `<svg viewBox="0 0 24 24" style="width:14px; fill:var(--primary);"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>`;
 
-                d.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0)).forEach(u => {
-                    let r = u.role ? String(u.role) : 'reseller_public';
-                    let roleDisplay = r.replace(/_/g,' ').toUpperCase();
-                    let rBadge = `<span class="role-badge">${roleDisplay}</span>`;
-                    
-                    let hapus = (String(u.username).toLowerCase() === 'admin') ? 
-                                `<span style="color:var(--text-sub); font-size:11px; font-weight:700; display:flex; align-items:center; gap:4px;">${svgShield} Root System</span>` : 
-                                `<button class="btn-hapus" onclick="hapusAkunWeb('${u.uId}', '${u.username}')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Cabut Akses</button>`;
-                    
-                    let stat = u.isOnline ? `<span class="status-badge status-online"><span class="status-dot dot-online"></span>Online</span>` : `<span class="status-badge status-offline">Offline</span>`;
-                    let expCell = getExpiredCell(u);
+                if(d.length === 0) {
+                    tabel += `<tr><td colspan="5" style="text-align: center; color: var(--warning); padding: 30px;">Belum ada entitas pengguna terdaftar.</td></tr>`;
+                } else {
+                    d.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0)).forEach(u => {
+                        let r = u.role ? String(u.role) : 'reseller_public';
+                        let roleDisplay = r.replace(/_/g,' ').toUpperCase();
+                        let rBadge = `<span class="role-badge">${roleDisplay}</span>`;
+                        
+                        let hapus = (String(u.username).toLowerCase() === 'admin') ? 
+                                    `<span style="color:var(--text-sub); font-size:11px; font-weight:700; display:flex; align-items:center; gap:4px;">${svgShield} Root System</span>` : 
+                                    `<button class="btn-hapus" onclick="hapusAkunWeb('${u.uId}', '${u.username}')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Cabut Akses</button>`;
+                        
+                        let stat = u.isOnline ? `<span class="status-badge status-online"><span class="status-dot dot-online"></span>Online</span>` : `<span class="status-badge status-offline">Offline</span>`;
+                        let expCell = getExpiredCell(u);
 
-                    tabel += `<tr>
-                                <td><b style="font-size:15px; letter-spacing:0.5px;">${u.username}</b><br><small style="color:var(--warning); font-family:monospace; font-size:12px;">Pass: ${u.password||'***'}</small></td>
-                                <td>${rBadge}</td>
-                                <td>${expCell}</td>
-                                <td>${stat}</td>
-                                <td>${hapus}</td>
-                              </tr>`;
-                });
+                        tabel += `<tr>
+                                    <td><b style="font-size:15px; letter-spacing:0.5px;">${u.username}</b><br><small style="color:var(--warning); font-family:monospace; font-size:12px;">Pass: ${u.password||'***'}</small></td>
+                                    <td>${rBadge}</td>
+                                    <td>${expCell}</td>
+                                    <td>${stat}</td>
+                                    <td>${hapus}</td>
+                                  </tr>`;
+                    });
+                }
                 document.getElementById('tabelWebUsers').innerHTML = tabel;
             });
         }
@@ -382,7 +608,6 @@
                     let expiredStatusValue = 'unset';
                     let expiredNoteValue = '';
                     
-                    // Jika yang dibuat BUKAN pemilik atau demo, hajar lisensi 30 hari!
                     if (roleBaru !== 'pemilik' && roleBaru !== 'demo') {
                         expiredAtValue = now + (30 * 24 * 60 * 60 * 1000); // 30 Hari
                         expiredStatusValue = 'active';
@@ -405,7 +630,6 @@
                         expiredStatus: expiredStatusValue
                     };
 
-                    // Suntik data expired jika bukan pemilik
                     if (expiredAtValue) {
                         newUserData.expiredAt = expiredAtValue;
                         newUserData.expiredNote = expiredNoteValue;
@@ -440,7 +664,7 @@
         
         function eksekusiHapus() {
             const now = Date.now();
-            database.ref('users/'+delId).once('value').then((snap) => {
+            database.ref('users/'+delId).once('value').then(async (snap) => {
                 const target = snap.val() || {};
                 
                 // Guard 4: Pastikan yang ngehapus adalah maker-nya (atau pemilik)
@@ -448,15 +672,46 @@
                     throw new Error("Otorisasi Ditolak: Anda tidak dapat menghapus entitas di luar jaringan Anda.");
                 }
 
-                return database.ref('users/'+delId).remove().then(() => database.ref('activity_logs').push({
+                // 1. Eksekusi Hapus Induk
+                await database.ref('users/'+delId).remove();
+                
+                await database.ref('activity_logs').push({
                     uid: currentUserId,
                     username: myUsername,
                     role: myRole,
                     action: `Menghancurkan kredensial web ${target.username || delId}.`,
                     timestamp: now
-                }));
+                });
+
+                // 2. Eksekusi CASCADING DELETE (Sapu Bersih Anak Buah)
+                if (target.username) {
+                    const allUsersSnap = await database.ref('users').once('value');
+                    const updates = {};
+                    let childCount = 0;
+                    
+                    allUsersSnap.forEach(childSnap => {
+                        const childData = childSnap.val();
+                        if (childData && childData.maker === target.username) {
+                            updates[childSnap.key] = null;
+                            childCount++;
+                        }
+                    });
+
+                    if (childCount > 0) {
+                        await database.ref('users').update(updates);
+                        await database.ref('activity_logs').push({
+                            uid: currentUserId,
+                            username: myUsername,
+                            role: myRole,
+                            action: `Auto-Purge: Memusnahkan ${childCount} entitas bawahan milik ${target.username}.`,
+                            timestamp: now
+                        });
+                    }
+                }
+
             }).then(() => { 
                 tutupKonfirmasi(); 
+                showAiSuccess("Entitas beserta seluruh jaringannya berhasil dimusnahkan secara permanen.", "PENCABUTAN BERHASIL");
             }).catch(e => {
                 tutupKonfirmasi();
                 showPeringatan(e.message);
@@ -472,7 +727,7 @@
         
         function salinDataWeb() { 
             navigator.clipboard.writeText(`Data Akses Control Center:\nUser: ${document.getElementById('resUserWeb').innerText}\nPass: ${document.getElementById('resPassWeb').innerText}\n\n*Catatan: Masa berlaku lisensi otomatis 30 Hari sejak diterbitkan.`).then(() => { 
-                let btn = document.querySelector('.btn-primary-action');
+                let btn = document.querySelector('#modalScreenshot .btn-primary-action');
                 let original = btn.innerText;
                 btn.innerText = "Tersalin!";
                 setTimeout(() => btn.innerText = original, 2000);
