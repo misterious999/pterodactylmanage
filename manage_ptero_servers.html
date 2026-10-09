@@ -54,7 +54,7 @@
         .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 15px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
         
-        .btn-tambah { width: 100%; background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; cursor: border-radius: 10px; padding: 14px; font-weight: 700; transition: 0.3s; margin-top: 5px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px var(--primary-glow); }
+        .btn-tambah { width: 100%; background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; cursor: pointer; border-radius: 10px; padding: 14px; font-weight: 700; transition: 0.3s; margin-top: 5px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px var(--primary-glow); }
         .btn-tambah svg { width: 18px; height: 18px; fill: currentColor; }
         .btn-tambah:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(13, 148, 136, 0.4); }
         
@@ -312,6 +312,17 @@
             transform: translateY(-2px); 
         }
 
+        select option {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 8px;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleUpModal { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    
         /* CUSTOM SELECT PICKER MODAL (THEMED DIALOG REPLACING NATIVE WHITE POPUP) */
         .select-picker-popup {
             background: rgba(15, 23, 42, 0.96);
@@ -464,16 +475,6 @@
             flex-shrink: 0;
         }
 
-        select option {
-            background: #1e293b;
-            color: #f8fafc;
-            padding: 8px;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes scaleUpModal { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -595,7 +596,10 @@
         </table>
     </div>
 
-    <!-- MODAL AKSES DITOLAK -->
+
+
+    <!-- MODAL HASIL DEPLOY -->
+        <!-- MODAL AKSES DITOLAK -->
     <div id="modalAksesDitolak" class="system-modal-overlay" style="z-index: 999999;">
         <div class="system-modal-popup mode-danger">
             <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>
@@ -619,7 +623,6 @@
         </div>
     </div>
 
-    <!-- MODAL HASIL DEPLOY -->
     <div id="modalScreenshot" class="system-modal-overlay">
         <div class="system-modal-popup mode-success">
             <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
@@ -673,78 +676,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // ==========================================
-        // SISTEM CUSTOM SELECT PICKER MODAL (ANTI-WHITE DEFAULT)
-        // ==========================================
-        let activeCustomSelectId = null;
-
-        function bukaModalSelect(selectId, title, subtitle) {
-            const selectEl = document.getElementById(selectId);
-            if (!selectEl) return;
-            activeCustomSelectId = selectId;
-            
-            const titleEl = document.getElementById('selectPickerTitle');
-            if (titleEl) titleEl.innerText = title || 'PILIH OPSI';
-
-            const subEl = document.getElementById('selectPickerSubtitle');
-            if (subEl) subEl.innerText = subtitle || 'Tentukan konfigurasi alokasi layanan';
-            
-            const listEl = document.getElementById('selectPickerList');
-            listEl.innerHTML = '';
-            
-            const currentVal = String(selectEl.value);
-            
-            Array.from(selectEl.options).forEach((opt, idx) => {
-                const item = document.createElement('div');
-                const isSelected = String(opt.value) === currentVal || (!selectEl.value && idx === selectEl.selectedIndex);
-                item.className = 'select-picker-item' + (isSelected ? ' selected' : '');
-                
-                let optText = opt.text;
-                let isWarning = (opt.getAttribute('style') && opt.getAttribute('style').includes('warning')) || opt.value === '0';
-                let extraStyle = isWarning ? 'color: var(--warning); font-weight: bold;' : '';
-                
-                item.innerHTML = `
-                    <span class="select-item-text" style="${extraStyle}">${optText}</span>
-                    <span class="select-picker-radio"></span>
-                `;
-                
-                item.onclick = function() {
-                    selectEl.value = opt.value;
-                    selectEl.selectedIndex = idx;
-                    
-                    const labelEl = document.getElementById('label_' + selectId);
-                    if (labelEl) labelEl.innerText = opt.text;
-                    
-                    selectEl.dispatchEvent(new Event('change'));
-                    tutupModalSelectDirect();
-                };
-                
-                listEl.appendChild(item);
-            });
-            
-            document.getElementById('modalSelectPicker').style.display = 'flex';
-        }
-
-        function tutupModalSelect(e) {
-            if (e.target && e.target.id === 'modalSelectPicker') {
-                tutupModalSelectDirect();
-            }
-        }
-
-        function tutupModalSelectDirect() {
-            const modal = document.getElementById('modalSelectPicker');
-            if (modal) modal.style.display = 'none';
-            activeCustomSelectId = null;
-        }
-
-        function syncCustomSelect(selectId) {
-            const selectEl = document.getElementById(selectId);
-            const labelEl = document.getElementById('label_' + selectId);
-            if (selectEl && labelEl && selectEl.selectedIndex >= 0 && selectEl.options[selectEl.selectedIndex]) {
-                labelEl.innerText = selectEl.options[selectEl.selectedIndex].text;
-            }
-        }
-
         // ============ CONFIGURATION ============
         const urlParams = new URLSearchParams(window.location.search);
         const modeParam = urlParams.get('mode') || localStorage.getItem('serverMode') || 'private';
@@ -808,7 +739,6 @@
             syncCustomSelect('serverCpu');
             syncCustomSelect('serverDisk');
             syncCustomSelect('userSelect');
-            
             let defaults = { locationId: 1, eggId: 15, nodeId: 1, nestId: 5 };
             if(window.GlobalConfig && GlobalConfig.getDefaultDeploy) defaults = GlobalConfig.getDefaultDeploy();
             
@@ -869,9 +799,8 @@
 
                 do {
                     let data = await apiPtero.getUsers(currentPage);
-                    let items = (data && data.data) ? data.data : [];
                     
-                    items.forEach(user => {
+                    data.data.forEach(user => {
                         let u = user.attributes; 
                         let pembuat = (u.last_name === 'User' || u.last_name === 'Admin') ? 'admin' : u.last_name;
                         usersMap[u.id] = { username: u.username, maker: pembuat }; 
@@ -883,11 +812,11 @@
                         if (show && u.id !== 1) select.innerHTML += `<option value="${u.id}">${u.username} (Author: ${pembuat})</option>`;
                     });
                     
-                    totalPages = (data && data.meta && data.meta.pagination && data.meta.pagination.total_pages) ? data.meta.pagination.total_pages : 1; 
+                    totalPages = data.meta ? data.meta.pagination.total_pages : 1; 
                     currentPage++;
                 } while (currentPage <= totalPages);
                 
-                select.options[0].text = '-- Tetapkan Entitas Pengguna --'; 
+                select.options[0].text = '-- Tetapkan Entitas Pengguna --';
                 syncCustomSelect('userSelect'); 
                 ambilDataServers(); 
             } catch(e) { 
@@ -906,12 +835,12 @@
 
                 do {
                     let data = await apiPtero.getServers(currentPage);
-                    let items = (data && data.data) ? data.data : [];
-                    allServers = allServers.concat(items); 
-                    totalPages = (data && data.meta && data.meta.pagination && data.meta.pagination.total_pages) ? data.meta.pagination.total_pages : 1; 
+                    allServers = allServers.concat(data.data || []); 
+                    totalPages = data.meta ? data.meta.pagination.total_pages : 1; 
                     currentPage++;
                 } while (currentPage <= totalPages);
 
+                // Mengambil data expired khusus server dari database
                 let snapExp = await database.ref(`ptero_servers_expired/${domainKey}`).once('value');
                 let expiredData = snapExp.val() || {};
 
@@ -922,7 +851,7 @@
                 const iconUnlock = `<svg viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg>`;
 
                 allServers.forEach(srv => {
-                    let s = srv.attributes || {}; 
+                    let s = srv.attributes; 
                     let oId = s.user; 
                     let oData = usersMap[oId] || { username: 'Tidak Teridentifikasi', maker: 'Sistem' };
                     
@@ -934,18 +863,21 @@
                     if (s.status === 'installing') sBadge = `<span class="badge badge-install"><span class="status-dot dot-warning"></span> Installing</span>`;
                     let mTag = isOwner ? `<br><span class="reseller-tag">Author: ${oData.maker}</span>` : '';
                     
+                    // Eksekusi Logika Masa Aktif Server & Tombol Hapus Expired
                     let expInfo = expiredData[s.id];
                     let kolomExpired = '';
                     if (expInfo && expInfo.expiredAt) {
                         let sisaWaktu = expInfo.expiredAt - Date.now();
                         if (sisaWaktu > 0) {
                             kolomExpired = `<div style="display:flex; align-items:center; gap:8px;">
-                                <span class="ptero-server-countdown badge badge-admin" data-expire="${expInfo.expiredAt}" style="font-family:monospace; font-size:11px; font-weight:800;">Menghitung...</span>
+                                <span class="ptero-server-countdown badge badge-admin" data-expire="${expInfo.expiredAt}" data-sid="${s.id}" data-sname="${s.name}" style="font-family:monospace; font-size:11px; font-weight:800;">Menghitung...</span>
                                 <button class="btn-action-small" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);" onclick="bukaModalExpiredServer(${s.id}, '${s.name}', ${expInfo.expiredAt})" title="Tambah Waktu">+</button>
                                 <button class="btn-action-small" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);" onclick="konfirmasiHapusTimer(${s.id}, '${s.name}')" title="Hapus Masa Aktif"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
                             </div>`;
                         } else {
-                            kolomExpired = `<span class="badge" style="background:rgba(239, 68, 68, 0.1); color:var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);">EXPIRED (Hapus Otonom)</span>`;
+                            // EKSEKUSI SAAT ITU JUGA TANPA DITUNDA
+                            eksekusiPurgeServerInstan(s.id, s.name);
+                            kolomExpired = `<span class="badge" style="background:rgba(239, 68, 68, 0.15); color:var(--danger); border: 1px solid rgba(239, 68, 68, 0.4);"><span class="status-dot dot-danger" style="animation: spin 1s linear infinite;"></span> MENGHAPUS...</span>`;
                         }
                     } else {
                         kolomExpired = `<button class="badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); cursor: pointer;" onclick="bukaModalExpiredServer(${s.id}, '${s.name}', 0)">Set Expired</button>`;
@@ -1011,6 +943,7 @@
             ambilDataServers(); 
         }
 
+        // Fungsi khusus hapus timer
         let targetDelTimerId = null;
         function konfirmasiHapusTimer(id, name) {
             if (role === 'demo') return showAiAlert("Akses terkunci di mode demo.", "AKSES DITOLAK");
@@ -1031,25 +964,66 @@
             }
         }
 
+        // ==========================================
+        // AUTO-PURGE INSTAN PTERO SERVER EXPIRED (ANTI-MACET)
+        // ==========================================
+        const activePurgingServers = new Set();
+
+        async function eksekusiPurgeServerInstan(serverId, serverName) {
+            serverId = parseInt(serverId);
+            if (!serverId || activePurgingServers.has(serverId)) return;
+            activePurgingServers.add(serverId);
+
+            console.log(`[Auto-Purge] Mengeksekusi server expired saat itu juga: #${serverId} (${serverName})`);
+            const domainKey = config.domain.replace(/\./g, '_');
+
+            try {
+                try {
+                    await apiPtero.deleteServer(serverId);
+                    console.log(`[Auto-Purge] Server #${serverId} (${serverName}) berhasil dihapus.`);
+                } catch (srvErr) {
+                    console.warn(`[Auto-Purge] Catatan deleteServer #${serverId}:`, srvErr.message);
+                }
+
+                // SELALU HAPUS DARI FIREBASE (Mencegah kotak merah nyangkut selamanya!)
+                await database.ref(`ptero_servers_expired/${domainKey}/${serverId}`).remove();
+                console.log(`[Auto-Purge] Record expired server #${serverId} telah dihapus dari Firebase.`);
+
+                // Efek Visual: Hilangkan baris tabel secara langsung
+                let allRows = document.querySelectorAll('#tabelServer tr');
+                allRows.forEach(tr => {
+                    let firstTd = tr.querySelector('td');
+                    if (firstTd && firstTd.innerText.includes('#' + serverId)) {
+                        tr.style.transition = 'all 0.4s ease';
+                        tr.style.opacity = '0';
+                        tr.style.transform = 'translateX(-20px)';
+                        setTimeout(() => { tr.remove(); }, 400);
+                    }
+                });
+
+            } catch (err) {
+                console.error(`[Auto-Purge] Gagal purge server #${serverId}:`, err);
+            } finally {
+                activePurgingServers.delete(serverId);
+            }
+        }
+
         async function sweeperServerExpiredLokal() {
-            let domainKey = config.domain.replace(/\./g, '_');
-            let snap = await database.ref(`ptero_servers_expired/${domainKey}`).once('value');
-            let expData = snap.val();
-            if (!expData) return;
-            
-            let now = Date.now();
-            for (let key in expData) {
-                let data = expData[key];
-                if (data.expiredAt <= now && (role === 'pemilik' || data.maker === myUsername) && !data.isDeleting) {
-                    database.ref(`ptero_servers_expired/${domainKey}/${key}/isDeleting`).set(true);
-                    try {
-                        await apiPtero.deleteServer(key);
-                        await database.ref(`ptero_servers_expired/${domainKey}/${key}`).remove();
-                        ambilDataServers(); 
-                    } catch(e) {
-                        console.error("[Auto-Sweeper] Error penghapusan otonom:", e);
+            try {
+                let domainKey = config.domain.replace(/\./g, '_');
+                let snap = await database.ref(`ptero_servers_expired/${domainKey}`).once('value');
+                let expData = snap.val();
+                if (!expData) return;
+                
+                let now = Date.now();
+                for (let key in expData) {
+                    let data = expData[key];
+                    if (data && data.expiredAt && Number(data.expiredAt) <= now) {
+                        eksekusiPurgeServerInstan(key, data.serverName || 'Server');
                     }
                 }
+            } catch(e) {
+                console.warn("[Auto-Sweeper Server] Polling warning:", e);
             }
         }
 
@@ -1059,10 +1033,15 @@
                 let sisa = exp - Date.now();
                 
                 if (sisa <= 0) {
-                    el.innerText = "EXPIRED";
+                    el.innerHTML = '<span class="status-dot dot-danger" style="animation: spin 1s linear infinite;"></span> MENGHAPUS...';
                     el.style.color = "var(--danger)";
-                    el.style.background = "rgba(239, 68, 68, 0.1)";
+                    el.style.background = "rgba(239, 68, 68, 0.15)";
                     el.style.borderColor = "var(--danger)";
+                    let targetSid = el.getAttribute('data-sid');
+                    let targetSname = el.getAttribute('data-sname');
+                    if (targetSid) {
+                        eksekusiPurgeServerInstan(targetSid, targetSname);
+                    }
                 } else {
                     let d = Math.floor(sisa / (1000 * 60 * 60 * 24));
                     let h = Math.floor((sisa % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -1073,7 +1052,8 @@
             });
         }, 1000);
 
-        setInterval(sweeperServerExpiredLokal, 30000);
+        sweeperServerExpiredLokal();
+        setInterval(sweeperServerExpiredLokal, 5000);
 
         // ==========================================
         // AUTO-DEPLOY ALGORITHMS
@@ -1083,7 +1063,7 @@
             let nodes = (nodesData && nodesData.data) ? nodesData.data : [];
             let targetLocId = parseInt(locId) || 1;
             let nodesInLoc = nodes.filter(n => n.attributes && parseInt(n.attributes.location_id) === targetLocId);
-
+            
             if (nodesInLoc.length === 0 && nodes.length > 0) {
                 console.warn(`Location ID ${targetLocId} tidak ditemukan, menggunakan node yang tersedia.`);
                 nodesInLoc = nodes;
@@ -1176,7 +1156,7 @@
                     },
                     "egg": parseInt(eggId), 
                     "docker_image": dockerImg, 
-                    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export$line; done fi; /usr/local/bin/${CMD_RUN};", 
+                    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export $line; done fi; /usr/local/bin/${CMD_RUN};", 
                     "environment": dynamicEnv, 
                     "limits": { "memory": parseInt(ram), "swap": 0, "disk": parseInt(disk), "io": 500, "cpu": parseInt(cpu) }, 
                     "feature_limits": { "databases": 5, "backups": 5, "allocations": 1 }
@@ -1191,10 +1171,6 @@
                 
                 munculkanModalStruk(cName, "Gunakan Sandi Akun Identitas", "Email Terdaftar", name, ramLabel);
                 document.getElementById('serverName').value = ""; 
-                syncCustomSelect('serverRam');
-                syncCustomSelect('serverCpu');
-                syncCustomSelect('serverDisk');
-                syncCustomSelect('userSelect');
                 ambilDataServers();
             } catch(e) { 
                 btn.innerHTML = originalText; 
@@ -1220,7 +1196,7 @@
             try {
                 await apiPtero.deleteServer(targetDelId);
                 let domainKey = config.domain.replace(/\./g, '_');
-                await database.ref(`ptero_servers_expired/${domainKey}/${targetDelId}`).remove();
+                await database.ref(`ptero_servers_expired/${domainKey}/${targetDelId}`).remove(); // Hapus timer expired juga
                 showAiSuccess("Instansi server berhasil dihancurkan secara permanen.", "DESTRUKSI BERHASIL", true); 
                 ambilDataServers();
             } catch(e) { 
@@ -1350,10 +1326,11 @@
 
             setTimeout(() => { 
                 btn.innerHTML = originalHtml; 
-                btn.style.pointerEvents = "auto"; 
+                btn.style.pointerEvents = "auto";
             }, 2000); 
         }
         
+        // Initialize
         ambilDataUsers();
     </script>
 
@@ -1389,6 +1366,51 @@
             }
         }, function(){});
     })();
+    </script>
+
+    <script>
+        // Timer Sidebar Setup
+        const roleTimer = roleRaw.trim().toLowerCase();
+        let expiryInterval;
+        function startExpiryTimer(expiredAt) {
+            const timerNav = document.getElementById('expiryTimerNav');
+            if (!timerNav) return;
+            clearInterval(expiryInterval);
+
+            if (roleTimer === 'pemilik') {
+                timerNav.innerHTML = '<span class="timer-unlimited">∞ Unlimited</span>';
+                return;
+            }
+
+            expiryInterval = setInterval(() => {
+                const now = Date.now();
+                const timeLeft = expiredAt - now;
+
+                if (timeLeft <= 0) {
+                    timerNav.innerHTML = '<span class="timer-countdown" style="color:var(--danger)">EXPIRED</span>';
+                    timerNav.classList.add('expired');
+                    clearInterval(expiryInterval);
+                    return;
+                }
+
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                const dateObj = new Date(expiredAt);
+                const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                timerNav.innerHTML = `<span class="timer-date">${dateStr}</span><span class="timer-countdown">Sisa: ${days}h ${hours}j ${minutes}m ${seconds}s</span>`;
+            }, 1000);
+        }
+
+        if (currentUserId) {
+            database.ref('users/'+ currentUserId + '/expiredAt').on('value', (snapshot) => {
+                const expiredAt = Number(snapshot.val() || 0);
+                startExpiryTimer(expiredAt);
+            });
+        }
     </script>
 </body>
 </html>
