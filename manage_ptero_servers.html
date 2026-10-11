@@ -676,6 +676,78 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
+        // ==========================================
+        // SISTEM CUSTOM SELECT PICKER MODAL (ANTI-WHITE DEFAULT)
+        // ==========================================
+        let activeCustomSelectId = null;
+
+        function bukaModalSelect(selectId, title, subtitle) {
+            const selectEl = document.getElementById(selectId);
+            if (!selectEl) return;
+            activeCustomSelectId = selectId;
+            
+            const titleEl = document.getElementById('selectPickerTitle');
+            if (titleEl) titleEl.innerText = title || 'PILIH OPSI';
+
+            const subEl = document.getElementById('selectPickerSubtitle');
+            if (subEl) subEl.innerText = subtitle || 'Tentukan konfigurasi alokasi layanan';
+            
+            const listEl = document.getElementById('selectPickerList');
+            listEl.innerHTML = '';
+            
+            const currentVal = String(selectEl.value);
+            
+            Array.from(selectEl.options).forEach((opt, idx) => {
+                const item = document.createElement('div');
+                const isSelected = String(opt.value) === currentVal || (!selectEl.value && idx === selectEl.selectedIndex);
+                item.className = 'select-picker-item' + (isSelected ? ' selected' : '');
+                
+                let optText = opt.text;
+                let isWarning = (opt.getAttribute('style') && opt.getAttribute('style').includes('warning')) || opt.value === '0';
+                let extraStyle = isWarning ? 'color: var(--warning); font-weight: bold;' : '';
+                
+                item.innerHTML = `
+                    <span class="select-item-text" style="${extraStyle}">${optText}</span>
+                    <span class="select-picker-radio"></span>
+                `;
+                
+                item.onclick = function() {
+                    selectEl.value = opt.value;
+                    selectEl.selectedIndex = idx;
+                    
+                    const labelEl = document.getElementById('label_' + selectId);
+                    if (labelEl) labelEl.innerText = opt.text;
+                    
+                    selectEl.dispatchEvent(new Event('change'));
+                    tutupModalSelectDirect();
+                };
+                
+                listEl.appendChild(item);
+            });
+            
+            document.getElementById('modalSelectPicker').style.display = 'flex';
+        }
+
+        function tutupModalSelect(e) {
+            if (e.target && e.target.id === 'modalSelectPicker') {
+                tutupModalSelectDirect();
+            }
+        }
+
+        function tutupModalSelectDirect() {
+            const modal = document.getElementById('modalSelectPicker');
+            if (modal) modal.style.display = 'none';
+            activeCustomSelectId = null;
+        }
+
+        function syncCustomSelect(selectId) {
+            const selectEl = document.getElementById(selectId);
+            const labelEl = document.getElementById('label_' + selectId);
+            if (selectEl && labelEl && selectEl.selectedIndex >= 0 && selectEl.options[selectEl.selectedIndex]) {
+                labelEl.innerText = selectEl.options[selectEl.selectedIndex].text;
+            }
+        }
+
         // ============ CONFIGURATION ============
         const urlParams = new URLSearchParams(window.location.search);
         const modeParam = urlParams.get('mode') || localStorage.getItem('serverMode') || 'private';
