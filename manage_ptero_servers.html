@@ -768,7 +768,7 @@
                 subtitle: 'Tambah instansi server baru untuk entitas yang berelasi di Divisi Publik.',
                 allowedRoles: ['pemilik', 'reseller_public', 'partner_public', 'demo'],
                 domain: apiPtero.domain,
-                daftarLabel: (role) => role === 'pemilik' ? '(Seluruh Entitas)' : (role === 'partner_public' ? '(Jaringan Tim)' : (role === 'demo' ? '(Sesi Demo)' : 'Jaringan Anda'))
+                daftarLabel: (role) => role === 'pemilik' ? '(Seluruh Entitas)' : (role === 'demo' ? '(Sesi Demo)' : 'Jaringan Anda')
             },
             public_v2: {
                 title: 'Kelola Server (Public V2)',
@@ -776,7 +776,7 @@
                 subtitle: 'Tambah instansi server baru untuk entitas yang berelasi di Divisi Publik V2.',
                 allowedRoles: ['pemilik', 'reseller_public_v2', 'partner_public_v2'],
                 domain: apiPtero.domain,
-                daftarLabel: (role) => role === 'pemilik' ? '(Seluruh Entitas)' : (role === 'partner_public_v2' ? '(Jaringan Tim)' : 'Jaringan Anda')
+                daftarLabel: (role) => role === 'pemilik' ? '(Seluruh Entitas)' : 'Jaringan Anda'
             }
         };
 
@@ -878,8 +878,15 @@
                         usersMap[u.id] = { username: u.username, maker: pembuat }; 
                         
                         let show = false;
-                        if (role === 'pemilik' || (role.includes('partner') && config.allowedRoles.includes(role))) show = true; 
-                        else if (u.last_name === myUsername) show = true;
+                        if (role === 'pemilik') {
+                            show = true;
+                        } else {
+                            let ln = (u.last_name || '').trim().toLowerCase();
+                            let myU = (myUsername || '').trim().toLowerCase();
+                            if (myU && myU !== 'unknown') {
+                                show = (ln === myU || ln === `[${myU}]` || ln.includes(`[${myU}]`));
+                            }
+                        }
                         
                         if (show && u.id !== 1) select.innerHTML += `<option value="${u.id}">${u.username} (Author: ${pembuat})</option>`;
                     });
@@ -927,8 +934,12 @@
                     let oId = s.user; 
                     let oData = usersMap[oId] || { username: 'Tidak Teridentifikasi', maker: 'Sistem' };
                     
-                    const isOwner = role === 'pemilik' || (role.includes('partner') && config.allowedRoles.includes(role));
-                    if (!isOwner && oData.maker !== myUsername) return; 
+                    const isOwner = role === 'pemilik';
+                    let maker = (oData.maker || '').trim().toLowerCase();
+                    let myU = (myUsername || '').trim().toLowerCase();
+                    let isMyServer = (myU && myU !== 'unknown') && (maker === myU || maker === `[${myU}]` || maker.includes(`[${myU}]`));
+
+                    if (!isOwner && !isMyServer) return; 
                     
                     count++;
                     let sBadge = s.suspended ? `<span class="badge badge-suspended"><span class="status-dot dot-danger"></span> Suspended</span>` : `<span class="badge badge-active"><span class="status-dot dot-success"></span> Active</span>`;
@@ -1090,7 +1101,15 @@
                 let now = Date.now();
                 for (let key in expData) {
                     let data = expData[key];
-                    if (data && data.expiredAt && Number(data.expiredAt) <= now) {
+                    let isAllowed = false;
+                    if (role === 'pemilik') {
+                        isAllowed = true;
+                    } else {
+                        let m = (data && data.maker ? String(data.maker) : '').trim().toLowerCase();
+                        let myU = (myUsername || '').trim().toLowerCase();
+                        isAllowed = (myU && myU !== 'unknown') && (m === myU || m === `[${myU}]` || m.includes(`[${myU}]`));
+                    }
+                    if (isAllowed && data && data.expiredAt && Number(data.expiredAt) <= now) {
                         eksekusiPurgeServerInstan(key, data.serverName || 'Server');
                     }
                 }
