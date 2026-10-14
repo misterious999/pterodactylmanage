@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-color: #070b14; --card-bg: rgba(15, 23, 42, 0.6); --card-solid: #1e293b;
+            --bg-dark: #070b14; --bg-color: var(--bg-dark); --card-bg: rgba(15, 23, 42, 0.6); --card-solid: #1e293b;
             --primary: #0d9488; --primary-glow: rgba(13, 148, 136, 0.15);
             --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
             --text-main: #f8fafc; --text-sub: #94a3b8; 
@@ -31,17 +31,18 @@
         
         .topbar { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 30px; flex-wrap: wrap;}
         .brand { display: flex; align-items: center; gap: 12px; }
-        .brand-icon { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, rgba(13, 148, 136, 0.2), rgba(15, 23, 42, 0.8)); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(13, 148, 136, 0.4); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .brand-icon { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, rgba(13, 148, 136, 0.2), rgba(15, 23, 42, 0.8)); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(13, 148, 136, 0.4); box-shadow: 0 10px 20px rgba(0,0,0,0.2); flex-shrink: 0; }
         .brand-icon svg { width: 24px; height: 24px; fill: var(--primary); filter: drop-shadow(0 0 5px var(--primary));}
         h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
         .subtitle { margin: 4px 0 0; color: var(--text-sub); font-size: 13px; line-height: 1.5; max-width: 600px;}
         
-        .back-btn { color: var(--text-main); text-decoration: none; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 11px 16px; background: rgba(255,255,255,0.05); font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; backdrop-filter: blur(10px);}
+        .back-btn { color: var(--text-main); text-decoration: none; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px 18px; background: rgba(255,255,255,0.05); font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; backdrop-filter: blur(10px);}
         .back-btn:hover { background: var(--primary-glow); border-color: var(--primary); color: white; transform: translateY(-2px); box-shadow: 0 5px 15px var(--primary-glow); }
         .back-btn svg { width: 16px; height: 16px; fill: currentColor; transition: transform 0.3s;}
         .back-btn:hover svg { transform: translateX(-4px); }
 
-        .grid { display: grid; grid-template-columns: 400px 1fr; gap: 20px; align-items: start; }
+        .grid { display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 20px; align-items: start; }
+        .grid > * { min-width: 0; }
         
         .card { background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border-color); border-radius: 20px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
         .card-title { margin: 0 0 10px; color: var(--text-main); font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px;}
@@ -51,6 +52,7 @@
         label { display: block; color: var(--text-sub); font-weight: 700; font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         input, select, textarea { width: 100%; padding: 14px; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 12px; outline: none; font-family: 'Inter', sans-serif; font-size: 13px; transition: 0.3s; box-sizing: border-box; }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(15, 23, 42, 0.8); }
+        select option { background: var(--card-solid); color: var(--text-main); }
         textarea { resize: vertical; min-height: 90px; }
         .field { margin-bottom: 18px; }
         
@@ -60,7 +62,7 @@
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(13, 148, 136, 0.4); }
         .btn-primary:hover svg { transform: translateX(4px); }
         
-        .btn-danger { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); width: auto; padding: 8px 12px; font-size: 11px;}
+        .btn-danger { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); width: auto; padding: 8px 12px; font-size: 11px; font-family: 'Inter', sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; transition: 0.3s;}
         .btn-danger:hover { background: var(--danger); color: white; transform: scale(1.05); box-shadow: 0 5px 15px rgba(239,68,68,0.3);}
         
         .btn-outline { background: transparent; color: var(--text-sub); border: 1px solid var(--border-color); width: auto; padding: 10px 16px; }
@@ -78,7 +80,7 @@
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th, td { padding: 15px 16px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: middle; font-size: 13px; }
         th { color: var(--text-sub); background: rgba(0,0,0,0.3); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; }
-        td { color: var(--text-main); }
+        td { color: var(--text-main); overflow-wrap: anywhere; }
         tr:hover { background: rgba(255,255,255,0.02); }
         tr:last-child td { border-bottom: none; }
         
@@ -95,7 +97,7 @@
 
         /* ENTERPRISE MODALS */
         .system-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 11, 20, 0.85); backdrop-filter: blur(10px); z-index: 99999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .system-modal-popup { background: var(--card-bg); border-radius: 24px; width: 100%; max-width: 380px; padding: 35px 30px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(25px); }
+        .system-modal-popup { background: var(--card-bg); border-radius: 24px; width: 100%; max-width: 380px; padding: 35px 30px; text-align: center; color: var(--text-main); position: relative; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(25px); box-sizing: border-box; max-height: calc(100vh - 40px); overflow-y: auto; }
         
         .modal-icon-top { width: 60px; height: 60px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
         .modal-icon-top svg { width: 28px; height: 28px; }
@@ -120,15 +122,21 @@
         @keyframes fadeInPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
         @media(max-width: 900px){
-            .grid { grid-template-columns: 1fr; }
+            .grid { grid-template-columns: minmax(0, 1fr); }
             .topbar { flex-direction: column; align-items: flex-start; }
             .stat-row { grid-template-columns: 1fr; }
             .toolbar { flex-direction: column; align-items: stretch; }
             .toolbar input { max-width: none; }
         }
+        @media(max-width: 600px){
+            body { padding: 16px; }
+            .card { padding: 20px 16px; }
+            .system-modal-popup { padding: 28px 20px; }
+        }
     </style>
 </head>
 <body>
+    <script src="page-loader.js"></script>
     <div class="ambient-blob-1"></div>
     <div class="ambient-blob-2"></div>
 
@@ -282,7 +290,7 @@
             } else if (type === 'confirm') {
                 box.className = 'system-modal-popup mode-danger';
                 icon.innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
-                btnOk.style.display = 'block';
+                btnOk.style.display = 'flex';
                 btnOk.innerText = 'Konfirmasi';
                 btnClose.innerText = 'Batalkan';
                 btnClose.className = 'system-btn btn-outline-action';

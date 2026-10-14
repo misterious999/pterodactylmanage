@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-color: #0f172a; --card-bg: #1e293b; 
+            --bg-color: #070b14; --card-bg: #1e293b; --card-solid: #1e293b; 
             --primary: #0d9488; 
             --primary-glow: rgba(13, 148, 136, 0.15);
             --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
@@ -27,7 +27,7 @@
             text-transform: uppercase;
             filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
         }
-        body { font-family: 'Inter', sans-serif; padding: 20px 5%; background-color: var(--bg-color); color: var(--text-main); margin: 0; max-width: 1200px; margin: auto; }
+        body { font-family: 'Inter', sans-serif; padding: 20px 5%; background-color: var(--bg-color); color: var(--text-main); max-width: 1200px; margin: auto; }
         
         .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 10px 18px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.3); transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .btn-back svg { width: 18px; height: 18px; fill: currentColor; transition: transform 0.3s; }
@@ -38,9 +38,10 @@
         h2 svg { width: 22px; height: 22px; fill: var(--primary); }
         .sub-title { color: var(--text-sub); margin-bottom: 25px; font-size: 13px; line-height: 1.5; }
         
-        .box { background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); overflow-x: auto; }
+        .box { background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); box-sizing: border-box; }
+        .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap; gap: 10px; }
-        .box-header h3 { margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+        .box-header h3 { margin: 0; font-size: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
         .box-header h3 svg { width: 18px; height: 18px; fill: var(--primary); }
         
         label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -48,13 +49,14 @@
         input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(15, 23, 42, 0.8); }
         
         .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 15px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 15px; }
         
         .custom-select-wrapper { position: relative; user-select: none; margin-bottom: 15px; }
         .custom-select-trigger { width: 100%; padding: 13px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); font-size: 14px; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; font-weight: 600; font-family: 'Inter', sans-serif; user-select: none; }
         .custom-select-trigger:hover, .custom-select-trigger.active { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(15, 23, 42, 0.85); }
-        .custom-select-trigger svg { width: 16px; height: 16px; fill: var(--text-sub); transition: transform 0.3s ease; flex-shrink: 0; }
-        .custom-select-trigger.active svg { transform: rotate(180deg); fill: var(--primary); }
+        .custom-select-trigger span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+        .custom-select-trigger > svg { width: 16px; height: 16px; fill: var(--text-sub); transition: transform 0.3s ease; flex-shrink: 0; }
+        .custom-select-trigger.active > svg { transform: rotate(180deg); fill: var(--primary); }
         
         .custom-options { position: absolute; display: none; top: calc(100% + 5px); left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--primary); border-radius: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 99; overflow: hidden; animation: fadeInModal 0.2s ease; }
         .custom-options.open { display: block; }
@@ -92,7 +94,7 @@
         .badge-user { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(13, 148, 136, 0.3); }
         .reseller-tag { font-size: 10px; color: var(--primary); background: var(--primary-glow); padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 6px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.2);}
 
-        .custom-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary); vertical-align: middle; }
+        .custom-checkbox { width: 16px; height: 16px; padding: 0; margin: 0; flex-shrink: 0; cursor: pointer; accent-color: var(--primary); vertical-align: middle; }
 
         /* ENTERPRISE POPUP / MODAL SYSTEM */
         .system-modal-overlay { 
@@ -128,6 +130,9 @@
             -webkit-backdrop-filter: blur(25px); 
             animation: scaleUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
             box-sizing: border-box;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            overscroll-behavior: contain;
         }
 
         .modal-icon-top { 
@@ -262,6 +267,7 @@
             text-decoration: none; 
             box-sizing: border-box;
         }
+        .system-btn svg { width: 14px; height: 14px; fill: currentColor; flex-shrink: 0; }
         .btn-primary-action { 
             background: linear-gradient(135deg, var(--primary), #059669); 
             color: white; 
@@ -335,6 +341,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             background: rgba(0, 0, 0, 0.25);
         }
         .select-picker-title-wrap {
@@ -368,6 +375,7 @@
             align-items: center;
             justify-content: center;
             transition: 0.2s;
+            flex-shrink: 0;
         }
         .select-picker-close-btn:hover {
             background: rgba(239, 68, 68, 0.2);
@@ -381,6 +389,8 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
+            flex: 1;
+            min-height: 0;
             overscroll-behavior: contain;
         }
         .select-picker-item {
@@ -403,7 +413,7 @@
         .select-picker-item.selected {
             background: rgba(13, 148, 136, 0.14);
             border-color: rgba(13, 148, 136, 0.35);
-            color: #38bdf8;
+            color: var(--primary);
         }
         .select-picker-radio {
             width: 22px;
@@ -431,12 +441,24 @@
             box-shadow: 0 0 6px var(--primary);
         }
 
+        @media (max-width: 480px) {
+            .box { padding: 18px 16px; }
+            .grid-3 { grid-template-columns: 1fr; gap: 12px; }
+            .system-modal-popup { padding: 26px 20px; }
+            .system-modal-overlay { padding: 14px; }
+        }
+
         @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
         @keyframes scaleUpModal { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        /* --- LITE MODE (ANTI-LAG) --- */
+        body.lite-mode * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: none !important; }
+        body.lite-mode .system-modal-popup, body.lite-mode .select-picker-popup { background: var(--card-solid) !important; }
     </style>
+    <link rel="stylesheet" href="ptero-ui.css">
 </head>
 <body>
+    <script src="page-loader.js"></script>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
         <a href="index.html" class="btn-back">
             <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
@@ -584,10 +606,12 @@
             <button class="btn-sapu" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.3);" onclick="konfirmasiBulk('unsuspend')"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Unsuspend Massal</button>
         </div>
 
+        <div class="table-wrap">
         <table id="tabelPtero">
             <tr><th style="width: 30px;"><input type="checkbox" id="selectAllCb" class="custom-checkbox" onclick="toggleSelectAll()"></th><th>ID</th><th>Username</th><th>Email</th><th>Masa Aktif</th><th>Tindakan</th></tr>
             <tr><td colspan="6" style="text-align: center; color: var(--text-sub); padding: 30px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Sinkronisasi pangkalan data...</td></tr>
         </table>
+        </div>
     </div>
 
     <!-- MODAL CUSTOM SELECT PICKER (THEMED DIALOG REPLACING DEFAULT BROWSER POPUP) -->
@@ -630,7 +654,7 @@
     <!-- MODAL TAMBAH EXPIRED PTERO -->
     <div id="modalTambahExpiredPtero" class="system-modal-overlay">
         <div class="system-modal-popup mode-info">
-            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8-8 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
             <div class="system-modal-header">KONFIGURASI SIKLUS AKTIF</div>
             <div class="system-modal-body">Alokasikan durasi perpanjangan layanan untuk ID Pengguna: <b id="expPteroUsername" style="color:var(--text-main);"></b>.</div>
             <input type="number" id="inputHariExpired" placeholder="Durasi (Hari)" class="modal-input">
@@ -663,7 +687,7 @@
             <p style="margin-bottom: 18px; color: var(--text-sub); font-size: 13px; line-height: 1.5;">Data kredensial siap diserahkan ke klien.</p>
             <div class="info-detail-system">
                 <div class="detail-row"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> Identitas Pengguna</div><div class="detail-value">User: <span id="resUser" class="value-highlight"></span></div><div class="detail-value">Pass: <span id="resPass" style="color:var(--warning);"></span></div></div>
-                <div class="detail-row"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96z"/></svg> Portal Akses</div><div class="detail-value"><a id="resLink" href="#" target="_blank" style="color: var(--primary); text-decoration: none; word-break: break-all;"></a></div></div>
+                <div class="detail-row"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg> Portal Akses</div><div class="detail-value"><a id="resLink" href="#" target="_blank" style="color: var(--primary); text-decoration: none; word-break: break-all;"></a></div></div>
                 <div class="detail-row" style="border: none; padding: 0;"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> Resources Server</div><div class="detail-value">Server: <span id="resServer" style="color: var(--success); font-weight: 700;"></span></div></div>
             </div>
             
@@ -690,6 +714,10 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
+        if(localStorage.getItem('lite_mode') === 'true') {
+            document.body.classList.add('lite-mode');
+        }
+
         // ==========================================
         // SISTEM CUSTOM SELECT PICKER MODAL (ANTI-WHITE DEFAULT)
         // ==========================================
@@ -774,7 +802,7 @@
                 subtitle: 'Automasi penyediaan lingkungan Server Private eksklusif.',
                 allowedRoles: ['pemilik', 'reseller_private', 'reseller', 'demo'],
                 domain: apiPtero.domain,
-                daftarLabel: (role) => role === 'pemilik' ? '(Seluruh Entitas)' : 'Jaringan Anda',
+                daftarLabel: (role) => role === 'pemilik' ? '(Seluruh Entitas)' : '(Jaringan Anda)',
                 showRoleContainer: (role) => role === 'pemilik'
             },
             public: {
@@ -783,7 +811,7 @@
                 subtitle: 'Automasi penyediaan lingkungan Server Publik.',
                 allowedRoles: ['pemilik', 'reseller_public', 'partner_public', 'demo'],
                 domain: apiPtero.domain,
-                daftarLabel: (role) => role === 'pemilik' ? '(Seluruh Entitas)' : (role === 'partner_public' ? '(Jaringan Tim)' : (role === 'demo' ? '(Sesi Demo)' : 'Jaringan Anda')),
+                daftarLabel: (role) => role === 'pemilik' ? '(Seluruh Entitas)' : (role === 'partner_public' ? '(Jaringan Tim)' : (role === 'demo' ? '(Sesi Demo)' : '(Jaringan Anda)')),
                 showRoleContainer: (role) => role === 'pemilik' || role === 'partner_public' || role === 'demo'
             },
             public_v2: {
@@ -792,7 +820,7 @@
                 subtitle: 'Automasi penyediaan lingkungan Server Publik Generasi 2.',
                 allowedRoles: ['pemilik', 'reseller_public_v2', 'partner_public_v2'],
                 domain: apiPtero.domain,
-                daftarLabel: (role) => role === 'pemilik' ? '(Seluruh Entitas)' : (role === 'partner_public_v2' ? '(Jaringan Tim)' : 'Jaringan Anda'),
+                daftarLabel: (role) => role === 'pemilik' ? '(Seluruh Entitas)' : (role === 'partner_public_v2' ? '(Jaringan Tim)' : '(Jaringan Anda)'),
                 showRoleContainer: (role) => role === 'pemilik' || role === 'partner_public_v2'
             }
         };
@@ -864,7 +892,7 @@
 
         function toggleRoleSelect() { 
             document.getElementById('customRoleOptions').classList.toggle('open'); 
-            document.querySelector('.custom-select-trigger').classList.toggle('active'); 
+            document.querySelector('.custom-select-wrapper .custom-select-trigger').classList.toggle('active'); 
         }
         
         function pilihRole(event, value, text) {
@@ -882,7 +910,7 @@
             const select = document.querySelector('.custom-select-wrapper'); 
             if (select && !select.contains(e.target)) { 
                 document.getElementById('customRoleOptions').classList.remove('open'); 
-                let trigger = document.querySelector('.custom-select-trigger'); 
+                let trigger = select.querySelector('.custom-select-trigger'); 
                 if(trigger) trigger.classList.remove('active'); 
             } 
         });
@@ -967,7 +995,7 @@
         async function eksekusiBulk() {
             tutupModal('modalBulkConfirm');
             document.getElementById('btnTutupSuccess').style.display = 'none';
-            showAiSuccess(`${spinnerSvg} Operasi batch sedang berlangsung pada${bulkTargetUsers.length} entitas...`, "PROSES BERJALAN", false);
+            showAiSuccess(`${spinnerSvg} Operasi batch sedang berlangsung pada ${bulkTargetUsers.length} entitas...`, "PROSES BERJALAN", false);
             
             let sukses = 0;
             let gagal = 0;
@@ -1008,13 +1036,13 @@
                     }
                 }
                 
-                document.getElementById('btnTutupSuccess').style.display = 'block';
+                document.getElementById('btnTutupSuccess').style.display = '';
                 showAiSuccess(`Eksekusi batch telah diselesaikan.\nTarget Berhasil: <b style="color:var(--success);">${sukses}</b> | Target Gagal: <b style="color:var(--danger);">${gagal}</b>`, "STATUS OK", false);
                 ambilDataPtero();
                 document.getElementById('bulkActions').style.display = 'none';
                 document.getElementById('selectAllCb').checked = false;
             } catch(e) {
-                document.getElementById('btnTutupSuccess').style.display = 'block';
+                document.getElementById('btnTutupSuccess').style.display = '';
                 showAiAlert("Malfunctions sistem terdeteksi selama eksekusi: " + e.message, "KESALAHAN FATAL");
             }
         }
@@ -1151,7 +1179,7 @@
                 let tabel = `<tr><th style="width: 30px;"><input type="checkbox" id="selectAllCb" class="custom-checkbox" onclick="toggleSelectAll()"></th><th>ID</th><th>Username</th><th>Email</th><th>Masa Aktif</th><th>Tindakan</th></tr>`;
                 let countDisplayed = 0;
                 
-                const svgCrown = `<svg viewBox="0 0 24 24"><path d="M12 1.5l3.09 6.3 6.91 1-5 4.87 1.18 6.88L12 17.25l-6.18 3.25L7 13.62 2 8.75l6.91-1L12 1.5z"/></svg>`;
+                const svgCrown = `<svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;vertical-align:-2px;"><path d="M12 1.5l3.09 6.3 6.91 1-5 4.87 1.18 6.88L12 17.25l-6.18 3.25L7 13.62 2 8.75l6.91-1L12 1.5z"/></svg>`;
                 const svgTrash = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
 
                 allUsers.forEach(user => {
@@ -1188,14 +1216,14 @@
                         kolomExpired = `<button class="btn-sapu" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.3);" onclick="bukaModalExpired(${uid}, '${u.username}', 0)">Konfigurasi</button>`;
                     }
 
-                    tabel += `<tr><td>${cb}</td><td style="color: var(--text-sub); font-weight: bold;">#${uid}</td><td style="font-weight: 700; color: var(--text-main); font-size:14px;">${u.username}${makerTag}</td><td style="color: var(--text-sub); font-size: 13px;">${u.email}</td><td>${kolomExpired}</td><td>${tombolHapus}</td></tr>`;
+                    tabel += `<tr><td>${cb}</td><td style="color: var(--text-sub); font-weight: bold;">#${uid}</td><td style="font-weight: 700; color: var(--text-main); font-size:14px;">${u.username}${makerTag}</td><td style="color: var(--text-sub); font-size: 13px; word-break: break-all; min-width: 140px;">${u.email}</td><td>${kolomExpired}</td><td>${tombolHapus}</td></tr>`;
                 });
 
                 if (countDisplayed === 0) tabel += `<tr><td colspan="6" style="text-align: center; color: var(--warning); padding: 30px;">Database entitas kosong atau di luar jangkauan otorisasi.</td></tr>`;
                 document.getElementById('tabelPtero').innerHTML = tabel;
                 updateBulkState();
             } catch(e) { 
-                document.getElementById('tabelPtero').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger);">Malfunctions Sinkronisasi: ${e.message}</td></tr>`; 
+                document.getElementById('tabelPtero').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger); padding: 30px;">Malfunctions Sinkronisasi: ${e.message}</td></tr>`; 
             }
         }
 

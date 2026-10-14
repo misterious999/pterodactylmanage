@@ -21,7 +21,7 @@
         body.lite-mode * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: none !important; }
         body.lite-mode .box, body.lite-mode .system-modal-popup, body.lite-mode .custom-options { background: var(--card-solid) !important; border: 1px solid rgba(255,255,255,0.1) !important; }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 25px 5%; max-width: 1200px; margin: auto; position: relative; overflow-x: hidden;}
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0 auto; padding: 25px 5%; max-width: 1200px; position: relative; overflow-x: hidden;}
         
         /* Ambient Blobs */
         .ambient-blob-1 { position: fixed; width: 500px; height: 500px; background: rgba(13, 148, 136, 0.15); border-radius: 50%; top: -10%; left: -10%; filter: blur(120px); animation: floatBlob 15s infinite alternate ease-in-out; z-index: -1; pointer-events: none; }
@@ -40,7 +40,8 @@
         h2 svg { width: 26px; height: 26px; fill: var(--primary); filter: drop-shadow(0 0 5px var(--primary));}
         .sub-title { color: var(--text-sub); margin-bottom: 35px; font-size: 13px; line-height: 1.5; }
         
-        .box { background: var(--card-bg); backdrop-filter: blur(20px); padding: 30px; border-radius: 20px; border: 1px solid var(--border-color); margin-bottom: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); overflow-x: auto; }
+        .box { background: var(--card-bg); backdrop-filter: blur(20px); padding: 30px; border-radius: 20px; border: 1px solid var(--border-color); margin-bottom: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
         .box-header h3 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 10px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 800; }
         .box-header h3 svg { width: 20px; height: 20px; fill: var(--primary); }
@@ -48,7 +49,7 @@
         label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
         input { width: 100%; padding: 14px 16px; margin-bottom: 20px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); font-size: 14px; box-sizing: border-box; outline: none; transition: 0.3s; font-family: 'Inter', sans-serif;}
         input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(15, 23, 42, 0.8); }
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 20px; }
         
         .custom-select-wrapper { position: relative; user-select: none; margin-bottom: 25px; }
         .custom-select-trigger { width: 100%; padding: 14px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); font-size: 14px; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; font-weight: 600; }
@@ -56,8 +57,11 @@
         .custom-select-trigger.active svg { transform: rotate(180deg); fill: var(--primary); }
         .custom-select-trigger:focus, .custom-select-trigger:hover { border-color: var(--primary); }
         
-        .custom-options { position: absolute; display: none; top: calc(100% + 8px); left: 0; right: 0; background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 99; overflow: hidden; animation: fadeInModal 0.2s ease; }
+        .custom-options { position: absolute; display: none; top: calc(100% + 8px); left: 0; right: 0; background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 99; max-height: 300px; overflow-y: auto; animation: fadeInModal 0.2s ease; }
         .custom-options.open { display: block; }
+        /* Dropdown role menjulur keluar kartu form: angkat kartu itu di atas kartu tabel, dan pakai latar solid agar opsi tidak tertutup */
+        .box:has(.custom-select-wrapper) { position: relative; z-index: 20; }
+        .custom-options { background: var(--card-solid); max-height: min(420px, 60vh); }
         .custom-option { padding: 14px 16px; font-size: 13px; color: var(--text-main); cursor: pointer; transition: 0.2s; border-bottom: 1px dashed rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px; }
         .custom-option svg { width: 18px; height: 18px; fill: var(--text-sub); }
         .custom-option:hover { background: rgba(255,255,255,0.05); color: var(--primary); padding-left: 22px; font-weight: 700; }
@@ -68,11 +72,15 @@
         .btn-tambah:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(13, 148, 136, 0.4); }
 
         table { width: 100%; border-collapse: collapse; min-width: 600px; margin-top: 10px; }
-        th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 13px; }
-        th { background: rgba(0,0,0,0.3); color: var(--text-sub); font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; white-space: nowrap; border-radius: 8px 8px 0 0; }
+        th, td { padding: 16px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 13px; vertical-align: middle; }
+        td { overflow-wrap: anywhere; }
+        th { background: rgba(0,0,0,0.3); color: var(--text-sub); font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; white-space: nowrap; }
         tr:hover { background: rgba(255,255,255,0.02); }
         
         .role-badge { display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); text-transform: uppercase; letter-spacing: 0.5px;}
+        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 50px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid transparent; white-space: nowrap; letter-spacing: 0.5px; }
+        .badge-active { color: var(--success); background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); }
+        .badge-suspended { color: var(--danger); background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); }
         .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 50px; text-transform: uppercase; letter-spacing: 0.5px;}
         .status-online { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
         .status-offline { background: rgba(148, 163, 184, 0.1); color: var(--text-sub); border: 1px solid rgba(148, 163, 184, 0.2);}
@@ -116,6 +124,8 @@
             -webkit-backdrop-filter: blur(25px); 
             animation: scaleUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
             box-sizing: border-box;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
         }
 
         .modal-icon-top { 
@@ -304,17 +314,24 @@
             padding: 8px;
         }
 
+        @media (max-width: 600px) {
+            .box { padding: 20px 16px; }
+            .system-modal-popup { padding: 26px 20px; }
+            th, td { padding: 12px; }
+        }
+
         @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
         @keyframes scaleUpModal { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+    <script src="page-loader.js"></script>
     <div class="ambient-blob-1"></div>
     <div class="ambient-blob-2"></div>
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; position: relative; z-index: 1;">
-        <a href="index.html" class="btn-back">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; position: relative; z-index: 1;">
+        <a href="index.html" class="btn-back" style="margin-bottom: 0;">
             <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
             Kembali ke Dashboard
         </a>
@@ -368,6 +385,7 @@
         <div class="box-header">
             <h3><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Direktori Pengelola Jaringan</h3>
         </div>
+        <div class="table-wrap">
         <table id="tabelWebUsers">
             <tr><th>Kredensial Entitas</th><th>Klasifikasi Sistem</th><th>Masa Berlaku</th><th>Integritas Sesi</th><th>Tindakan</th></tr>
             <tr><td colspan="5" style="text-align: center; color: var(--text-sub); padding: 30px;">
@@ -375,6 +393,7 @@
                 <br>Sinkronisasi data dari server...
             </td></tr>
         </table>
+        </div>
     </div>
 
     <!-- MODALS SYSTEM -->
@@ -517,7 +536,7 @@
             }
         });
 
-        function toggleRoleSelect() { document.getElementById('customRoleOptions').classList.toggle('open'); document.querySelector('.custom-select-trigger').classList.toggle('active'); }
+        function toggleRoleSelect() { const box = document.getElementById('customRoleOptions').closest('.box'); if (box) { box.style.position = 'relative'; box.style.zIndex = '20'; } document.getElementById('customRoleOptions').classList.toggle('open'); document.querySelector('.custom-select-trigger').classList.toggle('active'); }
         function pilihRole(v, t) { document.getElementById('webRole').value = v; document.getElementById('customSelectText').innerText = t; toggleRoleSelect(); }
         
         function formatExpiredDate(ts) { if (!ts) return '-'; return new Date(Number(ts)).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }); }

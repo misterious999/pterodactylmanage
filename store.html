@@ -16,6 +16,7 @@
             --text-sub: #94a3b8;
             --border-color: rgba(255, 255, 255, 0.08);
             --success: #10b981;
+            --warning: #f59e0b;
         }
         
         /* FIX PORTRAIT: Tambah html dan set max-width biar gak ada overscroll ke samping */
@@ -26,12 +27,15 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            overflow-x: clip; /* clip: tetap potong overflow samping tanpa bikin scroll-container (biar navbar sticky jalan) */
             width: 100%;
             max-width: 100vw;
             background-image: 
                 radial-gradient(circle at 15% 50%, rgba(13, 148, 136, 0.05), transparent 25%),
                 radial-gradient(circle at 85% 30%, rgba(13, 148, 136, 0.05), transparent 25%);
         }
+        html { background-image: none; }
+        button { font-family: inherit; }
 
         /* Navigasi Atas */
         .navbar {
@@ -94,6 +98,7 @@
             text-align: center;
             padding: 80px 20px 40px 20px;
             position: relative;
+            overflow-x: clip;
         }
 
         .hero::before {
@@ -114,6 +119,7 @@
             justify-content: center;
             align-items: center;
             gap: 15px;
+            flex-wrap: wrap;
             margin-top: 25px; /* Margin dirubah biar jarak sama teks pas */
         }
 
@@ -202,7 +208,7 @@
 
         .specs-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
             gap: 20px;
         }
 
@@ -217,6 +223,7 @@
             transition: 0.3s;
             position: relative;
             overflow: hidden;
+            min-width: 0;
         }
 
         .spec-card:hover {
@@ -239,6 +246,8 @@
         }
 
         .spec-icon svg { width: 24px; height: 24px; fill: currentColor; }
+
+        .spec-info { min-width: 0; overflow-wrap: anywhere; }
 
         .spec-info h4 {
             margin: 0 0 6px 0;
@@ -267,6 +276,7 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            padding: 0 20px;
         }
         
         .section-title::before, .section-title::after {
@@ -274,6 +284,7 @@
             display: block;
             width: 40px;
             height: 2px;
+            flex-shrink: 0;
             background: var(--primary);
             opacity: 0.5;
         }
@@ -323,7 +334,7 @@
 
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
             gap: 30px;
         }
 
@@ -338,7 +349,8 @@
             flex-direction: column;
             position: relative;
             overflow: hidden;
-            animation: fadeInPop 0.4s ease forwards;
+            min-width: 0;
+            animation: fadeInPop 0.4s ease;
         }
 
         @keyframes fadeInPop {
@@ -374,9 +386,11 @@
             margin-bottom: 20px;
             background: rgba(0,0,0,0.3);
             position: relative;
+            flex-shrink: 0;
         }
 
         .product-img {
+            display: block;
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -402,6 +416,11 @@
             z-index: 2;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            max-width: calc(100% - 24px);
+            box-sizing: border-box;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .product-title {
@@ -410,6 +429,7 @@
             margin: 0 0 10px 0;
             color: var(--text-main);
             letter-spacing: -0.5px;
+            overflow-wrap: anywhere;
         }
 
         .product-desc {
@@ -419,6 +439,7 @@
             margin-bottom: 25px;
             flex-grow: 1;
             white-space: pre-line;
+            overflow-wrap: anywhere;
         }
 
         .product-price-box {
@@ -430,11 +451,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .price-left {
             display: flex;
             flex-direction: column;
+            min-width: 0;
         }
 
         .price-label {
@@ -461,6 +485,9 @@
             padding: 4px 10px;
             border-radius: 50px;
             box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            text-align: center;
         }
 
         .btn-beli {
@@ -480,6 +507,7 @@
             justify-content: center;
             align-items: center;
             gap: 8px;
+            margin-top: auto;
         }
 
         .btn-beli:hover {
@@ -530,9 +558,26 @@
             font-weight: 700;
         }
 
+        /* --- RESPONSIVE HP --- */
+        @media (max-width: 480px) {
+            .navbar { padding: 14px 4%; gap: 10px; }
+            .brand { font-size: 17px; gap: 8px; letter-spacing: 0.5px; min-width: 0; }
+            .brand svg { width: 24px; height: 24px; flex-shrink: 0; }
+            .btn-login { padding: 8px 14px; font-size: 13px; gap: 6px; white-space: nowrap; flex-shrink: 0; }
+            .hero { padding: 50px 16px 30px 16px; }
+            .hero h1 { font-size: 30px; }
+            .hero p { font-size: 14px; }
+            .section-title { font-size: 20px; }
+            .btn-category { padding: 8px 16px; font-size: 13px; }
+            .product-grid { gap: 20px; }
+        }
+
+
     </style>
 </head>
 <body>
+    <script src="page-loader.js"></script>
+
 
     <!-- Definisi SVG Gradient untuk Logo -->
     <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
@@ -675,7 +720,7 @@
             
             let filterDiv = document.getElementById('categoryFilter');
             let currentActive = document.querySelector('.btn-category.active');
-            let activeFilter = currentActive ? currentActive.innerText : 'Semua Layanan';
+            let activeFilter = currentActive ? currentActive.textContent.trim() : 'Semua Layanan';
             
             // Render ulang tombol-tombolnya
             let html = `<button class="btn-category ${activeFilter === 'Semua Layanan' ? 'active' : ''}" onclick="filterKategori('Semua', this)">Semua Layanan</button>`;

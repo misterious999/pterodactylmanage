@@ -17,22 +17,22 @@
         body { 
             font-family: 'Inter', sans-serif; color: var(--text-main); margin: 0; 
             padding: 20px; box-sizing: border-box; /* Tambahan ruang napas biar gak mentok layar */
-            display: flex; justify-content: center; align-items: center; height: 100vh;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; min-height: 100dvh;
             background-color: var(--bg-dark);
-            overflow: hidden; 
+            overflow-x: hidden; 
             position: relative;
         }
 
         /* --- AMBIENT BACKGROUND GLOW --- */
         .ambient-blob-1 {
-            position: absolute; width: 400px; height: 400px;
+            position: fixed; width: 400px; height: 400px;
             background: rgba(13, 148, 136, 0.3); border-radius: 50%;
             top: -10%; left: -10%; filter: blur(100px);
             animation: floatBlob 10s infinite alternate ease-in-out;
             z-index: 0; pointer-events: none;
         }
         .ambient-blob-2 {
-            position: absolute; width: 300px; height: 300px;
+            position: fixed; width: 300px; height: 300px;
             background: rgba(5, 150, 105, 0.2); border-radius: 50%;
             bottom: -10%; right: -10%; filter: blur(80px);
             animation: floatBlob 12s infinite alternate-reverse ease-in-out;
@@ -139,7 +139,7 @@
 
         /* --- System Modal --- */
         .system-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 11, 20, 0.85); backdrop-filter: blur(10px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .system-modal-popup { background: var(--card-bg); border-radius: 24px; width: 100%; max-width: 350px; padding: 35px 30px; text-align: center; color: var(--text-main); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 30px 60px rgba(0,0,0,0.6); backdrop-filter: blur(25px); }
+        .system-modal-popup { background: var(--card-bg); border-radius: 24px; width: 100%; max-width: 350px; max-height: calc(100vh - 40px); overflow-y: auto; box-sizing: border-box; padding: 35px 30px; text-align: center; color: var(--text-main); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 30px 60px rgba(0,0,0,0.6); backdrop-filter: blur(25px); }
         
         .modal-icon-top { width: 60px; height: 60px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); box-shadow: 0 0 20px rgba(239, 68, 68, 0.15); }
         .modal-icon-top svg { width: 28px; height: 28px; fill: var(--danger); filter: drop-shadow(0 0 5px var(--danger));}
@@ -150,11 +150,17 @@
         .btn-close-modal { width: 100%; background: var(--danger); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3); }
         .btn-close-modal:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 15px 30px rgba(239, 68, 68, 0.4); }
 
+        body.lite-mode .ambient-blob-1, body.lite-mode .ambient-blob-2 { display: none !important; }
+        body.lite-mode * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+        body.lite-mode .login-box, body.lite-mode .system-modal-popup { background: #1e293b !important; }
+        @media (max-width: 400px) { .login-box { padding: 32px 22px; border-radius: 22px; } .login-box p { margin-bottom: 28px; } }
+
         @keyframes fadeInPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+    <script src="page-loader.js"></script>
 
     <div class="ambient-blob-1"></div>
     <div class="ambient-blob-2"></div>
@@ -200,6 +206,7 @@
         </div>
     </div>
     
+    <script>try { if (localStorage.getItem('lite_mode') === 'true') document.body.classList.add('lite-mode'); } catch (e) {}</script>
     <script src="config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -271,7 +278,7 @@
                 return;
             }
 
-            btn.innerHTML = `<span>Memverifikasi...</span> <svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite; width:18px; fill:currentColor;"><path d="M12 4V2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
+            btn.innerHTML = `<span>Memverifikasi...</span> <svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite; width:18px; fill:currentColor;"><path d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8z"/></svg>`;
             btn.style.opacity = "0.7";
             btn.style.pointerEvents = "none";
 

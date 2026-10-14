@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-color: #0f172a; --card-bg: #1e293b; 
+            --bg-color: #070b14; --bg-dark: #070b14; --card-bg: #1e293b; --card-solid: #1e293b; 
             --primary: #0d9488; 
             --primary-glow: rgba(13, 148, 136, 0.15);
             --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
@@ -27,7 +27,8 @@
             text-transform: uppercase;
             filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.5));
         }
-        body { font-family: 'Inter', sans-serif; padding: 20px 5%; background-color: var(--bg-color); color: var(--text-main); margin: 0; max-width: 1200px; margin: auto; }
+        body { font-family: 'Inter', sans-serif; padding: 20px 5%; background-color: var(--bg-color); color: var(--text-main); max-width: 1200px; margin: auto; }
+        button { font-family: inherit; }
         
         .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; padding: 10px 18px; background: var(--primary-glow); color: var(--primary); text-decoration: none; border-radius: 10px; font-size: 14px; font-weight: 600; border: 1px solid rgba(13, 148, 136, 0.3); transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .btn-back svg { width: 18px; height: 18px; fill: currentColor; transition: transform 0.3s; }
@@ -38,7 +39,8 @@
         h2 svg { width: 22px; height: 22px; fill: var(--primary); }
         .sub-title { color: var(--text-sub); margin-bottom: 25px; font-size: 13px; line-height: 1.5; }
         
-        .box { background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); overflow-x: auto; }
+        .box { background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); min-width: 0; }
+        .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap; gap: 10px; }
         .box-header h3 { margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
         .box-header h3 svg { width: 18px; height: 18px; fill: var(--primary); }
@@ -48,11 +50,10 @@
         input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(15, 23, 42, 0.8); }
         
         .select-wrapper { position: relative; margin-bottom: 15px; }
-        .select-wrapper::after { content: "▼"; position: absolute; right: 15px; top: 38px; color: var(--text-sub); font-size: 10px; pointer-events: none; }
 
         .input-group { margin-bottom: 15px; }
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 15px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 12px; margin-bottom: 15px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 15px; }
         
         .btn-tambah { width: 100%; background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; cursor: pointer; border-radius: 10px; padding: 14px; font-weight: 700; transition: 0.3s; margin-top: 5px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px var(--primary-glow); }
         .btn-tambah svg { width: 18px; height: 18px; fill: currentColor; }
@@ -130,6 +131,9 @@
             -webkit-backdrop-filter: blur(25px); 
             animation: scaleUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
             box-sizing: border-box;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            overscroll-behavior: contain;
         }
 
         .modal-icon-top { 
@@ -264,6 +268,7 @@
             text-decoration: none; 
             box-sizing: border-box;
         }
+        .system-btn svg { width: 14px; height: 14px; fill: currentColor; flex-shrink: 0; }
         .btn-primary-action { 
             background: linear-gradient(135deg, var(--primary), #059669); 
             color: white; 
@@ -416,7 +421,7 @@
         .select-picker-item.selected {
             background: rgba(13, 148, 136, 0.14);
             border-color: rgba(13, 148, 136, 0.35);
-            color: #38bdf8;
+            color: var(--primary);
         }
         .select-picker-radio {
             width: 22px;
@@ -467,17 +472,33 @@
             box-shadow: 0 0 0 3px var(--primary-glow);
             background: rgba(15, 23, 42, 0.85);
         }
-        .custom-select-trigger svg {
+        .custom-select-trigger > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; margin-right: 10px; }
+        .custom-select-trigger > svg {
             width: 16px;
             height: 16px;
             fill: var(--text-sub);
             transition: transform 0.3s ease;
             flex-shrink: 0;
         }
+        .select-item-text { min-width: 0; overflow-wrap: anywhere; text-align: left; }
+
+        @media (max-width: 600px) {
+            .box { padding: 18px; }
+            .grid-3 { grid-template-columns: minmax(0, 1fr); }
+            .system-modal-popup { padding: 26px 20px; }
+        }
+
+        /* LITE MODE */
+        body.lite-mode .ambient-blob-1, body.lite-mode .ambient-blob-2 { display:none !important; }
+        body.lite-mode * { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; box-shadow:none !important; }
+        body.lite-mode .box, body.lite-mode .system-modal-popup, body.lite-mode .select-picker-popup { background: var(--card-solid); }
+        body.lite-mode .system-modal-overlay { background: rgba(7, 11, 20, 0.95); }
 
     </style>
+    <link rel="stylesheet" href="ptero-ui.css">
 </head>
 <body>
+    <script src="page-loader.js"></script>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <a href="index.html" class="btn-back">
             <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
@@ -590,10 +611,12 @@
             <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
             <input type="text" id="searchInput" onkeyup="cariDataTabel()" placeholder="Cari nama server, user, atau ID..." autocomplete="off">
         </div>
+        <div class="table-wrap">
         <table id="tabelServer">
             <tr><th>ID</th><th>Nama Server</th><th>Pemilik</th><th>Masa Aktif</th><th>Status</th><th>Aksi</th></tr>
             <tr><td colspan="6" style="text-align: center; color: var(--text-sub); padding: 30px;"><svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: var(--text-sub); animation: spin 1s linear infinite; margin-bottom: 10px;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg><br>Sinkronisasi data server...</td></tr>
         </table>
+        </div>
     </div>
 
 
@@ -630,7 +653,7 @@
             <p style="margin-bottom: 18px; color: var(--text-sub); font-size: 13px; line-height: 1.5;">Instansi server baru telah dibuat dan terasosiasi.</p>
             <div class="info-detail-system">
                 <div class="detail-row"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> Keterangan Server</div><div class="detail-value" style="margin-bottom: 4px;">Server: <span id="resServerName" style="color: white; font-weight: 700;"></span></div><div class="detail-value">Owner: <span id="resServerOwner" style="color: var(--warning); font-weight: 700;"></span></div></div>
-                <div class="detail-row" style="border: none; padding: 0;"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96z"/></svg> Portal Akses</div><div class="detail-value"><a id="resLink" href="#" target="_blank" style="color: var(--primary); text-decoration: none; word-break: break-all;"></a></div></div>
+                <div class="detail-row" style="border: none; padding: 0;"><div class="detail-label"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2 0-.68.07-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/></svg> Portal Akses</div><div class="detail-value"><a id="resLink" href="#" target="_blank" style="color: var(--primary); text-decoration: none; word-break: break-all;"></a></div></div>
             </div>
             
             <div class="system-btn-group" style="flex-wrap: wrap;">
@@ -644,7 +667,7 @@
     <!-- MODAL TAMBAH EXPIRED SERVER -->
     <div id="modalTambahExpiredServer" class="system-modal-overlay">
         <div class="system-modal-popup mode-info">
-            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8-8 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+            <div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
             <div class="system-modal-header">SET EXPIRED SERVER</div>
             <div class="system-modal-body">Masukkan jumlah hari untuk memperpanjang masa aktif server <b id="expServerName" style="color:var(--text-main);"></b>.</div>
             <input type="number" id="inputHariExpiredServer" placeholder="Contoh: 30 (Dalam Hitungan Hari)" class="modal-input">
@@ -676,6 +699,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
+        if(localStorage.getItem('lite_mode') === 'true') document.body.classList.add('lite-mode');
+
         // ==========================================
         // SISTEM CUSTOM SELECT PICKER MODAL (ANTI-WHITE DEFAULT)
         // ==========================================
@@ -1368,7 +1393,7 @@
                 let originalHtml = btn.innerHTML;
                 btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Disalin!`; 
                 setTimeout(() => { btn.innerHTML = originalHtml; }, 2000); 
-            }).catch(() => showAiAlert("Sinkronisasi Clipboard gagal ditransmisi.", "ERROR CLIPOARD"));
+            }).catch(() => showAiAlert("Sinkronisasi Clipboard gagal ditransmisi.", "ERROR CLIPBOARD"));
         }
 
         async function salinTestimoni(ramLabel) {
