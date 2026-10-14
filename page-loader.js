@@ -52,10 +52,13 @@
         `<span class="zx-ch${i >= 6 ? ' zx-accent' : ''}" style="animation-delay:${(0.15 + i * 0.04).toFixed(2)}s">${c}</span>`
     ).join('');
 
-    function buildLoader() {
+    function buildLoader(curtainOnly) {
         const el = document.createElement('div');
         el.id = 'zxLoader';
         el.setAttribute('aria-hidden', 'true');
+        // Tirai polos (tanpa animasi logo) dipakai saat keluar halaman, supaya animasi
+        // tidak diputar dua kali: sekali di halaman lama, lalu lagi di halaman baru.
+        if (curtainOnly) return el;
         el.innerHTML = `
             <div class="zx-content">
                 <div class="zx-ring"><span>Z</span></div>
@@ -119,7 +122,9 @@
         const a = e.target.closest && e.target.closest('a[href]');
         if (!isInternalPageLink(a, e)) return;
         e.preventDefault();
-        const exit = buildLoader();
+        if (document.querySelector('#zxLoader.zx-exit')) return;
+        const exit = buildLoader(true);
+        exit.classList.add('zx-exit');
         exit.classList.add('zx-enter');
         exit.style.cursor = 'default';
         document.body.appendChild(exit);
