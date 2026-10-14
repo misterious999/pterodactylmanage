@@ -437,6 +437,7 @@
 
     <script src="config.js"></script>
     <script src="api-services.js"></script>
+    <script src="ui-confirm.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -661,7 +662,8 @@
             
             database.ref('users/' + userId + '/isOnline').set(false).catch(function(){});
             ['panel_user_id','user_id','user_id_ptero','panel_username','username','panel_role','role','panel_password','ptero_user_id'].forEach(function(k){ localStorage.removeItem(k); });
-            alert(blockMessage);
+            // Tunggu pengguna menekan OK dulu, baru dialihkan ke login
+            await beritahu({ judul: 'Akses dihentikan', pesan: blockMessage, tipe: 'error' });
             window.location.replace('login.html');
         }
 
@@ -848,25 +850,43 @@
         };
         window.tandaiSemuaDibaca = function () { setLastSeen(Date.now()); render(); };
 
-        window.hapusNotif = function (key) {
+        window.hapusNotif = async function (key) {
             const n = semua.find(x => x.key === key);
-            if (!n || !confirm('Hapus notifikasi ini? Akan hilang untuk semua pengguna.')) return;
-            firebase.database().ref('notifikasi/' + key).remove()
-                .then(() => catatAudit(`Menghapus notifikasi: ${String(n.pesan).slice(0, 80)}`))
-                .catch(err => alert('Gagal menghapus: ' + err.message));
+            if (!n) return;
+            const ya = await konfirmasi({
+                judul: 'Hapus notifikasi?',
+                pesan: 'Notifikasi ini akan dihapus untuk semua pengguna.\n\nTindakan ini tidak bisa dibatalkan.',
+                label: 'Ya, hapus'
+            });
+            if (!ya) return;
+            try {
+                await firebase.database().ref('notifikasi/' + key).remove();
+                await catatAudit(`Menghapus notifikasi: ${String(n.pesan).slice(0, 80)}`);
+            } catch (err) {
+                beritahu({ judul: 'Gagal menghapus', pesan: err.message, tipe: 'error' });
+            }
         };
 
         window.sembunyikanNotif = function (key) {
             const set = hiddenSet(); set.add(key); saveHidden(set); render();
         };
 
-        window.hapusSemuaNotif = function () {
+        window.hapusSemuaNotif = async function () {
             if (isOwner) {
                 const jumlah = semua.length;
-                if (!jumlah || !confirm(`Hapus SEMUA notifikasi (${jumlah} yang tampil, termasuk yang lebih lama)? Berlaku untuk semua pengguna.`)) return;
-                firebase.database().ref('notifikasi').remove()
-                    .then(() => catatAudit(`Menghapus semua notifikasi (${jumlah} entri)`))
-                    .catch(err => alert('Gagal menghapus: ' + err.message));
+                if (!jumlah) return beritahu({ judul: 'Tidak ada notifikasi', pesan: 'Daftar notifikasi sudah kosong.', tipe: 'info' });
+                const ya = await konfirmasi({
+                    judul: 'Hapus semua notifikasi?',
+                    pesan: `Semua notifikasi akan dihapus untuk semua pengguna, termasuk yang lebih lama dari ${jumlah} entri yang tampil.\n\nTindakan ini tidak bisa dibatalkan.`,
+                    label: 'Ya, hapus semua'
+                });
+                if (!ya) return;
+                try {
+                    await firebase.database().ref('notifikasi').remove();
+                    await catatAudit(`Menghapus semua notifikasi (${jumlah} entri)`);
+                } catch (err) {
+                    beritahu({ judul: 'Gagal menghapus', pesan: err.message, tipe: 'error' });
+                }
             } else {
                 const set = hiddenSet();
                 daftarTampil().forEach(n => set.add(n.key));

@@ -104,7 +104,7 @@ export default {
 
     // Dijalankan otomatis oleh Cron Trigger (Settings -> Triggers -> Cron, misal: */5 * * * *)
     async scheduled(event, env, ctx) {
-        ctx.waitUntil(sweepExpired(env));
+        ctx.waitUntil(sweepExpired(env, event.scheduledTime));
     },
 };
 
@@ -113,22 +113,27 @@ export default {
 //   expiredAt tercapai            -> server di-SUSPEND (masa tenggang dimulai)
 //   expiredAt + GRACE_DAYS lewat  -> server/user DIHAPUS permanen
 //   diperpanjang / timer dihapus  -> server yang di-suspend sweeper otomatis di-UNSUSPEND
+//   Notifikasi: ditulis ke Firebase `notifikasi/` dan ditampilkan sebagai lonceng di website
 // ==========================================
 const FIREBASE_URL = 'https://cobaaja-ac5d0-default-rtdb.firebaseio.com';
 
 // Harus sama dengan GlobalConfig.getGraceDays() di config.js
 const GRACE_DAYS = 3;
 const GRACE_MS = GRACE_DAYS * 24 * 60 * 60 * 1000;
+const WARN_MS = GRACE_MS; // pengingat: expired dalam 3 hari ke depan masuk ringkasan harian
 
-// Cloudflare free plan membatasi 50 subrequest per eksekusi. Sisanya dilanjut di run berikutnya.
+// Cloudflare free plan membatasi 50 subrequest per eksekusi.
 const SUBREQUEST_BUDGET = 45;
 
 const ok = (status) => status === 204 || status === 200 || status === 404; // 404 = sudah tidak ada
 
-async function sweepExpired(env) {
+async function sweepExpired(env, scheduledTime) {
     let budget = SUBREQUEST_BUDGET;
     const now = Date.now();
     const updates = {}; // ditulis sekaligus ke Firebase di akhir (1 request)
+    const aksi = [];    // ringkasan jumlah aksi untuk log konsol
+    const segeraExpired = []; // akan expired dalam WARN_MS (untuk ringkasan harian)
+    const jumlahTenggang = {}; // per mode: server/user yang sedang masa tenggang
     let logSeq = 0;
 
     const firebase = async (path, method = 'GET', body) => {
@@ -143,10 +148,14 @@ async function sweepExpired(env) {
         return res.json();
     };
 
-    const log = (action) => {
-        updates[`activity_logs/sweeper_${now}_${logSeq++}`] = {
+    // Satu aksi = dua catatan: Log Aktivitas (riwayat) dan notifikasi (lonceng di website)
+    const log = (action, maker) => {
+        const key = `${now}_${logSeq++}`;
+        updates[`activity_logs/sweeper_${key}`] = {
             uid: 'system', username: 'Auto-Sweeper', role: 'system', action, timestamp: Date.now(),
         };
+        updates[`notifikasi/${key}`] = { tipe: 'sweeper', pesan: action, maker: maker || 'system', timestamp: Date.now() };
+        aksi.push(action);
     };
 
     for (const [mode, panel] of Object.entries(PANELS)) {
@@ -190,6 +199,14 @@ async function sweepExpired(env) {
         ]).then(r => r.map(x => x || {}));
         const serverState = state.servers || {};
         const userState = state.users || {};
+        jumlahTenggang[mode] = Object.keys(serverState).length + Object.keys(userState).length;
+
+        const catatSegera = (jenis, id, rec) => {
+            const sisa = Number(rec?.expiredAt) - now;
+            if (sisa > 0 && sisa <= WARN_MS) {
+                segeraExpired.push({ mode, jenis, id, nama: rec?.serverName || rec?.username || '#' + id, maker: rec?.maker, sisa });
+            }
+        };
 
         // ---------- SERVER ----------
         for (const id of new Set([...Object.keys(serverRecs), ...Object.keys(serverState)])) {
@@ -205,19 +222,21 @@ async function sweepExpired(env) {
                 if (await serversAction([id], 'delete')) {
                     updates[recPath] = null;
                     updates[statePath] = null;
-                    log(`[${mode}] ${label} dihapus permanen (masa tenggang ${GRACE_DAYS} hari habis).`);
+                    log(`[${mode}] ${label} dihapus permanen (masa tenggang ${GRACE_DAYS} hari habis).`, rec?.maker);
                 }
             } else if (expiredAt && now >= expiredAt) {
                 if (!suspended && await serversAction([id], 'suspend')) {
                     updates[statePath] = { suspendedAt: now };
-                    log(`[${mode}] ${label} di-suspend karena expired. Dihapus permanen dalam ${GRACE_DAYS} hari jika tidak diperpanjang.`);
+                    log(`[${mode}] ${label} di-suspend karena expired. Dihapus permanen dalam ${GRACE_DAYS} hari jika tidak diperpanjang.`, rec?.maker);
                 }
             } else if (suspended) {
                 // Diperpanjang atau timer dihapus selama masa tenggang
                 if (await serversAction([id], 'unsuspend')) {
                     updates[statePath] = null;
-                    log(`[${mode}] ${label} dipulihkan (unsuspend) karena masa aktif diperbarui.`);
+                    log(`[${mode}] ${label} dipulihkan (unsuspend) karena masa aktif diperbarui.`, rec?.maker);
                 }
+            } else {
+                catatSegera('server', id, rec);
             }
         }
 
@@ -233,7 +252,7 @@ async function sweepExpired(env) {
             const label = `User ${rec?.username || '#' + id} milik ${rec?.maker || '-'}`;
 
             const expired = expiredAt && now >= expiredAt;
-            if (!expired && !suspended) continue;
+            if (!expired && !suspended) { catatSegera('user', id, rec); continue; }
             if (expired && suspended && now < expiredAt + GRACE_MS) continue; // sudah di-suspend, tunggu masa tenggang
 
             const ids = await userServerIds(id);
@@ -250,23 +269,38 @@ async function sweepExpired(env) {
                     if (ok(status)) {
                         updates[recPath] = null;
                         updates[statePath] = null;
-                        log(`[${mode}] ${label} beserta ${ids.length} server dihapus permanen (masa tenggang ${GRACE_DAYS} hari habis).`);
+                        log(`[${mode}] ${label} beserta ${ids.length} server dihapus permanen (masa tenggang ${GRACE_DAYS} hari habis).`, rec?.maker);
                     }
                 }
             } else if (expired) {
                 if (!suspended && await serversAction(ids, 'suspend')) {
                     updates[statePath] = { suspendedAt: now };
-                    log(`[${mode}] ${label} expired: ${ids.length} server di-suspend. Dihapus permanen dalam ${GRACE_DAYS} hari jika tidak diperpanjang.`);
+                    log(`[${mode}] ${label} expired: ${ids.length} server di-suspend. Dihapus permanen dalam ${GRACE_DAYS} hari jika tidak diperpanjang.`, rec?.maker);
                 }
             } else if (await serversAction(ids, 'unsuspend')) {
                 updates[statePath] = null;
-                log(`[${mode}] ${label} dipulihkan: ${ids.length} server di-unsuspend karena masa aktif diperbarui.`);
+                log(`[${mode}] ${label} dipulihkan: ${ids.length} server di-unsuspend karena masa aktif diperbarui.`, rec?.maker);
             }
         }
     }
 
-    if (Object.keys(updates).length) {
-        await firebase('', 'PATCH', updates); // aman: budget 45 masih menyisakan ruang dari batas 50
+    // Ringkasan harian: 08:00 WIB = 01:00 UTC (cron */5, jadi cukup menit 00-04). Hanya untuk pemilik.
+    const t = new Date(scheduledTime || now);
+    if (t.getUTCHours() === 1 && t.getUTCMinutes() < 5) {
+        const soon = segeraExpired.sort((a, b) => a.sisa - b.sisa)
+            .map(x => `• [${x.mode}] ${x.jenis === 'user' ? 'User' : 'Server'} ${x.nama} (${x.maker || '-'}), sisa ${(x.sisa / 86400000).toFixed(1)} hari`);
+        const tenggang = Object.entries(jumlahTenggang).map(([m, n]) => `• [${m}] ${n}`);
+        updates[`notifikasi/${now}_ringkasan`] = {
+            tipe: 'ringkasan',
+            pesan: `Akan expired dalam ${WARN_MS / 86400000} hari (${soon.length}):\n` + (soon.length ? soon.join('\n') : '• Tidak ada') +
+                   `\n\nSedang masa tenggang (suspend):\n` + (tenggang.length ? tenggang.join('\n') : '• Tidak ada'),
+            maker: 'system',
+            timestamp: now,
+        };
     }
-    console.log(`[Sweeper] Selesai. ${logSeq} aksi, sisa budget ${budget}.`);
+
+    if (Object.keys(updates).length) {
+        await firebase('', 'PATCH', updates);
+    }
+    console.log(`[Sweeper] Selesai. ${aksi.length} aksi, sisa budget ${budget}.`);
 }

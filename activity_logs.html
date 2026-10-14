@@ -129,6 +129,7 @@
     </div>
 
     <script src="config.js"></script>
+    <script src="ui-confirm.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
@@ -139,10 +140,12 @@
         // Validasi Akses: menu ini hanya tampil untuk Pemilik & Demo di dashboard
         const currentUserId = localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('user_id_ptero');
         const role = String(localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
-        if (!currentUserId) { window.location.replace('login.html'); }
+        let aksesDitolak = false;
+        if (!currentUserId) { aksesDitolak = true; window.location.replace('login.html'); }
         else if (role !== 'pemilik' && role !== 'demo') {
-            alert("Akses ditolak! Log audit hanya dapat diakses oleh Administrator.");
-            window.location.replace('index.html');
+            aksesDitolak = true;
+            beritahu({ judul: 'Akses ditolak', pesan: 'Log audit hanya dapat diakses oleh Administrator.', tipe: 'error' })
+                .then(() => window.location.replace('index.html'));
         }
 
         // Hanya pemilik yang boleh menghapus log. Demo hanya melihat.
@@ -251,13 +254,22 @@
             return database.ref('activity_logs').push({ uid: currentUserId, username, role, action, timestamp: Date.now() });
         }
 
-        function hapusLog(id) {
+        async function hapusLog(id) {
             if (!isOwner) return;
             const l = logs.find(x => x.id === id);
-            if (!l || !confirm(`Hapus log ini?\n\n"${l.action || '-'}" oleh ${l.username || '-'}`)) return;
-            database.ref('activity_logs/' + id).remove()
-                .then(() => catatAudit(`Menghapus 1 log audit: "${String(l.action || '-').slice(0, 80)}" (oleh ${l.username || '-'})`))
-                .catch(e => alert('Gagal menghapus: ' + e.message));
+            if (!l) return;
+            const ya = await konfirmasi({
+                judul: 'Hapus log audit?',
+                pesan: `"${l.action || '-'}"\noleh ${l.username || '-'}\n\nTindakan ini tidak bisa dibatalkan.`,
+                label: 'Ya, hapus'
+            });
+            if (!ya) return;
+            try {
+                await database.ref('activity_logs/' + id).remove();
+                await catatAudit(`Menghapus 1 log audit: "${String(l.action || '-').slice(0, 80)}" (oleh ${l.username || '-'})`);
+            } catch (e) {
+                beritahu({ judul: 'Gagal menghapus', pesan: e.message, tipe: 'error' });
+            }
         }
 
         async function hapusSemuaLog() {
@@ -268,8 +280,14 @@
                 const snap = await database.ref('activity_logs').once('value');
                 const data = snap.val() || {};
                 const jumlah = Object.keys(data).length;
-                if (!jumlah) return alert('Tidak ada log untuk dihapus.');
-                if (!confirm(`Hapus SEMUA log audit (${jumlah} entri)?\n\nCadangan JSON akan diunduh otomatis sebelum dihapus. Tindakan ini tidak bisa dibatalkan.`)) return;
+                if (!jumlah) return beritahu({ judul: 'Tidak ada log', pesan: 'Log audit sudah kosong.', tipe: 'info' });
+
+                const ya = await konfirmasi({
+                    judul: 'Hapus SEMUA log audit?',
+                    pesan: `${jumlah} entri akan dihapus permanen.\n\nCadangan JSON akan diunduh otomatis sebelum dihapus. Tindakan ini tidak bisa dibatalkan.`,
+                    label: 'Ya, hapus semua'
+                });
+                if (!ya) return;
 
                 // Cadangan dulu, baru hapus
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -283,8 +301,9 @@
                 btn.disabled = true;
                 await database.ref('activity_logs').remove();
                 await catatAudit(`Menghapus semua log audit (${jumlah} entri). Cadangan JSON diunduh oleh ${username}.`);
+                beritahu({ judul: 'Log dihapus', pesan: `${jumlah} entri telah dihapus.\nCadangan JSON sudah diunduh.`, tipe: 'success' });
             } catch (e) {
-                alert('Gagal menghapus log: ' + e.message);
+                beritahu({ judul: 'Gagal menghapus', pesan: e.message, tipe: 'error' });
             } finally {
                 btn.disabled = false;
             }
@@ -292,7 +311,7 @@
 
         document.getElementById('searchInput').addEventListener('input', render);
         document.getElementById('roleFilter').addEventListener('change', render);
-        subscribe();
+        if (!aksesDitolak) subscribe(); // jangan baca data kalau akses ditolak
     </script>
 </body>
 </html>
