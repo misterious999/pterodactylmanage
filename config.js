@@ -14,6 +14,10 @@ const GlobalConfig = {
         return domains[mode] || "localhost";
     },
 
+    // Masa tenggang setelah expired: server di-suspend dulu, dihapus permanen setelah X hari.
+    // Harus sama dengan GRACE_DAYS di workers.js
+    getGraceDays: () => 3,
+
     // Parameter statis default
     getDefaultDeploy: () => ({
         locationId: "1",

@@ -93,3 +93,36 @@ class PteroAPI {
         return this._request(`/api/application/nests/${nestId}/eggs/${eggId}?include=variables`); 
     }
 }
+
+// ==========================================
+// ⏳ COUNTDOWN MASA AKTIF (dipakai halaman server & user)
+// Aktif -> SUSPEND (masa tenggang) -> MENUNGGU DIHAPUS. Eksekusinya dikerjakan Worker Cron.
+// ==========================================
+function renderCountdownExpired(el, expiredAt) {
+    const now = Date.now();
+    const deleteAt = expiredAt + GlobalConfig.getGraceDays() * 24 * 60 * 60 * 1000;
+    const fmt = (ms) => {
+        const d = Math.floor(ms / 86400000);
+        const h = Math.floor((ms % 86400000) / 3600000);
+        const m = Math.floor((ms % 3600000) / 60000);
+        const s = Math.floor((ms % 60000) / 1000);
+        return `${d}h ${h}j ${m}m ${s}d`;
+    };
+    const paint = (color, bg) => {
+        el.style.color = color;
+        el.style.background = bg;
+        el.style.borderColor = color;
+    };
+
+    if (now < expiredAt) {
+        el.innerText = fmt(expiredAt - now);
+        paint('', '');
+    } else if (now < deleteAt) {
+        el.innerText = `SUSPEND · hapus ${fmt(deleteAt - now)}`;
+        el.title = 'Expired. Server di-suspend, dihapus permanen jika tidak diperpanjang.';
+        paint('var(--warning)', 'rgba(245, 158, 11, 0.12)');
+    } else {
+        el.innerText = 'MENUNGGU DIHAPUS';
+        paint('var(--danger)', 'rgba(239, 68, 68, 0.15)');
+    }
+}

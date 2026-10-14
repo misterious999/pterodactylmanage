@@ -1080,12 +1080,36 @@
                 username: username,
                 maker: myUsername 
             });
+            await pulihkanUserDariSweeper(id);
 
             btn.innerText = "Simpan Regulasi";
             btn.style.pointerEvents = "auto";
             tutupModal('modalTambahExpiredPtero');
             showAiSuccess(`Validitas akun ${username} berhasil diperpanjang <b>${hari} hari</b> dari siklus saat ini.`, "ALOKASI BERHASIL");
             ambilDataPtero(); 
+        }
+
+        // Kalau server user sedang di-suspend Auto-Sweeper (masa tenggang), langsung unsuspend.
+        // Worker juga akan memulihkannya di putaran berikutnya kalau langkah ini gagal.
+        async function pulihkanUserDariSweeper(userId) {
+            const domainKey = config.domain.replace(/\./g, '_');
+            const stateRef = database.ref(`ptero_sweeper_state/${domainKey}/users/${userId}`);
+            try {
+                if (!(await stateRef.once('value')).exists()) return;
+                let allServers = [], page = 1, totalPages = 1;
+                do {
+                    let data = await apiPtero.getServers(page);
+                    allServers = allServers.concat(data.data || []);
+                    totalPages = (data && data.meta && data.meta.pagination && data.meta.pagination.total_pages) ? data.meta.pagination.total_pages : 1;
+                    page++;
+                } while (page <= totalPages);
+                for (let s of allServers.filter(s => s.attributes && s.attributes.user === parseInt(userId))) {
+                    await apiPtero.unsuspendServer(s.attributes.id);
+                }
+                await stateRef.remove();
+            } catch (e) {
+                console.warn(`[Sweeper] Gagal unsuspend server user #${userId}, akan dicoba Worker:`, e.message);
+            }
         }
 
         let targetDelTimerUserId = null;
@@ -1101,52 +1125,11 @@
             try {
                 let domainKey = config.domain.replace(/\./g, '_');
                 await database.ref(`ptero_users_expired/${domainKey}/${targetDelTimerUserId}`).remove();
+                await pulihkanUserDariSweeper(targetDelTimerUserId);
                 showAiSuccess("Timer masa aktif berhasil dihapus. Akun kini Unlimited.", "TIMER DIHAPUS", false);
                 ambilDataPtero();
             } catch (e) {
                 showAiAlert("Gagal menghapus timer: " + e.message, "KESALAHAN");
-            }
-        }
-
-        async function prosesHapusUserPteroOtomatis(userId, username) {
-            try {
-                let allServers = [], page = 1, totalPages = 1;
-                do {
-                    let data = await apiPtero.getServers(page);
-                    allServers = allServers.concat(data.data || []);
-                    totalPages = (data && data.meta && data.meta.pagination && data.meta.pagination.total_pages) ? data.meta.pagination.total_pages : 1;
-                    page++;
-                } while (page <= totalPages);
-
-                let serversMilikUser = allServers.filter(s => s.attributes && s.attributes.user === parseInt(userId));
-                for (let server of serversMilikUser) {
-                    await apiPtero.deleteServer(server.attributes.id);
-                }
-                
-                await apiPtero.deleteUser(userId);
-
-                let domainKey = config.domain.replace(/\./g, '_');
-                await database.ref(`ptero_users_expired/${domainKey}/${userId}`).remove();
-                
-                ambilDataPtero(); 
-            } catch(e) {
-                console.error("Auto-purge mechanism failure:", e);
-            }
-        }
-
-        async function sweeperPteroExpiredLokal() {
-            let domainKey = config.domain.replace(/\./g, '_');
-            let snap = await database.ref(`ptero_users_expired/${domainKey}`).once('value');
-            let expData = snap.val();
-            if (!expData) return;
-            
-            let now = Date.now();
-            for (let key in expData) {
-                let data = expData[key];
-                if (data.expiredAt <= now && (role === 'pemilik' || data.maker === myUsername) && !data.isDeleting) {
-                    database.ref(`ptero_users_expired/${domainKey}/${key}/isDeleting`).set(true);
-                    await prosesHapusUserPteroOtomatis(key, data.username);
-                }
             }
         }
 
@@ -1202,16 +1185,12 @@
                     if (uid === 1) {
                         kolomExpired = `<span style="color:var(--text-sub); font-size:12px; font-weight:bold;">${svgCrown} Superadmin</span>`;
                     } else if (expInfo && expInfo.expiredAt) {
-                        let sisaWaktu = expInfo.expiredAt - Date.now();
-                        if (sisaWaktu > 0) {
-                            kolomExpired = `<div style="display:flex; align-items:center; gap:8px;">
+                        // Countdown menangani status aktif / masa tenggang (suspend) / menunggu dihapus Worker
+                        kolomExpired = `<div style="display:flex; align-items:center; gap:8px;">
                                 <span class="ptero-countdown-timer badge badge-admin" data-expire="${expInfo.expiredAt}" style="font-family:monospace; font-size:11px; font-weight:800;">Processing...</span>
                                 <button class="btn-sapu" style="padding: 4px 8px;" onclick="bukaModalExpired(${uid}, '${u.username}', ${expInfo.expiredAt})" title="Modifikasi Durasi">+</button>
                                 <button class="btn-sapu" style="padding: 4px 8px; background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);" onclick="konfirmasiHapusTimerUser(${uid}, '${u.username}')" title="Hapus Masa Aktif"><svg viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
                             </div>`;
-                        } else {
-                            kolomExpired = `<span class="badge" style="background:rgba(239, 68, 68, 0.1); color:var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);">EXPIRED (Purging)</span>`;
-                        }
                     } else {
                         kolomExpired = `<button class="btn-sapu" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.3);" onclick="bukaModalExpired(${uid}, '${u.username}', 0)">Konfigurasi</button>`;
                     }
@@ -1229,25 +1208,9 @@
 
         setInterval(() => {
             document.querySelectorAll('.ptero-countdown-timer').forEach(el => {
-                let exp = parseInt(el.getAttribute('data-expire'));
-                let sisa = exp - Date.now();
-                
-                if (sisa <= 0) {
-                    el.innerText = "EXPIRED";
-                    el.style.color = "var(--danger)";
-                    el.style.background = "rgba(239, 68, 68, 0.1)";
-                    el.style.borderColor = "var(--danger)";
-                } else {
-                    let d = Math.floor(sisa / (1000 * 60 * 60 * 24));
-                    let h = Math.floor((sisa % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    let m = Math.floor((sisa % (1000 * 60 * 60)) / (1000 * 60));
-                    let s = Math.floor((sisa % (1000 * 60)) / 1000);
-                    el.innerText = `${d}h ${h}j ${m}m ${s}s`;
-                }
+                renderCountdownExpired(el, parseInt(el.getAttribute('data-expire')));
             });
         }, 1000);
-
-        setInterval(sweeperPteroExpiredLokal, 30000);
 
         function cariDataTabel() {
             let input = document.getElementById("searchInput").value.toLowerCase(); 

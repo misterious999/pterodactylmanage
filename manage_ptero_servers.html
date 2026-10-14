@@ -975,18 +975,12 @@
                     let expInfo = expiredData[s.id];
                     let kolomExpired = '';
                     if (expInfo && expInfo.expiredAt) {
-                        let sisaWaktu = expInfo.expiredAt - Date.now();
-                        if (sisaWaktu > 0) {
-                            kolomExpired = `<div style="display:flex; align-items:center; gap:8px;">
+                        // Countdown menangani status aktif / masa tenggang (suspend) / menunggu dihapus Worker
+                        kolomExpired = `<div style="display:flex; align-items:center; gap:8px;">
                                 <span class="ptero-server-countdown badge badge-admin" data-expire="${expInfo.expiredAt}" data-sid="${s.id}" data-sname="${s.name}" style="font-family:monospace; font-size:11px; font-weight:800;">Menghitung...</span>
                                 <button class="btn-action-small" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);" onclick="bukaModalExpiredServer(${s.id}, '${s.name}', ${expInfo.expiredAt})" title="Tambah Waktu">+</button>
                                 <button class="btn-action-small" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);" onclick="konfirmasiHapusTimer(${s.id}, '${s.name}')" title="Hapus Masa Aktif"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
                             </div>`;
-                        } else {
-                            // EKSEKUSI SAAT ITU JUGA TANPA DITUNDA
-                            eksekusiPurgeServerInstan(s.id, s.name);
-                            kolomExpired = `<span class="badge" style="background:rgba(239, 68, 68, 0.15); color:var(--danger); border: 1px solid rgba(239, 68, 68, 0.4);"><span class="status-dot dot-danger" style="animation: spin 1s linear infinite;"></span> MENGHAPUS...</span>`;
-                        }
                     } else {
                         kolomExpired = `<button class="badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); cursor: pointer;" onclick="bukaModalExpiredServer(${s.id}, '${s.name}', 0)">Set Expired</button>`;
                     }
@@ -1043,12 +1037,27 @@
                 serverName: serverName,
                 maker: myUsername 
             });
+            await pulihkanServerDariSweeper(id);
 
             btn.innerText = "Simpan Waktu";
             btn.style.pointerEvents = "auto";
             tutupModal('modalTambahExpiredServer');
             showAiSuccess(`Masa aktif <b>${hari} Hari</b> berhasil ditambahkan untuk Server ${serverName}.`, "BERHASIL DIUPDATE");
             ambilDataServers(); 
+        }
+
+        // Kalau server sedang di-suspend Auto-Sweeper (masa tenggang), langsung unsuspend.
+        // Worker juga akan memulihkannya di putaran berikutnya kalau langkah ini gagal.
+        async function pulihkanServerDariSweeper(id) {
+            const domainKey = config.domain.replace(/\./g, '_');
+            const stateRef = database.ref(`ptero_sweeper_state/${domainKey}/servers/${id}`);
+            try {
+                if (!(await stateRef.once('value')).exists()) return;
+                await apiPtero.unsuspendServer(id);
+                await stateRef.remove();
+            } catch (e) {
+                console.warn(`[Sweeper] Gagal unsuspend server #${id}, akan dicoba Worker:`, e.message);
+            }
         }
 
         // Fungsi khusus hapus timer
@@ -1065,6 +1074,7 @@
             try {
                 let domainKey = config.domain.replace(/\./g, '_');
                 await database.ref(`ptero_servers_expired/${domainKey}/${targetDelTimerId}`).remove();
+                await pulihkanServerDariSweeper(targetDelTimerId);
                 showAiSuccess("Timer masa aktif berhasil dihapus. Server kini Unlimited.", "TIMER DIHAPUS", false);
                 ambilDataServers();
             } catch (e) {
@@ -1072,104 +1082,12 @@
             }
         }
 
-        // ==========================================
-        // AUTO-PURGE INSTAN PTERO SERVER EXPIRED (ANTI-MACET)
-        // ==========================================
-        const activePurgingServers = new Set();
-
-        async function eksekusiPurgeServerInstan(serverId, serverName) {
-            serverId = parseInt(serverId);
-            if (!serverId || activePurgingServers.has(serverId)) return;
-            activePurgingServers.add(serverId);
-
-            console.log(`[Auto-Purge] Mengeksekusi server expired saat itu juga: #${serverId} (${serverName})`);
-            const domainKey = config.domain.replace(/\./g, '_');
-
-            try {
-                try {
-                    await apiPtero.deleteServer(serverId);
-                    console.log(`[Auto-Purge] Server #${serverId} (${serverName}) berhasil dihapus.`);
-                } catch (srvErr) {
-                    console.warn(`[Auto-Purge] Catatan deleteServer #${serverId}:`, srvErr.message);
-                }
-
-                // SELALU HAPUS DARI FIREBASE (Mencegah kotak merah nyangkut selamanya!)
-                await database.ref(`ptero_servers_expired/${domainKey}/${serverId}`).remove();
-                console.log(`[Auto-Purge] Record expired server #${serverId} telah dihapus dari Firebase.`);
-
-                // Efek Visual: Hilangkan baris tabel secara langsung
-                let allRows = document.querySelectorAll('#tabelServer tr');
-                allRows.forEach(tr => {
-                    let firstTd = tr.querySelector('td');
-                    if (firstTd && firstTd.innerText.includes('#' + serverId)) {
-                        tr.style.transition = 'all 0.4s ease';
-                        tr.style.opacity = '0';
-                        tr.style.transform = 'translateX(-20px)';
-                        setTimeout(() => { tr.remove(); }, 400);
-                    }
-                });
-
-            } catch (err) {
-                console.error(`[Auto-Purge] Gagal purge server #${serverId}:`, err);
-            } finally {
-                activePurgingServers.delete(serverId);
-            }
-        }
-
-        async function sweeperServerExpiredLokal() {
-            try {
-                let domainKey = config.domain.replace(/\./g, '_');
-                let snap = await database.ref(`ptero_servers_expired/${domainKey}`).once('value');
-                let expData = snap.val();
-                if (!expData) return;
-                
-                let now = Date.now();
-                for (let key in expData) {
-                    let data = expData[key];
-                    let isAllowed = false;
-                    if (role === 'pemilik') {
-                        isAllowed = true;
-                    } else {
-                        let m = (data && data.maker ? String(data.maker) : '').trim().toLowerCase();
-                        let myU = (myUsername || '').trim().toLowerCase();
-                        isAllowed = (myU && myU !== 'unknown') && (m === myU || m === `[${myU}]` || m.includes(`[${myU}]`));
-                    }
-                    if (isAllowed && data && data.expiredAt && Number(data.expiredAt) <= now) {
-                        eksekusiPurgeServerInstan(key, data.serverName || 'Server');
-                    }
-                }
-            } catch(e) {
-                console.warn("[Auto-Sweeper Server] Polling warning:", e);
-            }
-        }
-
         setInterval(() => {
             document.querySelectorAll('.ptero-server-countdown').forEach(el => {
-                let exp = parseInt(el.getAttribute('data-expire'));
-                let sisa = exp - Date.now();
-                
-                if (sisa <= 0) {
-                    el.innerHTML = '<span class="status-dot dot-danger" style="animation: spin 1s linear infinite;"></span> MENGHAPUS...';
-                    el.style.color = "var(--danger)";
-                    el.style.background = "rgba(239, 68, 68, 0.15)";
-                    el.style.borderColor = "var(--danger)";
-                    let targetSid = el.getAttribute('data-sid');
-                    let targetSname = el.getAttribute('data-sname');
-                    if (targetSid) {
-                        eksekusiPurgeServerInstan(targetSid, targetSname);
-                    }
-                } else {
-                    let d = Math.floor(sisa / (1000 * 60 * 60 * 24));
-                    let h = Math.floor((sisa % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    let m = Math.floor((sisa % (1000 * 60 * 60)) / (1000 * 60));
-                    let s = Math.floor((sisa % (1000 * 60)) / 1000);
-                    el.innerText = `${d}h ${h}j ${m}m ${s}d`;
-                }
+                renderCountdownExpired(el, parseInt(el.getAttribute('data-expire')));
             });
         }, 1000);
 
-        sweeperServerExpiredLokal();
-        setInterval(sweeperServerExpiredLokal, 5000);
 
         // ==========================================
         // AUTO-DEPLOY ALGORITHMS
