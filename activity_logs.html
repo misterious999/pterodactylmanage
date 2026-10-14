@@ -87,6 +87,12 @@
             .log-time { margin-left: 0; width: 100%; }
             .toolbar select { flex: 1 1 100%; }
         }
+        .btn-clear-all { flex: 0 0 auto; padding: 12px 16px; background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; font-weight: 700; font-size: 12px; cursor: pointer; transition: .2s; }
+        .btn-clear-all:hover { background: var(--danger); color: #fff; }
+        .btn-clear-all:disabled { opacity: .4; cursor: not-allowed; }
+        .log-del { margin-left: 8px; background: none; border: none; color: var(--text-sub); font-size: 14px; line-height: 1; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+        .log-del:hover { color: var(--danger); background: rgba(239,68,68,0.1); }
+        @media (max-width: 600px) { .btn-clear-all { flex: 1 1 100%; } }
     </style>
 </head>
 <body>
@@ -116,6 +122,7 @@
         <div class="toolbar">
             <input type="text" id="searchInput" placeholder="Cari username atau aktivitas..." autocomplete="off">
             <select id="roleFilter"><option value="">Semua Role</option></select>
+            <button class="btn-clear-all" id="btnHapusSemuaLog" hidden onclick="hapusSemuaLog()">Hapus Semua Log</button>
         </div>
         <div id="logList"><div class="empty-state"><div class="core-spinner"></div>Memuat log aktivitas...</div></div>
         <button class="btn-more" id="btnMore" hidden onclick="muatLebih()">Muat Lebih Banyak</button>
@@ -137,6 +144,11 @@
             alert("Akses ditolak! Log audit hanya dapat diakses oleh Administrator.");
             window.location.replace('index.html');
         }
+
+        // Hanya pemilik yang boleh menghapus log. Demo hanya melihat.
+        const isOwner = role === 'pemilik';
+        const username = localStorage.getItem('username') || localStorage.getItem('panel_username') || 'Admin';
+        if (isOwner) document.getElementById('btnHapusSemuaLog').hidden = false;
 
         const ROLE_LABELS = { pemilik:'Administrator', partner_public:'Partner Public', partner_public_v2:'Partner Public V2', reseller_private:'Reseller Private', reseller_public:'Reseller Public', reseller_public_v2:'Reseller Public V2', reseller:'Reseller', demo:'Sesi Demo' };
         const DANGER_WORDS = /hapus|cabut|purge|musnah|suspend|tarik|terminasi|delete|gagal|ditolak/i;
@@ -187,6 +199,7 @@
                             <span class="log-user">${escapeHtml(l.username || 'Unknown')}</span>
                             <span class="badge ${tone}">${escapeHtml(getRoleLabel(l.role))}</span>
                             <span class="log-time">${time}</span>
+                            ${isOwner ? `<button class="log-del" title="Hapus log ini" onclick="hapusLog('${escapeHtml(l.id)}')">✕</button>` : ''}
                         </div>
                         <p class="log-action${isDanger ? ' tone-danger' : ''}">${escapeHtml(l.action || '-')}</p>
                     </div>
@@ -230,6 +243,52 @@
         }
 
         function muatLebih() { limit += PAGE_SIZE; subscribe(); }
+
+        // ==========================================
+        // HAPUS LOG (pemilik saja). Setiap penghapusan dicatat sebagai log baru.
+        // ==========================================
+        function catatAudit(action) {
+            return database.ref('activity_logs').push({ uid: currentUserId, username, role, action, timestamp: Date.now() });
+        }
+
+        function hapusLog(id) {
+            if (!isOwner) return;
+            const l = logs.find(x => x.id === id);
+            if (!l || !confirm(`Hapus log ini?\n\n"${l.action || '-'}" oleh ${l.username || '-'}`)) return;
+            database.ref('activity_logs/' + id).remove()
+                .then(() => catatAudit(`Menghapus 1 log audit: "${String(l.action || '-').slice(0, 80)}" (oleh ${l.username || '-'})`))
+                .catch(e => alert('Gagal menghapus: ' + e.message));
+        }
+
+        async function hapusSemuaLog() {
+            if (!isOwner) return;
+            const btn = document.getElementById('btnHapusSemuaLog');
+            try {
+                // Ambil seluruh log (bukan hanya yang tampil) untuk cadangan
+                const snap = await database.ref('activity_logs').once('value');
+                const data = snap.val() || {};
+                const jumlah = Object.keys(data).length;
+                if (!jumlah) return alert('Tidak ada log untuk dihapus.');
+                if (!confirm(`Hapus SEMUA log audit (${jumlah} entri)?\n\nCadangan JSON akan diunduh otomatis sebelum dihapus. Tindakan ini tidak bisa dibatalkan.`)) return;
+
+                // Cadangan dulu, baru hapus
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `log-audit-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.json`;
+                document.body.appendChild(a); a.click(); a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                btn.disabled = true;
+                await database.ref('activity_logs').remove();
+                await catatAudit(`Menghapus semua log audit (${jumlah} entri). Cadangan JSON diunduh oleh ${username}.`);
+            } catch (e) {
+                alert('Gagal menghapus log: ' + e.message);
+            } finally {
+                btn.disabled = false;
+            }
+        }
 
         document.getElementById('searchInput').addEventListener('input', render);
         document.getElementById('roleFilter').addEventListener('change', render);

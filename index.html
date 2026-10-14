@@ -232,6 +232,12 @@
         .notif-item.ringkasan .notif-tag { color: var(--warning); }
         .notif-item.sweeper .notif-tag { color: var(--primary); }
         .notif-item pre { margin: 0; white-space: pre-wrap; font-family: inherit; }
+        .notif-actions { display: flex; gap: 12px; }
+        .notif-clear.danger { color: var(--danger); }
+        .notif-item { position: relative; }
+        .notif-del { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--text-sub); font-size: 15px; line-height: 1; cursor: pointer; padding: 4px; border-radius: 6px; }
+        .notif-del:hover { color: var(--danger); background: rgba(239,68,68,0.1); }
+        .notif-item .notif-meta { padding-right: 22px; }
         .notif-empty { padding: 28px 16px; text-align: center; color: var(--text-sub); font-size: 13px; }
         @media (max-width: 480px) { .notif-panel { position: fixed; top: 64px; left: 16px; right: 16px; width: auto; } }
     </style>
@@ -312,7 +318,7 @@
                     <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
                 </button>
                 <div class="notif-panel" id="notifPanel" style="display:none;">
-                    <div class="notif-head"><b>Notifikasi</b><button class="notif-clear" onclick="event.stopPropagation(); tandaiSemuaDibaca();">Tandai dibaca</button></div>
+                    <div class="notif-head"><b>Notifikasi</b><div class="notif-actions"><button class="notif-clear" onclick="event.stopPropagation(); tandaiSemuaDibaca();">Tandai dibaca</button><button class="notif-clear danger" id="btnNotifHapusSemua" onclick="event.stopPropagation(); hapusSemuaNotif();">Hapus semua</button></div></div>
                     <div class="notif-list" id="notifList"><div class="notif-empty">Memuat...</div></div>
                 </div>
             </div>
@@ -771,41 +777,66 @@
     <script>
     // ==========================================
     // 🔔 NOTIFIKASI WEBSITE
-    // Sumber: Firebase `notifikasi/` (ditulis Worker). Pemilik melihat semua,
-    // reseller/partner hanya melihat notifikasi untuk entitas yang dia buat.
+    // Sumber: Firebase `notifikasi/` (ditulis Worker & bot).
+    // Pemilik: melihat semua, bisa hapus dari database (berlaku untuk semua).
+    // Reseller/partner: hanya melihat notifikasi miliknya, dan hanya bisa menyembunyikan
+    // di browser sendiri (tidak menghapus data).
+    // Setiap penghapusan dicatat ke Log Audit Sistem.
     // ==========================================
     (function () {
         const me = String(username || '').trim().toLowerCase();
         if (!currentUserId || role === 'demo') { document.querySelector('.notif-wrap').style.display = 'none'; return; }
+
+        const isOwner = role === 'pemilik';
         const LAST_SEEN_KEY = 'notif_last_seen';
+        const HIDDEN_KEY = 'notif_hidden';
         const TAMPIL_MAKS = 30;
-        let semua = [];
+        let semua = []; // { key, tipe, pesan, maker, timestamp }
 
         const lastSeen = () => { try { return Number(localStorage.getItem(LAST_SEEN_KEY)) || 0; } catch (e) { return 0; } };
         const setLastSeen = (t) => { try { localStorage.setItem(LAST_SEEN_KEY, String(t)); } catch (e) {} };
-        const boleh = (n) => role === 'pemilik' || String(n.maker || '').trim().toLowerCase() === me;
+        const hiddenSet = () => { try { return new Set(JSON.parse(localStorage.getItem(HIDDEN_KEY)) || []); } catch (e) { return new Set(); } };
+        const saveHidden = (set) => { try { localStorage.setItem(HIDDEN_KEY, JSON.stringify([...set].slice(-500))); } catch (e) {} };
+        const milikSaya = (n) => isOwner || String(n.maker || '').trim().toLowerCase() === me;
         const esc = (t) => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         const waktu = (t) => new Date(t).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 
+        // Notifikasi yang tampil untuk user ini (tanpa yang disembunyikan di browser)
+        function daftarTampil() {
+            const hidden = isOwner ? new Set() : hiddenSet();
+            return semua.filter(n => milikSaya(n) && !hidden.has(n.key)).sort((a, b) => b.timestamp - a.timestamp);
+        }
+
         function render() {
-            const list = semua.filter(boleh).reverse(); // terbaru di atas
-            const belum = list.filter(n => n.timestamp > lastSeen()).length;
+            const list = daftarTampil();
+            const seenAt = lastSeen();
+            const belum = list.filter(n => n.timestamp > seenAt).length;
 
             const badge = document.getElementById('notifBadge');
             badge.style.display = belum ? 'block' : 'none';
             badge.textContent = belum > 9 ? '9+' : belum;
 
+            const btnHapus = document.getElementById('btnNotifHapusSemua');
+            btnHapus.textContent = isOwner ? 'Hapus semua' : 'Sembunyikan semua';
+            btnHapus.disabled = !list.length;
+
             const box = document.getElementById('notifList');
             if (!list.length) { box.innerHTML = '<div class="notif-empty">Belum ada notifikasi.</div>'; return; }
-            const seenAt = lastSeen();
             box.innerHTML = list.slice(0, TAMPIL_MAKS).map(n => `
                 <div class="notif-item ${n.tipe === 'ringkasan' ? 'ringkasan' : 'sweeper'} ${n.timestamp > seenAt ? 'unread' : ''}">
+                    <button class="notif-del" title="${isOwner ? 'Hapus notifikasi' : 'Sembunyikan notifikasi'}" onclick="event.stopPropagation(); ${isOwner ? 'hapusNotif' : 'sembunyikanNotif'}('${esc(n.key)}')">✕</button>
                     <div class="notif-meta">
-                        <span class="notif-tag">${n.tipe === 'ringkasan' ? '📊 RINGKASAN HARIAN' : '⚙️ AUTO-SWEEPER'}</span>
+                        <span class="notif-tag">${n.tipe === 'ringkasan' ? '📊 RINGKASAN HARIAN' : (n.tipe === 'bot' ? '🤖 BOT' : '⚙️ AUTO-SWEEPER')}</span>
                         <span>${waktu(n.timestamp)}</span>
                     </div>
                     <pre>${esc(n.pesan)}</pre>
                 </div>`).join('');
+        }
+
+        function catatAudit(action) {
+            return firebase.database().ref('activity_logs').push({
+                uid: currentUserId, username, role, action, timestamp: Date.now()
+            });
         }
 
         window.toggleNotif = function (e) {
@@ -813,20 +844,42 @@
             const panel = document.getElementById('notifPanel');
             const buka = panel.style.display === 'none';
             panel.style.display = buka ? 'flex' : 'none';
-            if (buka) render(); // tampilkan status "baru" dulu sebelum ditandai dibaca
+            if (buka) render();
         };
-        window.tandaiSemuaDibaca = function () {
-            setLastSeen(Date.now());
-            render();
+        window.tandaiSemuaDibaca = function () { setLastSeen(Date.now()); render(); };
+
+        window.hapusNotif = function (key) {
+            const n = semua.find(x => x.key === key);
+            if (!n || !confirm('Hapus notifikasi ini? Akan hilang untuk semua pengguna.')) return;
+            firebase.database().ref('notifikasi/' + key).remove()
+                .then(() => catatAudit(`Menghapus notifikasi: ${String(n.pesan).slice(0, 80)}`))
+                .catch(err => alert('Gagal menghapus: ' + err.message));
         };
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.notif-wrap')) document.getElementById('notifPanel').style.display = 'none';
-        });
+
+        window.sembunyikanNotif = function (key) {
+            const set = hiddenSet(); set.add(key); saveHidden(set); render();
+        };
+
+        window.hapusSemuaNotif = function () {
+            if (isOwner) {
+                const jumlah = semua.length;
+                if (!jumlah || !confirm(`Hapus SEMUA notifikasi (${jumlah} yang tampil, termasuk yang lebih lama)? Berlaku untuk semua pengguna.`)) return;
+                firebase.database().ref('notifikasi').remove()
+                    .then(() => catatAudit(`Menghapus semua notifikasi (${jumlah} entri)`))
+                    .catch(err => alert('Gagal menghapus: ' + err.message));
+            } else {
+                const set = hiddenSet();
+                daftarTampil().forEach(n => set.add(n.key));
+                saveHidden(set); render();
+            }
+        };
 
         // Ambil 100 notifikasi terakhir (kunci berawalan timestamp, jadi urutannya kronologis)
         firebase.database().ref('notifikasi').limitToLast(100).on('value', (snap) => {
             const data = snap.val() || {};
-            semua = Object.values(data).filter(n => n && n.timestamp);
+            semua = Object.entries(data)
+                .filter(([, n]) => n && n.timestamp)
+                .map(([key, n]) => ({ key, ...n }));
             render();
         }, (err) => console.warn('Notifikasi gagal dimuat:', err.message));
     })();
