@@ -1,5 +1,6 @@
 // zeroix-gatekeeper - Proxy aman ke Pterodactyl Application API
 // API key disimpan di Cloudflare: Settings -> Variables and Secrets (PRVT_API, PUB_API, PUB_V2_API)
+// + endpoint /pay/* untuk pembayaran QRIS toko (secret RAFLYSHOP_PAY_KEY)
 
 // Website yang boleh memakai Worker ini
 const ALLOWED_ORIGINS = [
@@ -47,6 +48,12 @@ export default {
         }
         if (!ALLOWED_METHODS.includes(request.method)) {
             return reply('Method not allowed', 405, cors);
+        }
+
+        // Pembayaran QRIS toko (store.html) -> RaflyShop Payment
+        const pathname = new URL(request.url).pathname;
+        if (pathname.startsWith('/pay/')) {
+            return handlePayment(pathname, request, env, cors);
         }
 
         // 2. Mode panel harus salah satu yang terdaftar
@@ -107,6 +114,117 @@ export default {
         ctx.waitUntil(sweepExpired(env, event.scheduledTime));
     },
 };
+
+// ==========================================
+// PEMBAYARAN QRIS (RaflyShop Payment) untuk store.html
+//   Secret key disimpan di Cloudflare: Settings -> Variables and Secrets (RAFLYSHOP_PAY_KEY)
+//   Harga diambil dari Firebase store_products di sini, bukan dari browser, supaya tidak bisa diubah pembeli.
+//   Order dicatat di Firebase store_orders/{nexpay_transaction_id}
+// ==========================================
+// Catatan: docs.html menulis /charge/..., tapi endpoint aslinya ada di /api/charge/...
+const PAY_API = 'https://raflyshop.officialteam.my.id/api';
+const NEX_ID = /^NEX-[A-Za-z0-9-]{1,64}$/;
+
+// Status asli dari gateway: pending, settlement, cancelled, expired (docs menulis "cancel")
+const payStatus = (data) => String(data?.status || '').toLowerCase();
+
+async function firebaseRest(env, path, method = 'GET', body) {
+    const auth = env.FIREBASE_SECRET ? `?auth=${env.FIREBASE_SECRET}` : '';
+    const res = await fetch(`${FIREBASE_URL}/${path}.json${auth}`, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!res.ok) throw new Error(`Firebase ${method} ${path}: ${res.status}`);
+    return res.json();
+}
+
+async function payApi(env, endpoint, body) {
+    const res = await fetch(`${PAY_API}${endpoint}`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${env.RAFLYSHOP_PAY_KEY}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+        redirect: 'manual', // jangan ikuti redirect, supaya key tidak terbawa ke domain lain
+    });
+    let result = null;
+    try { result = await res.json(); } catch {}
+    if (!res.ok || !result?.success || !result.data) {
+        throw new Error(result?.message || `Payment gateway error ${res.status}`);
+    }
+    return result.data;
+}
+
+async function handlePayment(pathname, request, env, cors) {
+    if (request.method !== 'POST') return reply('Method not allowed', 405, cors);
+    if (!env.RAFLYSHOP_PAY_KEY) return reply('Payment key not configured in Worker', 500, cors);
+
+    let input;
+    try { input = await request.json(); } catch { return reply('Invalid JSON', 400, cors); }
+    const ok200 = (data) => new Response(JSON.stringify({ success: true, data }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...cors },
+    });
+
+    try {
+        // ---------- BUAT TAGIHAN ----------
+        if (pathname === '/pay/create') {
+            const productId = String(input.productId || '');
+            if (!/^[A-Za-z0-9_-]{1,128}$/.test(productId)) return reply('Produk tidak valid', 400, cors);
+            const product = await firebaseRest(env, `store_products/${productId}`);
+            const amount = parseInt(product?.harga);
+            if (!product || !(amount > 0)) return reply('Produk tidak ditemukan', 404, cors);
+
+            // Gateway kadang membalas "fetch failed" (gangguan di sisi mereka), coba sekali lagi
+            const data = await payApi(env, '/charge/qris', { amount })
+                .catch(e => e.message === 'fetch failed' ? payApi(env, '/charge/qris', { amount }) : Promise.reject(e));
+            const order = {
+                productId,
+                productName: product.nama || '-',
+                amount: data.amount,
+                fee: data.fee ?? null,
+                invoice: data.merchant_order_id,
+                status: payStatus(data) || 'pending',
+                expiresAt: data.expires_at || null,
+                createdAt: Date.now(),
+            };
+            await firebaseRest(env, `store_orders/${data.nexpay_transaction_id}`, 'PUT', order);
+            return ok200({
+                nexpay_transaction_id: data.nexpay_transaction_id,
+                invoice: order.invoice,
+                productName: order.productName,
+                amount: order.amount,
+                status: order.status,
+                qr_string: data.qr_string,
+                qr_image: data.qr_image, // URL gambar QR (.jpg) dari gateway
+                expires_at: order.expiresAt,
+            });
+        }
+
+        // ---------- CEK STATUS / BATALKAN (hanya order yang dibuat lewat Worker ini) ----------
+        if (pathname !== '/pay/status' && pathname !== '/pay/cancel') return reply('Not found', 404, cors);
+        const nexId = String(input.nexpay_transaction_id || '');
+        if (!NEX_ID.test(nexId)) return reply('ID transaksi tidak valid', 400, cors);
+        const order = await firebaseRest(env, `store_orders/${nexId}`);
+        if (!order) return reply('Order tidak ditemukan', 404, cors);
+
+        // Sudah final (lunas/batal), tidak perlu tanya gateway lagi
+        if (order.status !== 'pending') {
+            return ok200({ nexpay_transaction_id: nexId, invoice: order.invoice, status: order.status });
+        }
+
+        const data = await payApi(env, pathname === '/pay/status' ? '/charge/status' : '/charge/cancel', { nexpay_transaction_id: nexId });
+        const status = payStatus(data) || order.status;
+        if (status !== order.status) {
+            await firebaseRest(env, `store_orders/${nexId}`, 'PATCH', { status, updatedAt: Date.now() });
+        }
+        return ok200({ nexpay_transaction_id: nexId, invoice: order.invoice, status });
+    } catch (error) {
+        return reply(error.message, 502, cors);
+    }
+}
 
 // ==========================================
 // AUTO-SWEEPER EXPIRED (jalan di Cloudflare, tidak perlu ada yang buka website)

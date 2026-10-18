@@ -558,6 +558,71 @@
             font-weight: 700;
         }
 
+        /* Modal Pembayaran QRIS */
+        .pay-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 9999;
+        }
+        .pay-overlay.show { display: flex; }
+        .pay-box {
+            background: #1e293b;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 360px;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .pay-box h3 { margin: 0 0 4px 0; font-size: 18px; }
+        .pay-product { color: var(--text-sub); font-size: 13px; margin-bottom: 14px; overflow-wrap: anywhere; }
+        .pay-amount { font-size: 26px; font-weight: 800; color: var(--success); margin-bottom: 14px; }
+        .pay-qr {
+            background: #fff;
+            border-radius: 14px;
+            padding: 12px;
+            display: inline-flex;
+            margin-bottom: 12px;
+            min-height: 40px;
+        }
+        .pay-qr:empty { display: none; }
+        .pay-qr img, .pay-qr canvas { width: 220px; height: 220px; display: block; }
+        .pay-status {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.25);
+            margin-bottom: 12px;
+            white-space: pre-line;
+        }
+        .pay-status.success { color: var(--success); background: rgba(16, 185, 129, 0.12); }
+        .pay-status.error { color: #ef4444; background: rgba(239, 68, 68, 0.12); }
+        .pay-meta { font-size: 12px; color: var(--text-sub); margin-bottom: 14px; overflow-wrap: anywhere; }
+        .pay-meta a { color: var(--primary); }
+        .pay-actions { display: flex; flex-direction: column; gap: 8px; }
+        .pay-actions button {
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.05);
+            color: var(--text-main);
+        }
+        .pay-actions .pay-primary { background: linear-gradient(135deg, var(--primary), #059669); border-color: transparent; color: #fff; }
+        .pay-actions button[hidden] { display: none; }
+
         /* --- RESPONSIVE HP --- */
         @media (max-width: 480px) {
             .navbar { padding: 14px 4%; gap: 10px; }
@@ -690,6 +755,23 @@
         </div>
     </div>
 
+    <!-- Modal Pembayaran QRIS -->
+    <div class="pay-overlay" id="payModal">
+        <div class="pay-box">
+            <h3>Pembayaran QRIS</h3>
+            <div class="pay-product" id="payProduct"></div>
+            <div class="pay-amount" id="payAmount"></div>
+            <div class="pay-qr" id="payQr"></div>
+            <div class="pay-status" id="payStatus"></div>
+            <div class="pay-meta" id="payMeta"></div>
+            <div class="pay-actions">
+                <button class="pay-primary" id="payWaBtn" hidden>Konfirmasi via WhatsApp</button>
+                <button id="payCancelBtn" hidden>Batalkan Pembayaran</button>
+                <button id="payCloseBtn">Tutup</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer>
         <p>&copy; 2026 <span>ZeroixDark</span> | Official Marketplace</p>
@@ -699,6 +781,7 @@
     <script src="config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
         // Inisialisasi Firebase menggunakan config.js
@@ -796,10 +879,11 @@
                         ${p.diskon ? `<div class="discount-badge">${p.diskon}</div>` : ''}
                     </div>
 
-                    <button class="btn-beli" onclick="window.open('${linkWA}', '_blank')">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                        Pesan Sekarang
+                    <button class="btn-beli" onclick="bayarProduk('${p.id}')">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm-2 16h8v-8H3v8zm2-6h4v4H5v-4zm8-12v8h8V3h-8zm6 6h-4V5h4v4zm0 10h2v2h-2zm-6-6h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zm0-4h2v2h-2zm2 2h2v2h-2z"/></svg>
+                        Bayar via QRIS
                     </button>
+                    <a href="${linkWA}" target="_blank" style="display:block; text-align:center; margin-top:10px; font-size:12px; color:var(--text-sub);">Tanya dulu via WhatsApp</a>
                 </div>`;
             });
 
@@ -822,7 +906,7 @@
 
             if (dataProduk) {
                 Object.keys(dataProduk).forEach(key => {
-                    globalProducts.push(dataProduk[key]);
+                    globalProducts.push({ ...dataProduk[key], id: key });
                 });
             }
 
@@ -837,6 +921,162 @@
                 renderProducts('Semua');
             }
         });
+
+        // --- PEMBAYARAN QRIS (lewat Worker, secret key tidak pernah ada di browser) ---
+        const PAY_POLL_MS = 5000;
+        const payEl = (id) => document.getElementById(id);
+        let payOrder = null;   // order yang sedang ditampilkan di modal
+        let payTimer = null;
+        let paySeq = 0;        // naik setiap modal dibuka/ditutup, untuk buang respons yang sudah basi
+
+        async function payRequest(path, body) {
+            const res = await fetch(`${GlobalConfig.getWorkerUrl().replace(/[\/?]+$/, '')}/pay/${path}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            const json = await res.json().catch(() => null);
+            if (!res.ok || !json?.success) throw new Error(json?.error || `Error ${res.status}`);
+            return json.data;
+        }
+
+        function setPayStatus(text, tipe = '') {
+            const el = payEl('payStatus');
+            el.innerText = text;
+            el.className = 'pay-status' + (tipe ? ' ' + tipe : '');
+        }
+
+        function stopPolling() {
+            clearTimeout(payTimer);
+            payTimer = null;
+        }
+
+        function bukaWaKonfirmasi() {
+            if (!payOrder) return;
+            const pesan = encodeURIComponent(`Halo min, saya sudah membayar via QRIS:\n\n*${payOrder.productName}*\nNominal: ${formatRupiah(payOrder.amount)}\nInvoice: ${payOrder.invoice}\nID Transaksi: ${payOrder.nexpay_transaction_id}\n\nMohon diproses ya.`);
+            window.open(`https://wa.me/${nomorWhatsApp}?text=${pesan}`, '_blank');
+        }
+
+        const PAY_LUNAS = ['settlement', 'paid', 'success', 'completed'];
+        const PAY_GAGAL = { cancel: 'Pembayaran dibatalkan.', cancelled: 'Pembayaran dibatalkan.', expired: 'Tagihan sudah kedaluwarsa. Silakan buat pesanan baru.' };
+
+        function tampilkanStatus(status) {
+            if (status === 'pending') {
+                setPayStatus('⏳ Menunggu pembayaran...\nScan QR di atas dengan e-wallet / m-banking.');
+                return;
+            }
+            stopPolling();
+            payEl('payQr').innerHTML = '';
+            payEl('payCancelBtn').hidden = true;
+            if (PAY_LUNAS.includes(status)) {
+                payEl('payWaBtn').hidden = false;
+                setPayStatus('✅ Pembayaran berhasil!\nKirim konfirmasi ke admin untuk memproses pesanan.', 'success');
+            } else if (PAY_GAGAL[status]) {
+                setPayStatus(PAY_GAGAL[status], 'error');
+            } else {
+                // Status yang tidak dikenal: jangan anggap gagal, biar admin yang cek
+                payEl('payWaBtn').hidden = false;
+                setPayStatus(`Status pembayaran: ${status || '-'}\nHubungi admin dengan menyertakan invoice di bawah.`);
+            }
+        }
+
+        async function cekStatusPembayaran() {
+            if (!payOrder) return;
+            const nexId = payOrder.nexpay_transaction_id;
+            try {
+                const data = await payRequest('status', { nexpay_transaction_id: nexId });
+                if (payOrder?.nexpay_transaction_id !== nexId) return; // modal sudah ganti order
+                payOrder.status = data.status;
+                tampilkanStatus(data.status);
+            } catch (e) {
+                console.error('[Pay] Gagal cek status:', e);
+            }
+            if (payOrder?.nexpay_transaction_id === nexId && payOrder.status === 'pending') {
+                payTimer = setTimeout(cekStatusPembayaran, PAY_POLL_MS);
+            }
+        }
+
+        window.bayarProduk = async function(productId) {
+            const produk = globalProducts.find(p => p.id === productId);
+            if (!produk || payEl('payModal').classList.contains('show')) return;
+
+            stopPolling();
+            payOrder = null;
+            const seq = ++paySeq;
+            payEl('payProduct').innerText = produk.nama || 'Produk';
+            payEl('payAmount').innerText = formatRupiah(produk.harga);
+            payEl('payQr').innerHTML = '';
+            payEl('payMeta').innerHTML = '';
+            payEl('payWaBtn').hidden = true;
+            payEl('payCancelBtn').hidden = true;
+            setPayStatus('Membuat tagihan QRIS...');
+            payEl('payModal').classList.add('show');
+
+            try {
+                const data = await payRequest('create', { productId });
+                if (seq !== paySeq) return; // modal ditutup sebelum tagihan selesai dibuat
+                payOrder = data;
+                payEl('payAmount').innerText = formatRupiah(data.amount);
+
+                try {
+                    new QRCode(payEl('payQr'), { text: data.qr_string, width: 440, height: 440, correctLevel: QRCode.CorrectLevel.M });
+                } catch (e) {
+                    // Cadangan: pakai gambar QR dari gateway
+                    console.error('[Pay] Gagal render QR:', e);
+                    payEl('payQr').innerHTML = '';
+                    if (data.qr_image) {
+                        const img = document.createElement('img');
+                        img.src = data.qr_image;
+                        img.alt = 'QRIS';
+                        payEl('payQr').appendChild(img);
+                    }
+                }
+
+                const meta = document.createElement('div');
+                meta.innerText = `Invoice: ${data.invoice}` + (data.expires_at ? `\nBerlaku sampai: ${data.expires_at}` : '');
+                payEl('payMeta').appendChild(meta);
+                if (data.qr_image) {
+                    const link = document.createElement('a');
+                    link.href = data.qr_image;
+                    link.target = '_blank';
+                    link.rel = 'noopener';
+                    link.innerText = 'QR tidak muncul? Buka gambar QR';
+                    payEl('payMeta').appendChild(link);
+                }
+
+                payEl('payCancelBtn').hidden = false;
+                tampilkanStatus(data.status);
+                if (data.status === 'pending') payTimer = setTimeout(cekStatusPembayaran, PAY_POLL_MS);
+            } catch (e) {
+                if (seq !== paySeq) return;
+                setPayStatus('Gagal membuat tagihan: ' + e.message, 'error');
+            }
+        };
+
+        payEl('payWaBtn').onclick = bukaWaKonfirmasi;
+
+        payEl('payCancelBtn').onclick = async () => {
+            if (!payOrder || !confirm('Batalkan pembayaran ini?')) return;
+            const btn = payEl('payCancelBtn');
+            btn.disabled = true;
+            try {
+                const data = await payRequest('cancel', { nexpay_transaction_id: payOrder.nexpay_transaction_id });
+                payOrder.status = data.status;
+                tampilkanStatus(data.status);
+            } catch (e) {
+                alert('Gagal membatalkan: ' + e.message);
+            }
+            btn.disabled = false;
+        };
+
+        payEl('payCloseBtn').onclick = () => {
+            if (payOrder?.status === 'pending' &&
+                !confirm('Tagihan belum dibayar. Tutup sekarang? Kalau kamu sudah transfer, tunggu sampai status berubah jadi berhasil.')) return;
+            stopPolling();
+            payOrder = null;
+            paySeq++;
+            payEl('payModal').classList.remove('show');
+        };
 
         // --- SISTEM STATISTIK PENGUNJUNG & LIKES (FIREBASE) ---
         const statsRef = database.ref('store_stats');
