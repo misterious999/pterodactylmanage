@@ -157,6 +157,20 @@ async function payApi(env, endpoint, body) {
     return result.data;
 }
 
+// Error dengan HTTP status, pesannya aman ditampilkan ke pembeli
+class PayError extends Error {
+    constructor(message, status = 400) { super(message); this.status = status; }
+}
+
+// Tanda tangan order dibuat Worker saat tagihan dibuat. Firebase bisa ditulis dari browser,
+// jadi order tanpa tanda tangan yang cocok tidak boleh dipakai untuk membuat panel.
+async function signOrder(env, nexId, productId, amount) {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey('raw', enc.encode(env.RAFLYSHOP_PAY_KEY), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const sig = await crypto.subtle.sign('HMAC', key, enc.encode(`${nexId}|${productId}|${amount}`));
+    return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 async function handlePayment(pathname, request, env, cors) {
     if (request.method !== 'POST') return reply('Method not allowed', 405, cors);
     if (!env.RAFLYSHOP_PAY_KEY) return reply('Payment key not configured in Worker', 500, cors);
@@ -180,6 +194,7 @@ async function handlePayment(pathname, request, env, cors) {
             // Gateway kadang membalas "fetch failed" (gangguan di sisi mereka), coba sekali lagi
             const data = await payApi(env, '/charge/qris', { amount })
                 .catch(e => e.message === 'fetch failed' ? payApi(env, '/charge/qris', { amount }) : Promise.reject(e));
+            const nexId = data.nexpay_transaction_id;
             const order = {
                 productId,
                 productName: product.nama || '-',
@@ -189,10 +204,11 @@ async function handlePayment(pathname, request, env, cors) {
                 status: payStatus(data) || 'pending',
                 expiresAt: data.expires_at || null,
                 createdAt: Date.now(),
+                sig: await signOrder(env, nexId, productId, data.amount),
             };
-            await firebaseRest(env, `store_orders/${data.nexpay_transaction_id}`, 'PUT', order);
+            await firebaseRest(env, `store_orders/${nexId}`, 'PUT', order);
             return ok200({
-                nexpay_transaction_id: data.nexpay_transaction_id,
+                nexpay_transaction_id: nexId,
                 invoice: order.invoice,
                 productName: order.productName,
                 amount: order.amount,
@@ -203,12 +219,16 @@ async function handlePayment(pathname, request, env, cors) {
             });
         }
 
-        // ---------- CEK STATUS / BATALKAN (hanya order yang dibuat lewat Worker ini) ----------
-        if (pathname !== '/pay/status' && pathname !== '/pay/cancel') return reply('Not found', 404, cors);
+        // ---------- CEK STATUS / BATALKAN / BUAT PANEL (hanya order yang dibuat lewat Worker ini) ----------
+        if (!['/pay/status', '/pay/cancel', '/pay/provision'].includes(pathname)) return reply('Not found', 404, cors);
         const nexId = String(input.nexpay_transaction_id || '');
         if (!NEX_ID.test(nexId)) return reply('ID transaksi tidak valid', 400, cors);
         const order = await firebaseRest(env, `store_orders/${nexId}`);
         if (!order) return reply('Order tidak ditemukan', 404, cors);
+
+        if (pathname === '/pay/provision') {
+            return ok200(await provisionPanel(env, nexId, order, input));
+        }
 
         // Sudah final (lunas/batal), tidak perlu tanya gateway lagi
         if (order.status !== 'pending') {
@@ -222,7 +242,190 @@ async function handlePayment(pathname, request, env, cors) {
         }
         return ok200({ nexpay_transaction_id: nexId, invoice: order.invoice, status });
     } catch (error) {
-        return reply(error.message, 502, cors);
+        return reply(error.message, error.status || 502, cors);
+    }
+}
+
+// ==========================================
+// PANEL OTOMATIS SETELAH LUNAS
+//   Produk yang punya `panel: { mode, ram, disk, cpu }` (diatur di manage_products.html)
+//   langsung dibuatkan user + server Pterodactyl. Author = "admin", masa aktif PANEL_DAYS hari
+//   (ditulis ke ptero_users_expired, jadi Auto-Sweeper yang mengurus suspend/hapus).
+// ==========================================
+const PANEL_DAYS = 30;
+const PANEL_AUTHOR = 'admin';
+const PAID_STATUSES = ['settlement', 'paid', 'success', 'completed'];
+const DEPLOY = { locationId: 1, nestId: 5 }; // sama dengan GlobalConfig.getDefaultDeploy()
+const EGG_IMAGES = { 15: 'ghcr.io/parkervcp/yolks:nodejs_20', 20: 'ghcr.io/parkervcp/yolks:python_3.9' };
+// Sama persis dengan startup di manage_ptero_users.html
+const STARTUP = "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export$line; done fi; /usr/local/bin/${CMD_RUN};";
+const PROVISION_LOCK_MS = 3 * 60 * 1000; // kunci "processing" dianggap macet setelah 3 menit
+
+const tanggalWIB = (ms) => new Date(ms).toLocaleString('id-ID', {
+    timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+}) + ' WIB';
+
+function pteroClient(panel, apiKey) {
+    return async (path, method = 'GET', body) => {
+        const res = await fetch(`https://${panel.host}/api/application${path}`, {
+            method,
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+            body: body ? JSON.stringify(body) : undefined,
+            redirect: 'manual',
+        });
+        const text = await res.text();
+        let data = null;
+        try { data = text ? JSON.parse(text) : null; } catch {}
+        if (!res.ok) {
+            const detail = data?.errors?.map(e => e.detail).join('; ') || text.slice(0, 200);
+            throw new PayError(`Panel error ${res.status}: ${detail}`, 502);
+        }
+        return data;
+    };
+}
+
+// Kunci order supaya 1 pembayaran hanya menghasilkan 1 panel (pakai ETag Firebase)
+async function claimProvision(env, nexId) {
+    const auth = env.FIREBASE_SECRET ? `?auth=${env.FIREBASE_SECRET}` : '';
+    const url = `${FIREBASE_URL}/store_orders/${nexId}/provision.json${auth}`;
+    const cur = await fetch(url, { headers: { 'X-Firebase-ETag': 'true' } });
+    if (!cur.ok) throw new Error(`Firebase GET provision: ${cur.status}`);
+    const state = await cur.json();
+    if (state?.status === 'done') throw new PayError('Panel untuk pesanan ini sudah dibuat.', 409);
+    if (state?.status === 'processing' && Date.now() - state.at < PROVISION_LOCK_MS) {
+        throw new PayError('Panel sedang dibuat, tunggu sebentar lalu coba lagi.', 409);
+    }
+    const put = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'if-match': cur.headers.get('ETag') },
+        body: JSON.stringify({ status: 'processing', at: Date.now() }),
+    });
+    if (put.status === 412) throw new PayError('Panel sedang dibuat, tunggu sebentar lalu coba lagi.', 409);
+    if (!put.ok) throw new Error(`Firebase PUT provision: ${put.status}`);
+}
+
+async function provisionPanel(env, nexId, order, input) {
+    // 1. Validasi input pembeli
+    const username = String(input.username || '').trim().toLowerCase();
+    const password = String(input.password || '');
+    const serverName = String(input.serverName || '').trim();
+    const phone = String(input.phone || '').replace(/\D/g, '');
+    const eggId = parseInt(input.eggId);
+    if (!/^[a-z0-9][a-z0-9_.-]{2,29}$/.test(username)) throw new PayError('Username 3-30 karakter: huruf kecil, angka, titik, strip, atau underscore.');
+    if (password.length < 8 || password.length > 72) throw new PayError('Password minimal 8 karakter.');
+    if (!serverName || serverName.length > 50) throw new PayError('Nama server wajib diisi (maks. 50 karakter).');
+    if (!/^\d{9,15}$/.test(phone)) throw new PayError('Nomor telepon tidak valid.');
+    if (!EGG_IMAGES[eggId]) throw new PayError('Lingkungan server tidak valid.');
+
+    // 2. Order harus asli dari Worker ini dan produknya punya spesifikasi panel
+    if (!order.sig || order.sig !== await signOrder(env, nexId, order.productId, order.amount)) {
+        throw new PayError('Order tidak valid.', 403);
+    }
+    const product = await firebaseRest(env, `store_products/${order.productId}`);
+    const spec = product?.panel;
+    const panel = PANELS[spec?.mode];
+    if (!panel) throw new PayError('Produk ini tidak mendukung pembuatan panel otomatis. Hubungi admin.', 400);
+    const apiKey = env[panel.key];
+    if (!apiKey) throw new PayError('Panel API key not configured in Worker', 500);
+
+    // 3. Cek ulang ke gateway, jangan percaya status di Firebase
+    const pay = await payApi(env, '/charge/status', { nexpay_transaction_id: nexId });
+    if (!PAID_STATUSES.includes(payStatus(pay)) || Number(pay.amount) !== Number(order.amount)) {
+        throw new PayError('Pembayaran belum terverifikasi lunas.', 402);
+    }
+
+    await claimProvision(env, nexId);
+    const ptero = pteroClient(panel, apiKey);
+    let userId = null;
+    let serverDibuat = false;
+    try {
+        // 4. Username harus unik; email = nomor telepon @gmail.com (kalau sudah dipakai, pakai alias +kode)
+        const sama = (list, field, value) => (list?.data || []).some(u => String(u.attributes?.[field]).toLowerCase() === value);
+        if (sama(await ptero(`/users?filter[username]=${encodeURIComponent(username)}`), 'username', username)) {
+            throw new PayError('Username sudah dipakai, pilih username lain.', 409);
+        }
+        let email = `${phone}@gmail.com`;
+        if (sama(await ptero(`/users?filter[email]=${encodeURIComponent(email)}`), 'email', email)) {
+            email = `${phone}+${nexId.slice(-6)}@gmail.com`;
+        }
+
+        const createdAt = Date.now();
+        const expiredAt = createdAt + PANEL_DAYS * 24 * 60 * 60 * 1000;
+
+        const user = await ptero('/users', 'POST', {
+            email, username, first_name: username, last_name: PANEL_AUTHOR, password, root_admin: false,
+        });
+        userId = user.attributes.id;
+
+        // 5. Cari port kosong (sama dengan getFreeNodeAndAllocation)
+        const nodes = (await ptero('/nodes'))?.data || [];
+        let nodesInLoc = nodes.filter(n => parseInt(n.attributes?.location_id) === DEPLOY.locationId);
+        if (!nodesInLoc.length) nodesInLoc = nodes;
+        let alloc = null;
+        for (const node of nodesInLoc) {
+            for (let page = 1, total = 1; page <= total && !alloc; page++) {
+                const res = await ptero(`/nodes/${node.attributes.id}/allocations?page=${page}`);
+                alloc = (res?.data || []).find(a => a.attributes?.assigned === false);
+                if (alloc) alloc = { nodeId: node.attributes.id, allocId: alloc.attributes.id };
+                total = res?.meta?.pagination?.total_pages || 1;
+            }
+            if (alloc) break;
+        }
+        if (!alloc) throw new PayError('Semua port panel sedang penuh. Hubungi admin.', 503);
+
+        // 6. Environment egg (sama dengan getDynamicEnvironment)
+        let environment = { INST: 'npm', USER_UPLOAD: '0', AUTO_UPDATE: '0', CMD_RUN: 'npm start' };
+        try {
+            const egg = await ptero(`/nests/${DEPLOY.nestId}/eggs/${eggId}?include=variables`);
+            const preset = { PY_FILE: 'app.py', REQUIREMENTS_FILE: 'requirements.txt', MAIN_FILE: 'index.js', CMD_RUN: 'npm start', INST: 'npm', USER_UPLOAD: '0', AUTO_UPDATE: '0' };
+            environment = {};
+            for (const v of egg.attributes.relationships.variables.data) {
+                const a = v.attributes;
+                if (a.env_variable in preset) environment[a.env_variable] = preset[a.env_variable];
+                else if (a.rules.includes('required')) environment[a.env_variable] = a.default_value || 'default';
+            }
+        } catch {}
+
+        const server = await ptero('/servers', 'POST', {
+            name: serverName,
+            description: `Pembelian toko: ${order.productName} (${order.invoice}). Dibuat: ${tanggalWIB(createdAt)}. Expired: ${tanggalWIB(expiredAt)}.`,
+            user: userId,
+            node: alloc.nodeId,
+            allocation: { default: alloc.allocId },
+            egg: eggId,
+            docker_image: EGG_IMAGES[eggId],
+            startup: STARTUP,
+            environment,
+            limits: { memory: parseInt(spec.ram) || 0, swap: 0, disk: parseInt(spec.disk) || 0, io: 500, cpu: parseInt(spec.cpu) || 0 },
+            feature_limits: { databases: 5, backups: 5, allocations: 1 },
+        });
+        serverDibuat = true;
+
+        // 7. Catat expired (dibaca Auto-Sweeper), order, log aktivitas, notifikasi
+        const domainKey = panel.host.replace(/\./g, '_');
+        const pesan = `[${spec.mode}] Toko: panel ${username} (${order.productName}) dibuat otomatis untuk ${phone}, invoice ${order.invoice}. Expired ${tanggalWIB(expiredAt)}.`;
+        const result = {
+            username, email, phone, serverName,
+            userId, serverId: server.attributes.id, mode: spec.mode,
+            panelUrl: `https://${panel.host}`,
+            ram: parseInt(spec.ram) || 0, disk: parseInt(spec.disk) || 0, cpu: parseInt(spec.cpu) || 0,
+            createdAt, expiredAt,
+        };
+        await firebaseRest(env, '', 'PATCH', {
+            [`ptero_users_expired/${domainKey}/${userId}`]: { expiredAt, username, maker: PANEL_AUTHOR },
+            [`store_orders/${nexId}/provision`]: { status: 'done', ...result },
+            [`store_orders/${nexId}/status`]: payStatus(pay),
+            [`activity_logs/store_${createdAt}`]: { uid: 'system', username: 'Toko Otomatis', role: 'system', action: pesan, timestamp: createdAt },
+            [`notifikasi/${createdAt}_toko`]: { tipe: 'toko', pesan, maker: PANEL_AUTHOR, timestamp: createdAt },
+        });
+        return { ...result, productName: order.productName, invoice: order.invoice };
+    } catch (error) {
+        // Server sudah jadi tapi gagal dicatat: jangan dihapus, biar admin yang membereskan
+        if (serverDibuat) throw new PayError(`Panel sudah dibuat tapi gagal dicatat. Hubungi admin dengan invoice ${order.invoice}.`, 500);
+        // Gagal di tengah jalan: hapus user yang terlanjur dibuat dan lepas kunci supaya pembeli bisa coba lagi
+        if (userId) await ptero(`/users/${userId}`, 'DELETE').catch(() => {});
+        await firebaseRest(env, `store_orders/${nexId}/provision`, 'DELETE').catch(() => {});
+        throw error;
     }
 }
 

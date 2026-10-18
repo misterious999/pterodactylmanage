@@ -39,8 +39,9 @@
         .form-group.full-width { grid-column: 1 / -1; }
 
         label { display: block; margin-bottom: 8px; font-size: 11px; color: var(--text-sub); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        input[type="text"], input[type="number"], textarea { width: 100%; padding: 12px 14px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 10px; box-sizing: border-box; font-family: inherit; font-size: 13px; transition: 0.3s; outline: none;}
-        input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(15, 23, 42, 0.8); }
+        input[type="text"], input[type="number"], textarea, select { width: 100%; padding: 12px 14px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 10px; box-sizing: border-box; font-family: inherit; font-size: 13px; transition: 0.3s; outline: none;}
+        select option { background: #0f172a; color: var(--text-main); }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(15, 23, 42, 0.8); }
 
         input[type="file"] { width: 100%; padding: 10px; background: var(--input-bg); border: 1px dashed var(--border); color: var(--text-sub); border-radius: 10px; box-sizing: border-box; cursor: pointer; transition: 0.3s; }
         input[type="file"]:hover { border-color: var(--primary); background: rgba(13, 148, 136, 0.05); }
@@ -163,6 +164,31 @@
                     <div class="form-group">
                         <label>Label Promo Khusus (Opsional)</label>
                         <input type="text" id="diskon" placeholder="Contoh: Diskon 20% / Flash Sale" autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Panel Otomatis Setelah Bayar</label>
+                        <select id="panelMode" onchange="togglePanelSpec()">
+                            <option value="">Nonaktif (pesanan manual via WA)</option>
+                            <option value="private">Aktif: Panel Private</option>
+                            <option value="public">Aktif: Panel Public</option>
+                            <option value="public_v2">Aktif: Panel Public V2</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group panel-spec">
+                        <label>RAM Panel</label>
+                        <select id="panelRam"><option value="1024">1 GB</option><option value="2048">2 GB</option><option value="3072">3 GB</option><option value="4096" selected>4 GB</option><option value="5120">5 GB</option><option value="6144">6 GB</option><option value="7168">7 GB</option><option value="8192">8 GB</option><option value="9216">9 GB</option><option value="10240">10 GB</option><option value="0">Unlimited</option></select>
+                    </div>
+
+                    <div class="form-group panel-spec">
+                        <label>Disk Panel</label>
+                        <select id="panelDisk"><option value="1024">1 GB</option><option value="2048" selected>2 GB</option><option value="3072">3 GB</option><option value="4096">4 GB</option><option value="5120">5 GB</option><option value="6144">6 GB</option><option value="7168">7 GB</option><option value="8192">8 GB</option><option value="9216">9 GB</option><option value="10240">10 GB</option><option value="0">Unlimited</option></select>
+                    </div>
+
+                    <div class="form-group panel-spec">
+                        <label>CPU Limit Panel</label>
+                        <select id="panelCpu"><option value="50">50%</option><option value="100" selected>100%</option><option value="150">150%</option><option value="200">200%</option><option value="0">Unlimited</option></select>
                     </div>
 
                     <div class="form-group full-width">
@@ -395,12 +421,14 @@
                 
                 const diskonBadge = item.diskon ? `<br><span style="display:inline-block; margin-top:5px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">${item.diskon}</span>` : '';
                 const kategoriTeks = item.kategori ? item.kategori : 'Sistem Umum';
+                const ukuran = (mb) => mb ? `${mb / 1024} GB` : 'Unlimited';
+                const panelBadge = item.panel ? `<br><span style="display:inline-block; margin-top:5px; background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">Panel Otomatis · ${item.panel.mode} · RAM ${ukuran(item.panel.ram)}</span>` : '';
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><img src="${imgDisplay}" class="prod-img-preview" onerror="this.src='${fallbackImg}'"></td>
                     <td><strong style="font-size:14px; color:var(--text-main);">${item.nama}</strong><br><small style="color:var(--text-sub)">${item.deskripsi.substring(0, 45)}...</small></td>
-                    <td><span class="kategori-badge">${kategoriTeks}</span></td>
+                    <td><span class="kategori-badge">${kategoriTeks}</span>${panelBadge}</td>
                     <td><strong style="color:var(--success); font-size:14px;">${formatRupiah(item.harga)}</strong>${diskonBadge}</td>
                     <td>
                         <button class="btn-action btn-edit" onclick="editProduct('${key}')">Modifikasi</button>
@@ -460,7 +488,14 @@
                     kategori: inputKategori,
                     harga: parseInt(document.getElementById('harga').value),
                     diskon: document.getElementById('diskon').value,
-                    deskripsi: document.getElementById('deskripsi').value
+                    deskripsi: document.getElementById('deskripsi').value,
+                    // Spesifikasi panel yang dibuat otomatis setelah pembeli lunas (null = pesanan manual)
+                    panel: document.getElementById('panelMode').value ? {
+                        mode: document.getElementById('panelMode').value,
+                        ram: parseInt(document.getElementById('panelRam').value),
+                        disk: parseInt(document.getElementById('panelDisk').value),
+                        cpu: parseInt(document.getElementById('panelCpu').value)
+                    } : null
                 };
 
                 if (finalImageUrl !== "") {
@@ -509,6 +544,11 @@
                     document.getElementById('harga').value = data.harga;
                     document.getElementById('diskon').value = data.diskon || '';
                     document.getElementById('deskripsi').value = data.deskripsi;
+                    document.getElementById('panelMode').value = data.panel?.mode || '';
+                    document.getElementById('panelRam').value = data.panel?.ram ?? 4096;
+                    document.getElementById('panelDisk').value = data.panel?.disk ?? 2048;
+                    document.getElementById('panelCpu').value = data.panel?.cpu ?? 100;
+                    togglePanelSpec();
                     
                     document.getElementById('fileGambar').value = '';
                     
@@ -563,8 +603,15 @@
             });
         };
 
+        window.togglePanelSpec = function() {
+            const aktif = document.getElementById('panelMode').value !== '';
+            document.querySelectorAll('.panel-spec').forEach(el => el.style.display = aktif ? '' : 'none');
+        };
+        togglePanelSpec();
+
         function resetForm() {
             form.reset();
+            togglePanelSpec();
             document.getElementById('productId').value = '';
             fotoDataFinal = "";
             document.getElementById('previewGambar').style.display = 'none';
