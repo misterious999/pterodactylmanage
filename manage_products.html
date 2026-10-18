@@ -167,13 +167,14 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Panel Otomatis Setelah Bayar</label>
+                        <label>Spesifikasi Panel Otomatis</label>
                         <select id="panelMode" onchange="togglePanelSpec()">
-                            <option value="">Nonaktif (pesanan manual via WA)</option>
-                            <option value="private">Aktif: Panel Private</option>
-                            <option value="public">Aktif: Panel Public</option>
-                            <option value="public_v2">Aktif: Panel Public V2</option>
+                            <option value="">Otomatis dari kategori & nama produk</option>
+                            <option value="private">Manual: Panel Private</option>
+                            <option value="public">Manual: Panel Public</option>
+                            <option value="public_v2">Manual: Panel Public V2</option>
                         </select>
+                        <small id="panelDeteksi" style="display:block; margin-top:6px; font-size:11px; color:var(--text-sub);"></small>
                     </div>
 
                     <div class="form-group panel-spec">
@@ -421,8 +422,7 @@
                 
                 const diskonBadge = item.diskon ? `<br><span style="display:inline-block; margin-top:5px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">${item.diskon}</span>` : '';
                 const kategoriTeks = item.kategori ? item.kategori : 'Sistem Umum';
-                const ukuran = (mb) => mb ? `${mb / 1024} GB` : 'Unlimited';
-                const panelBadge = item.panel ? `<br><span style="display:inline-block; margin-top:5px; background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">Panel Otomatis · ${item.panel.mode} · RAM ${ukuran(item.panel.ram)}</span>` : '';
+                const panelBadge = `<br><span style="display:inline-block; margin-top:5px; background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">${teksJenisProduk(item)}</span>`;
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -603,10 +603,26 @@
             });
         };
 
+        // Ringkasan apa yang dibuat otomatis setelah pembeli lunas (aturannya di GlobalConfig.jenisProduk)
+        function teksJenisProduk(item) {
+            const jenis = GlobalConfig.jenisProduk(item);
+            const ukuran = (mb) => mb ? `${mb / 1024} GB` : 'Unlimited';
+            if (!jenis) return '⚠ Manual via WA (kategori/nama tidak dikenali)';
+            if (jenis.type === 'role') return `Akun Website · role ${jenis.role}`;
+            return `Panel ${jenis.mode} · RAM ${ukuran(jenis.ram)} · Disk ${ukuran(jenis.disk)} · CPU ${jenis.cpu ? jenis.cpu + '%' : 'Unlimited'}`;
+        }
+
         window.togglePanelSpec = function() {
-            const aktif = document.getElementById('panelMode').value !== '';
-            document.querySelectorAll('.panel-spec').forEach(el => el.style.display = aktif ? '' : 'none');
+            const manual = document.getElementById('panelMode').value !== '';
+            document.querySelectorAll('.panel-spec').forEach(el => el.style.display = manual ? '' : 'none');
+            const item = {
+                nama: document.getElementById('nama').value,
+                kategori: document.getElementById('kategori').value,
+                panel: manual ? { mode: document.getElementById('panelMode').value, ram: parseInt(document.getElementById('panelRam').value), disk: parseInt(document.getElementById('panelDisk').value), cpu: parseInt(document.getElementById('panelCpu').value) } : null
+            };
+            document.getElementById('panelDeteksi').innerText = 'Hasil setelah lunas: ' + teksJenisProduk(item);
         };
+        ['nama', 'kategori', 'panelRam', 'panelDisk', 'panelCpu'].forEach(id => document.getElementById(id).addEventListener('input', togglePanelSpec));
         togglePanelSpec();
 
         function resetForm() {

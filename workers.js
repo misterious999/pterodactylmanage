@@ -247,10 +247,10 @@ async function handlePayment(pathname, request, env, cors) {
 }
 
 // ==========================================
-// PANEL OTOMATIS SETELAH LUNAS
-//   Produk yang punya `panel: { mode, ram, disk, cpu }` (diatur di manage_products.html)
-//   langsung dibuatkan user + server Pterodactyl. Author = "admin", masa aktif PANEL_DAYS hari
-//   (ditulis ke ptero_users_expired, jadi Auto-Sweeper yang mengurus suspend/hapus).
+// PESANAN OTOMATIS SETELAH LUNAS
+//   Jenis produk ditentukan jenisProduk(): panel Pterodactyl (user + server) atau akun login website.
+//   Author = "admin", masa aktif PANEL_DAYS hari. Untuk panel ditulis ke ptero_users_expired
+//   (Auto-Sweeper yang mengurus suspend/hapus), untuk akun website ke users/{id}/expiredAt.
 // ==========================================
 const PANEL_DAYS = 30;
 const PANEL_AUTHOR = 'admin';
@@ -260,6 +260,76 @@ const EGG_IMAGES = { 15: 'ghcr.io/parkervcp/yolks:nodejs_20', 20: 'ghcr.io/parke
 // Sama persis dengan startup di manage_ptero_users.html
 const STARTUP = "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export$line; done fi; /usr/local/bin/${CMD_RUN};";
 const PROVISION_LOCK_MS = 3 * 60 * 1000; // kunci "processing" dianggap macet setelah 3 menit
+const WEB_LOGIN_URL = `${ALLOWED_ORIGINS[0]}/login`;
+
+// Harus sama dengan GlobalConfig.jenisProduk() di config.js
+function jenisProduk(p) {
+    const norm = (s) => String(s || '').toLowerCase().replace(/publik/g, 'public').replace(/privat\b/g, 'private').replace(/reseler/g, 'reseller');
+    const kat = norm(p?.kategori), nama = norm(p?.nama);
+    const area = (s) => /\bv2\b/.test(s) ? 'public_v2' : /private/.test(s) ? 'private' : /public/.test(s) ? 'public' : null;
+
+    if (/\brole\b/.test(kat)) {
+        const tier = /partner/.test(nama) ? 'partner' : /reseller/.test(nama) ? 'reseller' : null;
+        const role = tier && area(nama) ? `${tier}_${area(nama)}` : null;
+        const roles = ['reseller_private', 'reseller_public', 'partner_public', 'reseller_public_v2', 'partner_public_v2'];
+        return roles.includes(role) ? { type: 'role', role } : null;
+    }
+    if (p?.panel?.mode) return { type: 'panel', ...p.panel };
+    if (/\bpanel\b/.test(kat) && area(kat)) {
+        const gb = nama.match(/(\d+)\s*gb/);
+        if (/unli/.test(nama)) return { type: 'panel', mode: area(kat), ram: 0, disk: 0, cpu: 0 };
+        if (gb) return { type: 'panel', mode: area(kat), ram: gb[1] * 1024, disk: gb[1] * 1024, cpu: 100 };
+    }
+    return null;
+}
+
+// Akun login website (sama dengan buatAkunWeb() di manage_panel_users.html), author "admin", aktif PANEL_DAYS hari
+async function buatAkunWebsite(env, nexId, order, jenis, { username, password, phone }) {
+    const users = await firebaseRest(env, 'users') || {};
+    const dipakai = Object.values(users).some(u => String(u?.username || '').trim().toLowerCase() === username);
+    if (dipakai) throw new PayError('Username sudah dipakai, pilih username lain.', 409);
+
+    const createdAt = Date.now();
+    const expiredAt = createdAt + PANEL_DAYS * 24 * 60 * 60 * 1000;
+    const res = await fetch(`${FIREBASE_URL}/users.json${env.FIREBASE_SECRET ? `?auth=${env.FIREBASE_SECRET}` : ''}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            username,
+            usernameLower: username,
+            password,
+            role: jenis.role,
+            maker: PANEL_AUTHOR,
+            phone,
+            isOnline: false,
+            profilePic: '',
+            timestamp: createdAt,
+            createdAt,
+            lastLoginAt: 0,
+            expiredStatus: 'active',
+            expiredAt,
+            expiredNote: `Lisensi otomatis ${PANEL_DAYS} Hari dari pembelian toko (${order.invoice}).`,
+            expiredUpdatedAt: createdAt,
+            expiredUpdatedBy: 'Sistem',
+            expiredUpdatedByUid: 'system',
+        }),
+    });
+    if (!res.ok) throw new Error(`Firebase POST users: ${res.status}`);
+    const uid = (await res.json()).name;
+
+    const pesan = `Toko: akun website ${username} (${jenis.role}) dibuat otomatis untuk ${phone}, invoice ${order.invoice}. Expired ${tanggalWIB(expiredAt)}.`;
+    const result = { kind: 'role', username, role: jenis.role, phone, uid, loginUrl: WEB_LOGIN_URL, createdAt, expiredAt };
+    try {
+        await firebaseRest(env, '', 'PATCH', {
+            [`store_orders/${nexId}/provision`]: { status: 'done', ...result },
+            [`activity_logs/store_${createdAt}`]: { uid: 'system', username: 'Toko Otomatis', role: 'system', action: pesan, timestamp: createdAt },
+            [`notifikasi/${createdAt}_toko`]: { tipe: 'toko', pesan, maker: PANEL_AUTHOR, timestamp: createdAt },
+        });
+    } catch {
+        throw new PayError(`Akun sudah dibuat tapi gagal dicatat. Hubungi admin dengan invoice ${order.invoice}.`, 500);
+    }
+    return { ...result, productName: order.productName, invoice: order.invoice };
+}
 
 const tanggalWIB = (ms) => new Date(ms).toLocaleString('id-ID', {
     timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
@@ -291,16 +361,16 @@ async function claimProvision(env, nexId) {
     const cur = await fetch(url, { headers: { 'X-Firebase-ETag': 'true' } });
     if (!cur.ok) throw new Error(`Firebase GET provision: ${cur.status}`);
     const state = await cur.json();
-    if (state?.status === 'done') throw new PayError('Panel untuk pesanan ini sudah dibuat.', 409);
+    if (state?.status === 'done') throw new PayError('Pesanan ini sudah diproses sebelumnya.', 409);
     if (state?.status === 'processing' && Date.now() - state.at < PROVISION_LOCK_MS) {
-        throw new PayError('Panel sedang dibuat, tunggu sebentar lalu coba lagi.', 409);
+        throw new PayError('Pesanan sedang diproses, tunggu sebentar lalu coba lagi.', 409);
     }
     const put = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'if-match': cur.headers.get('ETag') },
         body: JSON.stringify({ status: 'processing', at: Date.now() }),
     });
-    if (put.status === 412) throw new PayError('Panel sedang dibuat, tunggu sebentar lalu coba lagi.', 409);
+    if (put.status === 412) throw new PayError('Pesanan sedang diproses, tunggu sebentar lalu coba lagi.', 409);
     if (!put.ok) throw new Error(`Firebase PUT provision: ${put.status}`);
 }
 
@@ -313,20 +383,23 @@ async function provisionPanel(env, nexId, order, input) {
     const eggId = parseInt(input.eggId);
     if (!/^[a-z0-9][a-z0-9_.-]{2,29}$/.test(username)) throw new PayError('Username 3-30 karakter: huruf kecil, angka, titik, strip, atau underscore.');
     if (password.length < 8 || password.length > 72) throw new PayError('Password minimal 8 karakter.');
-    if (!serverName || serverName.length > 50) throw new PayError('Nama server wajib diisi (maks. 50 karakter).');
     if (!/^\d{9,15}$/.test(phone)) throw new PayError('Nomor telepon tidak valid.');
-    if (!EGG_IMAGES[eggId]) throw new PayError('Lingkungan server tidak valid.');
 
-    // 2. Order harus asli dari Worker ini dan produknya punya spesifikasi panel
+    // 2. Order harus asli dari Worker ini dan produknya bisa diproses otomatis
     if (!order.sig || order.sig !== await signOrder(env, nexId, order.productId, order.amount)) {
         throw new PayError('Order tidak valid.', 403);
     }
     const product = await firebaseRest(env, `store_products/${order.productId}`);
-    const spec = product?.panel;
-    const panel = PANELS[spec?.mode];
-    if (!panel) throw new PayError('Produk ini tidak mendukung pembuatan panel otomatis. Hubungi admin.', 400);
-    const apiKey = env[panel.key];
-    if (!apiKey) throw new PayError('Panel API key not configured in Worker', 500);
+    const spec = jenisProduk(product);
+    if (!spec) throw new PayError('Produk ini tidak bisa diproses otomatis. Hubungi admin.', 400);
+    const panel = spec.type === 'panel' ? PANELS[spec.mode] : null;
+    if (spec.type === 'panel') {
+        if (!serverName || serverName.length > 50) throw new PayError('Nama server wajib diisi (maks. 50 karakter).');
+        if (!EGG_IMAGES[eggId]) throw new PayError('Lingkungan server tidak valid.');
+        if (!panel) throw new PayError('Panel untuk produk ini tidak dikenal. Hubungi admin.', 400);
+    }
+    const apiKey = panel && env[panel.key];
+    if (panel && !apiKey) throw new PayError('Panel API key not configured in Worker', 500);
 
     // 3. Cek ulang ke gateway, jangan percaya status di Firebase
     const pay = await payApi(env, '/charge/status', { nexpay_transaction_id: nexId });
@@ -335,6 +408,16 @@ async function provisionPanel(env, nexId, order, input) {
     }
 
     await claimProvision(env, nexId);
+    if (spec.type === 'role') {
+        try {
+            return await buatAkunWebsite(env, nexId, order, spec, { username, password, phone });
+        } catch (error) {
+            if (!(error instanceof PayError && error.status === 500)) {
+                await firebaseRest(env, `store_orders/${nexId}/provision`, 'DELETE').catch(() => {});
+            }
+            throw error;
+        }
+    }
     const ptero = pteroClient(panel, apiKey);
     let userId = null;
     let serverDibuat = false;
@@ -405,7 +488,7 @@ async function provisionPanel(env, nexId, order, input) {
         const domainKey = panel.host.replace(/\./g, '_');
         const pesan = `[${spec.mode}] Toko: panel ${username} (${order.productName}) dibuat otomatis untuk ${phone}, invoice ${order.invoice}. Expired ${tanggalWIB(expiredAt)}.`;
         const result = {
-            username, email, phone, serverName,
+            kind: 'panel', username, email, phone, serverName,
             userId, serverId: server.attributes.id, mode: spec.mode,
             panelUrl: `https://${panel.host}`,
             ram: parseInt(spec.ram) || 0, disk: parseInt(spec.disk) || 0, cpu: parseInt(spec.cpu) || 0,

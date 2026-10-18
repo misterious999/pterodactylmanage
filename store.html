@@ -802,24 +802,24 @@
             <!-- Form data panel, muncul setelah lunas untuk produk panel otomatis -->
             <div class="pay-form" id="payForm" hidden>
                 <div class="pay-spec" id="paySpec"></div>
-                <label>Username Panel<input type="text" id="pfUsername" placeholder="huruf kecil tanpa spasi" autocomplete="off" autocapitalize="off" maxlength="30"></label>
-                <label>Password Panel<input type="text" id="pfPassword" placeholder="minimal 8 karakter" autocomplete="off" maxlength="72"></label>
-                <label>Nama Server<input type="text" id="pfServer" placeholder="Contoh: Bot WhatsApp" autocomplete="off" maxlength="50"></label>
+                <label>Username<input type="text" id="pfUsername" placeholder="huruf kecil tanpa spasi" autocomplete="off" autocapitalize="off" maxlength="30"></label>
+                <label>Password<input type="text" id="pfPassword" placeholder="minimal 8 karakter" autocomplete="off" maxlength="72"></label>
+                <label id="pfServerRow">Nama Server<input type="text" id="pfServer" placeholder="Contoh: Bot WhatsApp" autocomplete="off" maxlength="50"></label>
                 <label>Nomor WhatsApp<input type="tel" id="pfPhone" placeholder="08xxxxxxxxxx" inputmode="numeric" autocomplete="tel" maxlength="16"></label>
-                <label>Lingkungan Server
+                <label id="pfEggRow">Lingkungan Server
                     <select id="pfEgg">
                         <option value="15">NodeJS (Bot / Server)</option>
                         <option value="20">Python (Bot / Server)</option>
                     </select>
                 </label>
                 <div class="pay-form-error" id="pfError"></div>
-                <div class="pay-actions"><button class="pay-primary" id="pfSubmit">Buat Panel Sekarang</button></div>
+                <div class="pay-actions"><button class="pay-primary" id="pfSubmit">Buat Sekarang</button></div>
             </div>
 
             <div class="pay-struk" id="payStruk" hidden></div>
             <div class="pay-meta" id="payMeta"></div>
             <div class="pay-actions">
-                <button class="pay-primary" id="payUnlockBtn" hidden>Kirim Bukti ke Owner, lalu Unlock Data Lengkap Panel</button>
+                <button class="pay-primary" id="payUnlockBtn" hidden>Kirim Bukti ke Owner, lalu Unlock Data Lengkap</button>
                 <button class="pay-primary" id="payCopyBtn" hidden>Salin Data Panel</button>
                 <button class="pay-primary" id="payWaBtn" hidden>Konfirmasi via WhatsApp</button>
                 <button id="payCancelBtn" hidden>Batalkan Pembayaran</button>
@@ -1021,9 +1021,16 @@
 
         const ukuran = (mb) => mb ? `${mb / 1024} GB` : 'Unlimited';
         const tanggalWIB = (ms) => new Date(ms).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB';
-        const specPanel = (order) => globalProducts.find(p => p.id === order.productId)?.panel || null;
+        const ROLE_LABEL = {
+            reseller_private: 'Reseller Private', reseller_public: 'Reseller Public', partner_public: 'Partner Public',
+            reseller_public_v2: 'Reseller Public V2', partner_public_v2: 'Partner Public V2',
+        };
+        const PANEL_LABEL = { private: 'Panel Private', public: 'Panel Public', public_v2: 'Panel Public V2' };
+        const specLimit = (x) => `RAM ${ukuran(x.ram)} · Disk ${ukuran(x.disk)} · CPU ${x.cpu ? x.cpu + '%' : 'Unlimited'}`;
+        // Jenis produk dari kategori + nama (lihat GlobalConfig.jenisProduk): panel Pterodactyl / akun website / null
+        const specPanel = (order) => GlobalConfig.jenisProduk(globalProducts.find(p => p.id === order.productId));
 
-        // Pesanan lunas yang masih harus diisi data panelnya / di-unlock
+        // Pesanan lunas yang masih harus diisi datanya / di-unlock
         const belumSelesai = (order) => order && PAY_LUNAS.includes(order.status) &&
             (order.panel ? !order.unlocked : !!specPanel(order));
 
@@ -1044,6 +1051,9 @@
 
         function teksDataPanel(o) {
             const p = o.panel;
+            if (p.kind === 'role') {
+                return `✅ *DATA LOGIN WEBSITE*\n\nUsername: ${p.username}\nPassword: ${o.password || '-'}\nRole: ${ROLE_LABEL[p.role] || p.role}\nLink Login: ${p.loginUrl}\nPaket: ${o.productName}\nDibuat: ${tanggalWIB(p.createdAt)}\nExpired: ${tanggalWIB(p.expiredAt)}\nInvoice: ${o.invoice}`;
+            }
             return `✅ *DATA AKUN PANEL*\n\nUsername: ${p.username}\nPassword: ${o.password || '-'}\nEmail: ${p.email}\nLink Panel: ${p.panelUrl}\nServer: ${p.serverName}\nPaket: ${o.productName}\nRAM: ${ukuran(p.ram)} | Disk: ${ukuran(p.disk)} | CPU: ${p.cpu ? p.cpu + '%' : 'Unlimited'}\nDibuat: ${tanggalWIB(p.createdAt)}\nExpired: ${tanggalWIB(p.expiredAt)}\nInvoice: ${o.invoice}`;
         }
 
@@ -1053,7 +1063,7 @@
             box.innerHTML = '';
             const judul = document.createElement('div');
             judul.className = 'pay-struk-title';
-            judul.innerText = 'DATA LOGIN PANEL';
+            judul.innerText = p.kind === 'role' ? 'DATA LOGIN WEBSITE' : 'DATA LOGIN PANEL';
             box.appendChild(judul);
             const baris = (label, nilai, href) => {
                 const row = document.createElement('div');
@@ -1066,13 +1076,21 @@
                 row.append(l, v);
                 box.appendChild(row);
             };
-            baris('Link Login', p.panelUrl, p.panelUrl);
-            baris('Username', p.username);
-            baris('Password', o.password || '(yang kamu isi tadi)');
-            baris('Email', p.email);
-            baris('Server', p.serverName);
-            baris('Paket', o.productName);
-            baris('Spesifikasi', `RAM ${ukuran(p.ram)} · Disk ${ukuran(p.disk)} · CPU ${p.cpu ? p.cpu + '%' : 'Unlimited'}`);
+            if (p.kind === 'role') {
+                baris('Link Login', p.loginUrl, p.loginUrl);
+                baris('Username', p.username);
+                baris('Password', o.password || '(yang kamu isi tadi)');
+                baris('Role', ROLE_LABEL[p.role] || p.role);
+                baris('Paket', o.productName);
+            } else {
+                baris('Link Login', p.panelUrl, p.panelUrl);
+                baris('Username', p.username);
+                baris('Password', o.password || '(yang kamu isi tadi)');
+                baris('Email', p.email);
+                baris('Server', p.serverName);
+                baris('Paket', o.productName);
+                baris('Spesifikasi', specLimit(p));
+            }
             baris('Dibuat', tanggalWIB(p.createdAt));
             baris('Expired', tanggalWIB(p.expiredAt));
             baris('Invoice', o.invoice);
@@ -1101,15 +1119,20 @@
                 renderStruk(o);
                 payEl('payStruk').hidden = false;
                 payEl('payCopyBtn').hidden = false;
-                setPayStatus('✅ Panel kamu sudah aktif. Silakan login dengan data di bawah.', 'success');
+                setPayStatus(`✅ ${o.panel.kind === 'role' ? 'Akun website' : 'Panel'} kamu sudah aktif. Silakan login dengan data di bawah.`, 'success');
             } else if (o.panel) {
                 payEl('payUnlockBtn').hidden = false;
-                setPayStatus(`✅ Panel berhasil dibuat otomatis!\nKirim bukti pembayaran ke owner untuk membuka data login lengkap.`, 'success');
+                setPayStatus(`✅ ${o.panel.kind === 'role' ? 'Akun website' : 'Panel'} berhasil dibuat otomatis!\nKirim bukti pembayaran ke owner untuk membuka data login lengkap.`, 'success');
             } else if (PAY_LUNAS.includes(o.status) && specPanel(o)) {
                 const spec = specPanel(o);
-                payEl('paySpec').innerText = `Paket ${o.productName}\nRAM ${ukuran(spec.ram)} · Disk ${ukuran(spec.disk)} · CPU ${spec.cpu ? spec.cpu + '%' : 'Unlimited'}`;
+                const isRole = spec.type === 'role';
+                payEl('paySpec').innerText = isRole
+                    ? `Akun login website\nRole ${ROLE_LABEL[spec.role] || spec.role}`
+                    : `${PANEL_LABEL[spec.mode] || spec.mode} · ${o.productName}\n${specLimit(spec)}`;
+                payEl('pfServerRow').hidden = isRole;
+                payEl('pfEggRow').hidden = isRole;
                 payEl('payForm').hidden = false;
-                setPayStatus('✅ Pembayaran berhasil!\nIsi data panel di bawah, panel akan dibuat otomatis.', 'success');
+                setPayStatus(`✅ Pembayaran berhasil!\nIsi data ${isRole ? 'akun website' : 'panel'} di bawah, ${isRole ? 'akun' : 'panel'} akan dibuat otomatis.`, 'success');
             } else if (PAY_LUNAS.includes(o.status)) {
                 payEl('payWaBtn').hidden = false;
                 setPayStatus('✅ Pembayaran berhasil!\nKirim konfirmasi ke admin untuk memproses pesanan.', 'success');
@@ -1220,14 +1243,15 @@
             const err = payEl('pfError');
             if (!/^[a-z0-9][a-z0-9_.-]{2,29}$/.test(input.username)) return err.innerText = 'Username 3-30 karakter: huruf kecil, angka, titik, strip, atau underscore.';
             if (input.password.length < 8) return err.innerText = 'Password minimal 8 karakter.';
-            if (!input.serverName) return err.innerText = 'Nama server wajib diisi.';
+            const isRole = specPanel(payOrder)?.type === 'role';
+            if (!isRole && !input.serverName) return err.innerText = 'Nama server wajib diisi.';
             if (!/^\d{9,15}$/.test(input.phone)) return err.innerText = 'Nomor WhatsApp tidak valid.';
             err.innerText = '';
 
             const btn = payEl('pfSubmit');
             const seq = paySeq;
             btn.disabled = true;
-            btn.innerText = 'Membuat panel... (jangan tutup halaman)';
+            btn.innerText = `Membuat ${isRole ? 'akun' : 'panel'}... (jangan tutup halaman)`;
             try {
                 const panel = await payRequest('provision', input);
                 if (seq !== paySeq) return;
@@ -1236,17 +1260,18 @@
                 simpanPesanan();
                 tampilkanPesanan();
             } catch (e) {
-                if (seq === paySeq) err.innerText = 'Gagal membuat panel: ' + e.message;
+                if (seq === paySeq) err.innerText = `Gagal membuat ${isRole ? 'akun' : 'panel'}: ` + e.message;
             }
             btn.disabled = false;
-            btn.innerText = 'Buat Panel Sekarang';
+            btn.innerText = 'Buat Sekarang';
         };
 
         // --- Kirim bukti ke owner, lalu buka data login ---
         payEl('payUnlockBtn').onclick = () => {
             if (!payOrder?.panel) return;
             const p = payOrder.panel;
-            bukaWa(`Halo min, saya sudah membayar via QRIS dan panel sudah dibuat otomatis.\n\n*${payOrder.productName}*\nNominal: ${formatRupiah(payOrder.amount)}\nInvoice: ${payOrder.invoice}\nID Transaksi: ${payOrder.nexpay_transaction_id}\nUsername Panel: ${p.username}\nNomor: ${p.phone}\n\nBerikut bukti pembayaran saya:`);
+            const jenis = p.kind === 'role' ? `akun website (${ROLE_LABEL[p.role] || p.role})` : 'panel';
+            bukaWa(`Halo min, saya sudah membayar via QRIS dan ${jenis} sudah dibuat otomatis.\n\n*${payOrder.productName}*\nNominal: ${formatRupiah(payOrder.amount)}\nInvoice: ${payOrder.invoice}\nID Transaksi: ${payOrder.nexpay_transaction_id}\nUsername: ${p.username}\nNomor: ${p.phone}\n\nBerikut bukti pembayaran saya:`);
             payOrder.unlocked = true;
             simpanPesanan();
             tampilkanPesanan();
