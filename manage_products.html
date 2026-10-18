@@ -57,6 +57,8 @@
         .btn-action { padding: 8px 12px; font-size: 11px; margin: 2px 5px 2px 0; border-radius: 8px; }
         .btn-edit { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
         .btn-edit:hover { background: var(--warning); color: white; }
+        .btn-clone { background: rgba(13, 148, 136, 0.1); color: var(--primary); border: 1px solid rgba(13, 148, 136, 0.3); }
+        .btn-clone:hover { background: var(--primary); color: white; }
         .btn-delete { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
         .btn-delete:hover { background: var(--danger); color: white; }
 
@@ -402,6 +404,7 @@
                     <td><strong style="color:var(--success); font-size:14px;">${formatRupiah(item.harga)}</strong>${diskonBadge}</td>
                     <td>
                         <button class="btn-action btn-edit" onclick="editProduct('${key}')">Modifikasi</button>
+                        <button class="btn-action btn-clone" onclick="cloneProduct('${key}')">Duplikat</button>
                         <button class="btn-action btn-delete" onclick="deleteProduct('${key}')">Cabut</button>
                     </td>
                 `;
@@ -491,13 +494,17 @@
             }
         });
 
-        // --- EDIT & HAPUS ---
-        window.editProduct = function(key) {
+        // --- EDIT, DUPLIKAT & HAPUS ---
+        // Duplikat = isi form dengan data produk lama tanpa productId, jadi saat disubmit tersimpan sebagai produk baru
+        window.editProduct = (key) => isiFormProduk(key, false);
+        window.cloneProduct = (key) => isiFormProduk(key, true);
+
+        function isiFormProduk(key, isClone) {
             productRef.child(key).once('value').then((snapshot) => {
                 const data = snapshot.val();
                 if(data) {
-                    document.getElementById('productId').value = key;
-                    document.getElementById('nama').value = data.nama;
+                    document.getElementById('productId').value = isClone ? '' : key;
+                    document.getElementById('nama').value = isClone ? `${data.nama} (Salinan)` : data.nama;
                     document.getElementById('kategori').value = data.kategori || '';
                     document.getElementById('harga').value = data.harga;
                     document.getElementById('diskon').value = data.diskon || '';
@@ -522,6 +529,19 @@
                         fotoDataFinal = "";
                     }
                     
+                    if (isClone) {
+                        formTitle.innerHTML = `<svg viewBox="0 0 24 24" style="fill:var(--primary); width:18px;"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Duplikat Produk (Simpan sebagai Baru)`;
+                        btnSubmit.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px; fill:white;"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg> Publish Produk Duplikat`;
+                        btnSubmit.style.background = "linear-gradient(135deg, var(--primary), #059669)";
+                        btnSubmit.style.boxShadow = "0 4px 15px var(--primary-glow)";
+                        btnCancelEdit.style.display = "flex";
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        const inputNama = document.getElementById('nama');
+                        inputNama.focus({ preventScroll: true });
+                        inputNama.select();
+                        return;
+                    }
+
                     formTitle.innerHTML = `<svg viewBox="0 0 24 24" style="fill:var(--warning); width:18px;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg> Modifikasi Atribut Layanan`;
                     btnSubmit.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px; fill:white;"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg> Terapkan Modifikasi`;
                     btnSubmit.style.background = "linear-gradient(135deg, var(--warning), #d97706)";
@@ -530,7 +550,7 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             });
-        };
+        }
 
         window.deleteProduct = function(key) {
             openSysModal('confirm', 'PENCABUTAN LAYANAN', 'Sistem akan menghapus layanan ini secara permanen dari pangkalan data dan etalase publik. Lanjutkan?', async () => {
