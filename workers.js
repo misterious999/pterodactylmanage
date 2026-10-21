@@ -89,7 +89,8 @@ async function hmacHex(env, msg) {
 }
 
 async function signSession(env, sess) {
-    sess.e = Date.now() + SESSION_TTL_MS;
+    sess.i = Date.now(); // issued-at: dipakai untuk pencabutan sesi saat password berubah
+    sess.e = sess.i + SESSION_TTL_MS;
     const payload = b64url(txtEnc.encode(JSON.stringify(sess)));
     return `v1.${payload}.${await hmacHex(env, payload)}`;
 }
@@ -185,9 +186,9 @@ function deepGetKey(obj, key) {
     return undefined;
 }
 
-async function deepHashPasswords(obj, sess) {
+async function deepHashPasswords(obj, sess, stampPasswordChange) {
     if (Array.isArray(obj)) {
-        for (let i = 0; i < obj.length; i++) obj[i] = await deepHashPasswords(obj[i], sess);
+        for (let i = 0; i < obj.length; i++) obj[i] = await deepHashPasswords(obj[i], sess, stampPasswordChange);
         return obj;
     }
     if (obj && typeof obj === 'object') {
@@ -196,8 +197,9 @@ async function deepHashPasswords(obj, sess) {
                 // Penulis sudah lolos otorisasi; password plaintext yang lolos
                 // pasti milik akun baru yang sedang dibuat — langsung di-hash.
                 obj[k] = await hashPassword(v);
+                if (stampPasswordChange) obj.passwordChangedAt = Date.now();
             } else {
-                obj[k] = await deepHashPasswords(v, sess);
+                obj[k] = await deepHashPasswords(v, sess, stampPasswordChange);
             }
         }
     }
@@ -213,6 +215,9 @@ const jsonHttp = (data, status, cors) => new Response(JSON.stringify(data), { st
 async function getSessionUser(env, sess) {
     const row = await dbCall(env, `users/${sess.uid}`, 'GET') || null;
     if (!row || !row.username || String(row.role || '').toLowerCase() !== sess.r) return null;
+    // Auto-logout sesi: password pernah diganti SETELAH token ini terbit → sesi batal
+    const changedAt = Number(row.passwordChangedAt || 0);
+    if (changedAt && Number(sess.i || 0) < changedAt) return null;
     return row;
 }
 
@@ -304,9 +309,9 @@ async function handleAuth(pathname, request, env, cors) {
             return reply('Password lama tidak cocok.', 403, cors);
         }
         const now = Date.now();
-        await dbCall(env, `users/${sess.uid}`, 'PATCH', { password: await hashPassword(next), updatedAt: now });
-        await logActivity(env, sess, 'Memperbarui kata sandi akun.');
-        return jsonHttp({ ok: true }, 200, cors);
+        await dbCall(env, `users/${sess.uid}`, 'PATCH', { password: await hashPassword(next), passwordChangedAt: now, updatedAt: now });
+        await logActivity(env, sess, 'Memperbarui kata sandi akun. Semua sesi dicabut otomatis.');
+        return jsonHttp({ ok: true, logoutAll: true }, 200, cors);
     }
 
     return reply('Endpoint auth tidak ditemukan', 404, cors);
@@ -395,12 +400,18 @@ async function handleDb(pathname, request, env, cors) {
     if (!validRel(rel)) return reply('Path database tidak valid', 400, cors);
     const node = rel.split('/')[0];
     const method = request.method;
+    let effMethod = method;
 
     // ---------- READ ----------
     if (method === 'GET') {
         if (!PUBLIC_READ_NODES.has(node)) {
             const sess = await verifySession(env, request);
             if (!sess) return reply('Sesi berakhir, silakan login.', 401, cors);
+            if (node === 'users') {
+                // Pencedet auto-logout: baris user diperiksa live (password hari ini vs iat token)
+                const live = await getSessionUser(env, sess).catch(() => null);
+                if (!live) return reply('Sesi tidak valid lagi (password/role berubah). Silakan login kembali.', 401, cors);
+            }
         }
         const q = new URL(request.url).searchParams;
         const parts = [];
@@ -430,13 +441,28 @@ async function handleDb(pathname, request, env, cors) {
     const sessLive = sess ? await getSessionUser(env, sess).catch(() => null) : null;
     if (sess && !sessLive) return reply('Sesi tidak valid lagi.', 401, cors);
 
-    body = await deepHashPasswords(body, sess);
+    body = await deepHashPasswords(body, sess, node === 'users');
+
+    // Reset password lewat /db (mis. oleh admin) juga mencabut semua sesi user tsb.
+    // Path daun `users/<uid>/password` ditulis ulang menjadi PATCH barunya.
+    if (sess && node === 'users') {
+        const parts = rel.split('/');
+        if (parts.length >= 3 && parts[parts.length - 1] === 'password') {
+            rel = parts.slice(0, -1).join('/');
+            body = { password: body, passwordChangedAt: Date.now() };
+            effMethod = 'PATCH'; // gabung, jangan menindih seluruh baris user
+        } else if (body && typeof body === 'object' && !Array.isArray(body) &&
+                   body.password && String(body.password).startsWith('pbkdf2$') && !body.passwordChangedAt) {
+            body.passwordChangedAt = Date.now();
+        }
+    }
+
     if (sess && sess.r !== 'demo' && node === 'users' && body && typeof body === 'object' && !Array.isArray(body) && !body.updatedAt) body.updatedAt = Date.now();
 
     let result;
-    try { result = await dbCall(env, rel, method, body); }
+    try { result = await dbCall(env, rel, effMethod, body); }
     catch { return reply('Database gagal diakses.', 502, cors); }
-    if (method === 'POST') return jsonHttp({ key: result?.name || null }, 200, cors);
+    if (effMethod === 'POST') return jsonHttp({ key: result?.name || null }, 200, cors);
     return jsonHttp(result ?? null, 200, cors);
 }
 

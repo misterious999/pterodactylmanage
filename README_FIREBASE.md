@@ -102,6 +102,14 @@ seluruh user.
 Role `demo` hanya boleh update `isOnline/lastLoginAt` miliknya. Password plaintext yang
 masuk ke `/db` selalu di-hash oleh Worker (hash PBKDF2) sebelum disimpan.
 
+**Auto-logout:** token sesi membawa `iat` (waktu terbit). Baris user bisa menyimpan
+`passwordChangedAt`. Kapan pun password user berubah — dari dirinya sendiri lewat
+menu ganti sandi, atau di-reset oleh admin/pemilik lewat halaman kelola — Worker mematikan
+semua token yang terbit **sebelum** momen itu. Efeknya: perangkat lain (atau selah yang
+mencuri token) langsung ditendang ke halaman login, meski token-nya baru 5 menit usianya.
+Halaman guard membaca baris user secara live tiap polling, jadi perubahan itu kena dalam
+±6 detik. Ganti role user juga berlaku setara (role mismatch = sesi mati).
+
 ---
 
 ## 4. Endpoint Worker baru
@@ -111,7 +119,7 @@ masuk ke `/db` selalu di-hash oleh Worker (hash PBKDF2) sebelum disimpan.
 | `POST /auth/login` | verifikasi username+password → token sesi |
 | `GET /auth/verify` | cek token sesi + data user live (tanpa password) |
 | `POST /auth/logout` | offline + catat log |
-| `POST /auth/change-password` | `{current?, next}` → hash baru |
+| `POST /auth/change-password` | `{current?, next}` → hash baru **+ mencabut semua sesi user tsb (auto-logout semua perangkat)** |
 | `GET/PUT/PATCH/POST/DELETE /db/<path>` | proxy database (token, aturan per role) |
 | `/pay/*` | pembayaran QRIS toko (tidak berubah) |
 | `/` proxy panel Pterodactyl | tidak berubah |
