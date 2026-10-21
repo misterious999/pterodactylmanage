@@ -45,11 +45,15 @@
             var t = readToken();
             if (t) headers['Authorization'] = 'Bearer ' + t;
         }
+        var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+        var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 20000) : null;
         return fetch(WORKER + path, {
             method: opts.method || 'GET',
             headers: headers,
             body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+            signal: ctrl ? ctrl.signal : undefined,
         }).then(function (res) {
+            clearTimeout(timer);
             return res.text().then(function (text) {
                 var data = null;
                 try { data = text ? JSON.parse(text) : null; } catch (e) {}
@@ -62,6 +66,10 @@
                 }
                 return data;
             });
+        }, function (errFetch) {
+            clearTimeout(timer);
+            if (errFetch && errFetch.name === 'AbortError') throw new Error('Koneksi ke server lambat. Coba lagi.');
+            throw errFetch;
         });
     }
 
