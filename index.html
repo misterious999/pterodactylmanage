@@ -438,8 +438,7 @@
     <script src="config.js"></script>
     <script src="api-services.js"></script>
     <script src="ui-confirm.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="db-bridge.js"></script>
 
     <script>
         // --- LITE MODE (ANTI-LAG) LOGIC ---
@@ -545,9 +544,9 @@
         });
 
         function simpanFotoProfil() { if(role === 'demo') return showAiAlert("Sesi Demo tidak memiliki otorisasi modifikasi.", "AKSES DITOLAK"); let link = document.getElementById('inputProfileUrl').value.trim(); if(!link) return; const now = Date.now(); database.ref('users/' + currentUserId).update({ profilePic: link, updatedAt: now }).then(() => database.ref('activity_logs').push({ uid: currentUserId, username, role, action: "Memperbarui foto profil.", timestamp: now })).then(() => { showAiSuccess("Profil diperbarui."); document.getElementById('inputProfileUrl').value = ""; }); }
-        function simpanPassword() { if(role === 'demo') return showAiAlert("Sesi Demo tidak memiliki otorisasi modifikasi.", "AKSES DITOLAK"); let passBaru = document.getElementById('inputPassBaru').value.trim(); if (!passBaru) return; const now = Date.now(); database.ref('users/' + currentUserId).update({ password: passBaru, updatedAt: now }).then(() => database.ref('activity_logs').push({ uid: currentUserId, username, role, action: "Memperbarui kata sandi akun.", timestamp: now })).then(() => { localStorage.setItem('panel_password', passBaru); tutupModal('modalPassword'); showAiSuccess("Kredensial diperbarui."); }); }
+        function simpanPassword() { if(role === 'demo') return showAiAlert("Sesi Demo tidak memiliki otorisasi modifikasi.", "AKSES DITOLAK"); let passBaru = document.getElementById('inputPassBaru').value.trim(); if (!passBaru) return; const btnLock = async () => { try { await AuthBridge.changePassword(null, passBaru); tutupModal('modalPassword'); document.getElementById('inputPassBaru').value = ""; showAiSuccess("Kredensial diperbarui."); } catch (e) { showAiAlert(e.message || "Gagal memperbarui sandi.", "GAGAL"); } }; btnLock(); }
         function terbitkanPengumuman() { if(role === 'demo') return showAiAlert("Sesi Demo tidak memiliki otorisasi modifikasi.", "AKSES DITOLAK"); let teks = document.getElementById('inputPengumuman').value.trim(); if(!teks) return; const now = Date.now(); database.ref('pengumuman_global').set({ pesan: teks, timestamp: now, dibuatOleh: username }).then(() => database.ref('activity_logs').push({ uid: currentUserId, username, role, action: "Menerbitkan broadcast global.", timestamp: now })).then(() => { showAiSuccess("Pesan disiarkan."); document.getElementById('inputPengumuman').value = ""; }); }
-        function logout() { if(currentUserId) database.ref('users/' + currentUserId + '/isOnline').set(false).then(() => { localStorage.clear(); window.location.replace("login.html"); }); else { localStorage.clear(); window.location.replace("login.html"); } }
+        function logout() { AuthBridge.logout().catch(function(){}).then(function() { localStorage.clear(); window.location.replace("login.html"); }); }
         function bukaModalPassword() { 
             if(window.innerWidth <= 768) { toggleSidebar(); }
             document.getElementById('modalPassword').style.display = 'flex'; 

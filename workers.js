@@ -5,6 +5,7 @@
 // Website yang boleh memakai Worker ini
 const ALLOWED_ORIGINS = [
     'https://pterodactylmanage.vercel.app',
+    'https://zeroixdarkmarket.web.id',
 ];
 
 // Setiap mode HANYA boleh diteruskan ke domain panelnya sendiri
@@ -14,13 +15,13 @@ const PANELS = {
     public_v2: { host: 'zeropublikv2.bypstar7.online',    key: 'PUB_V2_API' },
 };
 
-const ALLOWED_METHODS = ['GET', 'POST', 'PATCH', 'DELETE'];
+const ALLOWED_METHODS = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'];
 
 function corsHeaders(origin) {
     return {
         'Access-Control-Allow-Origin': origin,
         'Access-Control-Allow-Methods': ALLOWED_METHODS.join(', ') + ', OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, X-Panel-Mode',
+        'Access-Control-Allow-Headers': 'Content-Type, X-Panel-Mode, Authorization',
         'Access-Control-Max-Age': '86400',
         'Vary': 'Origin',
     };
@@ -31,6 +32,412 @@ function reply(body, status, headers) {
         status,
         headers: { 'Content-Type': 'application/json', ...headers },
     });
+}
+
+// ==========================================
+// AUTH & DATABASE BRIDGE (v7.2) — semua akses database dari browser melewati sini
+//
+//   Secret yang wajib diisi di Cloudflare (Settings -> Variables and Secrets):
+//     FIREBASE_SECRET = Database Secret dari Firebase (menembus rules yang dikunci total)
+//     AUTH_SECRET     = rahasia tanda tangan token sesi (fallback: FIREBASE_SECRET)
+//
+//   Endpoint baru:
+//     POST /auth/login             {username, password}          -> {token, user}
+//     GET  /auth/verify            Authorization: Bearer token   -> data user terkini
+//     POST /auth/logout            Authorization: Bearer token
+//     POST /auth/change-password   {next} (opsional {current})
+//     GET|PUT|PATCH|POST|DELETE /db/<node>/<uid>/...   (butuh token, kecuali node toko)
+// ==========================================
+
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+const PBKDF2_ITERATIONS = 120000;
+const PUBLIC_READ_NODES = new Set(['store_products', 'store_settings', 'store_stats']);
+const MANAGER_CREATE_ROLES = new Set(['pemilik', 'partner_public', 'partner_public_v2']);
+const SELF_ROW_FIELDS = new Set(['isOnline', 'lastLoginAt', 'updatedAt', 'usernameLower', 'profilePic']);
+const PTERO_BOOKKEEPING_NODES = new Set(['ptero_users_expired', 'ptero_servers_expired', 'ptero_sweeper_state']);
+
+const txtEnc = new TextEncoder();
+
+function toHex(buf) {
+    return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function hexToBytes(hex) {
+    return new Uint8Array(String(hex).match(/../g).map((h) => parseInt(h, 16)));
+}
+
+function b64url(bytes) {
+    let s = '';
+    bytes.forEach((b) => { s += String.fromCharCode(b); });
+    return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function fromB64url(str) {
+    const s = str.replace(/-/g, '+').replace(/_/g, '/');
+    return Uint8Array.from(atob(s + '='.repeat((4 - s.length % 4) % 4)), (c) => c.charCodeAt(0));
+}
+
+async function authKey(env) {
+    const secret = env.AUTH_SECRET || env.FIREBASE_SECRET || env.RAFLYSHOP_PAY_KEY || '';
+    if (!secret) throw new Error('AUTH_SECRET belum diisi di Cloudflare Worker');
+    return crypto.subtle.importKey('raw', txtEnc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
+}
+
+async function hmacHex(env, msg) {
+    const key = await authKey(env);
+    return toHex(await crypto.subtle.sign('HMAC', key, txtEnc.encode(msg)));
+}
+
+async function signSession(env, sess) {
+    sess.e = Date.now() + SESSION_TTL_MS;
+    const payload = b64url(txtEnc.encode(JSON.stringify(sess)));
+    return `v1.${payload}.${await hmacHex(env, payload)}`;
+}
+
+async function verifySession(env, request) {
+    const m = (request.headers.get('Authorization') || '').match(/^Bearer v1\.([A-Za-z0-9_-]+)\.([0-9a-f]{64})$/);
+    if (!m) return null;
+    if (await hmacHex(env, m[1]) !== m[2]) return null;
+    try {
+        const sess = JSON.parse(new TextDecoder().decode(fromB64url(m[1])));
+        return (sess && sess.e > Date.now() && sess.uid && sess.r) ? sess : null;
+    } catch { return null; }
+}
+
+// ---------- Password (PBKDF2-SHA256, format: pbkdf2$iter$salt$hash) ----------
+
+async function deriveHash(plain, saltBytes, iters) {
+    const base = await crypto.subtle.importKey('raw', txtEnc.encode(plain), 'PBKDF2', false, ['deriveBits']);
+    return toHex(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: saltBytes, iterations: iters }, base, 256));
+}
+
+async function hashPassword(plain) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    return `pbkdf2$${PBKDF2_ITERATIONS}$${toHex(salt)}$${await deriveHash(plain, salt, PBKDF2_ITERATIONS)}`;
+}
+
+async function verifyStored(stored, plain) {
+    stored = String(stored || '');
+    if (stored.startsWith('pbkdf2$')) {
+        const [, iters, salt, hash] = stored.split('$');
+        if (!iters || !salt || !hash) return false;
+        try { return (await deriveHash(plain, hexToBytes(salt), parseInt(iters, 10))) === hash; } catch { return false; }
+    }
+    // Password lama (plaintext) — dicocokkan langsung, lalu di-upgrade ke format hash
+    return stored === plain;
+}
+
+// ---------- Akses database lewat secret (bypass rules) ----------
+
+async function dbCall(env, rel, method, body, query) {
+    const parts = [];
+    if (env.FIREBASE_SECRET) parts.push(`auth=${encodeURIComponent(env.FIREBASE_SECRET)}`);
+    if (query) parts.push(query);
+    const res = await fetch(`${FIREBASE_URL}/${rel}.json${parts.length ? '?' + parts.join('&') : ''}`, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+    if (!res.ok) throw new Error(`Firebase ${method} ${rel}: ${res.status}`);
+    return res.json();
+}
+
+function logActivity(env, sess, action) {
+    return dbCall(env, 'activity_logs', 'POST', {
+        uid: sess.uid, username: sess.u, role: sess.r, action, timestamp: Date.now(),
+    }).catch(() => {});
+}
+
+// ---------- Rate limit login (per-Cloudflare-isolate, upaya terbaik) ----------
+
+const loginFails = new Map();
+
+function tooManyFails(ip) {
+    const now = Date.now();
+    const list = (loginFails.get(ip) || []).filter((t) => now - t < 600000);
+    loginFails.set(ip, list);
+    return list.length >= 10;
+}
+const noteFail = (ip) => loginFails.set(ip, [...(loginFails.get(ip) || []).filter((t) => Date.now() - t < 600000), Date.now()]);
+const clearFails = (ip) => loginFails.delete(ip);
+
+// ---------- Utilisasi data ----------
+
+function validRel(rel) {
+    rel = String(rel || '');
+    if (rel.length === 0 || rel.length > 512) return false;
+    return rel.split('/').every((s) => /^[^.$#\[\]/"\s\x00]+$/.test(s) && s !== '.' && s !== '..');
+}
+
+function deepCollectKeys(obj, out = new Set()) {
+    if (!obj || typeof obj !== 'object') return out;
+    for (const [k, v] of Object.entries(obj)) { out.add(k); deepCollectKeys(v, out); }
+    return out;
+}
+
+function deepGetKey(obj, key) {
+    if (!obj || typeof obj !== 'object') return undefined;
+    for (const [k, v] of Object.entries(obj)) {
+        if (k === key) return v;
+        const found = deepGetKey(v, key);
+        if (found !== undefined) return found;
+    }
+    return undefined;
+}
+
+async function deepHashPasswords(obj, sess) {
+    if (Array.isArray(obj)) {
+        for (let i = 0; i < obj.length; i++) obj[i] = await deepHashPasswords(obj[i], sess);
+        return obj;
+    }
+    if (obj && typeof obj === 'object') {
+        for (const [k, v] of Object.entries(obj)) {
+            if (k === 'password' && typeof v === 'string' && !v.startsWith('pbkdf2$') && sess) {
+                // Penulis sudah lolos otorisasi; password plaintext yang lolos
+                // pasti milik akun baru yang sedang dibuat — langsung di-hash.
+                obj[k] = await hashPassword(v);
+            } else {
+                obj[k] = await deepHashPasswords(v, sess);
+            }
+        }
+    }
+    return obj;
+}
+
+const jsonHttp = (data, status, cors) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', ...cors } });
+
+// ==========================================
+// /auth/*
+// ==========================================
+
+async function getSessionUser(env, sess) {
+    const row = await dbCall(env, `users/${sess.uid}`, 'GET') || null;
+    if (!row || !row.username || String(row.role || '').toLowerCase() !== sess.r) return null;
+    return row;
+}
+
+async function handleAuth(pathname, request, env, cors) {
+    if (!env.FIREBASE_SECRET) return reply('FIREBASE_SECRET belum diisi di Cloudflare Worker', 503, cors);
+
+    // ---------- LOGIN ----------
+    if (pathname === '/auth/login') {
+        if (request.method !== 'POST') return reply('Method not allowed', 405, cors);
+        let input;
+        try { input = await request.json(); } catch { return reply('Invalid JSON', 400, cors); }
+        const username = String(input.username || '').trim();
+        const password = String(input.password || '');
+        if (!username || !password) return reply('Username dan password wajib diisi.', 400, cors);
+
+        const ip = request.headers.get('CF-Connecting-IP') || 'anon';
+        if (tooManyFails(ip)) return reply('Terlalu sering gagal. Coba lagi dalam 10 menit.', 429, cors);
+        if (!/^[A-Za-z0-9_.@-]{1,64}$/.test(username)) { noteFail(ip); return reply('Kredensial yang dimasukkan tidak valid.', 401, cors); }
+
+        let users;
+        try { users = await dbCall(env, 'users', 'GET') || {}; } catch { return reply('Database tidak tersedia., coba beberapa saat lagi.', 502, cors); }
+
+        const needle = username.toLowerCase();
+        let foundUid = null, found = null;
+        for (const [uid, u] of Object.entries(users)) {
+            if (u && String(u.username || '').trim().toLowerCase() === needle) { foundUid = uid; found = u; break; }
+        }
+        if (!found || !(await verifyStored(found.password, password))) {
+            noteFail(ip);
+            return reply('Kredensial yang dimasukkan tidak valid.', 401, cors);
+        }
+        clearFails(ip);
+
+        const role = String(found.role || 'reseller_public').trim().toLowerCase();
+        if (role !== 'pemilik') {
+            const expiredAt = Number(found.expiredAt || 0);
+            if (!expiredAt) return reply('Akses ditangguhkan. Akun belum mendapat otorisasi lisensi dari Administrator.', 403, cors);
+            if (expiredAt <= Date.now()) return reply('Lisensi habis. Masa berlaku akun telah berakhir.', 403, cors);
+        }
+
+        const now = Date.now();
+        const patch = { isOnline: true, lastLoginAt: now, usernameLower: needle };
+        if (!String(found.password || '').startsWith('pbkdf2$')) patch.password = await hashPassword(password); // upgrade plaintext -> hash
+        await dbCall(env, `users/${foundUid}`, 'PATCH', patch).catch(() => {});
+
+        const sess = { uid: foundUid, u: String(found.username), r: role };
+        const token = await signSession(env, sess);
+        await logActivity(env, sess, 'Otorisasi berhasil. Masuk ke dalam Control Center.');
+        return jsonHttp({ token, user: { uid: foundUid, username: found.username, role, ptero_id: found.ptero_id || null } }, 200, cors);
+    }
+
+    const sess = await verifySession(env, request);
+
+    // ---------- VERIFY ----------
+    if (pathname === '/auth/verify') {
+        if (!sess) return reply('Sesi berakhir, silakan login.', 401, cors);
+        try {
+            const row = await getSessionUser(env, sess);
+            if (!row) return reply('Sesi tidak valid lagi.', 401, cors);
+            if (row.role !== 'pemilik') {
+                const expiredAt = Number(row.expiredAt || 0);
+                if (!expiredAt || expiredAt <= Date.now()) return reply('Sesi tidak valid lagi.', 401, cors);
+            }
+            const { password, ...rest } = row;
+            return jsonHttp({ session: sess, user: rest }, 200, cors);
+        } catch { return reply('Database tidak tersedia.', 502, cors); }
+    }
+
+    // ---------- LOGOUT ----------
+    if (pathname === '/auth/logout') {
+        if (!sess) return reply('Sesi berakhir, silakan login.', 401, cors);
+        await dbCall(env, `users/${sess.uid}`, 'PATCH', { isOnline: false }).catch(() => {});
+        await logActivity(env, sess, 'Keluar dari Control Center.');
+        return jsonHttp({ ok: true }, 200, cors);
+    }
+
+    // ---------- GANTI PASSWORD ----------
+    if (pathname === '/auth/change-password') {
+        if (!sess) return reply('Sesi berakhir, silakan login.', 401, cors);
+        if (request.method !== 'POST') return reply('Method not allowed', 405, cors);
+        let input;
+        try { input = await request.json(); } catch { return reply('Invalid JSON', 400, cors); }
+        const next = String(input.next || '');
+        if (next.length < 4 || next.length > 128) return reply('Password baru harus 4-128 karakter.', 400, cors);
+        let row;
+        try { row = await getSessionUser(env, sess); } catch { return reply('Database tidak tersedia.', 502, cors); }
+        if (!row) return reply('Sesi tidak valid lagi.', 401, cors);
+        if (input.current && !(await verifyStored(row.password, String(input.current)))) {
+            return reply('Password lama tidak cocok.', 403, cors);
+        }
+        const now = Date.now();
+        await dbCall(env, `users/${sess.uid}`, 'PATCH', { password: await hashPassword(next), updatedAt: now });
+        await logActivity(env, sess, 'Memperbarui kata sandi akun.');
+        return jsonHttp({ ok: true }, 200, cors);
+    }
+
+    return reply('Endpoint auth tidak ditemukan', 404, cors);
+}
+
+// ==========================================
+// /db/*  — jembatan data (token per role)
+// ==========================================
+
+async function authorizeDbWrite(rel, method, body, sess, env) {
+    const seg = rel.split('/');
+    const top = seg[0];
+    const isPemilik = sess && sess.r === 'pemilik';
+    const keys = deepCollectKeys(body);
+    const passwordVal = deepGetKey(body, 'password');
+
+    // ---------- Anonim: hanya statistik toko, maksimal ±1 per langkah ----------
+    if (!sess) {
+        if (top === 'store_stats' && ['PUT', 'PATCH'].includes(method)) {
+            const leaf = seg[1] || '';
+            if ((leaf === 'views' || leaf === 'likes') && typeof body === 'number') {
+                const cur = await dbCall(env, rel, 'GET');
+                if (Math.abs(body - Number(cur || 0)) <= 1) return { ok: true, body };
+                return { error: 'Nilai statistik tidak wajar.', status: 403 };
+            }
+            return { error: 'Statistik dikunci.', status: 403 };
+        }
+        return { error: 'Sesi berakhir, silakan login.', status: 401 };
+    }
+
+    const targetUid = seg[1] || null;
+
+    // ---------- USERS ----------
+    if (top === 'users') {
+        if (sess.r === 'demo') {
+            const want = ['isOnline', 'lastLoginAt'];
+            const allowed = [...keys].every((k) => want.includes(k));
+            let depthOk = true;
+            if (seg.length >= 3) { const leaf = seg[2]; depthOk = want.includes(leaf); }
+            if (targetUid === sess.uid && allowed && depthOk) return { ok: true, body };
+            return { error: 'Sesi Demo tidak memiliki otorisasi modifikasi.', status: 403 };
+        }
+        if (method === 'POST' && !targetUid) { // buat akun baru
+            if (!MANAGER_CREATE_ROLES.has(sess.r)) return { error: 'Kamu tidak berhak membuat akun web.', status: 403 };
+            if (String(deepGetKey(body, 'role') || '').toLowerCase() === 'pemilik' && !isPemilik) {
+                return { error: 'Tidak berhak membuat akun pemilik.', status: 403 };
+            }
+            return { ok: true, body };
+        }
+        if (!targetUid) return isPemilik ? { ok: true, body } : { error: 'Hanya pemilik yang boleh mengatur akun.', status: 403 };
+        if (targetUid === sess.uid) {
+            const allowed = [...keys].every((k) => SELF_ROW_FIELDS.has(k) || k === 'password');
+            if (passwordVal !== undefined && !String(passwordVal).startsWith('pbkdf2$')) {
+                return { error: 'Ganti password lewat menu ganti kata sandi.', status: 403 };
+            }
+            if (allowed) return { ok: true, body };
+            return { error: 'Ada data yang tidak boleh diubah lewat sini.', status: 403 };
+        }
+        if (isPemilik) return { ok: true, body };
+        return { error: 'Hanya pemilik yang boleh mengubah akun orang lain.', status: 403 };
+    }
+
+    // ---------- NODE LAIN ----------
+    if (top === 'pengumuman_global') return isPemilik ? { ok: true, body } : { error: 'Hanya pemilik yang boleh mengatur broadcast.', status: 403 };
+    if (top === 'activity_logs') {
+        if (method === 'POST') return sess.r === 'demo' ? { error: 'Sesi Demo tidak memiliki otorisasi modifikasi.', status: 403 } : { ok: true, body };
+        return isPemilik ? { ok: true, body } : { error: 'Hanya pemilik yang boleh mengatur log.', status: 403 };
+    }
+    if (top === 'notifikasi') {
+        if (method === 'DELETE') return seg.length === 1 ? (isPemilik ? { ok: true, body: undefined } : { error: 'Mengosongkan semua notifikasi hanya oleh pemilik.', status: 403 }) : { ok: true, body: undefined };
+        return isPemilik ? { ok: true, body } : { error: 'Hanya pemilik yang boleh mengatur notifikasi.', status: 403 };
+    }
+    if (top === 'store_products' || top === 'store_settings') return isPemilik ? { ok: true, body } : { error: 'Hanya pemilik yang boleh mengatur toko.', status: 403 };
+    if (top === 'store_stats') return isPemilik ? { ok: true, body } : { error: 'Statistik dikunci.', status: 403 };
+    if (PTERO_BOOKKEEPING_NODES.has(top)) {
+        return sess.r === 'demo' ? { error: 'Sesi Demo tidak memiliki otorisasi modifikasi.', status: 403 } : { ok: true, body };
+    }
+    return { error: `Menulis node "${top}" tanpa otorisasi tidak diizinkan.`, status: 403 };
+}
+
+async function handleDb(pathname, request, env, cors) {
+    if (!env.FIREBASE_SECRET) return reply('FIREBASE_SECRET belum diisi di Cloudflare Worker', 503, cors);
+    let rel;
+    try { rel = decodeURIComponent(pathname.slice(4)); } catch { return reply('Path tidak valid', 400, cors); }
+    if (rel.endsWith('/')) rel = rel.slice(0, -1);
+    if (!validRel(rel)) return reply('Path database tidak valid', 400, cors);
+    const node = rel.split('/')[0];
+    const method = request.method;
+
+    // ---------- READ ----------
+    if (method === 'GET') {
+        if (!PUBLIC_READ_NODES.has(node)) {
+            const sess = await verifySession(env, request);
+            if (!sess) return reply('Sesi berakhir, silakan login.', 401, cors);
+        }
+        const q = new URL(request.url).searchParams;
+        const parts = [];
+        if (q.get('orderBy')) parts.push(`orderBy="${q.get('orderBy')}"`);
+        if (q.get('limitToLast')) {
+            if (!q.get('orderBy')) parts.push('orderBy="$key"');
+            parts.push(`limitToLast=${parseInt(q.get('limitToLast'), 10) || 0}`);
+        }
+        let val;
+        try { val = await dbCall(env, rel, 'GET', undefined, parts.join('&')); }
+        catch { return reply('Database gagal diakses.', 502, cors); }
+        return jsonHttp(val ?? null, 200, cors);
+    }
+
+    // ---------- WRITE ----------
+    if (!['PUT', 'PATCH', 'POST', 'DELETE'].includes(method)) return reply('Method not allowed', 405, cors);
+    let body;
+    if (method !== 'DELETE') {
+        try { body = await request.json(); } catch { return reply('Invalid JSON', 400, cors); }
+    }
+
+    const sess = await verifySession(env, request);
+    const verdict = await authorizeDbWrite(rel, method, body, sess, env).catch((e) => ({ error: e.message, status: 502 }));
+    if (verdict.error) return reply(verdict.error, verdict.status || 403, cors);
+    body = verdict.body;
+
+    const sessLive = sess ? await getSessionUser(env, sess).catch(() => null) : null;
+    if (sess && !sessLive) return reply('Sesi tidak valid lagi.', 401, cors);
+
+    body = await deepHashPasswords(body, sess);
+    if (sess && sess.r !== 'demo' && node === 'users' && body && typeof body === 'object' && !Array.isArray(body) && !body.updatedAt) body.updatedAt = Date.now();
+
+    let result;
+    try { result = await dbCall(env, rel, method, body); }
+    catch { return reply('Database gagal diakses.', 502, cors); }
+    if (method === 'POST') return jsonHttp({ key: result?.name || null }, 200, cors);
+    return jsonHttp(result ?? null, 200, cors);
 }
 
 export default {
@@ -54,6 +461,14 @@ export default {
         const pathname = new URL(request.url).pathname;
         if (pathname.startsWith('/pay/')) {
             return handlePayment(pathname, request, env, cors);
+        }
+
+        // 1b. Login, sesi, dan jembatan database (browser <-> RTDB lewat Worker)
+        if (pathname.startsWith('/auth/')) {
+            return handleAuth(pathname, request, env, cors);
+        }
+        if (pathname.startsWith('/db/')) {
+            return handleDb(pathname, request, env, cors);
         }
 
         // 2. Mode panel harus salah satu yang terdaftar
