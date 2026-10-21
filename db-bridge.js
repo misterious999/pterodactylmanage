@@ -59,7 +59,14 @@
                 try { data = text ? JSON.parse(text) : null; } catch (e) {}
                 if (!res.ok) {
                     var msg = (data && data.error) ? data.error : 'Koneksi ke server gagal (' + res.status + ')';
-                    if (res.status === 401) { saveToken(null); msg = 'Sesi berakhir, silakan login kembali.'; }
+                    // 401 di /auth/login = kredensial salah (bukan sesi batal) —
+                    // tampilkan pesan asli server se-apa adanya.
+                    if (res.status === 401) {
+                        if (path !== '/auth/login') {
+                            saveToken(null);
+                            msg = 'Sesi berakhir, silakan login kembali.';
+                        }
+                    }
                     var err = new Error(msg);
                     err.status = res.status;
                     throw err;

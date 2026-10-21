@@ -241,11 +241,14 @@ async function handleAuth(pathname, request, env, cors) {
         try { users = await dbCall(env, 'users', 'GET') || {}; } catch { return reply('Database tidak tersedia., coba beberapa saat lagi.', 502, cors); }
 
         const needle = username.toLowerCase();
+        // Cocokkan password ke SEMUA baris dengan username sama (data lama bisa
+        // duplikat/junk). Baris pertama yang passwordnya benar-lah yang dipakai.
+        const kandidat = Object.entries(users).filter(([, u]) => u && String(u.username || '').trim().toLowerCase() === needle);
         let foundUid = null, found = null;
-        for (const [uid, u] of Object.entries(users)) {
-            if (u && String(u.username || '').trim().toLowerCase() === needle) { foundUid = uid; found = u; break; }
+        for (const [uid, u] of kandidat) {
+            if (await verifyStored(u.password, password)) { foundUid = uid; found = u; break; }
         }
-        if (!found || !(await verifyStored(found.password, password))) {
+        if (!foundUid) {
             noteFail(ip);
             return reply('Kredensial yang dimasukkan tidak valid.', 401, cors);
         }
@@ -467,15 +470,24 @@ async function handleDb(pathname, request, env, cors) {
 }
 
 export default {
+    // Pembungkus: error tak-terduga dijawab sebagai JSON + CORS (bukan halaman
+    // Error 1101 Cloudflare tanpa CORS yang di browser tampil "Failed to fetch").
     async fetch(request, env) {
         const origin = request.headers.get('Origin') || '';
-
-        // 1. Tolak request yang bukan dari website kita
         if (!ALLOWED_ORIGINS.includes(origin)) {
             return reply('Forbidden origin', 403, {});
         }
         const cors = corsHeaders(origin);
+        return coreGateway(request, env, origin, cors).catch((z) =>
+            reply('Kesalahan internal server. Coba beberapa saat lagi. (' + String(z && z.message || z).slice(0, 100) + ')', 500, cors));
+    },
 
+    scheduled: (event, env, ctx) => scheduledHandler(event, env, ctx),
+};
+
+// Aliur inti: dipisahkan dari export default supaya bisa dibungkus
+// try/catch oleh fetch() di atas (error tak-terduga dijawab sebagai JSON + CORS).
+async function coreGateway(request, env, origin, cors) {
         if (request.method === 'OPTIONS') {
             return new Response(null, { status: 204, headers: cors });
         }
@@ -548,13 +560,12 @@ export default {
         } catch (error) {
             return reply(error.message, 502, cors);
         }
-    },
+}
 
-    // Dijalankan otomatis oleh Cron Trigger (Settings -> Triggers -> Cron, misal: */5 * * * *)
-    async scheduled(event, env, ctx) {
-        ctx.waitUntil(sweepExpired(env, event.scheduledTime));
-    },
-};
+// Dijalankan otomatis oleh Cron Trigger (Settings -> Triggers -> Cron, misal: */5 * * * *)
+async function scheduledHandler(event, env, ctx) {
+    ctx.waitUntil(sweepExpired(env, event.scheduledTime));
+}
 
 // ==========================================
 // PEMBAYARAN QRIS (RaflyShop Payment) untuk store.html
