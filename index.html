@@ -122,7 +122,12 @@
         }
 
         .wrap { padding: 0 5%; max-width: 1180px; margin: 0 auto; }
-        section { padding: 64px 0; scroll-margin-top: 70px; }
+        section { padding: 58px 0; scroll-margin-top: 70px; }
+        @media (max-width: 760px) {
+            /* Napas lebih rapat di HP supaya antarbagian tidak terasa bolong */
+            section { padding: 34px 0; }
+            section#produk { padding-top: 40px; }
+        }
 
         .hero { padding: 72px 0 56px; text-align: center; }
         .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--primary); background: rgba(13,148,136,.12); border: 1px solid rgba(13,148,136,.35); padding: 7px 14px; border-radius: 999px; }
@@ -183,6 +188,10 @@
         details.faq { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 4px 20px; margin-bottom: 12px; }
         details.faq summary { cursor: pointer; font-weight: 700; font-size: 15px; padding: 16px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
         details.faq summary::-webkit-details-marker { display: none; }
+        /* Tombol WA: dikendalikan CSS (atribut hidden bisa ditimpa oleh display kelas) */
+        .wa-toggle { display: none !important; }
+        .wa-toggle.wa-on { display: inline-flex !important; }
+        #waFoot.wa-on { display: block !important; }
         details.faq summary::after { content: '+'; font-size: 20px; color: var(--primary); font-weight: 700; transition: transform .2s; }
         details.faq[open] summary::after { transform: rotate(45deg); }
         details.faq p { margin: 0 0 16px; color: var(--text-sub); font-size: 13.5px; line-height: 1.65; }
@@ -236,7 +245,7 @@
     <p class="lead">Panel Pterodactyl Private, Public, dan Public V2 plus akun reseller untuk bot dan proyek online Anda. Bayar lewat QRIS — sistem membuat akun &amp; server Anda secara otomatis, tanpa menunggu admin.</p>
     <div class="hero-cta">
         <a class="btn btn-primary" href="/store">Belanja di Toko <span aria-hidden="true">→</span></a>
-        <a class="btn btn-ghost" id="waBtn" href="/dashboard" hidden>Tanya via WhatsApp <span aria-hidden="true">💬</span></a>
+        <a class="btn btn-ghost wa-toggle" id="waBtn" href="#" rel="noopener">Tanya via WhatsApp <span aria-hidden="true">💬</span></a>
     </div>
     <div class="chips">
         <span class="chip">⚡ Aktivasi otomatis 24/7</span>
@@ -256,26 +265,26 @@
     <p class="sub">Tanpa drama, tanpa menunggu — semuanya diproses otomatis dari pembayaran sampai akun jadi.</p>
     <div class="grid3">
         <div class="card">
-            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2zm1 17.93V22a8 8 0 0 1-7.938-8h2.032A6.006 6.006 0 0 0 13 19.93zm-2-2.03A6.006 6.006 0 0 1 7 11h4V4.07A8 8 0 0 1 19.93 11H11v6.9z"/></svg></div>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M5 3h14a1.5 1.5 0 0 1 1.5 1.5v5A1.5 1.5 0 0 1 19 11H5a1.5 1.5 0 0 1-1.5-1.5v-5A1.5 1.5 0 0 1 5 3zm1.25 3a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2zM5 13h14a1.5 1.5 0 0 1 1.5 1.5v5A1.5 1.5 0 0 1 19 21H5a1.5 1.5 0 0 1-1.5-1.5v-5A1.5 1.5 0 0 1 5 13zm1.25 3a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2z"/></svg></div>
             <h3>Panel Private</h3>
             <p>Lingkungan expert bagi Anda yang butuh kuasa penuh: alokasi khusus, sumber daya yang tak diadu dengan pengguna lain, dan garansi aktif 30 hari.</p>
         </div>
         <div class="card">
-            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M16 11V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a3 3 0 0 0 3 3h1v2H6v2h8v-2h-2v-2h1a3 3 0 0 0 3-3zm4 2v-2h-2l-1 2v2h2a1 1 0 0 0 1-2z"/></svg></div>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5.25-3.4 9.74-8 11-4.6-1.26-8-5.75-8-11V5l8-3zm-1.2 13.6l5.4-5.4-1.4-1.4-4 4-1.8-1.8-1.4 1.4 3.2 3.2z"/></svg></div>
             <h3>Panel Public &amp; Public V2</h3>
             <p>Hemat untuk memulai bot atau proyek kecil-menengah. Dua tingkat performa yang bisa dipilih sesuai kebutuhan budget Anda.</p>
         </div>
         <div class="card">
-            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 1 1-12 0A6 6 0 0 1 16 8zm-4 9a4 4 0 0 0 4-4h2a6 6 0 0 1-6 6v2l-3-3 3-3z"/></svg></div>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M9 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm7 1a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm-7 1.5c-3.3 0-8 1.66-8 4.95V21h16v-1.55c0-3.29-4.7-4.95-8-4.95zm7 0c-.46 0-.95.04-1.46.11 1.53 1.03 2.46 2.44 2.46 4.39V21h6v-1.5c0-2.8-4.1-5-7-5z"/></svg></div>
             <h3>Akun Reseller / Partner</h3>
-            <p>Langsung terbit akun role reseller_public hingga partner_public_v2 — pas untuk yang berusaha menjual layanan ke komunitas sendiri.</p>
+            <p>Langsung terbit akun role reseller_public hingga partner_public_v2 — pas untuk yang berusaha menjual layanan ke komunitas Anda.</p>
         </div>
     </div>
 </section>
 
 <section id="produk" class="wrap">
     <h2 class="sec">Produk &amp; Harga Terkini</h2>
-    <p class="sub">Daftar ini live dari sistem kami — selalu sinkron dengan halaman toko. Belanja penuh di halaman Toko.</p>
+    <p class="sub">Daftar diambil live dari sistem kami — belanja penuh di halaman Toko.</p>
     <div class="prod-grid" id="prodGrid"></div>
     <div class="more-cta">
         <a class="btn btn-primary" href="/store">Lihat Semua Produk di Toko <span aria-hidden="true">→</span></a>
@@ -329,7 +338,7 @@
         </div>
         <div>
             <h4>Bantuan</h4>
-            <a class="fk" id="waFoot" href="/dashboard" hidden>WhatsApp Admin</a>
+            <a class="fk wa-toggle" id="waFoot" href="#">WhatsApp Admin</a>
             <a class="fk" href="/store">Pesan Panel</a>
             <a class="fk" href="#cara-beli">Cara Beli</a>
         </div>
@@ -403,21 +412,36 @@
 
         // ---- WhatsApp admin (dari pengaturan toko) ----
         getJson('store_settings/whatsapp').then(function (nomor) {
-            nomor = String(nomor || '').replace(/\D/g, '');
+            nomor = String(nomor == null ? '' : nomor).replace(/\D/g, '');
             if (!nomor) return;
             var wa = document.getElementById('waBtn');
             var wf = document.getElementById('waFoot');
-            wa.href = wf.href = 'https://wa.me/' + nomor;
-            wa.hidden = false; wf.hidden = false;
+            var href = 'https://wa.me/' + nomor;
+            wa.href = href; wf.href = href;
+            wa.target = wf.target = '_blank';
+            wa.rel = wf.rel = 'noopener';
+            wa.classList.add('wa-on'); wf.classList.add('wa-on');
         });
 
-        // ---- Statistik sosial (live dari sistem) ----
+        // ---- Statistik sosial (live dari sistem; sel disembunyikan bila kosong) ----
         getJson('store_stats').then(function (stats) {
-            if (!stats || typeof stats !== 'object') return;
+            if (!stats || typeof stats !== 'object') { sembunyikanStat(); return; }
             var v = Number(stats.viewCount || 0), l = Number(stats.likeCount || 0);
-            if (v) document.getElementById('statViews').textContent = v.toLocaleString('id-ID');
-            if (l) document.getElementById('statLikes').textContent = l.toLocaleString('id-ID');
+            if (!v) sembunyikanStat('view', true);
+            else document.getElementById('statViews').textContent = v.toLocaleString('id-ID');
+            if (!l) sembunyikanStat('like', true);
+            else document.getElementById('statLikes').textContent = l.toLocaleString('id-ID');
         });
+        function sembunyikanStat(jenis) {
+            // tanpa data: sembunyikan seluruh sel agar tidak muncul tanda "—"
+            var els = { view: 'statViews', like: 'statLikes' };
+            var kasus = jenis;
+            Object.keys(els).forEach(function (k) {
+                if (kasus && k !== kasus) return;
+                var el = document.getElementById(els[k]);
+                if (el && el.parentElement) el.parentElement.style.display = 'none';
+            });
+        }
     })();
 </script>
 </body>
