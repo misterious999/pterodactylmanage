@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /login
+Disallow: /activity-logs
+Disallow: /manage-
+
+Sitemap: https://zeroixdarkmarket.web.id/sitemap.xml

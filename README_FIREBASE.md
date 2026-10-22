@@ -20,7 +20,7 @@ Cloudflare Worker  zeroix-gatekeeper
 Firebase Realtime Database   ── rules: ".read": false, ".write": false
 ```
 
-- Password **tidak pernah disimpan plaintext lagi**: PBKDF2-SHA256 (120.000 iterasi,
+- Password **tidak pernah disimpan plaintext lagi**: PBKDF2-SHA256 (100.000 iterasi — batas maksimal PBKDF2 di Cloudflare Workers, salt acak per-akun,
   salt acak) → format `pbkdf2$<iter>$<salt>$<hash>`. Password lama (plaintext) otomatis
   di-upgrade ke hash saat login pertama setelah Worker baru aktif.
 - Password tidak lagi disimpan di browser (tidak ada lagi `localStorage panel_password`).

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
     <title>Manajemen Lisensi - Zeroix Enterprise</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -149,7 +150,7 @@
             </div>
             <h2 style="color:var(--danger); margin-top:0; font-weight: 800; text-transform: uppercase;">Akses Ditangguhkan</h2>
             <p class="subtitle" style="margin-bottom: 25px;">Modul Lisensi & Regulasi Siklus Aktif hanya diizinkan untuk otorisasi tingkat <b>Administrator atau Partner Terverifikasi</b>.</p>
-            <a class="back-btn" style="justify-content: center; width: 100%; box-sizing: border-box;" href="index.html">Kembali ke Dashboard</a>
+            <a class="back-btn" style="justify-content: center; width: 100%; box-sizing: border-box;" href="dashboard.html">Kembali ke Dashboard</a>
         </div>
     </div>
 
@@ -165,7 +166,7 @@
                 </div>
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="index.html" class="back-btn">
+                <a href="dashboard.html" class="back-btn">
                     <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
                     Dashboard
                 </a>
@@ -324,7 +325,7 @@
         
         if (!currentUserId || !allowedRoles.includes(role)) {
             document.getElementById('accessDenied').style.display = 'flex';
-            setTimeout(() => window.location.replace('index.html'), 2500);
+            setTimeout(() => window.location.replace('dashboard.html'), 2500);
         } else {
             document.getElementById('app').style.display = 'block';
             database.ref('users/' + currentUserId + '/isOnline').set(true);

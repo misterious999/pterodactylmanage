@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
     <title>Autentikasi Sistem - Zeroix Enterprise</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -282,7 +283,7 @@
                 localStorage.setItem('panel_role', peran);
                 localStorage.setItem('role', peran);
                 if (user.ptero_id) localStorage.setItem('ptero_user_id', user.ptero_id);
-                window.location.replace("index.html");
+                window.location.replace("dashboard.html");
             }).catch((error) => {
                 tampilkanError(error.message || "Otorisasi ditolak: Kredensial yang dimasukkan tidak valid.");
                 btn.innerHTML = defaultBtn;

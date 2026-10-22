@@ -50,7 +50,10 @@ function reply(body, status, headers) {
 // ==========================================
 
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
-const PBKDF2_ITERATIONS = 120000;
+// Batas Cloudflare Workers: deriveBits PBKDF2 maks. 100.000 iterasi (di Node tak dibatasi,
+// karena itu tes lokal tidak menangkap ini). Verifikasi hash lama tetap mengikuti
+// iterasi yang tertulis di string hash-nya.
+const PBKDF2_ITERATIONS = 100000;
 const PUBLIC_READ_NODES = new Set(['store_products', 'store_settings', 'store_stats']);
 const MANAGER_CREATE_ROLES = new Set(['pemilik', 'partner_public', 'partner_public_v2']);
 const SELF_ROW_FIELDS = new Set(['isOnline', 'lastLoginAt', 'updatedAt', 'usernameLower', 'profilePic']);
@@ -242,8 +245,13 @@ async function handleAuth(pathname, request, env, cors) {
 
         const needle = username.toLowerCase();
         // Cocokkan password ke SEMUA baris dengan username sama (data lama bisa
-        // duplikat/junk). Baris pertama yang passwordnya benar-lah yang dipakai.
-        const kandidat = Object.entries(users).filter(([, u]) => u && String(u.username || '').trim().toLowerCase() === needle);
+        // duplikat/junk). Baris pertama yang passwordnya benar-lah yang dipakai —
+        // dan diurutkan dari baris TERTUA dulu, supaya kloningan buatan hacker
+        // (yang baru dibuat) tidak bisa merebut sesi baris aslinya.
+        const usia = (u) => Number((u.createdAt || u.timestamp) || 0) || Infinity;
+        const kandidat = Object.entries(users)
+            .filter(([, u]) => u && String(u.username || '').trim().toLowerCase() === needle)
+            .sort((a, b) => usia(a[1]) - usia(b[1]));
         let foundUid = null, found = null;
         for (const [uid, u] of kandidat) {
             if (await verifyStored(u.password, password)) { foundUid = uid; found = u; break; }
@@ -304,7 +312,7 @@ async function handleAuth(pathname, request, env, cors) {
         let input;
         try { input = await request.json(); } catch { return reply('Invalid JSON', 400, cors); }
         const next = String(input.next || '');
-        if (next.length < 4 || next.length > 128) return reply('Password baru harus 4-128 karakter.', 400, cors);
+        if (next.length < 8 || next.length > 128) return reply('Password baru minimal 8 karakter (maks. 128).', 400, cors);
         let row;
         try { row = await getSessionUser(env, sess); } catch { return reply('Database tidak tersedia.', 502, cors); }
         if (!row) return reply('Sesi tidak valid lagi.', 401, cors);
