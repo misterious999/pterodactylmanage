@@ -150,3 +150,50 @@ Halaman guard membaca baris user secara live tiap polling, jadi perubahan itu ke
 1. **IMGBB key** di `manage_products.html` masih plaintext di front-end → dapat dirotate kapan saja & set akun; pindahkan ke Worker kalau ingin sempurna.
 2. Rate limit login berjalan per-replica Cloudflare — bukan klik jahat se-juta, tapi cukup memperlambat pelaku. Pertimbangkan Cloudflare WAF rule bila serangan besar.
 3. Berikan limit iterasi PBKDF2 & TTL token via konstanta di `workers.js` bila mau diubah.
+
+---
+
+## 8. Dashboard berhenti di "⏳" / "Err" — `workers.dev` diblokir ISP
+
+**Gejala:** halaman utama terbuka, tapi statistik node tetap "⏳" lama/berubah
+"Err", broadcast dan login ikut gagal. Worker sendiri sehat.
+
+**Penyebab (25 Okt 2026):** DNS ISP (XL/Axis) mengarahkan
+`zeroix-gatekeeper.benak211.workers.dev` ke `blockpage.xlaxiata.id`, jadi request
+dari HP tidak pernah sampai ke Cloudflare. Ini bukan bug hitung/scan di kode.
+Cek dari HP:
+
+```bash
+getent hosts zeroix-gatekeeper.benak211.workers.dev
+# kalau muncul blockpage.xlaxiata.id -> DNS ISP memblokir
+```
+
+Bisa juga cek lewat <https://dnschecker.org> (cari hostname Worker di atas).
+
+**Solusi cepat:** aktifkan Private DNS Android ke `one.one.one.one`
+(atau `dns.google`), atau pakai Wi-Fi/VPN, lalu reload.
+
+**Solusi permanen (disarankan):**
+
+1. Cloudflare Dashboard → **Workers & Pages** → `zeroix-gatekeeper` →
+   **Settings** → **Domains & Routes** → **Add** → **Custom domain**.
+2. Isi `api.zeroixdarkmarket.web.id` → **Add domain** → tunggu status **Active**
+   (SSL otomatis, biasanya 1–3 menit).
+3. Ganti URL Worker di `config.js`:
+
+   ```js
+   return "https://api.zeroixdarkmarket.web.id";
+   ```
+
+   Atau, tanpa deploy ulang, buka console browser di domain situs:
+
+   ```js
+   localStorage.setItem('zeroix_worker_url', 'https://api.zeroixdarkmarket.web.id')
+   ```
+
+   lalu reload. Hapus override dengan
+   `localStorage.removeItem('zeroix_worker_url')`.
+4. Upload ulang `config.js` (dan file lain yang berubah) ke Vercel.
+
+Tidak perlu mengubah `ALLOWED_ORIGINS` di Worker: yang dicek tetap origin
+situs (`https://zeroixdarkmarket.web.id`), bukan domain API-nya.

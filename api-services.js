@@ -7,9 +7,11 @@ class PteroAPI {
     }
 
     // Engine utama pengirim request ke Worker Gatekeeper
-    async _request(endpoint, method = 'GET', body = null) {
+    // timeoutMs: jangan biarkan halaman menggantung di "⏳" kalau Worker/panel
+    // tidak terjangkau (mis. DNS workers.dev diblokir ISP).
+    async _request(endpoint, method = 'GET', body = null, timeoutMs = 15000) {
         const targetUrl = `https://${this.domain}${endpoint}`;
-        const fetchUrl = `${this.workerUrl}/?url=${encodeURIComponent(targetUrl)}`;
+        const fetchUrl = `${this.workerUrl}?url=${encodeURIComponent(targetUrl)}`;
         
         const options = {
             method: method,
@@ -24,8 +26,14 @@ class PteroAPI {
             options.body = JSON.stringify(body);
         }
 
+        const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+        const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
+
         try {
-            const response = await fetch(fetchUrl, options);
+            const response = await fetch(fetchUrl, {
+                ...options,
+                signal: ctrl ? ctrl.signal : undefined
+            });
             const text = await response.text();
             
             if (!response.ok) {
@@ -36,7 +44,13 @@ class PteroAPI {
             return text ? JSON.parse(text) : null;
         } catch (error) {
             console.error(`[PteroAPI] Gagal eksekusi ${method} ${endpoint}:`, error);
+            if (error && error.name === 'AbortError') {
+                const detik = timeoutMs >= 1000 ? Math.round(timeoutMs / 1000) : (timeoutMs / 1000);
+                throw new Error(`Timeout ${detik} detik — server data tidak merespons.`);
+            }
             throw error;
+        } finally {
+            if (timer) clearTimeout(timer);
         }
     }
 
@@ -58,12 +72,14 @@ class PteroAPI {
     // ==========================================
     // 🖥️ MANAJEMEN SERVER
     // ==========================================
-    async getServers(page = 1) { 
-        return this._request(`/api/application/servers?page=${page}`); 
+    async getServers(page = 1, timeoutMs = 15000) { 
+        return this._request(`/api/application/servers?page=${page}`, 'GET', null, timeoutMs); 
     }
     
     async createServer(payload) { 
-        return this._request('/api/application/servers', 'POST', payload); 
+        // Provisioning server bisa lebih lama dari request biasa; beri 30 dtk
+        // supaya tidak dianggap timeout padahal upstream masih bekerja.
+        return this._request('/api/application/servers', 'POST', payload, 30000); 
     }
     
     async deleteServer(serverId) { 

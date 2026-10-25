@@ -365,6 +365,12 @@
             <h2><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg> Tinjauan Infrastruktur</h2>
         </div>
 
+        <div id="statErrorBanner" style="display: none; padding: 14px 16px; border-radius: 14px; margin-bottom: 16px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--text-main); font-size: 12px; line-height: 1.55; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; min-width: 20px; fill: var(--danger);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            <span id="statErrorMsg" style="flex: 1; min-width: 200px;"></span>
+            <button onclick="ambilStatistik()" style="padding: 9px 14px; border-radius: 9px; border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.12); color: #fca5a5; font-weight: 700; font-size: 11px; cursor: pointer; white-space: nowrap;">Coba Lagi</button>
+        </div>
+
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon-wrapper" style="background: rgba(13, 148, 136, 0.1); border: 1px solid rgba(13, 148, 136, 0.3);"><svg viewBox="0 0 24 24" style="fill: var(--primary);"><path d="M20 13H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zm-4 5h-2v-2h2v2zm0-9h-2V7h2v2zm4-6H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1z"/></svg></div>
@@ -436,8 +442,8 @@
     
     <div id="modalConfirm" class="system-modal-overlay"><div class="system-modal-popup" style="border-top: 4px solid var(--danger);"><svg class="modal-icon danger" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg><h3 style="color: var(--danger);">OTORISASI EKSEKUSI</h3><p id="confirmBody" style="color: var(--text-main); font-size: 13px; margin-bottom: 20px;">Anda akan melakukan pencabutan broadcast. Lanjutkan operasi?</p><div style="display: flex; gap: 10px;"><button class="btn-action btn-danger" style="margin: 0; flex: 1;" onclick="eksekusiCabutPengumuman()">Eksekusi</button><button class="btn-batal" style="margin: 0; flex: 1;" onclick="tutupModal('modalConfirm')">Batal</button></div></div></div>
 
-    <script src="config.js"></script>
-    <script src="api-services.js"></script>
+    <script src="config.js?v=74"></script>
+    <script src="api-services.js?v=74"></script>
     <script src="ui-confirm.js"></script>
     <script src="db-bridge.js?v=73"></script>
 
@@ -566,44 +572,87 @@
         const apiPub = new PteroAPI('public');
         const apiPubV2 = new PteroAPI('public_v2');
 
-        async function ambilStatistik() {
-            // Stats Private
-            try {
-                let dPriv = await apiPriv.getServers(1);
-                document.getElementById('countPrivate').innerText = dPriv.meta ? dPriv.meta.pagination.total : 0;
-            } catch(e) { document.getElementById('countPrivate').innerText = "Err"; }
-            
-            // Stats Public
-            try {
-                let dPub = await apiPub.getServers(1);
-                document.getElementById('countPublic').innerText = dPub.meta ? dPub.meta.pagination.total : 0;
-            } catch(e) { document.getElementById('countPublic').innerText = "Err"; }
+        const statTargets = [
+            { id: 'countPrivate', label: 'Node Private', api: apiPriv },
+            { id: 'countPublic', label: 'Node Publik', api: apiPub },
+            { id: 'countPublicV2', label: 'Node Publik V2', api: apiPubV2 },
+        ];
 
-            // Stats Public V2
-            try {
-                let dPubV2 = await apiPubV2.getServers(1);
-                document.getElementById('countPublicV2').innerText = dPubV2.meta ? dPubV2.meta.pagination.total : 0;
-            } catch(e) { document.getElementById('countPublicV2').innerText = "Err"; }
-
-            // Stats Firebase Users
-            if (role === 'pemilik' || role === 'partner_public' || role === 'partner_public_v2' || role === 'demo') {
-                database.ref('users').on('value', snap => {
-                    let tUsers = 0, oCount = 0;
-                    snap.forEach(c => { 
-                        let u = c.val(); 
-                        if (role === 'pemilik' || role === 'demo' || u.maker === username) { 
-                            tUsers++; 
-                            if(u.isOnline) oCount++; 
-                        } 
-                    });
-                    const elUser = document.getElementById('countUsers');
-                    const elOnline = document.getElementById('countOnline');
-                    if(elUser) elUser.innerText = tUsers;
-                    if(elOnline) elOnline.innerText = oCount;
-                });
-            }
+        function tampilkanErrorStatistik(pesan) {
+            const banner = document.getElementById('statErrorBanner');
+            const msg = document.getElementById('statErrorMsg');
+            if (!banner || !msg) return;
+            msg.textContent = pesan;
+            banner.style.display = 'flex';
         }
-        
+
+        async function ambilStatistik() {
+            const banner = document.getElementById('statErrorBanner');
+            if (banner) banner.style.display = 'none';
+
+            const gagal = [];
+
+            // Jalankan paralel: satu panel lambat/diblokir tidak boleh menahan
+            // statistik panel lain (dulu semuanya berhenti di "⏳").
+            await Promise.all(statTargets.map(async (t) => {
+                const el = document.getElementById(t.id);
+                if (!el) return;
+                el.innerText = '⏳';
+                el.style.color = '';
+                el.title = 'Memuat data...';
+
+                try {
+                    // Timeout 8 detik supaya dashboard tidak menggantung selamanya.
+                    const data = await t.api.getServers(1, 8000);
+                    const total = (data && data.meta && data.meta.pagination) ? data.meta.pagination.total : 0;
+                    el.innerText = total;
+                    el.title = `${t.label}: ${total} server`;
+                } catch (e) {
+                    el.innerText = 'Err';
+                    el.style.color = 'var(--danger)';
+                    el.title = (e && e.message) ? e.message : 'Gagal memuat data.';
+                    gagal.push(t.label);
+                }
+            }));
+
+            if (!gagal.length) return;
+            const semuaGagal = gagal.length === statTargets.length;
+            tampilkanErrorStatistik(
+                `Statistik ${gagal.join(', ')} gagal dimuat. ` +
+                (semuaGagal
+                    ? 'Server data tidak terjangkau — jika memakai data seluler, jaringan bisa memblokir domain workers.dev. Coba Wi-Fi/VPN, atau pasang domain API cadangan.'
+                    : 'Coba lagi beberapa saat lagi.')
+            );
+        }
+
+        function pantauStatistikPengguna() {
+            if (!(role === 'pemilik' || role === 'partner_public' || role === 'partner_public_v2' || role === 'demo')) return;
+            const elUser = document.getElementById('countUsers');
+            const elOnline = document.getElementById('countOnline');
+
+            database.ref('users').on('value', snap => {
+                let tUsers = 0, oCount = 0;
+                if (snap && snap.exists()) {
+                    snap.forEach(c => {
+                        let u = c.val();
+                        if (role === 'pemilik' || role === 'demo' || u.maker === username) {
+                            tUsers++;
+                            if (u.isOnline) oCount++;
+                        }
+                    });
+                }
+                if (elUser) { elUser.innerText = tUsers; elUser.style.color = ''; elUser.title = ''; }
+                if (elOnline) { elOnline.innerText = oCount; elOnline.style.color = 'var(--success)'; elOnline.title = ''; }
+            }, (e) => {
+                const pesan = (e && e.message) ? e.message : 'Koneksi database gagal.';
+                if (elUser) { elUser.innerText = 'Err'; elUser.style.color = 'var(--danger)'; elUser.title = pesan; }
+                if (elOnline) { elOnline.innerText = 'Err'; elOnline.style.color = 'var(--danger)'; elOnline.title = pesan; }
+            });
+        }
+
+        // Statistik user tidak bergantung pada API Pterodactyl, jadi jalankan
+        // sendiri supaya tetap tampil walau ketiga panel node bermasalah.
+        pantauStatistikPengguna();
         ambilStatistik();
     </script>
 

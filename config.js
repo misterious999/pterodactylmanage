@@ -1,7 +1,23 @@
 // config.js - Konfigurasi Terpusat Enterprise (Bebas Cache)
 const GlobalConfig = {
-    // URL Worker & Firebase ditanam statis
-    getWorkerUrl: () => "https://zeroix-gatekeeper.benak211.workers.dev",
+    // URL Worker & Firebase ditanam statis.
+    //
+    // CATATAN PENTING (insiden 25 Okt 2026):
+    // Banyak ISP Indonesia (mis. XL/Axis) memblokir *.workers.dev lewat DNS
+    // (dialihkan ke "blockpage.xlaxiata.id"). Gejalanya: dashboard berhenti
+    // di "⏳"/"Err" dan login gagal, padahal Worker sehat.
+    // Solusi permanen: pasang Custom Domain untuk Worker di Cloudflare
+    // (Workers & Pages -> zeroix-gatekeeper -> Settings -> Domains & Routes),
+    // misalnya "api.zeroixdarkmarket.web.id", lalu ganti URL di bawah.
+    // Bisa juga di-override tanpa deploy ulang lewat console browser:
+    //   localStorage.setItem('zeroix_worker_url', 'https://api.zeroixdarkmarket.web.id')
+    getWorkerUrl: () => {
+        try {
+            const override = localStorage.getItem('zeroix_worker_url');
+            if (override && override.trim()) return override.trim().replace(/[\/?]+$/, '');
+        } catch (e) { /* localStorage bisa diblokir di mode privat */ }
+        return "https://zeroix-gatekeeper.benak211.workers.dev";
+    },
     getFirebaseUrl: () => "https://cobaaja-ac5d0-default-rtdb.firebaseio.com",
     
     // Domain dipastikan bersih dari https://
