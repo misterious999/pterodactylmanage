@@ -11,7 +11,9 @@ class PteroAPI {
     // tidak terjangkau (mis. DNS workers.dev diblokir ISP).
     async _request(endpoint, method = 'GET', body = null, timeoutMs = 15000) {
         const targetUrl = `https://${this.domain}${endpoint}`;
-        const fetchUrl = `${this.workerUrl}?url=${encodeURIComponent(targetUrl)}`;
+        // Path relatif berisi query ?url=... — Worker menolak target di luar
+        // domain panel mode ini, jadi ini tetap aman walau lewat auto-fallback.
+        const fetchPath = `?url=${encodeURIComponent(targetUrl)}`;
         
         const options = {
             method: method,
@@ -30,7 +32,7 @@ class PteroAPI {
         const timer = ctrl ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
 
         try {
-            const response = await fetch(fetchUrl, {
+            const response = await GlobalConfig.workerFetch(fetchPath, {
                 ...options,
                 signal: ctrl ? ctrl.signal : undefined
             });

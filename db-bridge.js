@@ -20,6 +20,15 @@
     var WORKER = (typeof GlobalConfig !== 'undefined' && GlobalConfig.getWorkerUrl) ? GlobalConfig.getWorkerUrl() : '';
     if (!WORKER) console.warn('[db-bridge] GlobalConfig.getWorkerUrl() tidak ditemukan.');
 
+    // Pengirim request: memakai workerFetch milik GlobalConfig supaya otomatis
+    // pindah ke domain cadangan bila domain utama diblokir DNS ISP.
+    function request(path, opts) {
+        if (typeof GlobalConfig !== 'undefined' && GlobalConfig.workerFetch) {
+            return GlobalConfig.workerFetch(path, opts);
+        }
+        return fetch(WORKER + path, opts);
+    }
+
     function readToken() {
         try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; }
     }
@@ -47,7 +56,7 @@
         }
         var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
         var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 20000) : null;
-        return fetch(WORKER + path, {
+        return request(path, {
             method: opts.method || 'GET',
             headers: headers,
             body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
