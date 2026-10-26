@@ -842,8 +842,8 @@
     </footer>
 
     <!-- Script Pusat -->
-    <script src="config.js?v=74"></script>
-    <script src="db-bridge.js?v=73"></script>
+    <script src="config.js?v=75"></script>
+    <script src="db-bridge.js?v=74"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
@@ -1016,7 +1016,11 @@
         }
 
         async function payRequest(path, body) {
-            const res = await fetch(`${GlobalConfig.getWorkerUrl().replace(/[\/?]+$/, '')}/pay/${path}`, {
+            // Lewat GlobalConfig.workerFetch: kalau domain Worker utama diblokir
+            // DNS ISP, otomatis dicoba ke domain cadangan. workerFetch TIDAK
+            // mengulang bila server sudah menjawab (respons non-jaringan), jadi
+            // tagihan QRIS tidak mungkin terbuat dobel.
+            const res = await GlobalConfig.workerFetch(`/pay/${path}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
