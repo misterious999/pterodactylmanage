@@ -1,23 +1,90 @@
 // config.js - Konfigurasi Terpusat Enterprise (Bebas Cache)
 const GlobalConfig = {
-    // URL Worker & Firebase ditanam statis.
+    // ============================================================
+    // URL Cloudflare Worker (API) — ditanam statis
+    // ============================================================
+    // INSIDEN 25 Okt 2026: banyak ISP Indonesia (terbukti XL/Axis) memblokir
+    // *.workers.dev di level DNS dengan mengarahkannya ke
+    // "blockpage.xlaxiata.id". Karena yang diblokir lewat DNS, TLS-nya juga
+    // ikut gagal (sertifikat milik blockpage, bukan milik Worker):
     //
-    // CATATAN PENTING (insiden 25 Okt 2026):
-    // Banyak ISP Indonesia (mis. XL/Axis) memblokir *.workers.dev lewat DNS
-    // (dialihkan ke "blockpage.xlaxiata.id"). Gejalanya: dashboard berhenti
-    // di "⏳"/"Err" dan login gagal, padahal Worker sehat.
-    // Solusi permanen: pasang Custom Domain untuk Worker di Cloudflare
-    // (Workers & Pages -> zeroix-gatekeeper -> Settings -> Domains & Routes),
-    // misalnya "api.zeroixdarkmarket.web.id", lalu ganti URL di bawah.
-    // Bisa juga di-override tanpa deploy ulang lewat console browser:
+    //   curl: SSL: no alternative certificate subject name matches target hostname
+    //   browser: TypeError: Failed to fetch     (bukan HTTP error!)
+    //
+    // Akibatnya dashboard berhenti di "⏳"/"Err" dan login gagal, padahal
+    // Worker sendiri sehat. Situs tetap terbuka karena halaman statis ada di
+    // domain sendiri; yang hilang cuma semua panggilan API.
+    //
+    // SOLUSI PERMANEN: pasang Custom Domain untuk Worker — domain sendiri
+    // tidak kena blokir DNS ISP.
+    //   Cloudflare Dashboard -> Workers & Pages -> zeroix-gatekeeper
+    //   -> Settings -> Domains & Routes -> Add -> Custom domain
+    //   -> isi: api.zeroixdarkmarket.web.id  (tunggu status Active)
+    WORKER_URL_PRIMARY: 'https://api.zeroixdarkmarket.web.id',
+
+    // Domain workers.dev LAMA sengaja dipertahankan sebagai cadangan otomatis
+    // (lihat workerFetch di bawah). Jadi kalau custom domain belum dipasang,
+    // belum aktif, atau suatu saat gagal, permintaan otomatis dialihkan ke
+    // sana — situs tidak pernah jadi "mati total" hanya karena satu domain.
+    // Di jaringan yang tidak memblokir (WiFi/kampus/VPN), cadangan ini tetap
+    // berfungsi penuh.
+    WORKER_URL_FALLBACK: 'https://zeroix-gatekeeper.benak211.workers.dev',
+
+    // Override tanpa deploy ulang lewat console browser (dipakai untuk uji cepat):
     //   localStorage.setItem('zeroix_worker_url', 'https://api.zeroixdarkmarket.web.id')
+    //   localStorage.removeItem('zeroix_worker_url')
     getWorkerUrl: () => {
         try {
             const override = localStorage.getItem('zeroix_worker_url');
             if (override && override.trim()) return override.trim().replace(/[\/?]+$/, '');
         } catch (e) { /* localStorage bisa diblokir di mode privat */ }
-        return "https://zeroix-gatekeeper.benak211.workers.dev";
+        return GlobalConfig.WORKER_URL_PRIMARY;
     },
+    getWorkerFallbackUrl: () => GlobalConfig.WORKER_URL_FALLBACK,
+
+    // Endpoint yang terbukti bisa dijangkau di sesi browser ini (in-memory saja,
+    // di-reset tiap reload supaya tidak menyimpan keadaan yang basi).
+    _workerActive: null,
+
+    // --------------------------------------------------------
+    // workerFetch(path, opts) — pengirim request ke Worker dengan
+    // auto-fallback antar domain. Dipakai SEMUA halaman lewat GlobalConfig,
+    // supaya perilakunya seragam.
+    //
+    // ATURAN PENTING: hanya GAGAL JARINGAN (TypeError dari fetch — DNS diblokir,
+    // TLS gagal, offline) yang dicoba ulang ke domain cadangan.
+    // Respons HTTP apa pun (401/403/500) TIDAK diulang, karena itu jawaban
+    // asli dari server. Kalau diulang, endpoint /pay/* bisa membuat
+    // tagihan QRIS dobel — jadi aturan ini wajib dipatuhi.
+    // --------------------------------------------------------
+    workerFetch: (path, opts) => {
+        const urls = [];
+        const push = (u) => { if (u && urls.indexOf(u) < 0) urls.push(u); };
+        // Domain yang sudah terbukti jalan didahulukan biar hemat waktu.
+        push(GlobalConfig._workerActive);
+        push(GlobalConfig.getWorkerUrl());
+        push(GlobalConfig.getWorkerFallbackUrl());
+
+        const attempt = (i) => {
+            if (i >= urls.length) {
+                return Promise.reject(new Error('Tidak dapat terhubung ke server. Periksa koneksi internetmu.'));
+            }
+            return fetch(urls[i] + path, opts).then((res) => {
+                GlobalConfig._workerActive = urls[i]; // ingat untuk request berikutnya
+                return res;
+            }, (err) => {
+                // AbortError = kehabisan waktu; mengulang ke domain lain hanya
+                // menambah waktu tunggu, jadi tidak usah.
+                if (err && err.name === 'TypeError' && i + 1 < urls.length) {
+                    console.warn('[workerFetch] ' + urls[i] + ' gagal di level jaringan, mencoba cadangan: ' + urls[i + 1]);
+                    return attempt(i + 1);
+                }
+                throw err;
+            });
+        };
+        return attempt(0);
+    },
+
     getFirebaseUrl: () => "https://cobaaja-ac5d0-default-rtdb.firebaseio.com",
     
     // Domain dipastikan bersih dari https://

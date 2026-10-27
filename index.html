@@ -221,7 +221,7 @@
 </head>
 <body>
 <script src="page-loader.js"></script>
-<script src="config.js?v=74"></script>
+<script src="config.js?v=75"></script>
 
 <nav class="navbar">
     <a class="brand" href="/">
@@ -364,11 +364,9 @@
             }
         });
 
-        var WORKER = (typeof GlobalConfig !== 'undefined' && GlobalConfig.getWorkerUrl)
-            ? String(GlobalConfig.getWorkerUrl()).replace(/[\/?]+$/, '') : '';
-
         function getJson(rel) {
-            return fetch(WORKER + '/db/' + rel).then(function (r) {
+            // Lewat workerFetch supaya ikut auto-fallback bila domain Worker diblokir ISP.
+            return GlobalConfig.workerFetch('/db/' + rel).then(function (r) {
                 return r.ok ? r.json() : null;
             }).catch(function () { return null; });
         }

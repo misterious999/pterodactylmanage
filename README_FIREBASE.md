@@ -170,30 +170,62 @@ getent hosts zeroix-gatekeeper.benak211.workers.dev
 
 Bisa juga cek lewat <https://dnschecker.org> (cari hostname Worker di atas).
 
-**Solusi cepat:** aktifkan Private DNS Android ke `one.one.one.one`
-(atau `dns.google`), atau pakai Wi-Fi/VPN, lalu reload.
+**Solusi permanen (SUDAH DIIMPLEMENTASIKAN DI KODE — tinggal 1 langkah console):**
 
-**Solusi permanen (disarankan):**
+Kode sekarang memakai **Custom Domain sebagai URL utama**, dengan domain
+`workers.dev` lama tetap dipertahankan sebagai **cadangan otomatis**.
+`config.js`:
+
+```js
+WORKER_URL_PRIMARY:  'https://api.zeroixdarkmarket.web.id',   // bebas blokir ISP
+WORKER_URL_FALLBACK: 'https://zeroix-gatekeeper.benak211.workers.dev', // cadangan
+```
+
+Semua halaman mengirim request lewat `GlobalConfig.workerFetch(path, opts)`,
+yang aturannya:
+
+- **Gagal di level jaringan saja** (DNS diblokir / TLS gagal / offline → `TypeError`)
+  yang dicoba ulang ke domain cadangan, lalu diingat untuk request berikutnya.
+- **Respons HTTP apa pun (401/403/500) TIDAK diulang.** Itu jawaban asli server;
+  mengulangnya bisa membuat tagihan QRIS di `/pay/*` **dobel**.
+
+Jadi selama custom domain belum dipasang, situs tetap berperilaku persis
+seperti sebelumnya (jalan di Wi-Fi/VPN). Begitu custom domain aktif, otomatis
+dipakai dan tidak lagi tergantung Wi-Fi/VPN/Private DNS.
+
+**Langkah yang harus kamu lakukan (sekali saja):**
 
 1. Cloudflare Dashboard → **Workers & Pages** → `zeroix-gatekeeper` →
    **Settings** → **Domains & Routes** → **Add** → **Custom domain**.
 2. Isi `api.zeroixdarkmarket.web.id` → **Add domain** → tunggu status **Active**
    (SSL otomatis, biasanya 1–3 menit).
-3. Ganti URL Worker di `config.js`:
+3. Upload file yang berubah ke Vercel: `config.js`, `db-bridge.js`,
+   `api-services.js`, dan semua `.html` (versi cache `?v=` sudah dinaikkan
+   `config.js?v=75`, `db-bridge.js?v=74` — supaya pengunjendapat file baru).
 
-   ```js
-   return "https://api.zeroixdarkmarket.web.id";
-   ```
+Catatan: `zeroixdarkmarket.web.id` sudah berada di nameserver Cloudflare
+(`liberty` + `jim`), jadi tidak perlu pindah hosting. Pastikan zone itu ada di
+**akun Cloudflare yang sama** dengan Worker-nya.
 
-   Atau, tanpa deploy ulang, buka console browser di domain situs:
+**Verifikasi selesai:**
 
-   ```js
-   localStorage.setItem('zeroix_worker_url', 'https://api.zeroixdarkmarket.web.id')
-   ```
+```bash
+# Harus menunjukkan IP Cloudflare (104.x / 172.67.x), BUKAN blockpage:
+getent hosts api.zeroixdarkmarket.web.id
+```
 
-   lalu reload. Hapus override dengan
-   `localStorage.removeItem('zeroix_worker_url')`.
-4. Upload ulang `config.js` (dan file lain yang berubah) ke Vercel.
+Lalu buka situs dari data seluler: daftar produk, login, dan dashboard harus
+muncul tanpa perlu ganti Private DNS/VPN.
+
+**Darurat (kalau custom domain belum sempat dipasang):** aktifkan Private DNS
+Android ke `one.one.one.one` (atau `dns.google`), atau pakai Wi-Fi/VPN, lalu
+reload. Override cepat tanpa deploy lewat console browser di domain situs:
+
+```js
+localStorage.setItem('zeroix_worker_url', 'https://api.zeroixdarkmarket.web.id')
+// hapus override:
+localStorage.removeItem('zeroix_worker_url')
+```
 
 Tidak perlu mengubah `ALLOWED_ORIGINS` di Worker: yang dicek tetap origin
 situs (`https://zeroixdarkmarket.web.id`), bukan domain API-nya.
