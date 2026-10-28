@@ -1078,14 +1078,21 @@
             await database.ref(`ptero_users_expired/${domainKey}/${id}`).set({
                 expiredAt: newExpire,
                 username: username,
-                maker: myUsername 
+                maker: myUsername,
+                expiredUpdatedAt: Date.now()   // jejak waktu: siapa ubah & kapan (memudahkan audit)
             });
+            // Penting: terapkan masa aktif yang sama ke semua server milik user ini,
+            // supaya timer server lama (lebih pendek) tidak men-suspend lebih awal.
+            const jumlahServer = await sinkronTimerServerMilikUser(id, newExpire);
             await pulihkanUserDariSweeper(id);
 
             btn.innerText = "Simpan Regulasi";
             btn.style.pointerEvents = "auto";
             tutupModal('modalTambahExpiredPtero');
-            showAiSuccess(`Validitas akun ${username} berhasil diperpanjang <b>${hari} hari</b> dari siklus saat ini.`, "ALOKASI BERHASIL");
+            const catatanServer = jumlahServer > 0
+                ? `<br><small style="opacity:.8;">Masa aktif juga diterapkan ke <b>${jumlahServer} server</b> milik akun ini.</small>`
+                : (jumlahServer < 0 ? `<br><small style="opacity:.8;">Catatan: sinkron timer server gagal — timer user tetap tersimpan.</small>` : '');
+            showAiSuccess(`Validitas akun ${username} berhasil diperpanjang <b>${hari} hari</b> dari siklus saat ini.${catatanServer}`, "ALOKASI BERHASIL");
             ambilDataPtero(); 
         }
 
@@ -1112,6 +1119,58 @@
             }
         }
 
+        // ==========================================
+        // SINKRONISASI TIMER USER <-> SERVER
+        // ==========================================
+        // PENYEBAB BUG (ditemukan 28 Okt 2026): timer user (ptero_users_expired)
+        // dan timer server (ptero_servers_expired) disimpan TERPISAH dan tidak
+        // pernah saling tahu. Auto-Sweeper men-suspend server kalau SALAH SATU
+        // dari keduanya lewat. Akibatnya admin menyetel user 30 hari, tapi
+        // server masih menyimpan timer lama 7 hari -> server di-suspend di hari
+        // ke-7 dan dihapus permanen di hari ke-10 (7 + GRACE_DAYS).
+        //
+        // Solusinya: setiap pengaturan masa aktif USER selalu diterapkan juga ke
+        // SEMUA server milik user itu, supaya kedua timer selalu sama.
+        // (Timer per-server yang diset manual tetap berlaku sampai user diset
+        // ulang, karena saat itu admin memang sedang menentukan masa aktif akun.)
+        async function serverMilikUser(userId) {
+            let all = [], page = 1, totalPages = 1;
+            do {
+                const data = await apiPtero.getServers(page);
+                all = all.concat((data && data.data) ? data.data : []);
+                totalPages = (data && data.meta && data.meta.pagination && data.meta.pagination.total_pages) ? data.meta.pagination.total_pages : 1;
+                page++;
+            } while (page <= totalPages);
+            return all.filter(s => s.attributes && s.attributes.user === parseInt(userId));
+        }
+
+        async function sinkronTimerServerMilikUser(userId, expiredAt) {
+            const domainKey = config.domain.replace(/\./g, '_');
+            try {
+                const servers = await serverMilikUser(userId);
+                for (const s of servers) {
+                    const sid = s.attributes.id;
+                    // expiredAt null = hapus timer server, biar mengikuti "unlimited" milik user
+                    if (expiredAt) {
+                        await database.ref(`ptero_servers_expired/${domainKey}/${sid}`).set({
+                            expiredAt: expiredAt,
+                            serverName: s.attributes.name || '',
+                            maker: myUsername,
+                            expiredUpdatedAt: Date.now()
+                        });
+                    } else {
+                        await database.ref(`ptero_servers_expired/${domainKey}/${sid}`).remove();
+                    }
+                    // Lepas status suspend lama supaya server langsung pulih
+                    await database.ref(`ptero_sweeper_state/${domainKey}/servers/${sid}`).remove();
+                }
+                return servers.length;
+            } catch (e) {
+                console.warn('[Expired] Gagal sinkron timer server:', e.message);
+                return -1; // -1 = gagal; 0 = tidak ada server
+            }
+        }
+
         let targetDelTimerUserId = null;
         function konfirmasiHapusTimerUser(id, name) {
             if (role === 'demo') return showAiAlert("Fungsionalitas dinonaktifkan pada sesi Demo.", "AKSES DITOLAK");
@@ -1125,6 +1184,9 @@
             try {
                 let domainKey = config.domain.replace(/\./g, '_');
                 await database.ref(`ptero_users_expired/${domainKey}/${targetDelTimerUserId}`).remove();
+                // Timer server ikut dihapus: kalau tidak, server tetap akan
+                // di-suspend/dihapus sweeper padahal user-nya sudah "Unlimited".
+                await sinkronTimerServerMilikUser(targetDelTimerUserId, null);
                 await pulihkanUserDariSweeper(targetDelTimerUserId);
                 showAiSuccess("Timer masa aktif berhasil dihapus. Akun kini Unlimited.", "TIMER DIHAPUS", false);
                 ambilDataPtero();
@@ -1208,7 +1270,7 @@
 
         setInterval(() => {
             document.querySelectorAll('.ptero-countdown-timer').forEach(el => {
-                renderCountdownExpired(el, parseInt(el.getAttribute('data-expire')));
+                renderCountdownExpired(el, Number(el.getAttribute('data-expire')));
             });
         }, 1000);
 

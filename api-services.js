@@ -118,6 +118,25 @@ class PteroAPI {
 // ==========================================
 function renderCountdownExpired(el, expiredAt) {
     const now = Date.now();
+
+    // ---------- VALIDASI DATA (insiden 28 Okt 2026) ----------
+    // Beberapa record lama menyimpan expiredAt RUSAK, mis. 8.640008640001794e+24
+    // (hasil "string + number" pada kode versi lama, ditulis akun barmods/Randa).
+    // Angka itu bukan tanggal. Ketika lewat parseInt("8.64e+24") hasilnya 8,
+    // sehingga jatuh ke cabang terakhir dan tampil "MENUNGGU DIHAPUS" —
+    // padahal Auto-Sweeper tidak pernah menyentuh user tersebut.
+    // Supaya tidak menyesatkan lagi, nilai tidak wajar ditandai terpisah.
+    const MIN_TS = Date.UTC(2020, 0, 1);
+    const MAX_TS = Date.UTC(2100, 0, 1);
+    if (!Number.isFinite(expiredAt) || expiredAt < MIN_TS || expiredAt > MAX_TS) {
+        el.innerText = 'DATA EXPIRED RUSAK';
+        el.title = 'Nilai expiredAt di database bukan tanggal yang valid. Perbaiki lewat tombol konfigurasi (+) dan masukkan ulang durasi hari.';
+        el.style.color = 'var(--warning)';
+        el.style.background = 'rgba(245, 158, 11, 0.12)';
+        el.style.borderColor = 'var(--warning)';
+        return;
+    }
+
     const deleteAt = expiredAt + GlobalConfig.getGraceDays() * 24 * 60 * 60 * 1000;
     const fmt = (ms) => {
         const d = Math.floor(ms / 86400000);

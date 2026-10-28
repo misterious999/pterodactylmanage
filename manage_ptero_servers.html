@@ -1035,7 +1035,8 @@
             await database.ref(`ptero_servers_expired/${domainKey}/${id}`).set({
                 expiredAt: newExpire,
                 serverName: serverName,
-                maker: myUsername 
+                maker: myUsername,
+                expiredUpdatedAt: Date.now()   // jejak waktu: siapa ubah & kapan (memudahkan audit)
             });
             await pulihkanServerDariSweeper(id);
 
@@ -1084,7 +1085,7 @@
 
         setInterval(() => {
             document.querySelectorAll('.ptero-server-countdown').forEach(el => {
-                renderCountdownExpired(el, parseInt(el.getAttribute('data-expire')));
+                renderCountdownExpired(el, Number(el.getAttribute('data-expire')));
             });
         }, 1000);
 
