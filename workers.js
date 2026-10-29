@@ -15,6 +15,22 @@ const PANELS = {
     public_v2: { host: 'zeropublikv2.bypstar7.online',    key: 'PUB_V2_API' },
 };
 
+// Role mana yang boleh memakai proxy panel, untuk tiap mode.
+// Ditulis menyesuaikan allowedRoles di manage_ptero_users.html dan
+// manage_ptero_servers.html, supaya aturan di server sama dengan yang
+// terlihat di layar. Role yang tidak terdaftar di sini otomatis ditolak,
+// termasuk akun pelanggan yang tidak punya akses panel.
+const PANEL_ACCESS = {
+    pemilik:            ['private', 'public', 'public_v2'],
+    reseller:           ['private'],
+    reseller_private:   ['private'],
+    reseller_public:    ['public'],
+    partner_public:     ['public'],
+    reseller_public_v2: ['public_v2'],
+    partner_public_v2:  ['public_v2'],
+    demo:               ['public'], // sesi demo: boleh lihat saja (dijaga di coreGateway)
+};
+
 const ALLOWED_METHODS = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'];
 
 function corsHeaders(origin) {
@@ -517,8 +533,27 @@ async function coreGateway(request, env, origin, cors) {
             return handleDb(pathname, request, env, cors);
         }
 
-        // 2. Mode panel harus salah satu yang terdaftar
-        const panel = PANELS[request.headers.get('X-Panel-Mode') || 'private'];
+        // 1c. Proxy panel Pterodactyl wajib bawa sesi login DAN role yang berhak.
+        //     Header Origin bukan penjaga keamanan: lewat curl/Postman/script
+        //     header itu bebas ditulis, sedangkan URL Worker, header X-Panel-Mode,
+        //     dan Origin semuanya tampil publik di config.js. Tanpa pemeriksaan
+        //     ini siapa pun dapat membuat, membaca, dan menghapus user serta
+        //     server di ketiga panel hanya dengan dua header tebakan.
+        const sess = await verifySession(env, request);
+        if (!sess) return reply('Sesi berakhir, silakan login.', 401, cors);
+
+        // 2. Mode panel harus salah satu yang terdaftar, dan role-nya berhak
+        const mode = request.headers.get('X-Panel-Mode') || 'private';
+        const role = String(sess.r || '').toLowerCase();
+        if (!PANEL_ACCESS[role] || PANEL_ACCESS[role].indexOf(mode) < 0) {
+            return reply('Anda tidak punya akses ke panel ini.', 403, cors);
+        }
+        // Sesi demo hanya boleh membaca — sama dengan kunci "AKSES DITOLAK"
+        // di halaman admin yang selama ini hanya berjalan di browser.
+        if (role === 'demo' && request.method !== 'GET') {
+            return reply('Fungsionalitas dinonaktifkan pada sesi Demo.', 403, cors);
+        }
+        const panel = PANELS[mode];
         if (!panel) {
             return reply('Invalid panel mode', 400, cors);
         }
@@ -986,6 +1021,20 @@ const GRACE_DAYS = 3;
 const GRACE_MS = GRACE_DAYS * 24 * 60 * 60 * 1000;
 const WARN_MS = GRACE_MS; // pengingat: expired dalam 3 hari ke depan masuk ringkasan harian
 
+// ---------- PENJAGA NILAI expiredAt (insiden 28 Okt 2026) ----------
+// Beberapa record lama menyimpan expiredAt RUSAK, mis. 8.640008640001794e+24 —
+// hasil "string + number" pada kode versi lama (ditulis akun barmods/Randa).
+// Angka itu bukan tanggal. Kalau lolos begitu saja, suatu saat nilai rusak yang
+// justru KECIL bisa dianggap "sudah lewat" dan memicu suspend/penghapusan massal.
+// Maka hanya timestamp ms yang wajar (2020–2100) yang dipercaya; selain itu
+// dianggap "tanpa timer" dan dilaporkan ke log.
+const MIN_TS = Date.UTC(2020, 0, 1);
+const MAX_TS = Date.UTC(2100, 0, 1);
+const saneTs = (v) => {
+    const n = Number(v);
+    return (Number.isFinite(n) && n >= MIN_TS && n <= MAX_TS) ? n : 0;
+};
+
 // Cloudflare free plan membatasi 50 subrequest per eksekusi.
 const SUBREQUEST_BUDGET = 45;
 
@@ -997,6 +1046,7 @@ async function sweepExpired(env, scheduledTime) {
     const updates = {}; // ditulis sekaligus ke Firebase di akhir (1 request)
     const aksi = [];    // ringkasan jumlah aksi untuk log konsol
     const segeraExpired = []; // akan expired dalam WARN_MS (untuk ringkasan harian)
+    const rusakData = [];     // record dengan expiredAt tidak valid (insiden 28 Okt 2026)
     const jumlahTenggang = {}; // per mode: server/user yang sedang masa tenggang
     let logSeq = 0;
 
@@ -1077,7 +1127,11 @@ async function sweepExpired(env, scheduledTime) {
             if (budget < 3) break;
             const rec = serverRecs[id];
             const suspended = serverState[id];
-            const expiredAt = Number(rec?.expiredAt) || 0;
+            const expiredAt = saneTs(rec?.expiredAt);
+            if (rec?.expiredAt && !expiredAt) {
+                // Dicatat ke ringkasan harian saja — log per 5 menit akan membanjiri.
+                rusakData.push(`• [${mode}] Server #${id} (${rec?.serverName || '-'}) — expiredAt: ${rec.expiredAt}`);
+            }
             const recPath = `ptero_servers_expired/${domainKey}/${id}`;
             const statePath = `ptero_sweeper_state/${domainKey}/servers/${id}`;
             const label = `Server #${id} (${rec?.serverName || '-'}) milik ${rec?.maker || '-'}`;
@@ -1110,7 +1164,11 @@ async function sweepExpired(env, scheduledTime) {
             if (budget < 4) break;
             const rec = userRecs[id];
             const suspended = userState[id];
-            const expiredAt = Number(rec?.expiredAt) || 0;
+            const expiredAt = saneTs(rec?.expiredAt);
+            if (rec?.expiredAt && !expiredAt) {
+                // Dicatat ke ringkasan harian saja — log per 5 menit akan membanjiri.
+                rusakData.push(`• [${mode}] User ${rec?.username || '#' + id} — expiredAt: ${rec.expiredAt}`);
+            }
             const recPath = `ptero_users_expired/${domainKey}/${id}`;
             const statePath = `ptero_sweeper_state/${domainKey}/users/${id}`;
             const label = `User ${rec?.username || '#' + id} milik ${rec?.maker || '-'}`;
@@ -1154,10 +1212,12 @@ async function sweepExpired(env, scheduledTime) {
         const soon = segeraExpired.sort((a, b) => a.sisa - b.sisa)
             .map(x => `• [${x.mode}] ${x.jenis === 'user' ? 'User' : 'Server'} ${x.nama} (${x.maker || '-'}), sisa ${(x.sisa / 86400000).toFixed(1)} hari`);
         const tenggang = Object.entries(jumlahTenggang).map(([m, n]) => `• [${m}] ${n}`);
+        const rusak = [...new Set(rusakData)];
         updates[`notifikasi/${now}_ringkasan`] = {
             tipe: 'ringkasan',
             pesan: `Akan expired dalam ${WARN_MS / 86400000} hari (${soon.length}):\n` + (soon.length ? soon.join('\n') : '• Tidak ada') +
-                   `\n\nSedang masa tenggang (suspend):\n` + (tenggang.length ? tenggang.join('\n') : '• Tidak ada'),
+                   `\n\nSedang masa tenggang (suspend):\n` + (tenggang.length ? tenggang.join('\n') : '• Tidak ada') +
+                   (rusak.length ? `\n\n⚠️ Data expired RUSAK — perbaiki via tombol (+):\n` + rusak.join('\n') : ''),
             maker: 'system',
             timestamp: now,
         };

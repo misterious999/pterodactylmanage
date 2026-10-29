@@ -77,7 +77,22 @@
 
         .btn-unsuspend { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
         .btn-unsuspend:hover { background: var(--success); color: white; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); transform: scale(1.05); }
-        
+
+        .btn-ganti-game { background: rgba(13, 148, 136, 0.1); color: var(--primary); border: 1px solid rgba(13, 148, 136, 0.3); }
+        .btn-ganti-game:hover { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3); transform: scale(1.05); }
+
+        /* Pilihan kategori/game/runtime di modal Ganti Game. Aturan global
+           input,select memakai appearance:none sehingga panah bawaan hilang —
+           dikembalikan lewat panah SVG agar jelas bisa dibuka. */
+        #ggNest, #ggEgg, #ggImage {
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 18px;
+            padding-right: 38px;
+            cursor: pointer;
+        }
+
         .badge { padding: 6px 12px; border-radius: 50px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; border: 1px solid transparent; }
         .badge-install { background: rgba(245, 158, 11, 0.1); color: var(--warning); border-color: rgba(245, 158, 11, 0.3); }
         .badge-active { background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.3); }
@@ -689,13 +704,38 @@
     <div id="modalSuspendConfirm" class="system-modal-overlay"><div class="system-modal-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/></svg></div><div class="system-modal-header">RESTRIKSI SISTEM</div><div class="system-modal-body">Bekukan (Suspend) akses dan instansi server: <b style="color: var(--warning);" id="suspendServerName"></b>?<br><br>Pengguna tidak akan memiliki otorisasi operasional.</div><div class="system-btn-group"><button id="btnKonfirmasiSuspend" class="system-btn btn-warning-action" onclick="prosesSuspendServer()">Bekukan Akses</button><button class="system-btn btn-outline-action" onclick="tutupModal('modalSuspendConfirm')">Batal</button></div></div></div>
     
     <div id="modalUnsuspendConfirm" class="system-modal-overlay"><div class="system-modal-popup mode-success"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg></div><div class="system-modal-header">PEMULIHAN AKSES</div><div class="system-modal-body">Pulihkan otorisasi operasional (Unsuspend) untuk instansi server: <b style="color: var(--success);" id="unsuspendServerName"></b>?</div><div class="system-btn-group"><button id="btnKonfirmasiUnsuspend" class="system-btn btn-success-action" onclick="prosesUnsuspendServer()">Cabut Restriksi</button><button class="system-btn btn-outline-action" onclick="tutupModal('modalUnsuspendConfirm')">Batal</button></div></div></div>
+
+    <!-- MODAL GANTI GAME — menukar jenis game (egg) pada server yang sudah ada -->
+    <div id="modalGantiGame" class="system-modal-overlay"><div class="system-modal-popup mode-warning" style="max-width: 540px; max-height: 90vh; overflow-y: auto;"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M21.58 16.09l-1.09-7.66C20.21 6.46 18.52 5 16.53 5H7.47C5.48 5 3.79 6.46 3.51 8.43l-1.09 7.66C2.2 17.63 3.39 19 4.94 19c.68 0 1.32-.27 1.8-.75L9 16h6l2.25 2.25c.48.48 1.13.75 1.8.75 1.56 0 2.75-1.37 2.53-2.91zM11 11H9v2H7v-2H5v-2h2V7h2v2h2v2zm7-2c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm2 3c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg></div><div class="system-modal-header">GANTI JENIS GAME</div><div class="system-modal-body">
+        Menukar jenis game pada instansi server: <b style="color: var(--warning);" id="ggServerName">-</b>
+        <div id="ggCurrent" style="margin-top:10px; font-size:12px; color:var(--text-sub); background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:9px 11px; line-height:1.5;">Memuat daftar game dari panel...</div>
+
+        <div style="text-align:left; margin-top:15px;">
+            <label style="display:block; font-size:10px; font-weight:800; color:var(--text-sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Kategori Server</label>
+            <select id="ggNest" onchange="ggGantiNest()" style="margin-bottom:13px;"></select>
+
+            <label style="display:block; font-size:10px; font-weight:800; color:var(--text-sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Jenis Game</label>
+            <select id="ggEgg" onchange="ggGantiEgg()" style="margin-bottom:13px;"></select>
+
+            <label style="display:block; font-size:10px; font-weight:800; color:var(--text-sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Runtime Docker</label>
+            <select id="ggImage" style="margin-bottom:14px;"></select>
+
+            <div style="font-size:12px; line-height:1.7; color:var(--warning); background:rgba(245, 158, 11, 0.08); border:1px solid rgba(245, 158, 11, 0.25); border-radius:8px; padding:11px 12px;">
+                Server akan <b>di-reinstall</b> agar script instalasi game baru dijalankan (mengunduh file game).<br>
+                • RAM, disk, CPU, port, pemilik & masa aktif <b>tidak berubah</b>.<br>
+                • Data panel (database, backup, subuser) <b>ikut utuh</b>.<br>
+                • File game lama <b>tidak terhapus</b> — hanya bertambah.<br>
+                • Tunggu status <b>Installing</b> selesai, lalu <b>nyalakan ulang server</b>.
+            </div>
+        </div>
+    </div><div class="system-btn-group"><button id="btnGantiGame" class="system-btn btn-warning-action" onclick="prosesGantiGame()">Ganti Sekarang</button><button class="system-btn btn-outline-action" onclick="tutupModal('modalGantiGame')">Batal</button></div></div></div>
     
     <div id="modalAiAlert" class="system-modal-overlay" style="z-index: 999999;"><div class="system-modal-popup mode-warning"><div class="modal-icon-top"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><div class="system-modal-header" id="aiAlertTitle">PERINGATAN SISTEM</div><div class="system-modal-body" id="aiAlertBody">Pesan peringatan.</div><div class="system-btn-group"><button class="system-btn btn-warning-action" onclick="tutupModal('modalAiAlert')">Mengerti</button></div></div></div>
     
     <div id="modalAiSuccess" class="system-modal-overlay" style="z-index: 999999;"><div class="system-modal-popup mode-success" id="popupSuccessMode"><div class="modal-icon-top" id="iconSuccessMode"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="system-modal-header" id="aiSuccessTitle">STATUS OK</div><div class="system-modal-body" id="aiSuccessBody">Operasi berhasil diselesaikan.</div><div class="system-btn-group"><button class="system-btn btn-success-action" id="btnTutupSuccess" onclick="tutupModal('modalAiSuccess')">Tutup</button></div></div></div>
 
     <script src="config.js?v=75"></script>
-    <script src="api-services.js?v=74"></script>
+    <script src="api-services.js?v=75"></script>
     <script src="db-bridge.js?v=74"></script>
 
     <script>
@@ -928,6 +968,11 @@
             }
         }
 
+        // Menyimpan server yang sedang ditampilkan, supaya tombol "Ganti Game"
+        // cukup membawa ID (nama server bisa mengandung tanda kutip sehingga
+        // tidak aman disisipkan ke atribut onclick).
+        let serverTerkini = {};
+
         async function ambilDataServers() {
             try {
                 let domainKey = config.domain.replace(/\./g, '_');
@@ -950,9 +995,11 @@
 
                 let tabel = `<tr><th>ID</th><th>Nama Server</th><th>Pemilik</th><th>Masa Aktif</th><th>Status</th><th>Aksi</th></tr>`; 
                 let count = 0;
+                serverTerkini = {};
                 const iconTrash = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
                 const iconLock = `<svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/></svg>`;
                 const iconUnlock = `<svg viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg>`;
+                const iconGame = `<svg viewBox="0 0 24 24"><path d="M21.58 16.09l-1.09-7.66C20.21 6.46 18.52 5 16.53 5H7.47C5.48 5 3.79 6.46 3.51 8.43l-1.09 7.66C2.2 17.63 3.39 19 4.94 19c.68 0 1.32-.27 1.8-.75L9 16h6l2.25 2.25c.48.48 1.13.75 1.8.75 1.56 0 2.75-1.37 2.53-2.91zM11 11H9v2H7v-2H5v-2h2V7h2v2h2v2zm7-2c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm2 3c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>`;
 
                 allServers.forEach(srv => {
                     let s = srv.attributes; 
@@ -967,6 +1014,7 @@
                     if (!isOwner && !isMyServer) return; 
                     
                     count++;
+                    serverTerkini[s.id] = s;
                     let sBadge = s.suspended ? `<span class="badge badge-suspended"><span class="status-dot dot-danger"></span> Suspended</span>` : `<span class="badge badge-active"><span class="status-dot dot-success"></span> Active</span>`;
                     if (s.status === 'installing') sBadge = `<span class="badge badge-install"><span class="status-dot dot-warning"></span> Installing</span>`;
                     let mTag = isOwner ? `<br><span class="reseller-tag">Author: ${oData.maker}</span>` : '';
@@ -989,9 +1037,12 @@
                                   `<button class="btn-action-small btn-unsuspend" title="Buka Suspend Server" onclick="konfirmasiUnsuspend(${s.id}, '${s.name}')">${iconUnlock}</button>` : 
                                   `<button class="btn-action-small btn-suspend" title="Suspend Server" onclick="konfirmasiSuspend(${s.id}, '${s.name}')">${iconLock}</button>`;
 
+                    let btnGame = `<button class="btn-action-small btn-ganti-game" title="Ganti Game" onclick="bukaModalGantiGame(${s.id})">${iconGame}</button>`;
+
                     let btnAction = `<div class="action-group">
                         <button class="btn-action-small btn-hapus" title="Hapus Server" onclick="konfirmasiHapusServer(${s.id}, '${s.name}')">${iconTrash}</button>
                         ${btnLock}
+                        ${btnGame}
                     </div>`;
 
                     tabel += `<tr><td style="color:var(--text-sub); font-weight:bold;">#${s.id}</td><td style="font-weight:700; color:var(--text-main); font-size:14px;">${s.name}</td><td><span style="color:var(--primary); font-weight:bold;">${oData.username}</span>${mTag}</td><td>${kolomExpired}</td><td>${sBadge}</td><td>${btnAction}</td></tr>`;
@@ -1275,6 +1326,218 @@
                 ambilDataServers();
             } catch(e) { 
                 showAiAlert("Kegagalan pemulihan otorisasi: " + e.message, "KESALAHAN"); 
+            }
+        }
+
+        // ==========================================
+        // GANTI GAME — menukar jenis game (egg) pada server yang sudah ada
+        //
+        // Pterodactyl v1 menyediakan jalur resmi (sudah diuji langsung lewat API):
+        //   PATCH /api/application/servers/{id}/startup
+        //     field wajib : startup, environment, egg  -> PUT ditolak 405
+        //   POST  /api/application/servers/{id}/reinstall
+        //     menjalankan script instalasi milik egg baru (mengunduh file game)
+        //
+        // Hanya startup/egg/environment yang disentuh, sehingga RAM, disk, CPU,
+        // port (allocation), pemilik, subuser, database, backup, dan masa aktif
+        // di Firebase ikut utuh.
+        //
+        // PENTING: ID egg tidak sama antar panel — egg 1 = "Forge" di private,
+        // tetapi "Paper" di public_v2. Karena itu daftar game SELALU diambil
+        // hidup dari panel lewat ggDaftarNest(), tidak boleh di-hardcode.
+        // ==========================================
+        let ggTargetId = null;
+        let ggCacheNest = null;
+        let ggNamaSekarang = '';
+
+        async function ggDaftarNest() {
+            if (ggCacheNest) return ggCacheNest;
+            const data = await apiPtero.getNests();
+            ggCacheNest = (data.data || []).map(n => ({
+                id: n.attributes.id,
+                name: n.attributes.name,
+                eggs: ((((n.relationships || {}).eggs) || {}).data || [])
+                    .map(e => ({ id: e.attributes.id, name: e.attributes.name }))
+            })).filter(n => n.eggs.length);
+            return ggCacheNest;
+        }
+
+        // Isi <select> dari daftar {value, label}; nilaiAwal dipilih bila tersedia.
+        function ggIsiSelect(el, daftar, nilaiAwal) {
+            el.innerHTML = daftar.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+            const cocok = Array.prototype.some.call(el.options, o => o.value === String(nilaiAwal));
+            if (cocok) el.value = String(nilaiAwal);
+        }
+
+        // Label runtime. Sebagian egg menulis key = value berupa path panjang
+        // (mis. "ghcr.io/parkervcp/yolks:nodejs_24"), jadi key-nya tidak layak
+        // ditampilkan — dipakai nama setelah ":" saja.
+        function ggLabelGambar(key, value) {
+            if (key !== value) return key;
+            return String(value).split(':').pop();
+        }
+
+        async function bukaModalGantiGame(id) {
+            if (role === 'demo') return showAiAlert("Akses terkunci di mode demo.", "AKSES DITOLAK");
+
+            const s = serverTerkini[id];
+            if (!s) return showAiAlert("Data server tidak ditemukan. Muat ulang halaman.", "INTEGRITAS DATA GAGAL");
+            if (s.status === 'installing') return showAiAlert("Server sedang dalam proses instalasi. Tunggu selesai sebelum mengganti game.", "TUNGGU SEBENTAR");
+
+            ggTargetId = id;
+            document.getElementById('ggServerName').innerText = s.name;
+            document.getElementById('ggCurrent').innerText = 'Memuat daftar game dari panel...';
+            document.getElementById('ggNest').innerHTML = '<option>Memuat...</option>';
+            document.getElementById('ggEgg').innerHTML = '<option>-</option>';
+            document.getElementById('ggImage').innerHTML = '<option>-</option>';
+            document.getElementById('modalGantiGame').style.display = 'flex';
+
+            try {
+                const nests = await ggDaftarNest();
+                if (!nests.length) throw new Error('Panel tidak memiliki kategori game apa pun.');
+
+                // Nest pemilik egg saat ini. Diprioritaskan lewat s.nest karena
+                // ID egg bisa sama di nest yang berbeda.
+                const sekarang = nests.find(n => n.id === s.nest)
+                    || nests.find(n => n.eggs.some(e => e.id === s.egg))
+                    || nests[0];
+                const eggSekarang = sekarang.eggs.find(e => e.id === s.egg);
+                ggNamaSekarang = eggSekarang ? `${eggSekarang.name} (${sekarang.name})` : '#';
+
+                ggIsiSelect(document.getElementById('ggNest'),
+                    nests.map(n => ({ value: n.id, label: n.name })), sekarang.id);
+                ggIsiSelect(document.getElementById('ggEgg'),
+                    sekarang.eggs.map(e => ({ value: e.id, label: e.name })), s.egg);
+
+                await ggMuatGambar();
+                ggTulisStatus();
+            } catch (e) {
+                tutupModal('modalGantiGame');
+                showAiAlert("Gagal memuat daftar game dari panel: " + e.message, "GANGGUAN SISTEM");
+            }
+        }
+
+        function ggNestTerpilih() {
+            const id = parseInt(document.getElementById('ggNest').value);
+            return (ggCacheNest || []).find(n => n.id === id) || null;
+        }
+
+        function ggTulisStatus() {
+            const selEgg = document.getElementById('ggEgg');
+            const selImg = document.getElementById('ggImage');
+            const nest = ggNestTerpilih();
+            const namaEgg = selEgg.selectedOptions.length ? selEgg.selectedOptions[0].text : '-';
+            const namaImg = selImg.selectedOptions.length ? selImg.selectedOptions[0].text : '-';
+            document.getElementById('ggCurrent').innerHTML =
+                `Game sekarang: <b>${ggNamaSekarang}</b><br>` +
+                `Akan diganti ke: <b style="color: var(--warning);">${namaEgg}</b> · ${nest ? nest.name : '-'} · ${namaImg}`;
+        }
+
+        async function ggGantiNest() {
+            try {
+                const nest = ggNestTerpilih();
+                if (!nest || !nest.eggs.length) return;
+                ggIsiSelect(document.getElementById('ggEgg'),
+                    nest.eggs.map(e => ({ value: e.id, label: e.name })), nest.eggs[0].id);
+                await ggMuatGambar();
+                ggTulisStatus();
+            } catch (e) {
+                showAiAlert("Gagal memuat jenis game: " + e.message, "GANGGUAN SISTEM");
+            }
+        }
+
+        async function ggGantiEgg() {
+            try {
+                await ggMuatGambar();
+                ggTulisStatus();
+            } catch (e) {
+                showAiAlert("Gagal memuat runtime game: " + e.message, "GANGGUAN SISTEM");
+            }
+        }
+
+        // Isi pilihan runtime dari docker_images milik egg tujuan.
+        // Semua opsi berasal dari egg itu sendiri, sehingga tidak mungkin
+        // mengirim image yang ditolak panel.
+        async function ggMuatGambar() {
+            const sel = document.getElementById('ggImage');
+            const nestId = parseInt(document.getElementById('ggNest').value);
+            const eggId = parseInt(document.getElementById('ggEgg').value);
+            if (!nestId || !eggId) { sel.innerHTML = '<option value="">Default</option>'; return; }
+
+            const egg = await apiPtero.getEggVariables(nestId, eggId);
+            const gambar = (egg.attributes && egg.attributes.docker_images) || {};
+            const daftar = Object.keys(gambar).map(k => ({ value: gambar[k], label: ggLabelGambar(k, gambar[k]) }));
+            if (!daftar.length) {
+                const bawaan = egg.attributes.docker_image;
+                daftar.push({ value: bawaan, label: ggLabelGambar(bawaan, bawaan) });
+            }
+            ggIsiSelect(sel, daftar, egg.attributes.docker_image);
+        }
+
+        // Environment LENGKAP: semua variabel egg ikut diisi, bukan hanya yang
+        // wajib. Sebagian script instalasi game memakai variabel opsional
+        // (mis. MINECRAFT_VERSION pada egg Paper) — kalau dibiarkan kosong,
+        // instalasinya bisa gagal. Nilai diambil dari default_value milik egg,
+        // jadi dijamin lolos aturan validasi variabel tersebut.
+        async function ggBuatEnvironment(nestId, eggId) {
+            const data = await apiPtero.getEggVariables(nestId, eggId);
+            const variabel = ((((data.attributes || {}).relationships || {}).variables) || {}).data || [];
+            const env = {};
+            for (const v of variabel) {
+                const a = v.attributes;
+                const key = a.env_variable;
+                // preset yang sama dengan getDynamicEnvironment() (egg bot & python)
+                if (key === 'PY_FILE') env[key] = 'app.py';
+                else if (key === 'REQUIREMENTS_FILE') env[key] = 'requirements.txt';
+                else if (key === 'MAIN_FILE') env[key] = 'index.js';
+                else if (key === 'CMD_RUN') env[key] = 'npm start';
+                else if (key === 'INST') env[key] = 'npm';
+                else if (key === 'USER_UPLOAD' || key === 'AUTO_UPDATE') env[key] = '0';
+                else if (String(a.rules || '').includes('required')) env[key] = a.default_value || 'default';
+                else if (a.default_value !== undefined && a.default_value !== null) env[key] = a.default_value;
+            }
+            return env;
+        }
+
+        async function prosesGantiGame() {
+            const btn = document.getElementById('btnGantiGame');
+            const teksAsli = btn.innerHTML;
+            const id = ggTargetId;
+            const nestId = parseInt(document.getElementById('ggNest').value);
+            const eggId = parseInt(document.getElementById('ggEgg').value);
+            const gambar = document.getElementById('ggImage').value;
+
+            if (!id || !nestId || !eggId) return showAiAlert("Pilihan game belum lengkap.", "INTEGRITAS DATA GAGAL");
+
+            btn.style.pointerEvents = 'none';
+            try {
+                btn.innerHTML = `${spinnerSvg} Menganalisis Egg...`;
+                const egg = await apiPtero.getEggVariables(nestId, eggId);
+                const env = await ggBuatEnvironment(nestId, eggId);
+
+                btn.innerHTML = `${spinnerSvg} Menukar Jenis Game...`;
+                await apiPtero.updateServerStartup(id, {
+                    startup: egg.attributes.startup,
+                    environment: env,
+                    egg: eggId,
+                    image: gambar || egg.attributes.docker_image,
+                    skip_scripts: false
+                });
+
+                btn.innerHTML = `${spinnerSvg} Menjalankan Instalasi...`;
+                await apiPtero.reinstallServer(id);
+
+                tutupModal('modalGantiGame');
+                showAiSuccess(
+                    `Server berhasil diganti ke <b>${egg.attributes.name}</b>.<br><br>` +
+                    `Instalasi game baru sedang berjalan — tunggu status <b>Installing</b> selesai, ` +
+                    `lalu <b>nyalakan ulang server</b>.`, "GANTI GAME BERHASIL", false);
+                setTimeout(ambilDataServers, 3000);
+            } catch (e) {
+                showAiAlert("Ganti game gagal: " + e.message, "KESALAHAN SISTEM");
+            } finally {
+                btn.innerHTML = teksAsli;
+                btn.style.pointerEvents = '';
             }
         }
 

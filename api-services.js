@@ -23,6 +23,16 @@ class PteroAPI {
             }
         };
 
+        // Sesi login wajib dibawa: coreGateway (workers.js) menolak proxy panel
+        // tanpa token, karena header Origin bisa dipalsukan lewat curl sehingga
+        // Origin saja tidak cukup sebagai penjaga. Kunci tokennya sama dengan
+        // TOKEN_KEY di db-bridge.js — dibaca langsung dari localStorage supaya
+        // tidak bergantung pada urutan pemuatan script (config -> api-services
+        // -> db-bridge).
+        let sessionToken = '';
+        try { sessionToken = localStorage.getItem('fzb_token') || ''; } catch (e) { sessionToken = ''; }
+        if (sessionToken) options.headers['Authorization'] = 'Bearer ' + sessionToken;
+
         if (body) {
             options.headers['Content-Type'] = 'application/json';
             options.body = JSON.stringify(body);
@@ -109,6 +119,29 @@ class PteroAPI {
     
     async getEggVariables(nestId, eggId) { 
         return this._request(`/api/application/nests/${nestId}/eggs/${eggId}?include=variables`); 
+    }
+
+    // ==========================================
+    // 🎮 GANTI GAME (menukar egg server yang sudah ada)
+    // ==========================================
+    // Daftar nest+egg diambil dari panel setiap saat — ID egg TIDAK sama antar
+    // panel (egg 1 = "Forge" di private, tapi "Paper" di public_v2), jadi tidak
+    // boleh di-hardcode.
+    async getNests() {
+        return this._request('/api/application/nests?include=eggs');
+    }
+
+    // Jalur resmi Pterodactyl v1 untuk mengganti game: PATCH ini menerima
+    // egg + docker image + startup command + environment SEKALIGUS, tanpa
+    // menyentuh limits (RAM/disk/CPU), allocation, pemilik, maupun data lama.
+    // Sudah diuji langsung: PATCH valid, PUT ditolak 405.
+    async updateServerStartup(serverId, payload) {
+        return this._request(`/api/application/servers/${serverId}/startup`, 'PATCH', payload, 30000);
+    }
+
+    // Menjalankan script instalasi milik egg baru (mengunduh file game).
+    async reinstallServer(serverId) {
+        return this._request(`/api/application/servers/${serverId}/reinstall`, 'POST', {}, 30000);
     }
 }
 
