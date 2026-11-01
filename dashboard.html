@@ -151,9 +151,14 @@
         }
 
         /* Stats & Menu Layout Glassmorphism */
-        .page-header { margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between;}
+        .page-header { margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;}
         .page-header h2 { margin: 0; font-size: 20px; color: var(--text-main); font-weight: 800; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px;}
         .page-header svg { width: 24px; height: 24px; fill: var(--primary); }
+        .page-sub { margin: 6px 0 0; font-size: 11.5px; font-weight: 600; color: var(--text-sub); letter-spacing: .4px; }
+        .live-chip { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 15px; border-radius: 999px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.28); color: var(--success); font-size: 10px; font-weight: 800; letter-spacing: 1.4px; white-space: nowrap; }
+        .live-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px var(--success); animation: livePulse 1.8s ease-in-out infinite; }
+        @keyframes livePulse { 50% { opacity: 0.3; } }
+        body.lite-mode .live-chip i { animation: none; }
         
         .stats-grid { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 40px; }
         .stat-card { flex: 1 1 180px; min-width: 0; box-sizing: border-box; background: var(--card-bg); backdrop-filter: blur(15px); padding: 24px 16px; border-radius: 20px; border: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: 0.3s; position: relative; overflow: hidden;}
@@ -163,10 +168,25 @@
         .stat-icon-wrapper { width: 48px; height: 48px; flex-shrink: 0; border-radius: 14px; display: flex; align-items: center; justify-content: center; z-index: 1;}
         .stat-icon-wrapper svg { width: 24px; height: 24px; }
         .stat-info { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; z-index: 1;}
-        .stat-value { font-size: 28px; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1; letter-spacing: -0.5px; font-variant-numeric: tabular-nums;}
-        .stat-title { color: var(--text-sub); font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin: 0; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        .stat-value { font-size: 28px; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; text-shadow: 0 0 26px rgba(13, 148, 136, 0.28); }
+        .stat-title { color: var(--text-sub); font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin: 0; line-height: 1.3; max-width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .stat-title .glyph { width: 11px; height: 11px; min-width: 11px; fill: currentColor; opacity: .85; margin-right: 5px; flex: none; }
+        .stat-title span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         /* Baris kedua kartu node: jumlah user panel digambar lebih kecil di bawah jumlah server */
-        .stat-value-sm { font-size: 16px; font-weight: 800; color: var(--text-sub); letter-spacing: 0; }
+        .stat-value-sm { font-size: 16px; font-weight: 800; color: #cbd5e1; letter-spacing: 0; }
+        /* Pembatas "sinar" antar metrik (server / user) supaya pasangan angka jelas */
+        .stat-split { width: 58%; height: 1px; border: none; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent); margin: 6px auto 0; flex: none; }
+
+        /* --- Kartu node duometrik (hologram per panel) --- */
+        .stat-icon-wrapper { transition: transform .3s ease; }
+        .stat-icon-wrapper.tile {
+            background: linear-gradient(135deg, rgba(var(--tile, 16,185,129), 0.22), rgba(var(--tile, 16,185,129), 0.05));
+            border: 1px solid rgba(var(--tile, 16,185,129), 0.38);
+            box-shadow: inset 0 0 18px rgba(var(--tile, 16,185,129), 0.16), 0 8px 20px -10px rgba(var(--tile, 16,185,129), 0.45);
+        }
+        .stat-card:hover .stat-icon-wrapper { transform: scale(1.07); }
+        .stat-card.stat-duo { transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease; }
+        .stat-card.stat-duo:hover { border-color: rgba(var(--tile, 16,185,129), 0.55); box-shadow: 0 18px 44px -12px rgba(var(--tile, 16,185,129), 0.4); }
         
         @media (max-width: 768px) {
             .stats-grid { gap: 12px; margin-bottom: 30px; }
@@ -175,7 +195,15 @@
             .stat-icon-wrapper svg { width: 20px; height: 20px; }
             .stat-value { font-size: 22px; }
             .stat-value-sm { font-size: 13px; }
+            .stat-split { margin: 2px auto 0; }
             .stat-title { font-size: 10px; letter-spacing: 0.8px; }
+            .page-sub { font-size: 10.5px; margin-top: 4px; }
+            .live-chip { display: none; }
+        }
+        /* HP sempit: kartu node duometrik memakai satu baris penuh supaya
+           pasangan Server/User mendapat ruang napas; kartu sederhana tetap 2 kolom. */
+        @media (max-width: 480px) {
+            .stat-card.stat-duo { flex: 1 1 100%; }
         }
 
         .menu-section { background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid var(--border-color); border-radius: 24px; padding: 30px; margin-bottom: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); }
@@ -365,7 +393,11 @@
         </div>
 
         <div class="page-header">
-            <h2><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg> Tinjauan Infrastruktur</h2>
+            <div>
+                <h2><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg> Tinjauan Infrastruktur</h2>
+                <p class="page-sub">Ringkasan langsung jumlah server &amp; user tiap node, sesuai cakupan akunmu</p>
+            </div>
+            <span class="live-chip"><i></i>LIVE</span>
         </div>
 
         <div id="statErrorBanner" style="display: none; padding: 14px 16px; border-radius: 14px; margin-bottom: 16px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--text-main); font-size: 12px; line-height: 1.55; align-items: center; gap: 12px; flex-wrap: wrap;">
@@ -375,33 +407,36 @@
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card" id="cardPrivate" style="display: none;">
-                <div class="stat-icon-wrapper" style="background: rgba(13, 148, 136, 0.1); border: 1px solid rgba(13, 148, 136, 0.3);"><svg viewBox="0 0 24 24" style="fill: var(--primary);"><path d="M20 13H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zm-4 5h-2v-2h2v2zm0-9h-2V7h2v2zm4-6H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1z"/></svg></div>
+            <div class="stat-card stat-duo" id="cardPrivate" style="display: none;">
+                <div class="stat-icon-wrapper tile" style="--tile: 13, 148, 136;"><svg viewBox="0 0 24 24" style="fill: var(--primary);"><path d="M20 13H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zm-4 5h-2v-2h2v2zm0-9h-2V7h2v2zm4-6H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1z"/></svg></div>
                 <div class="stat-info">
-                    <p class="stat-value" id="countPrivate">⏳</p><p class="stat-title">Server Private</p>
-                    <p class="stat-value stat-value-sm" id="usersPrivate">⏳</p><p class="stat-title">User Private</p>
+                    <p class="stat-value" id="countPrivate">⏳</p><p class="stat-title"><svg class="glyph" viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> <span>Server Private</span></p>
+                    <div class="stat-split"></div>
+                    <p class="stat-value stat-value-sm" id="usersPrivate">⏳</p><p class="stat-title"><svg class="glyph" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> <span>User Private</span></p>
                 </div>
             </div>
-            <div class="stat-card" id="cardPublic" style="display: none;">
-                <div class="stat-icon-wrapper" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);"><svg viewBox="0 0 24 24" style="fill: var(--success);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div>
+            <div class="stat-card stat-duo" id="cardPublic" style="display: none;">
+                <div class="stat-icon-wrapper tile" style="--tile: 16, 185, 129;"><svg viewBox="0 0 24 24" style="fill: var(--success);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div>
                 <div class="stat-info">
-                    <p class="stat-value" id="countPublic">⏳</p><p class="stat-title">Server Publik</p>
-                    <p class="stat-value stat-value-sm" id="usersPublic">⏳</p><p class="stat-title">User Publik</p>
+                    <p class="stat-value" id="countPublic">⏳</p><p class="stat-title"><svg class="glyph" viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> <span>Server Publik</span></p>
+                    <div class="stat-split"></div>
+                    <p class="stat-value stat-value-sm" id="usersPublic">⏳</p><p class="stat-title"><svg class="glyph" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> <span>User Publik</span></p>
                 </div>
             </div>
-            <div class="stat-card" id="cardPublicV2" style="display: none;">
-                <div class="stat-icon-wrapper" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);"><svg viewBox="0 0 24 24" style="fill: var(--success);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 7.58L10 16.17l-2.59-2.58L6 15l4 4 8-8z"/></svg></div>
+            <div class="stat-card stat-duo" id="cardPublicV2" style="display: none;">
+                <div class="stat-icon-wrapper tile" style="--tile: 45, 212, 191;"><svg viewBox="0 0 24 24" style="fill: #2dd4bf;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 7.58L10 16.17l-2.59-2.58L6 15l4 4 8-8z"/></svg></div>
                 <div class="stat-info">
-                    <p class="stat-value" id="countPublicV2">⏳</p><p class="stat-title">Server Publik V2</p>
-                    <p class="stat-value stat-value-sm" id="usersPublicV2">⏳</p><p class="stat-title">User Publik V2</p>
+                    <p class="stat-value" id="countPublicV2">⏳</p><p class="stat-title"><svg class="glyph" viewBox="0 0 24 24"><path d="M4 5v4h16V5H4zm0 14h16v-4H4v4zm0-7h16v-4H4v4z"/></svg> <span>Server Publik V2</span></p>
+                    <div class="stat-split"></div>
+                    <p class="stat-value stat-value-sm" id="usersPublicV2">⏳</p><p class="stat-title"><svg class="glyph" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> <span>User Publik V2</span></p>
                 </div>
             </div>
             <div class="stat-card" id="boxTotalUserPanel" style="display: none;">
-                <div class="stat-icon-wrapper" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3);"><svg viewBox="0 0 24 24" style="fill: var(--warning);"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
+                <div class="stat-icon-wrapper tile" style="--tile: 245, 158, 11;"><svg viewBox="0 0 24 24" style="fill: var(--warning);"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
                 <div class="stat-info"><p class="stat-value" id="countUsers">⏳</p><p class="stat-title" id="titleTotalUser">Total Entitas</p></div>
             </div>
             <div class="stat-card" id="boxOnlineUser" style="display: none;">
-                <div class="stat-icon-wrapper" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);"><svg viewBox="0 0 24 24" style="fill: var(--success);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+                <div class="stat-icon-wrapper tile" style="--tile: 16, 185, 129;"><svg viewBox="0 0 24 24" style="fill: var(--success);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
                 <div class="stat-info"><p class="stat-value" id="countOnline" style="color: var(--success);">⏳</p><p class="stat-title" id="titleOnlineUser">Sesi Aktif</p></div>
             </div>
         </div>
@@ -535,6 +570,13 @@
         const allowedPanels = PANEL_ACCESS_UI[role] || [];
         const canManageWeb = ['pemilik', 'partner_public', 'partner_public_v2', 'demo'].includes(role);
 
+        // Role tanpa akses panel satupun dan bukan pengelola web: sembunyikan
+        // seluruh grid statistik supaya tidak menyisakan celah kosong di bawah header.
+        if (!allowedPanels.length && !canManageWeb) {
+            const statsGrid = document.querySelector('.stats-grid');
+            if (statsGrid) statsGrid.style.display = 'none';
+        }
+
         // Tampilkan hanya kartu node yang memang boleh diakses role ini.
         allowedPanels.forEach((m) => {
             const el = document.getElementById(cardIdByPanel[m]);
@@ -652,6 +694,25 @@
             banner.style.display = 'flex';
         }
 
+        // --- Angka "hidup": count-up halus saat data masuk ---
+        // Dilewati di Lite Mode (anti-lag) & ketika perangkat meminta gerakan
+        // dikurangi; nilai 0 langsung ditulis tanpa animasi. Total Entitas &
+        // Sesi Aktif sengaja tidak dianimasikan (dipolling tiap 6 detik).
+        function angkaHidup(el, target) {
+            if (!el) return;
+            const hemat = document.body.classList.contains('lite-mode')
+                || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+            if (hemat || !target) { el.innerText = target; return; }
+            const durasi = 700, t0 = performance.now();
+            const langkah = (t) => {
+                const p = Math.min(1, (t - t0) / durasi);
+                el.innerText = Math.round((1 - Math.pow(1 - p, 3)) * target);
+                if (p < 1) requestAnimationFrame(langkah);
+                else el.innerText = target;
+            };
+            requestAnimationFrame(langkah);
+        }
+
         // Kumpulkan seluruh halaman daftar (Pterodactyl memotong per 50 baris).
         async function kumpulkanHalaman(loader) {
             let out = [], page = 1, totalPages = 1;
@@ -729,11 +790,11 @@
                         });
                     }
                     if (elSrv) {
-                        elSrv.innerText = nSrv;
+                        angkaHidup(elSrv, nSrv);
                         elSrv.title = `Server ${p.label}: ${nSrv} server`;
                     }
                     if (elUsr) {
-                        elUsr.innerText = nUsr;
+                        angkaHidup(elUsr, nUsr);
                         elUsr.title = `User ${p.label}: ${nUsr} user panel`;
                     }
                 } catch (e) {
