@@ -541,11 +541,16 @@
             if (el) el.style.display = 'flex';
         });
 
+        // Seksi menu deploy mengikuti panel yang boleh diakses role — TIDAK
+        // diikat ke role pengelola web, supaya tombol "Automasi Deploy
+        // (User+Server)" dan "Alokasi Server Tambahan" tetap tampil untuk
+        // reseller dan semua role lain yang punya akses panel tersebut.
+        if (allowedPanels.includes('private')) document.getElementById('sectionPrivate').style.display = 'block';
+        if (allowedPanels.includes('public')) document.getElementById('sectionPublic').style.display = 'block';
+        if (allowedPanels.includes('public_v2')) document.getElementById('sectionPublicV2').style.display = 'block';
+
         if (canManageWeb) {
             document.getElementById('sectionWeb').style.display = 'block';
-            if (allowedPanels.includes('public')) document.getElementById('sectionPublic').style.display = 'block';
-            if (allowedPanels.includes('public_v2')) document.getElementById('sectionPublicV2').style.display = 'block';
-            if (allowedPanels.includes('private')) document.getElementById('sectionPrivate').style.display = 'block';
             if (['pemilik', 'partner_public', 'partner_public_v2'].includes(role)) {
                 document.getElementById('boxTotalUserPanel').style.display = 'flex';
                 document.getElementById('boxOnlineUser').style.display = 'flex';
