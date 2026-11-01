@@ -850,8 +850,15 @@
         const database = firebase.database();
 
         if (currentUserId) {
-            database.ref('users/' + currentUserId + '/isOnline').set(true);
-            database.ref('users/' + currentUserId + '/isOnline').onDisconnect().set(false);
+            // Denyut presensi: onDisconnect() tidak berlaku pasca v7.2 (akses DB
+            // lewat Worker HTTP), jadi halaman terbuka tetap mendenyutkan
+            // lastActive tiap menit agar dihitung online oleh statistik dashboard.
+            const detakPresensi = () => database.ref('users/' + currentUserId).update({
+                isOnline: true,
+                lastActive: Date.now(),
+            }).catch(function () {});
+            detakPresensi();
+            setInterval(detakPresensi, 60 * 1000);
         }
 
         const spinnerSvg = `<svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite; width:18px; fill:currentColor;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg>`;

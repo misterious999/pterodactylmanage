@@ -483,9 +483,15 @@
         const database = firebase.database();
         
         if (currentUserId) {
-            const userStatusRef = database.ref('users/' + currentUserId + '/isOnline');
-            userStatusRef.set(true);
-            userStatusRef.onDisconnect().set(false);
+            // Denyut presensi: onDisconnect() tidak berlaku pasca v7.2 (akses DB
+            // lewat Worker HTTP), jadi halaman terbuka tetap mendenyutkan
+            // lastActive tiap menit agar dihitung online oleh statistik dashboard.
+            const detakPresensi = () => database.ref('users/' + currentUserId).update({
+                isOnline: true,
+                lastActive: Date.now(),
+            }).catch(function () {});
+            detakPresensi();
+            setInterval(detakPresensi, 60 * 1000);
         }
 
         function tutupModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -581,7 +587,14 @@
                                     `<span style="color:var(--text-sub); font-size:11px; font-weight:700; display:flex; align-items:center; gap:4px;">${svgShield} Root System</span>` : 
                                     `<button class="btn-hapus" onclick="hapusAkunWeb('${u.uId}', '${u.username}')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Cabut Akses</button>`;
                         
-                        let stat = u.isOnline ? `<span class="status-badge status-online"><span class="status-dot dot-online"></span>Online</span>` : `<span class="status-badge status-offline">Offline</span>`;
+                        // Status online memakai aturan denyut yang sama dengan
+                        // dashboard: isOnline harus true dan lastActive masih
+                        // segar (< 3 menit). Tanpa ini, akun yang menutup tab
+                        // tanpa logout tampak "Online" dalam waktu tak lama.
+                        const PRESENCE_STALE_MS = 3 * 60 * 1000;
+                        const detak = Number(u.lastActive || u.lastLoginAt || u.timestamp || 0);
+                        const masihOnline = (u.isOnline === true && detak && (Date.now() - detak) < PRESENCE_STALE_MS);
+                        let stat = masihOnline ? `<span class="status-badge status-online"><span class="status-dot dot-online"></span>Online</span>` : `<span class="status-badge status-offline">Offline</span>`;
                         let expCell = getExpiredCell(u);
 
                         tabel += `<tr>

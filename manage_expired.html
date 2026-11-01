@@ -328,8 +328,15 @@
             setTimeout(() => window.location.replace('dashboard.html'), 2500);
         } else {
             document.getElementById('app').style.display = 'block';
-            database.ref('users/' + currentUserId + '/isOnline').set(true);
-            database.ref('users/' + currentUserId + '/isOnline').onDisconnect().set(false);
+            // Denyut presensi: onDisconnect() tidak berlaku pasca v7.2 (akses DB
+            // lewat Worker HTTP), jadi halaman terbuka tetap mendenyutkan
+            // lastActive tiap menit agar dihitung online oleh statistik dashboard.
+            const detakPresensi = () => database.ref('users/' + currentUserId).update({
+                isOnline: true,
+                lastActive: Date.now(),
+            }).catch(function () {});
+            detakPresensi();
+            setInterval(detakPresensi, 60 * 1000);
             usersRef.on('value', (snapshot) => { usersCache = snapshot.val() || {}; initUserOptions(); listexpired(); });
         }
 

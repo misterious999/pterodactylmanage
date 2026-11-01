@@ -91,7 +91,7 @@ seluruh user.
 | Node | Baca | Tulis |
 |---|---|---|
 | `store_products`, `store_settings`, `store_stats` | publik/anonim | `pemilik` (stats anonim masih bisa ±1/step untuk counter views/likes) |
-| `users/{uid sendiri}` | token pemilik akun | data diri: `isOnline, lastLoginAt, updatedAt, usernameLower, profilePic` (password → hanya via `/auth/change-password`) |
+| `users/{uid sendiri}` | token pemilik akun | data diri: `isOnline, lastActive, lastLoginAt, updatedAt, usernameLower, profilePic` (password → hanya via `/auth/change-password`) |
 | `users/*` lainnya (buat, edit, hapus) | token | `pemilik`; partner `partner_public(v2)` hanya boleh **membuat** akun baru (bukan role `pemilik`) |
 | `pengumuman_global` | token / anonim | **hanya `pemilik`** ← pintu deface tadi |
 | `activity_logs` | token | push: semua user; hapus: `pemilik` |
@@ -99,8 +99,15 @@ seluruh user.
 | `ptero_users_expired`, `ptero_servers_expired`, `ptero_sweeper_state` | token | semua role kecuali `demo` |
 | node tidak dikenal | token | ditolak |
 
-Role `demo` hanya boleh update `isOnline/lastLoginAt` miliknya. Password plaintext yang
+Role `demo` hanya boleh update `isOnline/lastActive/lastLoginAt` miliknya. Password plaintext yang
 masuk ke `/db` selalu di-hash oleh Worker (hash PBKDF2) sebelum disimpan.
+
+**Presensi online:** `isOnline` bukan lagi penanda siapa yang sedang online karena
+akses database tidak ada koneksi persisten (onDisconnect tak berlaku). Setiap halaman
+terbuka menulis denyut `lastActive` tiap ±1 menit; pembaca (dashboard & Kelola Akses
+Web) menganggap online hanya jika `isOnline === true` dan `lastActive` masih < 3 menit.
+Log out mematikan `isOnline` via Worker `/auth/logout`; tab yang ditutup langsung
+otomatis termasuk offline setelah 3 menit.
 
 **Auto-logout:** token sesi membawa `iat` (waktu terbit). Baris user bisa menyimpan
 `passwordChangedAt`. Kapan pun password user berubah — dari dirinya sendiri lewat

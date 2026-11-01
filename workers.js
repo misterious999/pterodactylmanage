@@ -72,7 +72,7 @@ const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 const PBKDF2_ITERATIONS = 100000;
 const PUBLIC_READ_NODES = new Set(['store_products', 'store_settings', 'store_stats']);
 const MANAGER_CREATE_ROLES = new Set(['pemilik', 'partner_public', 'partner_public_v2']);
-const SELF_ROW_FIELDS = new Set(['isOnline', 'lastLoginAt', 'updatedAt', 'usernameLower', 'profilePic']);
+const SELF_ROW_FIELDS = new Set(['isOnline', 'lastLoginAt', 'lastActive', 'updatedAt', 'usernameLower', 'profilePic']);
 const PTERO_BOOKKEEPING_NODES = new Set(['ptero_users_expired', 'ptero_servers_expired', 'ptero_sweeper_state']);
 
 const txtEnc = new TextEncoder();
@@ -286,7 +286,7 @@ async function handleAuth(pathname, request, env, cors) {
         }
 
         const now = Date.now();
-        const patch = { isOnline: true, lastLoginAt: now, usernameLower: needle };
+        const patch = { isOnline: true, lastActive: now, lastLoginAt: now, usernameLower: needle };
         if (!String(found.password || '').startsWith('pbkdf2$')) patch.password = await hashPassword(password); // upgrade plaintext -> hash
         await dbCall(env, `users/${foundUid}`, 'PATCH', patch).catch(() => {});
 
@@ -374,7 +374,7 @@ async function authorizeDbWrite(rel, method, body, sess, env) {
     // ---------- USERS ----------
     if (top === 'users') {
         if (sess.r === 'demo') {
-            const want = ['isOnline', 'lastLoginAt'];
+            const want = ['isOnline', 'lastLoginAt', 'lastActive'];
             const allowed = [...keys].every((k) => want.includes(k));
             let depthOk = true;
             if (seg.length >= 3) { const leaf = seg[2]; depthOk = want.includes(leaf); }

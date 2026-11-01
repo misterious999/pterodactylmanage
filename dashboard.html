@@ -165,6 +165,8 @@
         .stat-info { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; z-index: 1;}
         .stat-value { font-size: 28px; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1; letter-spacing: -0.5px; font-variant-numeric: tabular-nums;}
         .stat-title { color: var(--text-sub); font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin: 0; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        /* Baris kedua kartu node: jumlah user panel digambar lebih kecil di bawah jumlah server */
+        .stat-value-sm { font-size: 16px; font-weight: 800; color: var(--text-sub); letter-spacing: 0; }
         
         @media (max-width: 768px) {
             .stats-grid { gap: 12px; margin-bottom: 30px; }
@@ -172,6 +174,7 @@
             .stat-icon-wrapper { width: 40px; height: 40px; border-radius: 12px; }
             .stat-icon-wrapper svg { width: 20px; height: 20px; }
             .stat-value { font-size: 22px; }
+            .stat-value-sm { font-size: 13px; }
             .stat-title { font-size: 10px; letter-spacing: 0.8px; }
         }
 
@@ -372,17 +375,26 @@
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card" id="cardPrivate" style="display: none;">
                 <div class="stat-icon-wrapper" style="background: rgba(13, 148, 136, 0.1); border: 1px solid rgba(13, 148, 136, 0.3);"><svg viewBox="0 0 24 24" style="fill: var(--primary);"><path d="M20 13H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zm-4 5h-2v-2h2v2zm0-9h-2V7h2v2zm4-6H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1z"/></svg></div>
-                <div class="stat-info"><p class="stat-value" id="countPrivate">⏳</p><p class="stat-title">Node Private</p></div>
+                <div class="stat-info">
+                    <p class="stat-value" id="countPrivate">⏳</p><p class="stat-title">Server Private</p>
+                    <p class="stat-value stat-value-sm" id="usersPrivate">⏳</p><p class="stat-title">User Private</p>
+                </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" id="cardPublic" style="display: none;">
                 <div class="stat-icon-wrapper" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);"><svg viewBox="0 0 24 24" style="fill: var(--success);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div>
-                <div class="stat-info"><p class="stat-value" id="countPublic">⏳</p><p class="stat-title">Node Publik</p></div>
+                <div class="stat-info">
+                    <p class="stat-value" id="countPublic">⏳</p><p class="stat-title">Server Publik</p>
+                    <p class="stat-value stat-value-sm" id="usersPublic">⏳</p><p class="stat-title">User Publik</p>
+                </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" id="cardPublicV2" style="display: none;">
                 <div class="stat-icon-wrapper" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);"><svg viewBox="0 0 24 24" style="fill: var(--success);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 7.58L10 16.17l-2.59-2.58L6 15l4 4 8-8z"/></svg></div>
-                <div class="stat-info"><p class="stat-value" id="countPublicV2">⏳</p><p class="stat-title">Node Publik V2</p></div>
+                <div class="stat-info">
+                    <p class="stat-value" id="countPublicV2">⏳</p><p class="stat-title">Server Publik V2</p>
+                    <p class="stat-value stat-value-sm" id="usersPublicV2">⏳</p><p class="stat-title">User Publik V2</p>
+                </div>
             </div>
             <div class="stat-card" id="boxTotalUserPanel" style="display: none;">
                 <div class="stat-icon-wrapper" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3);"><svg viewBox="0 0 24 24" style="fill: var(--warning);"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
@@ -398,7 +410,7 @@
         <div class="menu-section" id="sectionWeb" style="display: none;">
             <h3 class="section-title title-internal">Otorisasi Internal Web</h3>
             <div class="menu-grid">
-                <a href="manage_panel_users.html" class="menu-card card-internal"><div class="menu-card-header"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><h3>Kelola Akses Web</h3></div><p>Manajemen entitas Reseller/Partner pada sistem Control Center.</p></a>
+                <a href="manage_panel_users.html" id="menuWebUsers" class="menu-card card-internal"><div class="menu-card-header"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><h3>Kelola Akses Web</h3></div><p>Manajemen entitas Reseller/Partner pada sistem Control Center.</p></a>
                 <a href="activity_logs.html" id="menuCctvLog" class="menu-card card-internal" style="display: none; border-left: 3px solid rgba(239, 68, 68, 0.5);"><div class="menu-card-header"><svg viewBox="0 0 24 24" style="fill: var(--danger);"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg><h3 style="color: var(--danger);">Log Audit Sistem</h3></div><p>Pemantauan aktivitas otorisasi dan modifikasi basis data secara real-time.</p></a>
                 <a href="manage_expired.html" id="menuExpired" class="menu-card card-internal" style="display: none;"><div class="menu-card-header"><svg viewBox="0 0 24 24"><path d="M7 2v2H5c-1.11 0-1.99.89-1.99 2L3 20c0 1.11.89 2 2 2h14c1.1 0 2-.89 2-2V6c0-1.11-.9-2-2-2h-2V2h-2v2H9V2H7zm12 18H5V9h14v11zm-7-3.5c1.38 0 2.5-1.12 2.5-2.5S13.38 11.5 12 11.5 9.5 12.62 9.5 14s1.12 2.5 2.5 2.5z"/></svg><h3>Lisensi & Expired</h3></div><p>Manajemen masa aktif sesi pengguna berdasarkan regulasi sistem.</p></a>
             </div>
@@ -506,49 +518,92 @@
             }
         }
 
-        if (role === 'pemilik' || role === 'demo') {
-            document.getElementById('sectionWeb').style.display = 'block'; document.getElementById('menuCctvLog').style.display = 'block'; 
-            document.getElementById('sectionPrivate').style.display = 'block'; document.getElementById('sectionPublic').style.display = 'block'; document.getElementById('sectionPublicV2').style.display = 'block';
-            document.getElementById('boxTotalUserPanel').style.display = 'flex'; document.getElementById('boxOnlineUser').style.display = 'flex';
-            
-            if(role === 'pemilik') { 
-                document.getElementById('boxPengumumanAdmin').style.display = 'block'; 
-                document.getElementById('menuExpired').style.display = 'block'; 
-                document.getElementById('btnKelolaToko').style.display = 'flex';
-            } 
+        // Peta akses panel per role — harus sama dengan PANEL_ACCESS di workers.js,
+        // supaya kartu Tinjauan Infrastruktur tidak menampilkan panel yang
+        // sebenarnya akan ditolak Worker (tampilan menggantung "Err" palsu).
+        const PANEL_ACCESS_UI = {
+            pemilik:            ['private', 'public', 'public_v2'],
+            reseller:           ['private'],
+            reseller_private:   ['private'],
+            reseller_public:    ['public'],
+            partner_public:     ['public'],
+            reseller_public_v2: ['public_v2'],
+            partner_public_v2:  ['public_v2'],
+            demo:               ['public'],
+        };
+        const cardIdByPanel = { private: 'cardPrivate', public: 'cardPublic', public_v2: 'cardPublicV2' };
+        const allowedPanels = PANEL_ACCESS_UI[role] || [];
+        const canManageWeb = ['pemilik', 'partner_public', 'partner_public_v2', 'demo'].includes(role);
+
+        // Tampilkan hanya kartu node yang memang boleh diakses role ini.
+        allowedPanels.forEach((m) => {
+            const el = document.getElementById(cardIdByPanel[m]);
+            if (el) el.style.display = 'flex';
+        });
+
+        if (canManageWeb) {
+            document.getElementById('sectionWeb').style.display = 'block';
+            if (allowedPanels.includes('public')) document.getElementById('sectionPublic').style.display = 'block';
+            if (allowedPanels.includes('public_v2')) document.getElementById('sectionPublicV2').style.display = 'block';
+            if (allowedPanels.includes('private')) document.getElementById('sectionPrivate').style.display = 'block';
+            if (['pemilik', 'partner_public', 'partner_public_v2'].includes(role)) {
+                document.getElementById('boxTotalUserPanel').style.display = 'flex';
+                document.getElementById('boxOnlineUser').style.display = 'flex';
+            }
+        }
+        if (role === 'pemilik') {
+            document.getElementById('menuCctvLog').style.display = 'block';
+            document.getElementById('menuExpired').style.display = 'block';
+            document.getElementById('boxPengumumanAdmin').style.display = 'block';
+            document.getElementById('btnKelolaToko').style.display = 'flex';
+            document.getElementById('titleTotalUser').innerText = 'Total Entitas';
         } else if (role === 'partner_public') {
-            document.getElementById('sectionWeb').style.display = 'block'; document.getElementById('sectionPublic').style.display = 'block';
-            document.getElementById('boxTotalUserPanel').style.display = 'flex'; document.getElementById('boxOnlineUser').style.display = 'flex';
-            document.getElementById('titleTotalUser').innerText = "Jaringan Anda"; 
+            document.getElementById('titleTotalUser').innerText = 'Jaringan Anda';
             document.getElementById('menuExpired').style.display = 'block';
         } else if (role === 'partner_public_v2') {
-            document.getElementById('sectionWeb').style.display = 'block'; document.getElementById('sectionPublicV2').style.display = 'block';
-            document.getElementById('boxTotalUserPanel').style.display = 'flex'; document.getElementById('boxOnlineUser').style.display = 'flex';
-            document.getElementById('titleTotalUser').innerText = "Jaringan V2 Anda"; 
+            document.getElementById('titleTotalUser').innerText = 'Jaringan V2 Anda';
             document.getElementById('menuExpired').style.display = 'block';
-        } else if (role.includes('private') || role === 'reseller') { 
-            document.getElementById('sectionPrivate').style.display = 'block'; 
-        } else if (role === 'reseller_public_v2') { 
-            document.getElementById('sectionPublicV2').style.display = 'block'; 
-        } else if (role === 'reseller_public' || role.includes('public')) { 
-            document.getElementById('sectionPublic').style.display = 'block'; 
+        } else if (role === 'demo') {
+            // Sesi Demo: hanya lihat isi publik. Halaman Kelola Akses Web menolak
+            // demo, jadi kartunya disembunyikan — sisakan Log Audit yang boleh dibaca.
+            document.getElementById('menuCctvLog').style.display = 'block';
+            document.getElementById('menuWebUsers').style.display = 'none';
+            document.getElementById('boxTotalUserPanel').style.display = 'flex';
+            document.getElementById('boxOnlineUser').style.display = 'flex';
         }
 
         const firebaseConfig = { databaseURL: GlobalConfig.getFirebaseUrl() };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // --- PRESENS (denyut jantung sesi web) ---
+        // Pasca v7.2 semua akses database lewat Worker HTTP (tanpa koneksi
+        // Firebase persisten), jadi onDisconnect() TIDAK PERNAH jalan dan
+        // isOnline tidak pernah turun sendiri — lama dulu "Sesi Aktif" menghitung
+        // semua akun yang pernah login. Sekarang: halaman membukukan denyut
+        // lastActive tiap ±1 menit. Pembaca statistik menganggap seseorang
+        // online hanya jika isOnline masih true DAN denyutnya < 3 menit.
+        // Logout mematikan isOnline (Worker /auth/logout), tab ditutup langsung
+        // → denyut berhenti → otomatis dianggap offline.
+        const PRESENCE_STALE_MS = 3 * 60 * 1000;
+        function detakPresensi() {
+            database.ref('users/' + currentUserId).update({
+                isOnline: true,
+                lastActive: Date.now(),
+            }).catch(function () {});
+        }
+
         database.ref('users/' + currentUserId).on('value', (snap) => {
             if (snap.exists()) {
                 let u = snap.val();
-                database.ref('users/' + currentUserId + '/isOnline').onDisconnect().set(false);
-                database.ref('users/' + currentUserId + '/isOnline').set(true);
-                
                 let avatarUrl = u.profilePic || `https://ui-avatars.com/api/?name=${username}&background=0d9488&color=fff&size=150`;
                 document.getElementById('sidebarProfilePic').src = avatarUrl;
                 document.getElementById('avatar').src = avatarUrl;
             }
         });
+
+        detakPresensi();
+        setInterval(detakPresensi, 60 * 1000);
 
         function simpanFotoProfil() { if(role === 'demo') return showAiAlert("Sesi Demo tidak memiliki otorisasi modifikasi.", "AKSES DITOLAK"); let link = document.getElementById('inputProfileUrl').value.trim(); if(!link) return; const now = Date.now(); database.ref('users/' + currentUserId).update({ profilePic: link, updatedAt: now }).then(() => database.ref('activity_logs').push({ uid: currentUserId, username, role, action: "Memperbarui foto profil.", timestamp: now })).then(() => { showAiSuccess("Profil diperbarui."); document.getElementById('inputProfileUrl').value = ""; }); }
         function simpanPassword() { if(role === 'demo') return showAiAlert("Sesi Demo tidak memiliki otorisasi modifikasi.", "AKSES DITOLAK"); let passBaru = document.getElementById('inputPassBaru').value.trim(); if (!passBaru) return; const btnLock = async () => { try { await AuthBridge.changePassword(null, passBaru); tutupModal('modalPassword'); document.getElementById('inputPassBaru').value = ""; showAiSuccess("Sandi baru tersimpan. Semua sesi dicabut otomatis, kutandakan kamu ke halaman login..."); setTimeout(() => { localStorage.clear(); window.location.replace("login.html"); }, 2200); } catch (e) { showAiAlert(e.message || "Gagal memperbarui sandi.", "GAGAL"); } }; btnLock(); }
@@ -568,15 +623,21 @@
         });
 
         // --- SENTRALISASI API STATISTICS MENGGUNAKAN KELAS PTEROAPI ---
+        // Setiap kartu node menampilkan 2 angka: jumlah SERVER dan jumlah USER
+        // panel. Angka mengikuti cakupan yang memang terlihat oleh role:
+        // pemilik melihat total seluruh panel, role lain melihat data jaringan
+        // mereka sendiri — sama seperti isi halaman Kelola User/Server.
         const apiPriv = new PteroAPI('private');
         const apiPub = new PteroAPI('public');
         const apiPubV2 = new PteroAPI('public_v2');
 
-        const statTargets = [
-            { id: 'countPrivate', label: 'Node Private', api: apiPriv },
-            { id: 'countPublic', label: 'Node Publik', api: apiPub },
-            { id: 'countPublicV2', label: 'Node Publik V2', api: apiPubV2 },
-        ];
+        const LABEL_PANEL = { private: 'Private', public: 'Publik', public_v2: 'Publik V2' };
+        const statPanels = allowedPanels.map((m) => ({
+            api: { private: apiPriv, public: apiPub, public_v2: apiPubV2 }[m],
+            label: LABEL_PANEL[m],
+            elSrv: { private: 'countPrivate', public: 'countPublic', public_v2: 'countPublicV2' }[m],
+            elUsr: { private: 'usersPrivate', public: 'usersPublic', public_v2: 'usersPublicV2' }[m],
+        }));
 
         function tampilkanErrorStatistik(pesan) {
             const banner = document.getElementById('statErrorBanner');
@@ -584,6 +645,37 @@
             if (!banner || !msg) return;
             msg.textContent = pesan;
             banner.style.display = 'flex';
+        }
+
+        // Kumpulkan seluruh halaman daftar (Pterodactyl memotong per 50 baris).
+        async function kumpulkanHalaman(loader) {
+            let out = [], page = 1, totalPages = 1;
+            do {
+                const data = await loader(page);
+                out = out.concat((data && data.data) ? data.data : []);
+                totalPages = (data && data.meta && data.meta.pagination && data.meta.pagination.total_pages) ? data.meta.pagination.total_pages : 1;
+                page++;
+            } while (page <= totalPages);
+            return out;
+        }
+
+        // Author sebuah akun panel ditandai lewat last_name: username polos
+        // atau format [username]; last_name "User"/"Admin" = akun dasar admin.
+        function namaPembuatPanelUser(a) {
+            let ln = String(a.last_name || '').trim();
+            return (ln === 'User' || ln === 'Admin') ? 'admin' : ln;
+        }
+
+        // Cakupan jaringan, selaras filter di manage_ptero_users/servers:
+        // pemilik = seluruh panel; demo = hanya buatan admin; lainnya = tag
+        // maker miliknya sendiri (polos / [username]).
+        function termasukJaringan(maker) {
+            if (role === 'pemilik') return true;
+            if (role === 'demo') return String(maker || '').trim().toLowerCase() === 'admin';
+            const myU = String(username || '').trim().toLowerCase();
+            if (!myU || myU === 'unknown') return false;
+            const m = String(maker || '').trim().toLowerCase();
+            return m === myU || m === `[${myU}]` || m.includes(`[${myU}]`);
         }
 
         async function ambilStatistik() {
@@ -594,29 +686,64 @@
 
             // Jalankan paralel: satu panel lambat/diblokir tidak boleh menahan
             // statistik panel lain (dulu semuanya berhenti di "⏳").
-            await Promise.all(statTargets.map(async (t) => {
-                const el = document.getElementById(t.id);
-                if (!el) return;
-                el.innerText = '⏳';
-                el.style.color = '';
-                el.title = 'Memuat data...';
+            await Promise.all(statPanels.map(async (p) => {
+                const elSrv = document.getElementById(p.elSrv);
+                const elUsr = document.getElementById(p.elUsr);
+                if (!elSrv && !elUsr) return;
+
+                [elSrv, elUsr].forEach((el) => {
+                    if (!el) return;
+                    el.innerText = '⏳';
+                    el.style.color = '';
+                    el.title = 'Memuat data...';
+                });
 
                 try {
-                    // Timeout 8 detik supaya dashboard tidak menggantung selamanya.
-                    const data = await t.api.getServers(1, 8000);
-                    const total = (data && data.meta && data.meta.pagination) ? data.meta.pagination.total : 0;
-                    el.innerText = total;
-                    el.title = `${t.label}: ${total} server`;
+                    let nSrv = 0, nUsr = 0;
+                    if (role === 'pemilik') {
+                        // Angka total resmi panel (pagination.total Pterodactyl).
+                        const sData = await p.api.getServers(1, 8000);
+                        nSrv = (sData && sData.meta && sData.meta.pagination) ? sData.meta.pagination.total : 0;
+                        const uData = await p.api.getUsers(1);
+                        nUsr = (uData && uData.meta && uData.meta.pagination) ? uData.meta.pagination.total : 0;
+                    } else {
+                        // Hitung langsung dari daftar milik jaringan ini, persis
+                        // jalur yang dipakai halaman Kelola User/Server.
+                        const panelUsers = await kumpulkanHalaman((pg) => p.api.getUsers(pg));
+                        const milikJaringan = {};
+                        panelUsers.forEach((row) => {
+                            const a = row.attributes || {};
+                            if (termasukJaringan(namaPembuatPanelUser(a))) {
+                                nUsr++;
+                                milikJaringan[a.id] = true;
+                            }
+                        });
+                        const panelServers = await kumpulkanHalaman((pg) => p.api.getServers(pg, 15000));
+                        panelServers.forEach((row) => {
+                            if (milikJaringan[row.attributes && row.attributes.user]) nSrv++;
+                        });
+                    }
+                    if (elSrv) {
+                        elSrv.innerText = nSrv;
+                        elSrv.title = `Server ${p.label}: ${nSrv} server`;
+                    }
+                    if (elUsr) {
+                        elUsr.innerText = nUsr;
+                        elUsr.title = `User ${p.label}: ${nUsr} user panel`;
+                    }
                 } catch (e) {
-                    el.innerText = 'Err';
-                    el.style.color = 'var(--danger)';
-                    el.title = (e && e.message) ? e.message : 'Gagal memuat data.';
-                    gagal.push(t.label);
+                    [elSrv, elUsr].forEach((el) => {
+                        if (!el) return;
+                        el.innerText = 'Err';
+                        el.style.color = 'var(--danger)';
+                        el.title = (e && e.message) ? e.message : 'Gagal memuat data.';
+                    });
+                    gagal.push(p.label);
                 }
             }));
 
             if (!gagal.length) return;
-            const semuaGagal = gagal.length === statTargets.length;
+            const semuaGagal = gagal.length === statPanels.length;
             tampilkanErrorStatistik(
                 `Statistik ${gagal.join(', ')} gagal dimuat. ` +
                 (semuaGagal
@@ -637,7 +764,12 @@
                         let u = c.val();
                         if (role === 'pemilik' || role === 'demo' || u.maker === username) {
                             tUsers++;
-                            if (u.isOnline) oCount++;
+                            // Online hanya jika isOnline masih true DAN denyut
+                            // lastActive masih segar. Tab yang ditutup langsung
+                            // berhenti berdenyut → otomatis dihitung offline,
+                            // tidak lagi menumpuk status online palsu.
+                            const detak = Number(u.lastActive || u.lastLoginAt || u.timestamp || 0);
+                            if (u.isOnline === true && detak && (Date.now() - detak) < PRESENCE_STALE_MS) oCount++;
                         }
                     });
                 }
@@ -651,9 +783,9 @@
         }
 
         // Statistik user tidak bergantung pada API Pterodactyl, jadi jalankan
-        // sendiri supaya tetap tampil walau ketiga panel node bermasalah.
+        // sendiri supaya tetap tampil walau semua panel node bermasalah.
         pantauStatistikPengguna();
-        ambilStatistik();
+        if (statPanels.length) ambilStatistik();
     </script>
 
     <script>
