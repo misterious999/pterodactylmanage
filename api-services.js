@@ -143,6 +143,14 @@ class PteroAPI {
     async reinstallServer(serverId) {
         return this._request(`/api/application/servers/${serverId}/reinstall`, 'POST', {}, 30000);
     }
+
+    // Memicu sweeper di Cloudflare Worker untuk memeriksa expired & timer 3 hari
+    static async triggerSweeper() {
+        if (typeof GlobalConfig !== 'undefined' && GlobalConfig.workerFetch) {
+            return GlobalConfig.workerFetch('/api/sweep', { method: 'POST' }).then(r => r.json());
+        }
+        return Promise.reject(new Error('GlobalConfig tidak tersedia'));
+    }
 }
 
 // ==========================================

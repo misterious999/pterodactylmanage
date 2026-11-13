@@ -74,6 +74,20 @@ const PUBLIC_READ_NODES = new Set(['store_products', 'store_settings', 'store_st
 const MANAGER_CREATE_ROLES = new Set(['pemilik', 'partner_public', 'partner_public_v2']);
 const SELF_ROW_FIELDS = new Set(['isOnline', 'lastLoginAt', 'lastActive', 'updatedAt', 'usernameLower', 'profilePic']);
 const PTERO_BOOKKEEPING_NODES = new Set(['ptero_users_expired', 'ptero_servers_expired', 'ptero_sweeper_state']);
+const FIREBASE_URL = 'https://cobaaja-ac5d0-default-rtdb.firebaseio.com';
+
+// Harus sama dengan GlobalConfig.getGraceDays() di config.js (3 hari)
+const GRACE_DAYS = 3;
+const GRACE_MS = GRACE_DAYS * 24 * 60 * 60 * 1000;
+const WARN_MS = GRACE_MS;
+
+// ---------- PENJAGA NILAI expiredAt ----------
+const MIN_TS = Date.UTC(2020, 0, 1);
+const MAX_TS = Date.UTC(2100, 0, 1);
+const saneTs = (v) => {
+    const n = Number(v);
+    return (Number.isFinite(n) && n >= MIN_TS && n <= MAX_TS) ? n : 0;
+};
 
 const txtEnc = new TextEncoder();
 
@@ -280,9 +294,22 @@ async function handleAuth(pathname, request, env, cors) {
 
         const role = String(found.role || 'reseller_public').trim().toLowerCase();
         if (role !== 'pemilik') {
-            const expiredAt = Number(found.expiredAt || 0);
+            const expiredAt = saneTs(found.expiredAt);
             if (!expiredAt) return reply('Akses ditangguhkan. Akun belum mendapat otorisasi lisensi dari Administrator.', 403, cors);
-            if (expiredAt <= Date.now()) return reply('Lisensi habis. Masa berlaku akun telah berakhir.', 403, cors);
+            if (expiredAt <= Date.now()) {
+                const deleteAt = expiredAt + GRACE_MS;
+                const sisaMs = deleteAt - Date.now();
+                if (sisaMs > 0) {
+                    const d = Math.floor(sisaMs / 86400000);
+                    const h = Math.floor((sisaMs % 86400000) / 3600000);
+                    const m = Math.floor((sisaMs % 3600000) / 60000);
+                    const s = Math.floor((sisaMs % 60000) / 1000);
+                    const sisaStr = `${d} Hari ${h} Jam ${m} Menit ${s} Detik`;
+                    return reply(`Masa aktif akun Anda telah habis!\n\n⏳ Timer Penghapusan Akun: Sisa ${sisaStr}.\n\nSistem memberikan tenggang waktu 3 hari sebelum penghapusan permanen. Jika tidak diperpanjang sebelum timer 3 hari habis, sistem akan langsung menghapus seluruh server dan user Pterodactyl yang pernah dibuat beserta akun website ini secara permanen.\n\nSegera hubungi Administrator untuk memperpanjang lisensi Anda!`, 403, cors);
+                } else {
+                    return reply('Masa aktif lisensi dan batas timer 3 hari telah berakhir. Akun website beserta seluruh server dan user Pterodactyl terkait telah dijadwalkan untuk dimusnahkan secara permanen.', 403, cors);
+                }
+            }
         }
 
         const now = Date.now();
@@ -305,8 +332,14 @@ async function handleAuth(pathname, request, env, cors) {
             const row = await getSessionUser(env, sess);
             if (!row) return reply('Sesi tidak valid lagi.', 401, cors);
             if (row.role !== 'pemilik') {
-                const expiredAt = Number(row.expiredAt || 0);
-                if (!expiredAt || expiredAt <= Date.now()) return reply('Sesi tidak valid lagi.', 401, cors);
+                const expiredAt = saneTs(row.expiredAt);
+                if (!expiredAt) return reply('Sesi tidak valid lagi.', 401, cors);
+                if (expiredAt <= Date.now()) {
+                    const deleteAt = expiredAt + GRACE_MS;
+                    if (Date.now() >= deleteAt) return reply('Masa tenggang 3 hari telah berakhir. Akun dihapus permanen.', 401, cors);
+                    const { password, ...rest } = row;
+                    return jsonHttp({ session: sess, user: { ...rest, isGracePeriod: true, deleteAt } }, 200, cors);
+                }
             }
             const { password, ...rest } = row;
             return jsonHttp({ session: sess, user: rest }, 200, cors);
@@ -389,15 +422,27 @@ async function authorizeDbWrite(rel, method, body, sess, env) {
             return { ok: true, body };
         }
         if (!targetUid) return isPemilik ? { ok: true, body } : { error: 'Hanya pemilik yang boleh mengatur akun.', status: 403 };
-        if (targetUid === sess.uid) {
-            const allowed = [...keys].every((k) => SELF_ROW_FIELDS.has(k) || k === 'password');
-            if (passwordVal !== undefined && !String(passwordVal).startsWith('pbkdf2$')) {
-                return { error: 'Ganti password lewat menu ganti kata sandi.', status: 403 };
+        if (passwordVal !== undefined && typeof passwordVal === 'string' && !passwordVal.startsWith('pbkdf2$')) {
+            if (passwordVal.length < 8 || passwordVal.length > 128) {
+                return { error: 'Password baru minimal 8 karakter (maks. 128).', status: 400 };
             }
+        }
+        if (targetUid === sess.uid) {
+            const allowed = [...keys].every((k) => SELF_ROW_FIELDS.has(k) || k === 'password' || k === 'passwordChangedAt');
             if (allowed) return { ok: true, body };
             return { error: 'Ada data yang tidak boleh diubah lewat sini.', status: 403 };
         }
         if (isPemilik) return { ok: true, body };
+        if (MANAGER_CREATE_ROLES.has(sess.r) && targetUid) {
+            const targetUser = await dbCall(env, `users/${targetUid}`, 'GET').catch(() => null);
+            if (targetUser && targetUser.maker === sess.u) {
+                if (String(targetUser.role || '').toLowerCase() === 'pemilik' ||
+                    String(deepGetKey(body, 'role') || '').toLowerCase() === 'pemilik') {
+                    return { error: 'Tidak berhak mengatur akun pemilik.', status: 403 };
+                }
+                return { ok: true, body };
+            }
+        }
         return { error: 'Hanya pemilik yang boleh mengubah akun orang lain.', status: 403 };
     }
 
@@ -476,7 +521,8 @@ async function handleDb(pathname, request, env, cors) {
         const parts = rel.split('/');
         if (parts.length >= 3 && parts[parts.length - 1] === 'password') {
             rel = parts.slice(0, -1).join('/');
-            body = { password: body, passwordChangedAt: Date.now() };
+            const hashed = (typeof body === 'string' && !body.startsWith('pbkdf2$')) ? await hashPassword(body) : body;
+            body = { password: hashed, passwordChangedAt: Date.now() };
             effMethod = 'PATCH'; // gabung, jangan menindih seluruh baris user
         } else if (body && typeof body === 'object' && !Array.isArray(body) &&
                    body.password && String(body.password).startsWith('pbkdf2$') && !body.passwordChangedAt) {
@@ -533,6 +579,18 @@ async function coreGateway(request, env, origin, cors) {
             return handleDb(pathname, request, env, cors);
         }
 
+        // 1b-2. Endpoint Sweeper (Auto/Manual Trigger untuk pembersihan expired & timer 3 hari)
+        if (pathname === '/api/sweep' || pathname === '/system/sweep') {
+            const sess = await verifySession(env, request);
+            if (!sess) return reply('Sesi berakhir, silakan login.', 401, cors);
+            const role = String(sess.r || '').toLowerCase();
+            if (role !== 'pemilik' && role !== 'partner_public' && role !== 'partner_public_v2') {
+                return reply('Akses ditolak.', 403, cors);
+            }
+            const res = await sweepExpired(env, Date.now());
+            return jsonHttp({ ok: true, message: 'Sweeper berhasil dijalankan.', result: res }, 200, cors);
+        }
+
         // 1c. Proxy panel Pterodactyl wajib bawa sesi login DAN role yang berhak.
         //     Header Origin bukan penjaga keamanan: lewat curl/Postman/script
         //     header itu bebas ditulis, sedangkan URL Worker, header X-Panel-Mode,
@@ -541,6 +599,19 @@ async function coreGateway(request, env, origin, cors) {
         //     server di ketiga panel hanya dengan dua header tebakan.
         const sess = await verifySession(env, request);
         if (!sess) return reply('Sesi berakhir, silakan login.', 401, cors);
+
+        // 1d. Pengguna non-pemilik yang habis masa aktifnya diblokir dari aksi mutasi server/user
+        if (String(sess.r || '').toLowerCase() !== 'pemilik' && request.method !== 'GET') {
+            try {
+                const uRow = await getSessionUser(env, sess);
+                if (uRow) {
+                    const uExp = saneTs(uRow.expiredAt);
+                    if (uExp && uExp <= Date.now()) {
+                        return reply('Masa aktif lisensi Anda telah habis. Akun dalam masa tenggang 3 hari sebelum penghapusan. Operasi penambahan/modifikasi server dinonaktifkan.', 403, cors);
+                    }
+                }
+            } catch (e) {}
+        }
 
         // 2. Mode panel harus salah satu yang terdaftar, dan role-nya berhak
         const mode = request.headers.get('X-Panel-Mode') || 'private';
@@ -1014,27 +1085,6 @@ async function provisionPanel(env, nexId, order, input) {
 //   diperpanjang / timer dihapus  -> server yang di-suspend sweeper otomatis di-UNSUSPEND
 //   Notifikasi: ditulis ke Firebase `notifikasi/` dan ditampilkan sebagai lonceng di website
 // ==========================================
-const FIREBASE_URL = 'https://cobaaja-ac5d0-default-rtdb.firebaseio.com';
-
-// Harus sama dengan GlobalConfig.getGraceDays() di config.js
-const GRACE_DAYS = 3;
-const GRACE_MS = GRACE_DAYS * 24 * 60 * 60 * 1000;
-const WARN_MS = GRACE_MS; // pengingat: expired dalam 3 hari ke depan masuk ringkasan harian
-
-// ---------- PENJAGA NILAI expiredAt (insiden 28 Okt 2026) ----------
-// Beberapa record lama menyimpan expiredAt RUSAK, mis. 8.640008640001794e+24 —
-// hasil "string + number" pada kode versi lama (ditulis akun barmods/Randa).
-// Angka itu bukan tanggal. Kalau lolos begitu saja, suatu saat nilai rusak yang
-// justru KECIL bisa dianggap "sudah lewat" dan memicu suspend/penghapusan massal.
-// Maka hanya timestamp ms yang wajar (2020–2100) yang dipercaya; selain itu
-// dianggap "tanpa timer" dan dilaporkan ke log.
-const MIN_TS = Date.UTC(2020, 0, 1);
-const MAX_TS = Date.UTC(2100, 0, 1);
-const saneTs = (v) => {
-    const n = Number(v);
-    return (Number.isFinite(n) && n >= MIN_TS && n <= MAX_TS) ? n : 0;
-};
-
 // Cloudflare free plan membatasi 50 subrequest per eksekusi.
 const SUBREQUEST_BUDGET = 45;
 
@@ -1071,6 +1121,35 @@ async function sweepExpired(env, scheduledTime) {
         updates[`notifikasi/${key}`] = { tipe: 'sweeper', pesan: action, maker: maker || 'system', timestamp: Date.now() };
         aksi.push(action);
     };
+
+    // Baca data seluruh akun website untuk pengecekan masa aktif & timer 3 hari
+    let allWebsiteUsers = {};
+    try {
+        allWebsiteUsers = (await firebase('users')) || {};
+    } catch (err) {
+        console.error('[Sweeper] Gagal membaca tabel users:', err);
+    }
+
+    const websiteUsersToPurge = []; // expired + GRACE_MS <= now -> Hapus permanen!
+    const websiteUsersInGrace = []; // expired <= now < expired + GRACE_MS -> Masa tenggang 3 hari!
+    const websiteUsersActive = [];  // masih aktif atau diperpanjang
+
+    for (const [uid, u] of Object.entries(allWebsiteUsers)) {
+        if (!u || !u.username) continue;
+        const role = String(u.role || '').toLowerCase();
+        if (role === 'pemilik') continue; // Administrator utama bebas lisensi
+        const expiredAt = saneTs(u.expiredAt);
+        if (!expiredAt) continue;
+
+        const deleteAt = expiredAt + GRACE_MS;
+        if (now >= deleteAt) {
+            websiteUsersToPurge.push({ uid, username: u.username, u, expiredAt, deleteAt });
+        } else if (now >= expiredAt) {
+            websiteUsersInGrace.push({ uid, username: u.username, u, expiredAt, deleteAt });
+        } else {
+            websiteUsersActive.push({ uid, username: u.username, u, expiredAt, deleteAt });
+        }
+    }
 
     for (const [mode, panel] of Object.entries(PANELS)) {
         const apiKey = env[panel.key];
@@ -1122,14 +1201,13 @@ async function sweepExpired(env, scheduledTime) {
             }
         };
 
-        // ---------- SERVER ----------
+        // ---------- SERVER PTERODACTYL (ptero_servers_expired) ----------
         for (const id of new Set([...Object.keys(serverRecs), ...Object.keys(serverState)])) {
             if (budget < 3) break;
             const rec = serverRecs[id];
             const suspended = serverState[id];
             const expiredAt = saneTs(rec?.expiredAt);
             if (rec?.expiredAt && !expiredAt) {
-                // Dicatat ke ringkasan harian saja — log per 5 menit akan membanjiri.
                 rusakData.push(`• [${mode}] Server #${id} (${rec?.serverName || '-'}) — expiredAt: ${rec.expiredAt}`);
             }
             const recPath = `ptero_servers_expired/${domainKey}/${id}`;
@@ -1148,7 +1226,6 @@ async function sweepExpired(env, scheduledTime) {
                     log(`[${mode}] ${label} di-suspend karena expired. Dihapus permanen dalam ${GRACE_DAYS} hari jika tidak diperpanjang.`, rec?.maker);
                 }
             } else if (suspended) {
-                // Diperpanjang atau timer dihapus selama masa tenggang
                 if (await serversAction([id], 'unsuspend')) {
                     updates[statePath] = null;
                     log(`[${mode}] ${label} dipulihkan (unsuspend) karena masa aktif diperbarui.`, rec?.maker);
@@ -1158,7 +1235,7 @@ async function sweepExpired(env, scheduledTime) {
             }
         }
 
-        // ---------- USER (beserta semua servernya) ----------
+        // ---------- USER PTERODACTYL (ptero_users_expired) ----------
         for (const id of new Set([...Object.keys(userRecs), ...Object.keys(userState)])) {
             if (parseInt(id) === 1) continue; // akun root panel tidak pernah disentuh
             if (budget < 4) break;
@@ -1166,7 +1243,6 @@ async function sweepExpired(env, scheduledTime) {
             const suspended = userState[id];
             const expiredAt = saneTs(rec?.expiredAt);
             if (rec?.expiredAt && !expiredAt) {
-                // Dicatat ke ringkasan harian saja — log per 5 menit akan membanjiri.
                 rusakData.push(`• [${mode}] User ${rec?.username || '#' + id} — expiredAt: ${rec.expiredAt}`);
             }
             const recPath = `ptero_users_expired/${domainKey}/${id}`;
@@ -1175,11 +1251,11 @@ async function sweepExpired(env, scheduledTime) {
 
             const expired = expiredAt && now >= expiredAt;
             if (!expired && !suspended) { catatSegera('user', id, rec); continue; }
-            if (expired && suspended && now < expiredAt + GRACE_MS) continue; // sudah di-suspend, tunggu masa tenggang
+            if (expired && suspended && now < expiredAt + GRACE_MS) continue;
 
             const ids = await userServerIds(id);
-            if (ids === undefined) continue; // panel error, coba lagi nanti
-            if (ids === null) { // user sudah tidak ada di panel
+            if (ids === undefined) continue;
+            if (ids === null) {
                 updates[recPath] = null;
                 updates[statePath] = null;
                 continue;
@@ -1204,6 +1280,162 @@ async function sweepExpired(env, scheduledTime) {
                 log(`[${mode}] ${label} dipulihkan: ${ids.length} server di-unsuspend karena masa aktif diperbarui.`, rec?.maker);
             }
         }
+
+        // ---------- USER WEBSITE & SELURUH SERVER/USER PTERODACTYL TERKAIT ----------
+        if ((websiteUsersToPurge.length > 0 || websiteUsersInGrace.length > 0 || websiteUsersActive.length > 0) && budget >= 5) {
+            let panelUsers = [];
+            try {
+                const pRes = await ptero('/users?include=servers&per_page=100');
+                if (pRes.status === 200 && pRes.data && pRes.data.data) {
+                    panelUsers = pRes.data.data;
+                }
+            } catch (pErr) {
+                console.warn(`[Sweeper] [${mode}] Gagal baca /users panel:`, pErr);
+            }
+
+            // 1. Eksekusi pemusnahan jika timer 3 hari user website telah habis!
+            for (const wPurge of websiteUsersToPurge) {
+                if (budget < 4) break;
+                const targetUname = wPurge.username.trim().toLowerCase();
+                const pteroUserIds = new Set();
+                const pteroServerIds = new Set();
+
+                for (const pu of panelUsers) {
+                    const attr = pu.attributes || {};
+                    const puId = attr.id;
+                    if (puId === 1) continue;
+                    const puMaker = String(attr.last_name || '').trim().toLowerCase();
+                    const puName = String(attr.username || '').trim().toLowerCase();
+                    const isMakerMatch = (puMaker === targetUname || puMaker === `[${targetUname}]` || puMaker.includes(`[${targetUname}]`));
+                    const isNameMatch = (puName === targetUname);
+                    const isPteroIdMatch = (wPurge.u.ptero_id && parseInt(wPurge.u.ptero_id, 10) === puId);
+
+                    if (isMakerMatch || isNameMatch || isPteroIdMatch) {
+                        pteroUserIds.add(puId);
+                        const relServers = attr.relationships?.servers?.data || [];
+                        for (const s of relServers) {
+                            if (s.attributes && s.attributes.id) pteroServerIds.add(s.attributes.id);
+                        }
+                    }
+                }
+
+                for (const [pIdStr, uRec] of Object.entries(userRecs)) {
+                    const pId = parseInt(pIdStr, 10);
+                    if (!pId || pId === 1) continue;
+                    const uMaker = String(uRec?.maker || '').trim().toLowerCase();
+                    const uName = String(uRec?.username || '').trim().toLowerCase();
+                    if (uMaker === targetUname || uName === targetUname) {
+                        pteroUserIds.add(pId);
+                    }
+                }
+
+                for (const [sIdStr, sRec] of Object.entries(serverRecs)) {
+                    const sId = parseInt(sIdStr, 10);
+                    if (!sId) continue;
+                    if (String(sRec?.maker || '').trim().toLowerCase() === targetUname) {
+                        pteroServerIds.add(sId);
+                    }
+                }
+
+                for (const pUid of pteroUserIds) {
+                    if (budget < 3) break;
+                    const sIds = await userServerIds(pUid);
+                    if (Array.isArray(sIds)) {
+                        for (const sid of sIds) pteroServerIds.add(sid);
+                    }
+                }
+
+                // Hapus semua server Pterodactyl yang bersangkutan
+                if (pteroServerIds.size > 0) {
+                    await serversAction([...pteroServerIds], 'delete');
+                    for (const sid of pteroServerIds) {
+                        updates[`ptero_servers_expired/${domainKey}/${sid}`] = null;
+                        updates[`ptero_sweeper_state/${domainKey}/servers/${sid}`] = null;
+                    }
+                }
+
+                // Hapus semua user Pterodactyl yang bersangkutan
+                for (const pUid of pteroUserIds) {
+                    if (budget < 2) break;
+                    const { status } = await ptero(`/users/${pUid}`, 'DELETE');
+                    if (ok(status)) {
+                        updates[`ptero_users_expired/${domainKey}/${pUid}`] = null;
+                        updates[`ptero_sweeper_state/${domainKey}/users/${pUid}`] = null;
+                    }
+                }
+
+                if (pteroServerIds.size > 0 || pteroUserIds.size > 0) {
+                    log(`[${mode}] Pemusnahan data Pterodactyl user website "${wPurge.username}": ${pteroServerIds.size} server dan ${pteroUserIds.size} user Pterodactyl dihapus permanen.`, wPurge.username);
+                }
+            }
+
+            // 2. Suspend server untuk user website yang sedang dalam masa tenggang 3 hari
+            for (const wGrace of websiteUsersInGrace) {
+                if (budget < 3) break;
+                const targetUname = wGrace.username.trim().toLowerCase();
+                const graceServerIds = new Set();
+
+                for (const pu of panelUsers) {
+                    const attr = pu.attributes || {};
+                    const puMaker = String(attr.last_name || '').trim().toLowerCase();
+                    const puName = String(attr.username || '').trim().toLowerCase();
+                    if (puMaker === targetUname || puMaker === `[${targetUname}]` || puMaker.includes(`[${targetUname}]`) || puName === targetUname) {
+                        const relServers = attr.relationships?.servers?.data || [];
+                        for (const s of relServers) {
+                            if (s.attributes && s.attributes.id) graceServerIds.add(s.attributes.id);
+                        }
+                    }
+                }
+                for (const [sIdStr, sRec] of Object.entries(serverRecs)) {
+                    if (String(sRec?.maker || '').trim().toLowerCase() === targetUname) {
+                        const sId = parseInt(sIdStr, 10);
+                        if (sId) graceServerIds.add(sId);
+                    }
+                }
+
+                for (const sid of graceServerIds) {
+                    if (budget < 2) break;
+                    if (!serverState[sid]) {
+                        if (await serversAction([sid], 'suspend')) {
+                            updates[`ptero_sweeper_state/${domainKey}/servers/${sid}`] = { suspendedAt: now, reason: 'user_website_grace' };
+                            log(`[${mode}] Server #${sid} di-suspend (masa tenggang 3 hari akun website ${wGrace.username}).`, wGrace.username);
+                        }
+                    }
+                }
+            }
+
+            // 3. Unsuspend server jika akun website diperpanjang
+            for (const wActive of websiteUsersActive) {
+                if (budget < 3) break;
+                const targetUname = wActive.username.trim().toLowerCase();
+                for (const [sidStr, st] of Object.entries(serverState)) {
+                    if (st && st.reason === 'user_website_grace') {
+                        const sid = parseInt(sidStr, 10);
+                        const sRec = serverRecs[sidStr];
+                        if (String(sRec?.maker || '').trim().toLowerCase() === targetUname) {
+                            if (await serversAction([sid], 'unsuspend')) {
+                                updates[`ptero_sweeper_state/${domainKey}/servers/${sid}`] = null;
+                                log(`[${mode}] Server #${sid} dipulihkan (unsuspend) karena lisensi website ${wActive.username} diperpanjang.`, wActive.username);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ---------- PEMUSNAHAN USER WEBSITE PERMANEN DARI FIREBASE ----------
+    for (const wPurge of websiteUsersToPurge) {
+        const targetUname = wPurge.username.trim().toLowerCase();
+        let childCount = 0;
+        for (const [childUid, childUser] of Object.entries(allWebsiteUsers)) {
+            if (childUid !== wPurge.uid && String(childUser?.maker || '').trim().toLowerCase() === targetUname) {
+                updates[`users/${childUid}`] = null;
+                childCount++;
+            }
+        }
+        updates[`users/${wPurge.uid}`] = null;
+        log(`[Pemusnahan Akun Website] Timer 3 hari habis: Akun website "${wPurge.username}" (UID: ${wPurge.uid})${childCount > 0 ? ` beserta ${childCount} akun bawahan` : ''} telah dihapus permanen dari sistem.`, wPurge.username);
     }
 
     // Ringkasan harian: 08:00 WIB = 01:00 UTC (cron */5, jadi cukup menit 00-04). Hanya untuk pemilik.
@@ -1217,6 +1449,7 @@ async function sweepExpired(env, scheduledTime) {
             tipe: 'ringkasan',
             pesan: `Akan expired dalam ${WARN_MS / 86400000} hari (${soon.length}):\n` + (soon.length ? soon.join('\n') : '• Tidak ada') +
                    `\n\nSedang masa tenggang (suspend):\n` + (tenggang.length ? tenggang.join('\n') : '• Tidak ada') +
+                   (websiteUsersInGrace.length ? `\n• User website dalam masa tenggang 3 hari: ${websiteUsersInGrace.length}` : '') +
                    (rusak.length ? `\n\n⚠️ Data expired RUSAK — perbaiki via tombol (+):\n` + rusak.join('\n') : ''),
             maker: 'system',
             timestamp: now,
@@ -1227,4 +1460,12 @@ async function sweepExpired(env, scheduledTime) {
         await firebase('', 'PATCH', updates);
     }
     console.log(`[Sweeper] Selesai. ${aksi.length} aksi, sisa budget ${budget}.`);
+    return {
+        success: true,
+        timestamp: now,
+        actionsCount: aksi.length,
+        websiteUsersPurged: websiteUsersToPurge.map(u => u.username),
+        websiteUsersInGrace: websiteUsersInGrace.map(u => u.username),
+        actions: aksi
+    };
 }

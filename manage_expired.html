@@ -227,7 +227,10 @@
                 
                 <div class="toolbar">
                     <input id="searchExpired" type="text" placeholder="Cari entitas, otorisasi, atau memo..." oninput="listexpired()">
-                    <button class="btn btn-outline" onclick="confirmDeleteExpiredAll()">Purge Siklus Massal</button>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-outline" style="border-color: var(--primary); color: var(--primary);" onclick="jalankanSweeperManual()">Jalankan Sweeper Sekarang</button>
+                        <button class="btn btn-outline" onclick="confirmDeleteExpiredAll()">Purge Siklus Massal</button>
+                    </div>
                 </div>
                 
                 <div class="table-wrap">
@@ -368,13 +371,30 @@
 
         function getStatus(expiredAt){ 
             if(!expiredAt) return {label:'LISENSI TIDAK VALID',cls:'badge-unset',remain:null}; 
-            const remain=Number(expiredAt)-Date.now(); 
-            if(remain<=0) return {label:'AKSES TERTOLAK',cls:'badge-expired',remain}; 
-            if(remain<=3*86400000) return {label:'SIKLUS KRITIS',cls:'badge-soon',remain}; 
-            return {label:'STATUS AKTIF',cls:'badge-active',remain}; 
+            const now = Date.now();
+            const remain = Number(expiredAt) - now; 
+            const GRACE_MS = 3 * 24 * 60 * 60 * 1000;
+            const deleteAt = Number(expiredAt) + GRACE_MS;
+            const graceRemain = deleteAt - now;
+
+            if (remain <= 0) {
+                if (graceRemain > 0) {
+                    return { label:'TIMER HAPUS (3 HARI)', cls:'badge-soon', remain:graceRemain, isGrace:true };
+                }
+                return { label:'SIAP DIMUSNAHKAN', cls:'badge-expired', remain:0, isPurgeReady:true };
+            }
+            if (remain <= 3 * 86400000) return { label:'SIKLUS KRITIS', cls:'badge-soon', remain }; 
+            return { label:'STATUS AKTIF', cls:'badge-active', remain }; 
         }
 
-        function humanRemain(ms){ 
+        function humanRemain(ms, isGrace = false, isPurgeReady = false){ 
+            if(isPurgeReady) return 'Timer 3 hari habis (Dihapus sistem)';
+            if(isGrace) {
+                const d = Math.floor(ms / 86400000);
+                const h = Math.floor((ms % 86400000) / 3600000);
+                const m = Math.floor((ms % 3600000) / 60000);
+                return `Dihapus dlm: ${d} Hari ${h} Jam ${m} Menit`;
+            }
             if(ms===null) return 'Otorisasi dibutuhkan'; 
             if(ms<=0) return 'Masa berlaku usai'; 
             const d=Math.floor(ms/86400000); 
@@ -464,13 +484,49 @@
                 html += `<tr>
                     <td><div class="target">${escapeHtml(u.username)}</div><div class="muted">UID: ${escapeHtml(u.uid)}</div>${u.maker?`<div class="muted">Otorisasi: ${escapeHtml(u.maker)}</div>`:''}</td>
                     <td><span class="badge badge-unset">${escapeHtml(getRoleLabel(String(u.role||'')))}</span></td>
-                    <td><b style="color:var(--text-main); font-size:14px;">${expiredAt?formatDate(expiredAt):'-'}</b><br><span class="muted" style="color: var(--primary); font-weight:600;">${humanRemain(st.remain)}</span></td>
+                    <td><b style="color:var(--text-main); font-size:14px;">${expiredAt?formatDate(expiredAt):'-'}</b><br><span class="muted" style="color: var(--primary); font-weight:600;">${humanRemain(st.remain, st.isGrace, st.isPurgeReady)}</span></td>
                     <td><span class="badge ${st.cls}">${st.label}</span></td>
                     <td><div style="background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">${u.expiredNote?escapeHtml(u.expiredNote):'<span class="muted" style="margin:0;">Tidak ada memo terlampir.</span>'}</div>${u.expiredUpdatedBy?`<span class="muted" style="margin-top:6px;">Modifikasi oleh: ${escapeHtml(u.expiredUpdatedBy)}</span>`:''}</td>
-                    <td>${expiredAt?`<button class="btn-danger" style="border-radius:8px; cursor:pointer;" onclick="deleteexpired('${escapeHtml(u.uid)}')">Cabut Lisensi</button>`:'<span class="muted" style="font-weight:700;">Akses Nonaktif</span>'}</td>
+                    <td>${expiredAt ? `
+                        <div style="display:flex; gap:6px; flex-direction:column;">
+                            <button class="btn-danger" style="border-radius:8px; cursor:pointer;" onclick="deleteexpired('${escapeHtml(u.uid)}')">Cabut Lisensi</button>
+                            ${(st.isPurgeReady || st.isGrace) ? `<button class="btn-danger" style="border-radius:8px; background:var(--danger); color:white; cursor:pointer;" onclick="musnahkanUserSekarang('${escapeHtml(u.uid)}', '${escapeHtml(u.username)}')">Musnahkan Total</button>` : ''}
+                        </div>
+                    ` : '<span class="muted" style="font-weight:700;">Akses Nonaktif</span>'}</td>
                 </tr>`; 
             });
             table.innerHTML = html;
+        }
+
+        function musnahkanUserSekarang(uid, uname) {
+            openSysModal('confirm', 'PEMUSNAHAN TOTAL', `Peringatan: Anda akan menghapus akun <b>${uname}</b> beserta SELURUH server dan user Pterodactyl yang bersangkutan secara permanen!\n\nLanjutkan pemusnahan?`, async () => {
+                try {
+                    await usersRef.child(uid).remove();
+                    if (window.GlobalConfig && GlobalConfig.workerFetch) {
+                        await GlobalConfig.workerFetch('/api/sweep', { method: 'POST' });
+                    }
+                    openSysModal('success', 'PEMUSNAHAN BERHASIL', `Akun <b>${escapeHtml(uname)}</b> beserta seluruh data server dan user Pterodactyl terkait berhasil dimusnahkan secara permanen.`);
+                } catch (e) {
+                    openSysModal('error', 'GAGAL', e.message);
+                }
+            });
+        }
+
+        function jalankanSweeperManual() {
+            openSysModal('confirm', 'JALANKAN SWEEPER', 'Sistem akan memeriksa seluruh akun website dan timer 3 hari penghapusan akun serta server Pterodactyl.\n\nLanjutkan pemindaian sekarang?', async () => {
+                try {
+                    const res = await GlobalConfig.workerFetch('/api/sweep', { method: 'POST' }).then(r => r.json());
+                    if (res && res.ok) {
+                        const aksiCount = res.result ? res.result.actionsCount : 0;
+                        const purged = (res.result && res.result.websiteUsersPurged) ? res.result.websiteUsersPurged.join(', ') : '';
+                        openSysModal('success', 'SWEEPER SELESAI', `Pemindaian sweeper berhasil dijalankan.\nTotal aksi: ${aksiCount}.\n${purged ? `Akun website dimusnahkan: <b>${purged}</b>` : 'Tidak ada akun yang melewati timer 3 hari saat ini.'}`);
+                    } else {
+                        openSysModal('error', 'SWEEPER GAGAL', res ? res.error : 'Gagal menghubungi server sweeper.');
+                    }
+                } catch (e) {
+                    openSysModal('error', 'SWEEPER GAGAL', 'Gagal memicu sweeper: ' + e.message);
+                }
+            });
         }
 
         function deleteexpired(uid){

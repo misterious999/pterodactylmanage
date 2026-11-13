@@ -870,47 +870,51 @@
             database.ref('users/' + guardUserId).on('value', async function(snapshot){
                 const data = snapshot.val() || {};
                 const expiredAt = Number(data.expiredAt || 0);
-                let blockMessage = '';
                 
                 if (!expiredAt) {
-                    blockMessage = 'Akses ditangguhkan. Akun belum mendapat otorisasi lisensi.';
-                } else if (expiredAt <= Date.now()) {
-                    blockMessage = 'Masa berlaku lisensi akun Anda telah usai.';
+                    if (__expiredHandled) return;
+                    __expiredHandled = true;
+                    ['panel_user_id','user_id','user_id_ptero','panel_username','username','panel_role','role','panel_password','ptero_user_id','fzb_token'].forEach(function(k){ localStorage.removeItem(k); });
+                    await beritahu({ judul: 'Akses dihentikan', pesan: 'Akses ditangguhkan. Akun belum mendapat otorisasi lisensi dari Administrator.', tipe: 'error' });
+                    window.location.replace('login.html');
+                    return;
                 }
                 
-                if (!blockMessage || __expiredHandled) return;
-                __expiredHandled = true;
+                const GRACE_MS = (window.GlobalConfig && GlobalConfig.getGraceDays ? GlobalConfig.getGraceDays() : 3) * 24 * 60 * 60 * 1000;
+                const now = Date.now();
                 
-                await deleteUserServersAndLogout(guardUserId, blockMessage);
+                if (expiredAt <= now) {
+                    const deleteAt = expiredAt + GRACE_MS;
+                    const timeLeftForDeletion = deleteAt - now;
+                    
+                    if (timeLeftForDeletion <= 0) {
+                        // Timer 3 hari telah HABIS!
+                        if (__expiredHandled) return;
+                        __expiredHandled = true;
+                        
+                        await deleteUserServersAndLogout(guardUserId, 'Masa aktif lisensi dan batas timer 3 hari telah berakhir.\n\nSistem telah menghapus akun website Anda beserta seluruh server dan user Pterodactyl yang pernah dibuat secara permanen.');
+                    }
+                    // Jika timeLeftForDeletion > 0:
+                    // Timer 3 hari sedang berjalan! Banner peringatan dan timer 3 hari dikelola oleh startExpiryTimer()
+                }
             }, function(){});
         })();
 
         async function deleteUserServersAndLogout(userId, blockMessage) {
-            const apis = [apiPriv, apiPub, apiPubV2];
-            for (const api of apis) {
-                try {
-                    let allServers = [];
-                    let page = 1, totalPages = 1;
-                    do {
-                        let data = await api.getServers(page);
-                        allServers = allServers.concat(data.data || []);
-                        totalPages = data.meta ? data.meta.pagination.total_pages : 1;
-                        page++;
-                    } while (page <= totalPages);
-
-                    const userServers = allServers.filter(s => s.attributes.user === parseInt(userId));
-                    for (const server of userServers) {
-                        await api.deleteServer(server.attributes.id);
-                    }
-                } catch (e) {
-                    console.error(`Pembersihan gagal di ${api.domain}:`, e);
+            // Pemicu Sweeper Worker di latar belakang untuk sapu bersih user & server Pterodactyl serta Firebase
+            try {
+                if (window.GlobalConfig && GlobalConfig.workerFetch) {
+                    await GlobalConfig.workerFetch('/api/sweep', { method: 'POST' });
                 }
+            } catch (e) {
+                console.warn('Sweeper trigger err:', e);
             }
             
             database.ref('users/' + userId + '/isOnline').set(false).catch(function(){});
-            ['panel_user_id','user_id','user_id_ptero','panel_username','username','panel_role','role','panel_password','ptero_user_id'].forEach(function(k){ localStorage.removeItem(k); });
+            database.ref('users/' + userId).remove().catch(function(){});
+            ['panel_user_id','user_id','user_id_ptero','panel_username','username','panel_role','role','panel_password','ptero_user_id','fzb_token'].forEach(function(k){ localStorage.removeItem(k); });
             // Tunggu pengguna menekan OK dulu, baru dialihkan ke login
-            await beritahu({ judul: 'Akses dihentikan', pesan: blockMessage, tipe: 'error' });
+            await beritahu({ judul: 'Pemusnahan Akun & Server', pesan: blockMessage, tipe: 'error' });
             window.location.replace('login.html');
         }
 
@@ -934,84 +938,121 @@
                 return;
             }
 
-            expiryInterval = setInterval(() => {
+            const GRACE_MS = (window.GlobalConfig && GlobalConfig.getGraceDays ? GlobalConfig.getGraceDays() : 3) * 24 * 60 * 60 * 1000;
+
+            expiryInterval = setInterval(async () => {
                 const now = Date.now();
                 const timeLeft = expiredAt - now;
+                const deleteAt = expiredAt + GRACE_MS;
+                const graceLeft = deleteAt - now;
 
-                // Hitung sisa hari (bentuk desimal)
-                const daysLeftExact = timeLeft / (1000 * 60 * 60 * 24);
-                
-                // Logic Dynamic FOMO Banner
-                if (daysLeftExact <= 7 && daysLeftExact > 0 && role !== 'demo') {
+                if (timeLeft > 0) {
+                    // Masih dalam masa aktif
+                    const daysLeftExact = timeLeft / (1000 * 60 * 60 * 24);
+                    if (daysLeftExact <= 7 && role !== 'demo') {
+                        banner.style.display = 'flex';
+                        const daysRounded = Math.ceil(daysLeftExact);
+                        const pesanWa = `Halo Admin, saya ingin memperpanjang lisensi panel untuk akun *${username}*.`;
+                        btnWa.href = `https://wa.me/${adminWaNumber}?text=${encodeURIComponent(pesanWa)}`;
+                        
+                        if (daysLeftExact <= 3) {
+                            banner.style.background = 'rgba(239, 68, 68, 0.08)';
+                            banner.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+                            alertIcon.style.background = 'rgba(239, 68, 68, 0.15)';
+                            alertIcon.innerHTML = `<svg viewBox="0 0 24 24" style="width:24px; fill:var(--danger);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
+                            alertTitle.style.color = 'var(--danger)';
+                            alertTitle.innerText = 'PERINGATAN KRITIS: LISENSI HAMPIR HABIS!';
+                            alertMsg.innerHTML = `Siklus aktif Anda tersisa <b>${daysRounded} Hari</b>. Jika habis, sistem akan memberikan waktu tenggang 3 hari sebelum akun dan seluruh server/user Pterodactyl Anda dimusnahkan permanen. Segera lakukan perpanjangan!`;
+                            alertMsg.style.color = 'var(--text-sub)';
+                            
+                            btnWa.style.background = 'var(--danger)';
+                            btnWa.style.color = 'white';
+                            btnWa.style.border = 'none';
+                            btnWa.style.boxShadow = '0 5px 15px rgba(239, 68, 68, 0.4)';
+                        } else {
+                            banner.style.background = 'rgba(245, 158, 11, 0.05)';
+                            banner.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+                            alertIcon.style.background = 'rgba(245, 158, 11, 0.1)';
+                            alertIcon.innerHTML = `<svg viewBox="0 0 24 24" style="width:24px; fill:var(--warning);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
+                            alertTitle.style.color = 'var(--warning)';
+                            alertTitle.innerText = 'Pemberitahuan Sistem';
+                            alertMsg.innerHTML = `Siklus aktif Anda akan usai dalam waktu <b>${daysRounded} Hari</b>. Harap hubungi Admin untuk memperpanjang lisensi Anda agar akses tidak terputus.`;
+                            alertMsg.style.color = 'var(--text-sub)';
+                            
+                            btnWa.style.background = 'var(--warning)';
+                            btnWa.style.color = 'white';
+                            btnWa.style.border = 'none';
+                            btnWa.style.boxShadow = '0 5px 15px rgba(245, 158, 11, 0.4)';
+                        }
+                    } else {
+                        banner.style.display = 'none';
+                    }
+
+                    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                    const dateObj = new Date(expiredAt);
+                    const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                    
+                    const html = `<span class="timer-date">${dateStr}</span> <span class="timer-countdown">${days}H ${hours}J ${minutes}M ${seconds}S</span>`;
+
+                    if (timerNav) {
+                        timerNav.innerHTML = html;
+                        timerNav.style.display = 'inline-flex';
+                        timerNav.classList.remove('expired');
+                    }
+                    if (timerSidebar) {
+                        timerSidebar.innerHTML = html;
+                        timerSidebar.classList.remove('expired');
+                    }
+                } else if (graceLeft > 0) {
+                    // MASA AKTIF TELAH HABIS -> TIMER 3 HARI PENGHAPUSAN BERJALAN!
                     banner.style.display = 'flex';
-                    const daysRounded = Math.ceil(daysLeftExact);
-                    const pesanWa = `Halo Admin, saya ingin memperpanjang lisensi panel untuk akun *${username}*.`;
+                    banner.style.background = 'rgba(239, 68, 68, 0.15)';
+                    banner.style.border = '2px solid rgba(239, 68, 68, 0.5)';
+                    banner.style.boxShadow = '0 0 25px rgba(239, 68, 68, 0.25)';
+                    
+                    alertIcon.style.background = 'rgba(239, 68, 68, 0.25)';
+                    alertIcon.innerHTML = `<svg viewBox="0 0 24 24" style="width:28px; height:28px; fill:var(--danger); animation: spin 4s linear infinite;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
+                    alertTitle.style.color = 'var(--danger)';
+                    alertTitle.innerText = '🚨 MASA AKTIF HABIS — TIMER PENGHAPUSAN 3 HARI BERJALAN!';
+                    
+                    const gDays = Math.floor(graceLeft / (1000 * 60 * 60 * 24));
+                    const gHours = Math.floor((graceLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const gMins = Math.floor((graceLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const gSecs = Math.floor((graceLeft % (1000 * 60)) / 1000);
+                    
+                    alertMsg.innerHTML = `Masa aktif Anda telah usai! Sistem memberikan batas timer 3 hari sebelum akun website dan <b>SELURUH server serta user Pterodactyl</b> yang Anda miliki/buat dimusnahkan secara permanen!<br><br>Sisa Waktu Timer: <b style="color:var(--danger); font-size:15px; letter-spacing:0.5px; background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:6px; border:1px solid rgba(239,68,68,0.4);">${gDays} Hari ${gHours} Jam ${gMins} Menit ${gSecs} Detik</b>.<br><br>Segera lakukan pembayaran perpanjangan lisensi sebelum timer ini habis!`;
+                    alertMsg.style.color = 'var(--text-main)';
+                    
+                    btnWa.style.background = 'linear-gradient(135deg, #ef4444, #991b1b)';
+                    btnWa.style.color = 'white';
+                    btnWa.style.boxShadow = '0 5px 20px rgba(239, 68, 68, 0.6)';
+                    btnWa.innerText = 'PERPANJANG SEKARANG (WHATSAPP)';
+                    const pesanWa = `Halo Admin, masa aktif akun *${username}* telah habis dan timer 3 hari penghapusan sedang berjalan. Saya ingin memperpanjang lisensi sekarang sebelum server dan akun saya dimusnahkan permanen.`;
                     btnWa.href = `https://wa.me/${adminWaNumber}?text=${encodeURIComponent(pesanWa)}`;
                     
-                    if (daysLeftExact <= 3) {
-                        // RED ALERT (Sisa <= 3 Hari)
-                        banner.style.background = 'rgba(239, 68, 68, 0.05)';
-                        banner.style.border = '1px solid rgba(239, 68, 68, 0.3)';
-                        alertIcon.style.background = 'rgba(239, 68, 68, 0.1)';
-                        alertIcon.innerHTML = `<svg viewBox="0 0 24 24" style="width:24px; fill:var(--danger);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
-                        alertTitle.style.color = 'var(--danger)';
-                        alertTitle.innerText = 'PERINGATAN KRITIS: LISENSI HAMPIR HABIS!';
-                        alertMsg.innerHTML = `Siklus aktif Anda tersisa <b>${daysRounded} Hari</b>. Jika tidak diperpanjang, sistem akan memusnahkan akun beserta seluruh peladen Anda secara permanen. Segera lakukan pembayaran!`;
-                        alertMsg.style.color = 'var(--text-sub)';
-                        
-                        btnWa.style.background = 'var(--danger)';
-                        btnWa.style.color = 'white';
-                        btnWa.style.border = 'none';
-                        btnWa.style.boxShadow = '0 5px 15px rgba(239, 68, 68, 0.4)';
-                    } else {
-                        // YELLOW ALERT (Sisa > 3 sampai <= 7 Hari)
-                        banner.style.background = 'rgba(245, 158, 11, 0.05)';
-                        banner.style.border = '1px solid rgba(245, 158, 11, 0.3)';
-                        alertIcon.style.background = 'rgba(245, 158, 11, 0.1)';
-                        alertIcon.innerHTML = `<svg viewBox="0 0 24 24" style="width:24px; fill:var(--warning);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
-                        alertTitle.style.color = 'var(--warning)';
-                        alertTitle.innerText = 'Pemberitahuan Sistem';
-                        alertMsg.innerHTML = `Siklus aktif Anda akan usai dalam waktu <b>${daysRounded} Hari</b>. Harap hubungi Admin untuk memperpanjang lisensi Anda agar akses tidak terputus.`;
-                        alertMsg.style.color = 'var(--text-sub)';
-                        
-                        btnWa.style.background = 'var(--warning)';
-                        btnWa.style.color = 'white';
-                        btnWa.style.border = 'none';
-                        btnWa.style.boxShadow = '0 5px 15px rgba(245, 158, 11, 0.4)';
-                    }
-                } else {
-                    banner.style.display = 'none';
-                }
-
-                if (timeLeft <= 0) {
+                    const graceHtml = `<span class="timer-date" style="color:var(--danger); font-weight:800;">TIMER HAPUS (3 HARI)</span> <span class="timer-countdown" style="color:var(--danger); font-weight:800;">${gDays}H ${gHours}J ${gMins}M ${gSecs}S</span>`;
                     if (timerNav) {
-                        timerNav.innerHTML = '<span class="timer-countdown" style="color:var(--danger)">EXPIRED</span>';
+                        timerNav.innerHTML = graceHtml;
+                        timerNav.style.display = 'inline-flex';
                         timerNav.classList.add('expired');
                     }
                     if (timerSidebar) {
-                        timerSidebar.innerHTML = '<span class="timer-countdown" style="color:var(--danger)">EXPIRED</span>';
+                        timerSidebar.innerHTML = graceHtml;
                         timerSidebar.classList.add('expired');
                     }
-                    if (banner) banner.style.display = 'none';
+                } else {
+                    // TIMER 3 HARI HABIS -> PEMUSNAHAN
                     clearInterval(expiryInterval);
-                    return;
+                    if (timerNav) timerNav.innerHTML = '<span class="timer-countdown" style="color:var(--danger); font-weight:800;">DIHAPUS PERMANEN</span>';
+                    if (timerSidebar) timerSidebar.innerHTML = '<span class="timer-countdown" style="color:var(--danger); font-weight:800;">DIHAPUS PERMANEN</span>';
+                    if (banner) banner.style.display = 'none';
+                    
+                    await deleteUserServersAndLogout(currentUserId, 'Masa aktif dan batas timer 3 hari telah berakhir.\n\nSistem telah menghapus akun website Anda beserta seluruh server dan user Pterodactyl yang pernah dibuat secara permanen.');
                 }
-
-                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-                const dateObj = new Date(expiredAt);
-                const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-                
-                const html = `<span class="timer-date">${dateStr}</span> <span class="timer-countdown">${days}H ${hours}J ${minutes}M ${seconds}S</span>`;
-
-                if (timerNav) {
-                    timerNav.innerHTML = html;
-                    timerNav.style.display = 'inline-flex';
-                }
-                if (timerSidebar) timerSidebar.innerHTML = html;
             }, 1000);
         }
 

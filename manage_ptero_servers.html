@@ -1654,7 +1654,16 @@
             if (!expiredAt) {
                 blockMessage = 'Otorisasi ditangguhkan. Hubungi Administrator sistem utama.';
             } else if (expiredAt <= Date.now()) {
-                blockMessage = 'Masa berlaku lisensi akun Anda telah usai.';
+                const GRACE_MS = 3 * 24 * 60 * 60 * 1000;
+                const deleteAt = expiredAt + GRACE_MS;
+                const now = Date.now();
+                if (now < deleteAt) {
+                    const d = Math.floor((deleteAt - now) / 86400000);
+                    const h = Math.floor(((deleteAt - now) % 86400000) / 3600000);
+                    blockMessage = 'Masa aktif lisensi akun Anda telah habis!<br><br><b>Timer Penghapusan:</b> Sisa ' + (d > 0 ? d + ' Hari ' + h + ' Jam' : h + ' Jam') + '.<br>Harap segera hubungi Administrator untuk memperpanjang lisensi Anda sebelum seluruh data dan server dimusnahkan secara permanen.';
+                } else {
+                    blockMessage = 'Masa aktif lisensi dan batas timer 3 hari telah berakhir.<br><br>Akun website serta seluruh server dan user Pterodactyl Anda telah dimusnahkan secara permanen.';
+                }
             }
             if (!blockMessage || __expiredHandled) return;
             __expiredHandled = true;
@@ -1687,12 +1696,25 @@
                 return;
             }
 
+            const GRACE_MS = 3 * 24 * 60 * 60 * 1000;
+
             expiryInterval = setInterval(() => {
                 const now = Date.now();
                 const timeLeft = expiredAt - now;
+                const deleteAt = expiredAt + GRACE_MS;
+                const graceLeft = deleteAt - now;
 
                 if (timeLeft <= 0) {
-                    timerNav.innerHTML = '<span class="timer-countdown" style="color:var(--danger)">EXPIRED</span>';
+                    if (graceLeft > 0) {
+                        const gDays = Math.floor(graceLeft / (1000 * 60 * 60 * 24));
+                        const gHours = Math.floor((graceLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const gMins = Math.floor((graceLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        const gSecs = Math.floor((graceLeft % (1000 * 60)) / 1000);
+                        timerNav.innerHTML = `<span class="timer-date" style="color:var(--danger); font-weight:800;">TIMER HAPUS (3 HARI)</span><span class="timer-countdown" style="color:var(--danger); font-weight:800;">${gDays}h ${gHours}j ${gMins}m ${gSecs}s</span>`;
+                        timerNav.classList.add('expired');
+                        return;
+                    }
+                    timerNav.innerHTML = '<span class="timer-countdown" style="color:var(--danger); font-weight:800;">DIHAPUS PERMANEN</span>';
                     timerNav.classList.add('expired');
                     clearInterval(expiryInterval);
                     return;
