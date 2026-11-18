@@ -53,7 +53,7 @@
         
         .desk-logo { display: flex; align-items: center; gap: 12px; color: var(--text-main); font-weight: 800; font-size: 18px; letter-spacing: 0.5px; transition: 0.3s; text-transform: uppercase; }
         .sidebar.close .desk-logo { display: none; }
-        .desk-logo svg { width: 28px; height: 28px; fill: var(--primary); filter: drop-shadow(0 0 8px var(--primary-glow)); }
+        .desk-logo svg { width: 32px; height: 32px; filter: drop-shadow(0 0 10px var(--primary-glow)); }
         
         .btn-sidebar-toggle { background: transparent; border: none; color: var(--text-sub); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; transition: 0.3s; }
         .btn-sidebar-toggle:hover { color: var(--text-main); transform: scale(1.1); }
@@ -105,7 +105,7 @@
         .sidebar.close ~ .footer { margin-right: 85px; }
 
         .mobile-logo { display: none; align-items: center; gap: 10px; font-size: 16px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px; text-transform: uppercase; margin-right: auto; }
-        .mobile-logo svg { width: 24px; height: 24px; fill: var(--primary); filter: drop-shadow(0 0 5px var(--primary-glow)); }
+        .mobile-logo svg { width: 28px; height: 28px; filter: drop-shadow(0 0 8px var(--primary-glow)); }
         
         .header-controls { display: flex; align-items: center; gap: 15px; }
         /* Pill profil: tinggi tetap & sejajar dengan tombol header, tanpa glow yang bocor keluar */
@@ -286,7 +286,18 @@
     <div class="sidebar" id="sidebarMenu">
         <div class="sidebar-header">
             <div class="desk-logo">
-                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg> 
+                <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="zxDashBg" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#0c152c"/><stop offset="100%" stop-color="#050a16"/></linearGradient>
+                        <linearGradient id="zxDashBrd" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#5eead4"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+                        <linearGradient id="zxDashTop" x1="16" y1="17" x2="47" y2="38"><stop offset="0%" stop-color="#5eead4"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+                        <linearGradient id="zxDashBot" x1="17" y1="26" x2="48" y2="47"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+                    </defs>
+                    <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#zxDashBg)" stroke="url(#zxDashBrd)" stroke-width="1.6"/>
+                    <path d="M 19 17.5 H 43 C 45.8 17.5 47.8 19.5 47.2 22.3 L 31.2 38.3 C 30.5 39 29.5 39.4 28.5 39.4 H 24.5 C 23.3 39.4 22.6 38.1 23.3 37.1 L 37.8 24.5 H 19 C 17.3 24.5 16 23.2 16 21.5 V 20.5 C 16 18.8 17.3 17.5 19 17.5 Z" fill="url(#zxDashTop)"/>
+                    <path d="M 45 46.5 H 21 C 18.2 46.5 16.2 44.5 16.8 41.7 L 32.8 25.7 C 33.5 25 34.5 24.6 35.5 24.6 H 39.5 C 40.7 24.6 41.4 25.9 40.7 26.9 L 26.2 39.5 H 45 C 46.7 39.5 48 40.8 48 42.5 V 43.5 C 48 45.2 46.7 46.5 45 46.5 Z" fill="url(#zxDashBot)"/>
+                    <circle cx="32" cy="32" r="2.2" fill="#fff"/>
+                </svg> 
                 <span>ENTERPRISE</span>
             </div>
             <button class="btn-sidebar-toggle mobile-hide" onclick="toggleSidebar()">
@@ -337,7 +348,19 @@
     <!-- NAVBAR ATAS -->
     <div class="top-nav">
         <div class="brand-logo mobile-logo">
-            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg> Enterprise
+            <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <defs>
+                    <linearGradient id="zxMobBg" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#0c152c"/><stop offset="100%" stop-color="#050a16"/></linearGradient>
+                    <linearGradient id="zxMobBrd" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#5eead4"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+                    <linearGradient id="zxMobTop" x1="16" y1="17" x2="47" y2="38"><stop offset="0%" stop-color="#5eead4"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+                    <linearGradient id="zxMobBot" x1="17" y1="26" x2="48" y2="47"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+                </defs>
+                <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#zxMobBg)" stroke="url(#zxMobBrd)" stroke-width="1.6"/>
+                <path d="M 19 17.5 H 43 C 45.8 17.5 47.8 19.5 47.2 22.3 L 31.2 38.3 C 30.5 39 29.5 39.4 28.5 39.4 H 24.5 C 23.3 39.4 22.6 38.1 23.3 37.1 L 37.8 24.5 H 19 C 17.3 24.5 16 23.2 16 21.5 V 20.5 C 16 18.8 17.3 17.5 19 17.5 Z" fill="url(#zxMobTop)"/>
+                <path d="M 45 46.5 H 21 C 18.2 46.5 16.2 44.5 16.8 41.7 L 32.8 25.7 C 33.5 25 34.5 24.6 35.5 24.6 H 39.5 C 40.7 24.6 41.4 25.9 40.7 26.9 L 26.2 39.5 H 45 C 46.7 39.5 48 40.8 48 42.5 V 43.5 C 48 45.2 46.7 46.5 45 46.5 Z" fill="url(#zxMobBot)"/>
+                <circle cx="32" cy="32" r="2.2" fill="#fff"/>
+            </svg> 
+            <span>Enterprise</span>
         </div>
         
         <div class="header-controls">
