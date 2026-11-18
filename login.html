@@ -5,36 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>Autentikasi Sistem - Zeroix Enterprise</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --primary: #0d9488; --primary-hover: #0f766e; --primary-glow: rgba(13, 148, 136, 0.4);
-            --danger: #ef4444; --bg-dark: #070b14; 
-            --card-bg: rgba(15, 23, 42, 0.5); 
-            --text-main: #ffffff; --text-sub: #94a3b8; 
-            --border: rgba(255, 255, 255, 0.1); 
+            --primary: #5eead4; --primary-hover: #2dd4bf; --primary-glow: rgba(94, 234, 212, 0.4);
+            --danger: #ef4444; --bg-dark: #060b1a; 
+            --card-bg: rgba(255, 255, 255, 0.04); 
+            --text-main: #e9eeff; --text-sub: #8d97b8; 
+            --border: rgba(255, 255, 255, 0.09);
+            --a1: #5eead4; --a2: #818cf8; --a3: #f472b6;
         }
         
         body { 
-            font-family: 'Inter', sans-serif; color: var(--text-main); margin: 0; 
-            padding: 20px; box-sizing: border-box; /* Tambahan ruang napas biar gak mentok layar */
+            font-family: 'Sora', sans-serif; color: var(--text-main); margin: 0; 
+            padding: 20px; box-sizing: border-box;
             display: flex; justify-content: center; align-items: center; min-height: 100vh; min-height: 100dvh;
             background-color: var(--bg-dark);
             overflow-x: hidden; 
             position: relative;
         }
 
-        /* --- AMBIENT BACKGROUND GLOW --- */
+        /* --- AMBIENT BACKGROUND GLOW (contoh.html) --- */
         .ambient-blob-1 {
-            position: fixed; width: 400px; height: 400px;
-            background: rgba(13, 148, 136, 0.3); border-radius: 50%;
+            position: fixed; width: 450px; height: 450px;
+            background: rgba(94, 234, 212, 0.22); border-radius: 50%;
             top: -10%; left: -10%; filter: blur(100px);
             animation: floatBlob 10s infinite alternate ease-in-out;
             z-index: 0; pointer-events: none;
         }
         .ambient-blob-2 {
-            position: fixed; width: 300px; height: 300px;
-            background: rgba(5, 150, 105, 0.2); border-radius: 50%;
+            position: fixed; width: 380px; height: 380px;
+            background: rgba(129, 140, 248, 0.2); border-radius: 50%;
+            bottom: -10%; right: -10%; filter: blur(90px);
+            animation: floatBlob 12s infinite alternate-reverse ease-in-out;
+            z-index: 0; pointer-events: none;
+        }
             bottom: -10%; right: -10%; filter: blur(80px);
             animation: floatBlob 12s infinite alternate-reverse ease-in-out;
             z-index: 0; pointer-events: none;
@@ -113,11 +120,11 @@
         .btn-submit { 
             position: relative; overflow: hidden;
             width: 100%; padding: 15px; 
-            background: linear-gradient(135deg, #0d9488 0%, #059669 100%); 
-            color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; 
+            background: linear-gradient(135deg, var(--a1) 0%, var(--a2) 100%); 
+            color: #060b1a; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; 
             cursor: pointer; transition: all 0.3s ease; margin-top: 10px; display: flex; 
             justify-content: center; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px;
-            box-shadow: 0 10px 25px rgba(13, 148, 136, 0.4), inset 0 1px 1px rgba(255,255,255,0.2);
+            box-shadow: 0 10px 25px rgba(94, 234, 212, 0.4), inset 0 1px 1px rgba(255,255,255,0.2);
         }
         
         /* Efek Shimmer (Cahaya Lewat) */

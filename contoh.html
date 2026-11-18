@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dimas Prakoso — Data Scientist & AI Engineer</title>
+<!-- TEMPLATE 13 · AURORA + ANIMATED CHARTS · Untuk: Data Scientist, AI/ML Engineer, Data Analyst, Peneliti -->
+<!-- GAMBAR: foto sementara dari Pexels (gratis, boleh dipakai komersial). Ganti URL images.pexels.com/... dengan foto milikmu -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.css" rel="stylesheet">
+<style>
+  :root{--bg:#060b1a;--card:rgba(255,255,255,.04);--line:rgba(255,255,255,.09);--ink:#e9eeff;--muted:#8d97b8;--a1:#5eead4;--a2:#818cf8;--a3:#f472b6}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:'Sora',sans-serif;font-weight:300;overflow-x:hidden;line-height:1.6}
+  a{color:inherit;text-decoration:none}
+  i[class^="ri-"]{line-height:1;vertical-align:-.125em}
+  .mono{font-family:'JetBrains Mono',monospace}
+  .aurora{position:fixed;inset:-20%;z-index:-2;filter:blur(80px) saturate(140%);opacity:.55}
+  .aurora span{position:absolute;width:60vmax;height:60vmax;border-radius:50%;mix-blend-mode:screen;animation:drift 22s ease-in-out infinite alternate}
+  .aurora span:nth-child(1){background:radial-gradient(circle,var(--a1),transparent 60%);top:0;left:10%}
+  .aurora span:nth-child(2){background:radial-gradient(circle,var(--a2),transparent 60%);top:20%;right:0;animation-delay:-8s}
+  .aurora span:nth-child(3){background:radial-gradient(circle,var(--a3),transparent 60%);bottom:0;left:30%;animation-delay:-14s;opacity:.6}
+  @keyframes drift{to{transform:translate(12vmax,-8vmax) rotate(40deg) scale(1.2)}}
+  .grain{position:fixed;inset:0;z-index:-1;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(circle at 50% 30%,#000,transparent 75%)}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+  nav{display:flex;justify-content:space-between;align-items:center;padding:26px 0}
+  nav .links{display:flex;gap:26px;font-size:.9rem;color:var(--muted)}
+  nav .links a:hover{color:var(--a1)}
+  .logo{font-weight:800;letter-spacing:-.02em}.logo b{color:var(--a1)}
+  .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center;min-height:86vh}
+  .pill{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line);background:var(--card);padding:7px 14px;border-radius:30px;font-size:.8rem;color:var(--muted)}
+  .pill i{color:var(--a1)}
+  h1{font-size:clamp(2.6rem,5.6vw,4.8rem);font-weight:800;line-height:1.02;letter-spacing:-.04em;margin:22px 0}
+  .grad{background:linear-gradient(90deg,var(--a1),var(--a2),var(--a3));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .typer{color:var(--a1)}
+  .typer::after{content:"_";animation:bl 1s steps(1) infinite;color:var(--ink)}
+  @keyframes bl{50%{opacity:0}}
+  .hero p{color:var(--muted);font-size:1.08rem;max-width:520px}
+  .ctas{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+  .btn{display:inline-flex;gap:10px;align-items:center;padding:14px 24px;border-radius:12px;font-weight:600;font-size:.92rem;border:1px solid var(--line);transition:.3s}
+  .btn.p{background:linear-gradient(135deg,var(--a1),var(--a2));color:#071022;border:0;box-shadow:0 10px 40px rgba(94,234,212,.25)}
+  .btn:hover{transform:translateY(-3px)}
+  .net{width:100%;aspect-ratio:1;position:relative}
+  .net svg{width:100%;height:100%}
+  .net line{stroke:url(#lg);stroke-width:1;opacity:.35;stroke-dasharray:4 6;animation:flow 3s linear infinite}
+  @keyframes flow{to{stroke-dashoffset:-40}}
+  .net circle{fill:var(--bg);stroke:var(--a1);stroke-width:2;animation:pulse 2.4s ease-in-out infinite;transform-origin:center;transform-box:fill-box}
+  @keyframes pulse{50%{transform:scale(1.35);stroke:var(--a3)}}
+  .avatar{position:absolute;left:50%;top:50%;width:34%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:url('https://images.pexels.com/photos/9761037/pexels-photo-9761037.jpeg?auto=compress&cs=tinysrgb&w=500&h=500&fit=crop') 50% 20%/cover;border:3px solid var(--a1);box-shadow:0 0 60px rgba(94,234,212,.4)}
+  section{padding:110px 0}
+  .h2{font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-.03em;margin-bottom:12px}
+  .sub{color:var(--muted);margin-bottom:46px;max-width:560px}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px;backdrop-filter:blur(10px);position:relative;overflow:hidden;transition:.35s}
+  .card:hover{border-color:rgba(94,234,212,.5);transform:translateY(-6px)}
+  .card .k{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+  .card .v{font-size:2.6rem;font-weight:800;letter-spacing:-.03em;margin-top:6px}
+  .bars{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:16px}
+  .bars i{flex:1;border-radius:6px 6px 2px 2px;background:linear-gradient(var(--a2),var(--a1));height:0;transition:height 1.4s cubic-bezier(.2,.8,.2,1)}
+  .chart path.ln{fill:none;stroke:var(--a3);stroke-width:3;stroke-linecap:round;stroke-dasharray:600;stroke-dashoffset:600;transition:stroke-dashoffset 2s ease}
+  .chart path.ar{fill:url(#ag);opacity:0;transition:opacity 1.5s .8s}
+  .in .chart path.ln{stroke-dashoffset:0}.in .chart path.ar{opacity:.5}
+  .ring{width:120px;height:120px;margin-top:10px}
+  .ring circle{fill:none;stroke-width:10}
+  .ring .fg{stroke:var(--a1);stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:314;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 2s cubic-bezier(.2,.8,.2,1)}
+  .projects{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+  .proj{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;transition:.35s}
+  .proj:hover{transform:translateY(-6px);box-shadow:0 30px 60px rgba(0,0,0,.4)}
+  .proj img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;filter:saturate(1.1) hue-rotate(-10deg)}
+  .proj .b{padding:22px 24px}
+  .tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .tags span{font-size:.72rem;padding:4px 10px;border-radius:20px;background:rgba(129,140,248,.15);color:#c7cbff}
+  .proj h3{font-size:1.25rem;margin-bottom:6px}
+  .proj p{color:var(--muted);font-size:.92rem}
+  .stack{display:flex;flex-wrap:wrap;gap:12px}
+  .stack span{display:inline-flex;gap:8px;align-items:center;padding:12px 18px;border:1px solid var(--line);border-radius:14px;background:var(--card);transition:.3s}
+  .stack span:hover{border-color:var(--a2);transform:translateY(-3px)}
+  .stack i{color:var(--a1)}
+  .contact{text-align:center;background:var(--card);border:1px solid var(--line);border-radius:30px;padding:70px 30px}
+  footer{text-align:center;color:var(--muted);padding:40px;font-size:.85rem}
+  .rv{opacity:0;transform:translateY(30px);transition:1s cubic-bezier(.2,.8,.2,1)}
+  .rv.in{opacity:1;transform:none}
+  @media(max-width:900px){.hero,.projects{grid-template-columns:1fr}.cards{grid-template-columns:1fr}nav .links{display:none}.net{max-width:420px;margin:0 auto}}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="aurora"><span></span><span></span><span></span></div><div class="grain"></div>
+<div class="wrap">
+  <nav><a class="logo" href="#">dimas<b>.ai</b></a><div class="links"><a href="#metrics">Metrik</a><a href="#projects">Proyek</a><a href="#stack">Stack</a><a href="#contact">Kontak</a></div><a class="btn" href="#contact"><i class="ri-mail-line"></i> Hubungi</a></nav>
+
+  <header class="hero">
+    <div class="rv in">
+      <span class="pill"><i class="ri-sparkling-2-fill"></i> Terbuka untuk riset & kolaborasi</span>
+      <h1>Mengubah <span class="grad">data mentah</span> jadi keputusan cerdas.</h1>
+      <p>Saya Dimas — <span class="typer mono" id="typer"></span><br>6 tahun membangun model prediksi, sistem rekomendasi, dan LLM untuk e-commerce & fintech.</p>
+      <div class="ctas"><a class="btn p" href="#projects"><i class="ri-bar-chart-box-line"></i> Lihat Proyek</a><a class="btn" href="#"><i class="ri-github-line"></i> GitHub</a></div>
+    </div>
+    <div class="net rv in">
+      <svg viewBox="0 0 400 400" id="net"><defs><linearGradient id="lg"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#f472b6"/></linearGradient></defs></svg>
+      <div class="avatar" role="img" aria-label="Foto Dimas"></div>
+    </div>
+  </header>
+
+  <section id="metrics">
+    <h2 class="h2 rv">Dampak dalam angka</h2><p class="sub rv">Hasil nyata dari model yang saya deploy ke produksi.</p>
+    <div class="cards">
+      <div class="card rv"><span class="k">Akurasi Model Churn</span><div class="v"><span data-n="94">0</span>%</div>
+        <svg class="ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,.08)"/><circle class="fg" cx="60" cy="60" r="50" data-p="94"/></svg></div>
+      <div class="card rv"><span class="k">Kenaikan GMV dari Rekomendasi</span><div class="v">+<span data-n="23">0</span>%</div>
+        <svg class="chart" viewBox="0 0 300 120" style="width:100%;margin-top:14px"><defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f472b6"/><stop offset="1" stop-color="#f472b6" stop-opacity="0"/></linearGradient></defs><path class="ar" d="M0 100 L40 92 L80 96 L120 70 L160 74 L200 46 L240 50 L300 14 L300 120 L0 120Z"/><path class="ln" d="M0 100 L40 92 L80 96 L120 70 L160 74 L200 46 L240 50 L300 14"/></svg></div>
+      <div class="card rv"><span class="k">Data Diproses / Hari</span><div class="v"><span data-n="18">0</span> TB</div>
+        <div class="bars"><i data-h="40"></i><i data-h="62"></i><i data-h="48"></i><i data-h="80"></i><i data-h="70"></i><i data-h="95"></i><i data-h="88"></i></div></div>
+    </div>
+  </section>
+
+  <section id="projects" style="padding-top:0">
+    <h2 class="h2 rv">Proyek pilihan</h2><p class="sub rv">Dari eksperimen notebook hingga sistem yang melayani jutaan pengguna.</p>
+    <div class="projects">
+      <article class="proj rv"><img src="https://images.pexels.com/photos/28504955/pexels-photo-28504955.jpeg?auto=compress&cs=tinysrgb&w=900&h=506&fit=crop" alt=""><div class="b"><div class="tags"><span>XGBoost</span><span>Fintech</span></div><h3>Credit Scoring Real-time</h3><p>Menurunkan rasio kredit macet 31% untuk 2 juta peminjam.</p></div></article>
+      <article class="proj rv"><img src="https://images.pexels.com/photos/3850263/pexels-photo-3850263.jpeg?auto=compress&cs=tinysrgb&w=900&h=506&fit=crop" alt=""><div class="b"><div class="tags"><span>PyTorch</span><span>RecSys</span></div><h3>Mesin Rekomendasi Produk</h3><p>Two-tower model untuk 40 juta SKU dengan latensi &lt; 50 ms.</p></div></article>
+      <article class="proj rv"><img src="https://images.pexels.com/photos/48606/pexels-photo-48606.jpeg?auto=compress&cs=tinysrgb&w=900&h=506&fit=crop" alt=""><div class="b"><div class="tags"><span>LLM</span><span>RAG</span></div><h3>Asisten CS Bahasa Indonesia</h3><p>Chatbot RAG yang menjawab 68% tiket tanpa eskalasi.</p></div></article>
+      <article class="proj rv"><img src="https://images.pexels.com/photos/29530641/pexels-photo-29530641.jpeg?auto=compress&cs=tinysrgb&w=900&h=506&fit=crop" alt=""><div class="b"><div class="tags"><span>Forecasting</span><span>UMKM</span></div><h3>Prediksi Permintaan Pasar</h3><p>Forecast harga bahan pokok untuk 300 pasar tradisional.</p></div></article>
+    </div>
+  </section>
+
+  <section id="stack" style="padding-top:0">
+    <h2 class="h2 rv">Tech stack</h2><p class="sub rv">Alat yang saya gunakan setiap hari.</p>
+    <div class="stack rv">
+      <span><i class="ri-code-s-slash-line"></i>Python</span><span><i class="ri-fire-line"></i>PyTorch</span><span><i class="ri-database-2-line"></i>SQL & BigQuery</span><span><i class="ri-flashlight-line"></i>Spark</span><span><i class="ri-cloud-line"></i>GCP Vertex AI</span><span><i class="ri-git-branch-line"></i>MLflow</span><span><i class="ri-terminal-box-line"></i>Docker</span><span><i class="ri-robot-2-line"></i>LangChain</span><span><i class="ri-pie-chart-line"></i>Looker</span>
+    </div>
+  </section>
+
+  <section id="contact" style="padding-top:0">
+    <div class="contact rv">
+      <h2 class="h2">Punya data yang <span class="grad">belum bicara?</span></h2>
+      <p class="sub" style="margin:0 auto 30px">Mari diskusikan bagaimana machine learning bisa membantu bisnismu.</p>
+      <a class="btn p" href="mailto:dimas@data.ai"><i class="ri-mail-send-line"></i> dimas@data.ai</a>
+    </div>
+  </section>
+</div>
+<footer>© 2026 Dimas Prakoso · Dibangun dengan rasa ingin tahu</footer>
+
+<script>
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Typewriter peran
+const roles=['Data Scientist','Machine Learning Engineer','Peneliti NLP','Pecinta Statistik'];let ri=0,ci=0,del=false;const ty=document.getElementById('typer');
+(function type(){const w=roles[ri];ty.textContent=w.slice(0,ci);if(!del&&ci<w.length)ci++;else if(del&&ci>0)ci--;else if(!del){del=true;return setTimeout(type,1400);}else{del=false;ri=(ri+1)%roles.length;}setTimeout(type,del?40:80);})();
+// Jaringan saraf SVG
+const svg=document.getElementById('net'),NS='http://www.w3.org/2000/svg',layers=[4,6,6,3],pts=[];
+layers.forEach((n,l)=>{for(let i=0;i<n;i++)pts.push({l,x:50+l*100,y:200+(i-(n-1)/2)*55});});
+pts.forEach(a=>pts.filter(b=>b.l===a.l+1).forEach(b=>{const ln=document.createElementNS(NS,'line');ln.setAttribute('x1',a.x);ln.setAttribute('y1',a.y);ln.setAttribute('x2',b.x);ln.setAttribute('y2',b.y);ln.style.animationDelay=(-Math.random()*3)+'s';svg.appendChild(ln);}));
+pts.forEach((p,i)=>{const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',7);c.style.animationDelay=(i*.15)+'s';svg.appendChild(c);});
+// Reveal & grafik
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const el=e.target;el.classList.add('in');
+  el.querySelectorAll('.bars i').forEach(b=>b.style.height=b.dataset.h+'%');
+  el.querySelectorAll('.ring .fg').forEach(c=>c.style.strokeDashoffset=314-314*c.dataset.p/100);
+  el.querySelectorAll('[data-n]').forEach(s=>{const end=+s.dataset.n;let n=0;const t=setInterval(()=>{n++;s.textContent=n;if(n>=end)clearInterval(t);},1400/end);});
+  io.unobserve(el); setTimeout(()=>el.classList.remove('rv'),1100);}),{threshold:.2});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

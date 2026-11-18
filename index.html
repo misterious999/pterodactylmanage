@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZeroixDark — Panel Pterodactyl Premium & Akun Reseller, Aktivasi Otomatis</title>
+    <title>ZeroixDark — Panel Pterodactyl Premium &amp; Akun Reseller, Aktivasi Otomatis</title>
     <meta name="description" content="Toko panel Pterodactyl Private, Public, dan V2 plus akun reseller untuk bot Anda. Bayar lewat QRIS, aktif otomatis dalam hitungan menit, dukungan 24 jam.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://zeroixdarkmarket.web.id/">
-    <meta name="theme-color" content="#0d9488">
+    <meta name="theme-color" content="#060b1a">
 
     <!-- Open Graph / Twitter -->
     <meta property="og:type" content="website">
@@ -28,9 +28,14 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
     <link rel="apple-touch-icon" href="/favicon-512.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Data terstruktur -->
+    <!-- Fonts & Icons (Aurora Tech Theme - contoh.html) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- Data Terstruktur (Schema.org) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -68,379 +73,871 @@
 
     <style>
         :root {
-            --primary: #0d9488;
-            --primary-glow: rgba(13, 148, 136, 0.4);
-            --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.6);
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --success: #10b981;
-            --warning: #f59e0b;
+            --bg: #060b1a;
+            --card: rgba(255, 255, 255, 0.04);
+            --card-hover: rgba(255, 255, 255, 0.07);
+            --line: rgba(255, 255, 255, 0.09);
+            --line-hover: rgba(94, 234, 212, 0.4);
+            --ink: #e9eeff;
+            --muted: #8d97b8;
+            --a1: #5eead4;
+            --a2: #818cf8;
+            --a3: #f472b6;
+            --primary: #5eead4;
+            --primary-glow: rgba(94, 234, 212, 0.28);
         }
-        * { box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-        html, body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            margin: 0; padding: 0;
-            overflow-x: hidden; overflow-x: clip; width: 100%; max-width: 100vw;
-            background-image:
-                radial-gradient(circle at 15% 20%, rgba(13, 148, 136, 0.06), transparent 30%),
-                radial-gradient(circle at 85% 65%, rgba(13, 148, 136, 0.05), transparent 25%);
-        }
-        button { font-family: inherit; }
-        img { max-width: 100%; }
-        a { color: inherit; }
-        /* Rasa tekan premium ala toko: mati-kan highlight tap abu-abu bawaan HP */
-        a, button, summary { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
-        .navbar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 5%;
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border-color);
-            position: sticky; top: 0; z-index: 100;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Sora', sans-serif;
+            font-weight: 300;
+            overflow-x: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
         }
-        .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 800; font-size: 20px; letter-spacing: -0.5px; }
-        .brand svg { width: 30px; height: 30px; border-radius: 8px; filter: drop-shadow(0 0 10px var(--primary-glow)); }
-        .nav-links { display: flex; align-items: center; gap: 22px; }
-        .nav-links a.nav-a { text-decoration: none; color: var(--text-sub); font-size: 14px; font-weight: 600; transition: color .2s; }
-        .nav-links a.nav-a:hover { color: var(--primary); }
-        .nav-cta { background: linear-gradient(135deg, var(--primary), #059669); color: #fff !important; padding: 10px 20px; border-radius: 10px; font-size: 14px !important; box-shadow: 0 4px 14px var(--primary-glow); transition: transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s ease, filter .25s ease; }
-        .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--primary-glow); filter: brightness(1.06); }
-        .btn-login { border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 10px; color: var(--text-main) !important; }
-        .btn-login:hover { background: linear-gradient(135deg, var(--primary), #059669); border-color: transparent; transform: translateY(-2px); box-shadow: 0 6px 20px var(--primary-glow); }
-        .burger { display: none; background: none; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 8px 10px; cursor: pointer; }
-        @media (max-width: 760px) {
-            .nav-links { position: absolute; top: 64px; left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 0; background: rgba(15,23,42,.97); border-bottom: 1px solid var(--border-color); display: none; padding: 8px 5% 14px; }
+        a { color: inherit; text-decoration: none; }
+        button { font-family: inherit; }
+        i[class^="ri-"] { line-height: 1; vertical-align: -.125em; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* --- AURORA FLOATING AMBIENCE (contoh.html) --- */
+        .aurora {
+            position: fixed; inset: -20%; z-index: -2;
+            filter: blur(80px) saturate(140%);
+            opacity: .55; pointer-events: none;
+        }
+        .aurora span {
+            position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%;
+            mix-blend-mode: screen; animation: drift 22s ease-in-out infinite alternate;
+        }
+        .aurora span:nth-child(1) { background: radial-gradient(circle, var(--a1), transparent 60%); top: 0; left: 10%; }
+        .aurora span:nth-child(2) { background: radial-gradient(circle, var(--a2), transparent 60%); top: 20%; right: 0; animation-delay: -8s; }
+        .aurora span:nth-child(3) { background: radial-gradient(circle, var(--a3), transparent 60%); bottom: 0; left: 30%; animation-delay: -14s; opacity: .6; }
+        @keyframes drift { to { transform: translate(12vmax, -8vmax) rotate(40deg) scale(1.2); } }
+
+        /* --- GRID GRAIN BACKGROUND (contoh.html) --- */
+        .grain {
+            position: fixed; inset: 0; z-index: -1;
+            background-image:
+                linear-gradient(var(--line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--line) 1px, transparent 1px);
+            background-size: 64px 64px;
+            mask-image: radial-gradient(circle at 50% 30%, #000, transparent 75%);
+            pointer-events: none;
+        }
+
+        .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+        section { padding: 84px 0; scroll-margin-top: 80px; }
+        @media (max-width: 768px) { section { padding: 48px 0; } }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(6, 11, 26, 0.75);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--line);
+        }
+        .nav-inner {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: 18px; padding-bottom: 18px;
+        }
+        .brand {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 800; font-size: 1.25rem; letter-spacing: -.02em;
+        }
+        .brand svg {
+            width: 34px; height: 34px; border-radius: 10px;
+            filter: drop-shadow(0 0 10px var(--primary-glow));
+        }
+        .brand span b { color: var(--a1); }
+        .nav-links { display: flex; align-items: center; gap: 26px; }
+        .nav-links a.nav-a { font-size: .9rem; color: var(--muted); font-weight: 400; transition: color .2s; }
+        .nav-links a.nav-a:hover { color: var(--a1); }
+        .nav-actions { display: flex; align-items: center; gap: 12px; }
+        .burger {
+            display: none; background: var(--card); border: 1px solid var(--line);
+            color: var(--ink); border-radius: 10px; padding: 8px 12px; font-size: 1.25rem;
+            cursor: pointer; transition: .2s;
+        }
+        .burger:hover { border-color: var(--a1); }
+
+        @media (max-width: 860px) {
+            .nav-links {
+                position: absolute; top: 100%; left: 0; right: 0;
+                flex-direction: column; align-items: stretch; gap: 0;
+                background: rgba(6, 11, 26, 0.98);
+                border-bottom: 1px solid var(--line);
+                display: none; padding: 12px 24px 20px;
+            }
             .nav-links.open { display: flex; }
-            .nav-links a.nav-a { padding: 12px 4px; border-bottom: 1px solid var(--border-color); }
+            .nav-links a.nav-a { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 1rem; }
+            .nav-actions { flex-direction: column; align-items: stretch; gap: 10px; margin-top: 14px; width: 100%; }
             .burger { display: block; }
         }
 
-        .wrap { padding: 0 5%; max-width: 1180px; margin: 0 auto; }
-        section { padding: 58px 0; scroll-margin-top: 70px; }
-        @media (max-width: 760px) {
-            /* Napas lebih rapat di HP supaya antarbagian tidak terasa bolong */
-            section { padding: 34px 0; }
-            section#produk { padding-top: 40px; padding-bottom: 48px; }
+        /* --- BUTTONS & PILLS --- */
+        .pill {
+            display: inline-flex; gap: 8px; align-items: center;
+            border: 1px solid var(--line); background: var(--card);
+            padding: 7px 16px; border-radius: 30px; font-size: .82rem;
+            color: var(--muted); backdrop-filter: blur(8px);
+        }
+        .pill i { color: var(--a1); font-size: 1rem; }
+
+        .btn {
+            display: inline-flex; gap: 8px; align-items: center; justify-content: center;
+            padding: 12px 22px; border-radius: 12px; font-weight: 600;
+            font-size: .92rem; border: 1px solid var(--line);
+            background: var(--card); color: var(--ink);
+            backdrop-filter: blur(8px); transition: all .3s cubic-bezier(.2,.8,.2,1);
+            cursor: pointer;
+        }
+        .btn:hover { border-color: var(--a1); color: #fff; transform: translateY(-3px); }
+        .btn.p {
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color: #060b1a !important; border: 0; font-weight: 700;
+            box-shadow: 0 10px 35px rgba(94, 234, 212, .28);
+        }
+        .btn.p:hover { transform: translateY(-3px); box-shadow: 0 14px 45px rgba(94, 234, 212, .42); filter: brightness(1.08); }
+        .btn:active { transform: translateY(0) scale(.97); }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            display: grid; grid-template-columns: 1.2fr 1fr;
+            gap: 40px; align-items: center; min-height: 84vh;
+            padding: 30px 0 50px;
+        }
+        h1 {
+            font-size: clamp(2.4rem, 5.2vw, 4.2rem);
+            font-weight: 800; line-height: 1.08;
+            letter-spacing: -.04em; margin: 20px 0 16px;
+        }
+        .grad {
+            background: linear-gradient(90deg, var(--a1), var(--a2), var(--a3));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .typer { color: var(--a1); font-weight: 600; }
+        .typer::after { content: "_"; animation: bl 1s steps(1) infinite; color: var(--ink); }
+        @keyframes bl { 50% { opacity: 0; } }
+
+        .hero p.lead { color: var(--muted); font-size: 1.05rem; max-width: 540px; line-height: 1.65; }
+        .ctas { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+        .chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 28px; }
+        .chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: .8rem; color: var(--muted); background: var(--card);
+            border: 1px solid var(--line); padding: 7px 15px; border-radius: 999px;
+            backdrop-filter: blur(8px);
+        }
+        .chip i { color: var(--a1); }
+
+        /* --- TOPOLOGY NETWORK SVG & CORE AVATAR --- */
+        .net { width: 100%; aspect-ratio: 1; position: relative; max-width: 440px; margin: 0 auto; }
+        .net svg { width: 100%; height: 100%; }
+        .net line {
+            stroke: url(#lg); stroke-width: 1.2; opacity: .35;
+            stroke-dasharray: 4 6; animation: flow 3s linear infinite;
+        }
+        @keyframes flow { to { stroke-dashoffset: -40; } }
+        .net circle {
+            fill: var(--bg); stroke: var(--a1); stroke-width: 2;
+            animation: pulse 2.4s ease-in-out infinite;
+            transform-origin: center; transform-box: fill-box;
+        }
+        @keyframes pulse { 50% { transform: scale(1.35); stroke: var(--a3); } }
+        .avatar.server-core {
+            position: absolute; left: 50%; top: 50%; width: 36%; aspect-ratio: 1;
+            border-radius: 50%; transform: translate(-50%, -50%);
+            background: radial-gradient(circle at 35% 35%, rgba(94, 234, 212, 0.25), #060b1a 80%);
+            border: 3px solid var(--a1);
+            box-shadow: 0 0 60px rgba(94, 234, 212, .45), inset 0 0 25px rgba(94, 234, 212, .25);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 4px; z-index: 2;
+        }
+        .server-core svg { width: 44px; height: 44px; fill: var(--a1); filter: drop-shadow(0 0 10px var(--a1)); }
+        .server-core span { font-size: .7rem; font-weight: 700; letter-spacing: 1.5px; color: var(--ink); text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
+
+        /* --- HEADINGS & CARDS --- */
+        .h2 { font-size: clamp(1.9rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -.03em; margin-bottom: 12px; }
+        .sub { color: var(--muted); margin-bottom: 44px; max-width: 580px; font-size: 1rem; }
+        .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .card {
+            background: var(--card); border: 1px solid var(--line);
+            border-radius: 20px; padding: 26px; backdrop-filter: blur(10px);
+            position: relative; overflow: hidden; transition: .35s;
+        }
+        .card:hover { border-color: rgba(94, 234, 212, .5); transform: translateY(-6px); }
+        .card .k { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
+        .card .v { font-size: 2.5rem; font-weight: 800; letter-spacing: -.03em; margin-top: 6px; }
+        .card .note { font-size: .8rem; color: var(--muted); margin-top: 14px; }
+
+        /* --- CHARTS (contoh.html) --- */
+        .bars { display: flex; align-items: flex-end; gap: 8px; height: 110px; margin-top: 16px; }
+        .bars i {
+            flex: 1; border-radius: 6px 6px 2px 2px;
+            background: linear-gradient(var(--a2), var(--a1));
+            height: 0; transition: height 1.4s cubic-bezier(.2,.8,.2,1);
+        }
+        .chart path.ln { fill: none; stroke: var(--a3); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 600; stroke-dashoffset: 600; transition: stroke-dashoffset 2s ease; }
+        .chart path.ar { fill: url(#ag); opacity: 0; transition: opacity 1.5s .8s; }
+        .in .chart path.ln { stroke-dashoffset: 0; }
+        .in .chart path.ar { opacity: .55; }
+        .ring { width: 110px; height: 110px; margin-top: 10px; }
+        .ring circle { fill: none; stroke-width: 10; }
+        .ring .fg {
+            stroke: var(--a1); stroke-linecap: round;
+            stroke-dasharray: 314; stroke-dashoffset: 314;
+            transform: rotate(-90deg); transform-origin: center;
+            transition: stroke-dashoffset 2s cubic-bezier(.2,.8,.2,1);
         }
 
-        .hero { padding: 72px 0 56px; text-align: center; }
-        .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--primary); background: rgba(13,148,136,.12); border: 1px solid rgba(13,148,136,.35); padding: 7px 14px; border-radius: 999px; }
-        .hero h1 { font-size: clamp(30px, 6vw, 52px); line-height: 1.12; margin: 18px auto 0; max-width: 720px; letter-spacing: -1px; }
-        .hero h1 .grad { background: linear-gradient(180deg, #fff 30%, var(--primary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .hero p.lead { color: var(--text-sub); font-size: clamp(14px, 3.4vw, 17px); max-width: 640px; margin: 14px auto 0; line-height: 1.65; }
-        .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 28px; }
-        .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 700; font-size: 15px; padding: 14px 26px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; will-change: transform; transition: transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s ease, background .25s ease, border-color .25s ease, color .25s ease, filter .25s ease; }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), #059669); color: #fff; box-shadow: 0 6px 20px var(--primary-glow); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px var(--primary-glow); filter: brightness(1.06); }
-        .btn-ghost { border-color: var(--border-color); color: var(--text-main); background: rgba(30, 41, 59, .45); }
-        .btn-ghost:hover { background: linear-gradient(135deg, var(--primary), #059669); border-color: transparent; color: #fff; transform: translateY(-2px); box-shadow: 0 6px 20px var(--primary-glow); }
-        /* Tekan: mewah cepat ala "kaca ditekan" */
-        .btn:active, .nav-cta:active, .buy:active { transform: translateY(0) scale(.96); transition-duration: .08s; filter: brightness(1.14); }
-        .btn-ghost:active { background: rgba(13, 148, 136, .28); }
-        .chips { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
-        .chip { font-size: 13px; color: var(--text-sub); background: rgba(30,41,59,.55); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 999px; }
+        /* --- LAYANAN / SERVICES --- */
+        .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+        .service-card {
+            background: var(--card); border: 1px solid var(--line);
+            border-radius: 22px; padding: 28px; backdrop-filter: blur(10px);
+            transition: .35s; display: flex; flex-direction: column;
+        }
+        .service-card:hover { border-color: rgba(94, 234, 212, .5); transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,.35); }
+        .service-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            background: rgba(94, 234, 212, .12); border: 1px solid rgba(94, 234, 212, .3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; color: var(--a1); margin-bottom: 20px;
+        }
+        .service-tag {
+            align-self: flex-start; font-size: .72rem; padding: 4px 10px;
+            border-radius: 20px; background: rgba(129, 140, 248, .15);
+            color: #c7cbff; font-weight: 600; margin-bottom: 12px;
+        }
+        .service-card h3 { font-size: 1.28rem; margin-bottom: 8px; font-weight: 700; }
+        .service-card p { color: var(--muted); font-size: .92rem; line-height: 1.6; }
 
-        .stats { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 38px; }
-        .stat { min-width: 130px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px 22px; }
-        .stat b { display: block; font-size: 22px; letter-spacing: -.5px; }
-        .stat span { font-size: 12px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        /* --- PRODUK / LIVE CATALOG --- */
+        .prod-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+        .prod {
+            background: var(--card); border: 1px solid var(--line);
+            border-radius: 22px; padding: 24px; backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; gap: 12px; transition: .35s;
+        }
+        .prod:hover { border-color: rgba(94, 234, 212, .5); transform: translateY(-6px); box-shadow: 0 30px 60px rgba(0,0,0,.4); }
+        .prod .cat {
+            align-self: flex-start; font-size: .72rem; padding: 4px 10px;
+            border-radius: 20px; background: rgba(129, 140, 248, .15);
+            color: #c7cbff; font-weight: 600; letter-spacing: .5px;
+        }
+        .prod .name { font-weight: 700; font-size: 1.15rem; color: var(--ink); }
+        .prod .desc { color: var(--muted); font-size: .88rem; line-height: 1.55; min-height: 42px; }
+        .prod .foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-top: 14px; border-top: 1px solid var(--line); }
+        .prod .price { font-weight: 800; font-size: 1.25rem; color: var(--a1); font-family: 'JetBrains Mono', monospace; }
+        .prod .buy {
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color: #060b1a; font-size: .85rem; font-weight: 700;
+            padding: 9px 18px; border-radius: 10px; box-shadow: 0 6px 20px rgba(94,234,212,.25);
+            transition: all .25s ease;
+        }
+        .prod .buy:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 10px 25px rgba(94,234,212,.4); }
+        .more-cta { text-align: center; margin-top: 36px; }
+        .prod-empty { color: var(--muted); text-align: center; padding: 36px 0; }
 
-        h2.sec { font-size: clamp(22px, 4.6vw, 32px); text-align: center; margin: 0 0 8px; letter-spacing: -.5px; }
-        p.sub { text-align: center; color: var(--text-sub); margin: 0 auto 34px; max-width: 560px; line-height: 1.6; }
+        /* --- CARA BELI / STEPS --- */
+        .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+        .step {
+            background: var(--card); border: 1px solid var(--line);
+            border-radius: 20px; padding: 26px 22px; backdrop-filter: blur(10px);
+            position: relative; transition: .35s;
+        }
+        .step:hover { border-color: rgba(94, 234, 212, .4); transform: translateY(-4px); }
+        .step .num {
+            width: 38px; height: 38px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color: #060b1a; font-weight: 800; font-size: .95rem;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 18px; font-family: 'JetBrains Mono', monospace;
+            box-shadow: 0 6px 18px rgba(94,234,212,.3);
+        }
+        .step h3 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 700; }
+        .step p { color: var(--muted); font-size: .88rem; line-height: 1.55; }
 
-        .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-        @media (max-width: 860px) { .grid3 { grid-template-columns: 1fr; } }
-        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 22px; transition: border-color .25s ease; }
-        .card:hover { border-color: rgba(13, 148, 136, .45); }
-        .card h3 { margin: 12px 0 6px; font-size: 17px; }
-        .card p { margin: 0; color: var(--text-sub); font-size: 13.5px; line-height: 1.6; }
-        .icon-box { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(13,148,136,.14); border: 1px solid rgba(13,148,136,.4); }
-        .icon-box svg { width: 22px; height: 22px; fill: var(--primary); }
+        /* --- TECH STACK (contoh.html) --- */
+        .stack { display: flex; flex-wrap: wrap; gap: 12px; }
+        .stack span {
+            display: inline-flex; gap: 8px; align-items: center;
+            padding: 12px 18px; border: 1px solid var(--line);
+            border-radius: 14px; background: var(--card);
+            font-size: .9rem; color: var(--ink); transition: .3s;
+            backdrop-filter: blur(8px);
+        }
+        .stack span:hover { border-color: var(--a2); transform: translateY(-3px); }
+        .stack i { color: var(--a1); font-size: 1.1rem; }
 
-        .prod-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-        @media (max-width: 860px) { .prod-grid { grid-template-columns: 1fr; } }
-        .prod { display: flex; flex-direction: column; gap: 10px; transition: border-color .25s ease; }
-        .prod:hover { border-color: rgba(13, 148, 136, .5); }
-        .prod .cat { align-self: flex-start; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--primary); background: rgba(13,148,136,.12); border: 1px solid rgba(13,148,136,.35); padding: 4px 10px; border-radius: 999px; }
-        .prod .name { font-weight: 700; font-size: 16px; }
-        .prod .desc { color: var(--text-sub); font-size: 13px; line-height: 1.55; min-height: 40px; }
-        .prod .foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-        .prod .price { font-weight: 800; font-size: 18px; color: var(--primary); }
-        .prod .buy { background: linear-gradient(135deg, var(--primary), #059669); color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: 10px; white-space: nowrap; box-shadow: 0 4px 14px var(--primary-glow); transition: transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s ease, filter .25s ease; }
-        .prod .buy:hover { transform: translateY(-2px); box-shadow: 0 8px 22px var(--primary-glow); filter: brightness(1.06); }
-        .more-cta { text-align: center; margin-top: 26px; }
-        .prod-empty { color: var(--text-sub); text-align: center; padding: 30px 0; }
-
-        .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-        @media (max-width: 860px) { .steps { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 480px) { .steps { grid-template-columns: 1fr; } }
-        .step { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; position: relative; }
-        .step .num { position: absolute; top: -14px; left: 18px; width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, var(--primary), #059669); color: #fff; font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px var(--primary-glow); }
-        .step h3 { margin: 12px 0 6px; font-size: 15.5px; }
-        .step p { margin: 0; color: var(--text-sub); font-size: 13px; line-height: 1.55; }
-
-        details.faq { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 4px 20px; margin-bottom: 12px; }
-        details.faq summary { cursor: pointer; font-weight: 700; font-size: 15px; padding: 16px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        /* --- FAQ --- */
+        details.faq {
+            background: var(--card); border: 1px solid var(--line);
+            border-radius: 16px; padding: 4px 22px; margin-bottom: 14px;
+            backdrop-filter: blur(10px); transition: border-color .25s ease;
+        }
+        details.faq:hover { border-color: rgba(94, 234, 212, .4); }
+        details.faq summary {
+            cursor: pointer; font-weight: 600; font-size: .98rem;
+            padding: 16px 0; list-style: none; display: flex;
+            justify-content: space-between; align-items: center; gap: 12px;
+        }
         details.faq summary::-webkit-details-marker { display: none; }
-        /* Tombol WA: dikendalikan CSS (atribut hidden bisa ditimpa oleh display kelas) */
+        details.faq summary::after {
+            content: '+'; font-size: 1.4rem; color: var(--a1);
+            font-weight: 400; transition: transform .25s; font-family: monospace;
+        }
+        details.faq[open] summary::after { transform: rotate(45deg); color: var(--a3); }
+        details.faq p { margin: 0 0 16px; color: var(--muted); font-size: .9rem; line-height: 1.65; }
+
+        /* --- CONTACT / CTA BANNER --- */
+        .contact {
+            text-align: center; background: var(--card);
+            border: 1px solid var(--line); border-radius: 30px;
+            padding: 68px 30px; backdrop-filter: blur(12px);
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            border-top: 1px solid var(--line);
+            padding: 44px 0 54px; margin-top: 40px;
+        }
+        .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 30px; }
+        footer .fb { color: var(--muted); font-size: .88rem; line-height: 1.7; }
+        footer h4 { font-size: .85rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; color: var(--ink); font-weight: 700; }
+        footer a.fk { display: block; color: var(--muted); font-size: .9rem; padding: 5px 0; transition: color .2s; }
+        footer a.fk:hover { color: var(--a1); }
+
+        /* --- REVEAL ON SCROLL --- */
+        .rv { opacity: 0; transform: translateY(30px); transition: 1s cubic-bezier(.2, .8, .2, 1); }
+        .rv.in { opacity: 1; transform: none; }
+
+        /* --- WHATSAPP TOGGLE --- */
         .wa-toggle { display: none !important; }
         .wa-toggle.wa-on { display: inline-flex !important; }
         #waFoot.wa-on { display: block !important; }
-        details.faq summary::after { content: '+'; font-size: 20px; color: var(--primary); font-weight: 700; transition: transform .2s; }
-        details.faq[open] summary::after { transform: rotate(45deg); }
-        details.faq p { margin: 0 0 16px; color: var(--text-sub); font-size: 13.5px; line-height: 1.65; }
-        details.faq summary:hover { color: var(--primary); }
 
-        /* Aksesibilitas + nyaman di mata */
-        a:focus-visible, button:focus-visible, summary:focus-visible {
-            outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 8px;
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; text-align: center; min-height: auto; }
+            .hero p.lead { margin: 0 auto; }
+            .ctas, .chips { justify-content: center; }
+            .cards, .services-grid, .prod-grid { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr 1fr; }
+            .foot-grid { grid-template-columns: 1fr; }
+            .net { max-width: 360px; margin-top: 20px; }
+        }
+        @media (max-width: 500px) {
+            .steps { grid-template-columns: 1fr; }
         }
         @media (prefers-reduced-motion: reduce) {
-            .btn, .nav-cta, .prod .buy, .prod, .card { transition: none; }
-            .btn:hover, .btn-primary:hover, .nav-cta:hover, .prod .buy:hover, .btn-login:hover { transform: none; }
+            * { animation: none !important; transition: none !important; }
+            .rv { opacity: 1; transform: none; }
         }
-
-        .cta-band { background: linear-gradient(135deg, rgba(13,148,136,.16), rgba(13,148,136,.05)); border: 1px solid rgba(13,148,136,.4); border-radius: 20px; padding: 44px 24px; text-align: center; }
-        .cta-band h2 { margin: 0 0 10px; font-size: clamp(20px, 4.4vw, 30px); letter-spacing: -.5px; }
-        .cta-band p { color: var(--text-sub); margin: 0 0 24px; line-height: 1.6; }
-
-        footer { border-top: 1px solid var(--border-color); padding: 36px 5% 46px; margin-top: 40px; }
-        .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 24px; max-width: 1180px; margin: 0 auto; }
-        @media (max-width: 760px) { .foot-grid { grid-template-columns: 1fr; } }
-        footer .fb { color: var(--text-sub); font-size: 12px; letter-spacing: .3px; }
-        footer h4 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 10px; color: var(--text-main); }
-        footer a.fk { display: block; color: var(--text-sub); text-decoration: none; font-size: 13.5px; padding: 4px 0; }
-        footer a.fk:hover { color: var(--primary); }
     </style>
 </head>
 <body>
+<!-- Ambient Background Elements (contoh.html) -->
+<div class="aurora"><span></span><span></span><span></span></div>
+<div class="grain"></div>
+
 <script src="page-loader.js"></script>
 <script src="config.js?v=75"></script>
 
+<!-- NAVBAR -->
 <nav class="navbar">
-    <a class="brand" href="/">
-        <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0f172a" stroke="#0d9488" stroke-opacity=".5"/><path d="M16 16h32v9l-19 14h19v9H16v-9l19-14H16z" fill="#0d9488"/></svg>
-        <span>ZeroixDark</span>
-    </a>
-    <button class="burger" id="burger" aria-label="Buka menu" aria-expanded="false">☰</button>
-    <div class="nav-links" id="navLinks">
-        <a class="nav-a" href="#layanan">Layanan</a>
-        <a class="nav-a" href="#produk">Produk</a>
-        <a class="nav-a" href="#cara-beli">Cara Beli</a>
-        <a class="nav-a" href="#faq">FAQ</a>
-        <a class="nav-a btn-login" href="/dashboard">Masuk</a>
-        <a class="nav-a nav-cta" href="/store">Belanja Sekarang</a>
+    <div class="wrap nav-inner">
+        <a class="brand" href="/">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+                <rect width="64" height="64" rx="14" fill="#060b1a" stroke="#5eead4" stroke-opacity=".5"/>
+                <path d="M16 16h32v9l-19 14h19v9H16v-9l19-14H16z" fill="url(#brandGrad)"/>
+                <defs>
+                    <linearGradient id="brandGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#5eead4"/>
+                        <stop offset="100%" stop-color="#818cf8"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <span>Zeroix<b>Dark</b></span>
+        </a>
+        <button class="burger" id="burger" aria-label="Buka menu" aria-expanded="false"><i class="ri-menu-4-line"></i></button>
+        <div class="nav-links" id="navLinks">
+            <a class="nav-a" href="#metrics">Metrik</a>
+            <a class="nav-a" href="#layanan">Layanan</a>
+            <a class="nav-a" href="#produk">Produk</a>
+            <a class="nav-a" href="#cara-beli">Cara Beli</a>
+            <a class="nav-a" href="#stack">Ekosistem</a>
+            <a class="nav-a" href="#faq">FAQ</a>
+            <div class="nav-actions">
+                <a class="btn" href="/dashboard"><i class="ri-shield-keyhole-line"></i> Masuk</a>
+                <a class="btn p" href="/store"><i class="ri-shopping-cart-2-line"></i> Belanja</a>
+            </div>
+        </div>
     </div>
 </nav>
 
-<header class="hero wrap">
-    <div class="eyebrow">Zeroix Enterprise · Aktivasi Otomatis</div>
-    <h1>Panel Server Premium yang <span class="grad">Aktif Sendiri</span> Setelah Bayar QRIS</h1>
-    <p class="lead">Panel Pterodactyl Private, Public, dan Public V2 plus akun reseller untuk bot dan proyek online Anda. Bayar lewat QRIS — sistem membuat akun &amp; server Anda secara otomatis, tanpa menunggu admin.</p>
-    <div class="hero-cta">
-        <a class="btn btn-primary" href="/store">Belanja di Toko <span aria-hidden="true">→</span></a>
-        <a class="btn btn-ghost wa-toggle" id="waBtn" href="#" rel="noopener">Tanya via WhatsApp <span aria-hidden="true">💬</span></a>
-    </div>
-    <div class="chips">
-        <span class="chip">⚡ Aktivasi otomatis 24/7</span>
-        <span class="chip">🔒 Kredensial tersimpan aman (PBKDF2)</span>
-        <span class="chip">💳 QRIS semua e-wallet &amp; m-banking</span>
-    </div>
-    <div class="stats">
-        <div class="stat"><b id="statViews">—</b><span>Dilihat</span></div>
-        <div class="stat"><b id="statLikes">—</b><span>Suka</span></div>
-        <div class="stat"><b>3</b><span>Panel Server</span></div>
-        <div class="stat"><b>&lt;1 mnt</b><span>Aktivasi</span></div>
-    </div>
-</header>
-
-<section id="layanan" class="wrap">
-    <h2 class="sec">Layanan yang Tersedia</h2>
-    <p class="sub">Tanpa drama, tanpa menunggu — semuanya diproses otomatis dari pembayaran sampai akun jadi.</p>
-    <div class="grid3">
-        <div class="card">
-            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M5 3h14a1.5 1.5 0 0 1 1.5 1.5v5A1.5 1.5 0 0 1 19 11H5a1.5 1.5 0 0 1-1.5-1.5v-5A1.5 1.5 0 0 1 5 3zm1.25 3a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2zM5 13h14a1.5 1.5 0 0 1 1.5 1.5v5A1.5 1.5 0 0 1 19 21H5a1.5 1.5 0 0 1-1.5-1.5v-5A1.5 1.5 0 0 1 5 13zm1.25 3a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2z"/></svg></div>
-            <h3>Panel Private</h3>
-            <p>Lingkungan expert bagi Anda yang butuh kuasa penuh: alokasi khusus, sumber daya yang tak diadu dengan pengguna lain, dan garansi aktif 30 hari.</p>
+<!-- HERO SECTION -->
+<div class="wrap">
+    <header class="hero">
+        <div class="rv in">
+            <span class="pill"><i class="ri-sparkling-2-fill"></i> Zeroix Enterprise · Aktivasi Otomatis 24/7</span>
+            <h1>Panel Server <span class="grad">Aktif Sendiri</span> Tanpa Menunggu Admin.</h1>
+            <p class="lead">Panel Pterodactyl Private, Public &amp; Public V2 untuk <span class="typer mono" id="typer"></span>.<br>Bayar mudah lewat QRIS — server dan akun dibuat seketika oleh sistem tanpa menunggu konfirmasi manual.</p>
+            <div class="ctas">
+                <a class="btn p" href="/store"><i class="ri-shopping-bag-3-line"></i> Belanja di Toko</a>
+                <a class="btn wa-toggle" id="waBtn" href="#" rel="noopener"><i class="ri-whatsapp-line" style="color:#25d366"></i> Tanya via WhatsApp</a>
+                <a class="btn" href="/dashboard"><i class="ri-login-box-line"></i> Masuk Dashboard</a>
+            </div>
+            <div class="chips">
+                <span class="chip"><i class="ri-flashlight-line"></i> Aktivasi &lt; 1 Menit</span>
+                <span class="chip"><i class="ri-lock-2-line"></i> Enkripsi PBKDF2</span>
+                <span class="chip"><i class="ri-qr-code-line"></i> QRIS Semua Bank &amp; E-Wallet</span>
+                <span class="chip"><i class="ri-shield-check-line"></i> Garansi Aktif 30 Hari</span>
+            </div>
         </div>
-        <div class="card">
-            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5.25-3.4 9.74-8 11-4.6-1.26-8-5.75-8-11V5l8-3zm-1.2 13.6l5.4-5.4-1.4-1.4-4 4-1.8-1.8-1.4 1.4 3.2 3.2z"/></svg></div>
-            <h3>Panel Public &amp; Public V2</h3>
-            <p>Hemat untuk memulai bot atau proyek kecil-menengah. Dua tingkat performa yang bisa dipilih sesuai kebutuhan budget Anda.</p>
+
+        <div class="net rv in">
+            <svg viewBox="0 0 400 400" id="net">
+                <defs>
+                    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#5eead4"/>
+                        <stop offset="100%" stop-color="#f472b6"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <div class="avatar server-core" role="img" aria-label="Zeroix Core Server">
+                <svg viewBox="0 0 64 64">
+                    <path d="M16 16h32v9l-19 14h19v9H16v-9l19-14H16z"/>
+                </svg>
+                <span>Zeroix Node</span>
+            </div>
         </div>
-        <div class="card">
-            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M9 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm7 1a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm-7 1.5c-3.3 0-8 1.66-8 4.95V21h16v-1.55c0-3.29-4.7-4.95-8-4.95zm7 0c-.46 0-.95.04-1.46.11 1.53 1.03 2.46 2.44 2.46 4.39V21h6v-1.5c0-2.8-4.1-5-7-5z"/></svg></div>
-            <h3>Akun Reseller / Partner</h3>
-            <p>Langsung terbit akun role reseller_public hingga partner_public_v2 — pas untuk yang berusaha menjual layanan ke komunitas Anda.</p>
+    </header>
+
+    <!-- SECTION: METRICS (contoh.html) -->
+    <section id="metrics">
+        <h2 class="h2 rv">Performa dalam <span class="grad">Angka</span></h2>
+        <p class="sub rv">Transparansi kualitas server, kecepatan otomasi, dan kepuasan pengguna aktif kami.</p>
+        <div class="cards">
+            <div class="card rv">
+                <span class="k">Kecepatan Aktivasi Server</span>
+                <div class="v">&lt;<span data-n="60">0</span>s</div>
+                <svg class="ring" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,.08)"/>
+                    <circle class="fg" cx="60" cy="60" r="50" data-p="98"/>
+                </svg>
+                <div class="note">Aktivasi otomatis detik demi detik setelah QRIS lunas.</div>
+            </div>
+
+            <div class="card rv">
+                <span class="k">Total Kunjungan &amp; Aktivitas</span>
+                <div class="v">+<span id="statViews" data-n="1280">0</span></div>
+                <svg class="chart" viewBox="0 0 300 120" style="width:100%;margin-top:14px">
+                    <defs>
+                        <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0" stop-color="#f472b6"/>
+                            <stop offset="1" stop-color="#f472b6" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+                    <path class="ar" d="M0 100 L40 92 L80 96 L120 70 L160 74 L200 46 L240 50 L300 14 L300 120 L0 120Z"/>
+                    <path class="ln" d="M0 100 L40 92 L80 96 L120 70 L160 74 L200 46 L240 50 L300 14"/>
+                </svg>
+                <div class="note">Pengunjung dan pemesanan tercatat di platform.</div>
+            </div>
+
+            <div class="card rv">
+                <span class="k">Kepuasan &amp; Server Cluster</span>
+                <div class="v"><span id="statLikes" data-n="99">0</span>%</div>
+                <div class="bars">
+                    <i data-h="45"></i>
+                    <i data-h="68"></i>
+                    <i data-h="52"></i>
+                    <i data-h="84"></i>
+                    <i data-h="75"></i>
+                    <i data-h="98"></i>
+                    <i data-h="90"></i>
+                </div>
+                <div class="note">SLA Uptime &amp; respons node Pterodactyl stabil 24/7.</div>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<section id="produk" class="wrap">
-    <h2 class="sec">Produk &amp; Harga Terkini</h2>
-    <p class="sub">Daftar diambil live dari sistem kami — belanja penuh di halaman Toko.</p>
-    <div class="prod-grid" id="prodGrid"></div>
-    <div class="more-cta">
-        <a class="btn btn-primary" href="/store">Lihat Semua Produk di Toko <span aria-hidden="true">→</span></a>
-    </div>
-</section>
+    <!-- SECTION: LAYANAN -->
+    <section id="layanan">
+        <h2 class="h2 rv">Layanan <span class="grad">Server Unggulan</span></h2>
+        <p class="sub rv">Pilih tier panel server yang sesuai dengan skala proyek, bot, atau kebutuhan komunitas Anda.</p>
+        <div class="services-grid">
+            <div class="service-card rv">
+                <div class="service-icon"><i class="ri-server-line"></i></div>
+                <span class="service-tag">Dedicated CPU · Garansi 30 Hari</span>
+                <h3>Panel Private</h3>
+                <p>Lingkungan eksklusif bagi Anda yang membutuhkan kendali penuh tanpa berbagi performa CPU dan RAM dengan pengguna lain. Ideal untuk bot produksi skala besar dan aplikasi komersial.</p>
+            </div>
+            <div class="service-card rv">
+                <div class="service-icon"><i class="ri-cpu-line"></i></div>
+                <span class="service-tag">Ekonomis · Node Anti-Overload</span>
+                <h3>Panel Public &amp; Public V2</h3>
+                <p>Pilihan tepat dan hemat untuk memulai bot WhatsApp, bot Discord musik, atau proyek online kecil-menengah dengan latensi rendah dan node terjaga kestabilannya.</p>
+            </div>
+            <div class="service-card rv">
+                <div class="service-icon"><i class="ri-group-line"></i></div>
+                <span class="service-tag">Multi-Tenant · White-Label Ready</span>
+                <h3>Akun Reseller &amp; Partner</h3>
+                <p>Role reseller_public hingga partner_public_v2 langsung aktif setelah pembayaran. Kelola puluhan akun server pengguna Anda sendiri dan bangun bisnis hosting mandiri.</p>
+            </div>
+        </div>
+    </section>
 
-<section id="cara-beli" class="wrap">
-    <h2 class="sec">Cara Beli dalam 4 Langkah</h2>
-    <p class="sub">Semuanya otomatis — tanpa antre, tanpa mencari admin, tanpa salah paham.</p>
-    <div class="steps">
-        <div class="step"><div class="num">1</div><h3>Pilih Produk</h3><p>Buka halaman Toko dan pilih panel atau akun yang paling pas dengan budget Anda.</p></div>
-        <div class="step"><div class="num">2</div><h3>Bayar QRIS</h3><p>Scan satu QRIS untuk semua e-wallet dan m-banking. Tagihan aktif beberapa menit.</p></div>
-        <div class="step"><div class="num">3</div><h3>Sistem Menentukan</h3><p>Setelah lunas, akun dan server dibuat otomatis oleh sistem — bukan manual.</p></div>
-        <div class="step"><div class="num">4</div><h3>Akun di Tangan</h3><p>Kredensial muncul di dashboard Anda dalam bentuk struk. Langsung pakai.</p></div>
-    </div>
-</section>
+    <!-- SECTION: PRODUK LIVE DARI DB -->
+    <section id="produk">
+        <h2 class="h2 rv">Katalog <span class="grad">Produk Live</span></h2>
+        <p class="sub rv">Daftar harga tersinkronisasi live dari database — checkout langsung lewat QRIS otomatis.</p>
+        <div class="prod-grid" id="prodGrid"></div>
+        <div class="more-cta rv">
+            <a class="btn p" href="/store"><i class="ri-store-2-line"></i> Lihat Semua Produk di Toko</a>
+        </div>
+    </section>
 
-<section id="faq" class="wrap">
-    <h2 class="sec">Pertanyaan yang Sering Muncul</h2>
-    <p class="sub">Kalau masih penasaran setelah ini, sambung hubungi admin via WhatsApp.</p>
-    <details class="faq"><summary>Apa itu ZeroixDark?</summary><p>ZeroixDark adalah marketplace panel server Pterodactyl (Private, Public, dan Public V2) serta akun reseller untuk kebutuhan bot dan proyek online. Semua pesanan diproses otomatis setelah pembayaran terverifikasi.</p></details>
-    <details class="faq"><summary>Bagaimana cara membeli panel?</summary><p>Buka halaman <a href="/store">Toko</a>, pilih produk, buka tagihan QRIS, bayar lewat e-wallet atau m-banking apa pun, lalu sistem otomatis membuat akun dan server Anda.</p></details>
-    <details class="faq"><summary>Metode pembayaran apa yang didukung?</summary><p>Pembayaran memakai QRIS, jadi bisa dibayar dengan semua e-wallet dan m-banking yang mendukung QRIS.</p></details>
-    <details class="faq"><summary>Berapa lama akun aktif?</summary><p>Umumnya panel aktif 30 hari dan bisa diperpanjang. Akun yang habis masa aktif akan otomatis ditunda (suspend) lalu dihapus sesuai aturan masa tenggang yang tertera saat pembelian.</p></details>
-    <details class="faq"><summary>Apakah password saya aman?</summary><p>Kredensial akun berada di sistem dengan enkripsi (PBKDF2-SHA256 + salt acak) dan sesi login dicabut otomatis kapan pun password diganti. Data pembayaran tidak disimpan di sisi browser.</p></details>
-</section>
+    <!-- SECTION: CARA BELI -->
+    <section id="cara-beli">
+        <h2 class="h2 rv">Cara Beli dalam <span class="grad">4 Langkah Mudah</span></h2>
+        <p class="sub rv">Alur instan tanpa antre dan tanpa perlu menunggu balasan admin.</p>
+        <div class="steps">
+            <div class="step rv">
+                <div class="num">01</div>
+                <h3>Pilih Paket</h3>
+                <p>Buka Toko dan tentukan paket panel server atau reseller yang pas dengan spesifikasi bot Anda.</p>
+            </div>
+            <div class="step rv">
+                <div class="num">02</div>
+                <h3>Bayar QRIS</h3>
+                <p>Scan satu QRIS dinamis untuk semua aplikasi mobile banking dan e-wallet di Indonesia.</p>
+            </div>
+            <div class="step rv">
+                <div class="num">03</div>
+                <h3>Sistem Deploy</h3>
+                <p>Setelah pembayaran terdeteksi lunas, sistem server mengeksekusi pembuatan akun detik itu juga.</p>
+            </div>
+            <div class="step rv">
+                <div class="num">04</div>
+                <h3>Akun Aktif</h3>
+                <p>Kredensial dan struk otomatis muncul di layar. Login ke panel Pterodactyl dan server langsung siap pakai.</p>
+            </div>
+        </div>
+    </section>
 
-<section class="wrap">
-    <div class="cta-band">
-        <h2>Siap Menjalankan Botmu Hari Ini?</h2>
-        <p>Pilih layanan, bayar QRIS, dan akunmu langsung aktif — semuanya dalam beberapa menit.</p>
-        <a class="btn btn-primary" href="/store">Menuju Toko Sekarang <span aria-hidden="true">→</span></a>
-    </div>
-</section>
+    <!-- SECTION: TECH STACK / EKOSISTEM (contoh.html) -->
+    <section id="stack">
+        <h2 class="h2 rv">Infrastruktur &amp; <span class="grad">Teknologi</span></h2>
+        <p class="sub rv">Fondasi performa tinggi yang menjamin uptime bot dan keamanan data server Anda.</p>
+        <div class="stack rv">
+            <span><i class="ri-terminal-box-line"></i> Pterodactyl Wings</span>
+            <span><i class="ri-nodejs-line"></i> Node.js &amp; Python 3</span>
+            <span><i class="ri-shield-check-line"></i> Anti-DDoS Filtered</span>
+            <span><i class="ri-cloud-line"></i> Cloudflare Edge Workers</span>
+            <span><i class="ri-database-2-line"></i> Firebase Realtime DB</span>
+            <span><i class="ri-lock-password-line"></i> PBKDF2-SHA256 Security</span>
+            <span><i class="ri-qr-code-line"></i> Dynamic QRIS Gateway</span>
+            <span><i class="ri-time-line"></i> Automated Cron Expired</span>
+            <span><i class="ri-pulse-line"></i> 99.9% Server Uptime</span>
+        </div>
+    </section>
 
+    <!-- SECTION: FAQ -->
+    <section id="faq">
+        <h2 class="h2 rv">Pertanyaan yang <span class="grad">Sering Ditanyakan</span></h2>
+        <p class="sub rv">Punya pertanyaan? Berikut ringkasan hal penting seputar layanan kami.</p>
+        <details class="faq rv">
+            <summary>Apa itu ZeroixDark?</summary>
+            <p>ZeroixDark adalah marketplace panel server Pterodactyl (Private, Public, dan Public V2) serta akun reseller untuk kebutuhan bot dan proyek online. Semua pesanan diproses otomatis setelah pembayaran terverifikasi.</p>
+        </details>
+        <details class="faq rv">
+            <summary>Bagaimana cara membeli panel?</summary>
+            <p>Buka halaman <a href="/store" style="color:var(--a1); font-weight:600;">Toko</a>, pilih produk, buka tagihan QRIS, bayar lewat e-wallet atau m-banking apa pun, lalu sistem otomatis membuat akun dan server Anda.</p>
+        </details>
+        <details class="faq rv">
+            <summary>Metode pembayaran apa yang didukung?</summary>
+            <p>Pembayaran memakai QRIS standar nasional (NMID), sehingga dapat dibayar dengan GoPay, OVO, DANA, ShopeePay, BCA Mobile, Livin by Mandiri, BRImo, dan seluruh aplikasi yang memiliki fitur scan QRIS.</p>
+        </details>
+        <details class="faq rv">
+            <summary>Berapa lama akun aktif dan bagaimana perpanjangannya?</summary>
+            <p>Umumnya panel aktif selama 30 hari penuh dan dapat diperpanjang sebelum habis masa aktif. Sistem juga menyediakan notifikasi dan masa tenggang sebelum server ditunda (suspend) atau dihapus.</p>
+        </details>
+        <details class="faq rv">
+            <summary>Apakah password dan data saya aman?</summary>
+            <p>Kredensial disimpan dengan algoritma hash PBKDF2-SHA256 dengan salt acak unik. Sesi login dicabut otomatis kapan pun password diganti, dan data perbankan tidak pernah disimpan di sisi peramban.</p>
+        </details>
+    </section>
+
+    <!-- SECTION: CONTACT / CTA BANNER (contoh.html) -->
+    <section id="contact">
+        <div class="contact rv">
+            <h2 class="h2">Siap Menjalankan Bot &amp; Proyekmu <span class="grad">Hari Ini?</span></h2>
+            <p class="sub" style="margin:0 auto 30px;">Pilih spesifikasi yang tepat, bayar dengan QRIS, dan nikmati server online dalam hitungan detik tanpa drama.</p>
+            <div class="ctas" style="justify-content:center;">
+                <a class="btn p" href="/store"><i class="ri-flashlight-line"></i> Buka Katalog Toko</a>
+                <a class="btn wa-toggle" id="waBtn2" href="#" rel="noopener"><i class="ri-whatsapp-line" style="color:#25d366"></i> Chat Admin WhatsApp</a>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- FOOTER -->
 <footer>
-    <div class="foot-grid">
+    <div class="wrap foot-grid">
         <div>
-            <a class="brand" href="/" style="margin-bottom:10px;">
-                <svg viewBox="0 0 64 64" width="26" height="26" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0f172a" stroke="#0d9488" stroke-opacity=".5"/><path d="M16 16h32v9l-19 14h19v9H16v-9l19-14H16z" fill="#0d9488"/></svg>
-                <span>ZeroixDark</span>
+            <a class="brand" href="/" style="margin-bottom:12px;">
+                <svg viewBox="0 0 64 64" width="28" height="28" aria-hidden="true">
+                    <rect width="64" height="64" rx="14" fill="#060b1a" stroke="#5eead4" stroke-opacity=".5"/>
+                    <path d="M16 16h32v9l-19 14h19v9H16v-9l19-14H16z" fill="#5eead4"/>
+                </svg>
+                <span>Zeroix<b>Dark</b></span>
             </a>
-            <p class="fb" style="max-width:320px; line-height:1.7; margin-top:10px;">Marketplace panel server Pterodactyl &amp; akun reseller dengan aktivasi otomatis. Bagian dari Zeroix Enterprise — dibangun agar cepat, aman, dan tanpa ribet.</p>
-            <p class="fb" style="margin-top:10px;">© <span id="year">2026</span> ZeroixDark · Zeroix Enterprise</p>
+            <p class="fb" style="max-width:340px; margin-top:10px;">Marketplace panel server Pterodactyl &amp; akun reseller dengan aktivasi otomatis. Ditenagai oleh infrastruktur Zeroix Enterprise yang cepat, tangguh, dan aman.</p>
+            <p class="fb" style="margin-top:12px;">© <span id="year">2026</span> ZeroixDark · Zeroix Enterprise. Hak cipta dilindungi.</p>
         </div>
         <div>
-            <h4>Halaman</h4>
-            <a class="fk" href="/store">Toko</a>
+            <h4>Navigasi</h4>
+            <a class="fk" href="/store">Toko Layanan</a>
             <a class="fk" href="/dashboard">Masuk Dashboard</a>
+            <a class="fk" href="#layanan">Layanan Server</a>
             <a class="fk" href="#faq">FAQ</a>
         </div>
         <div>
             <h4>Bantuan</h4>
             <a class="fk wa-toggle" id="waFoot" href="#">WhatsApp Admin</a>
-            <a class="fk" href="/store">Pesan Panel</a>
-            <a class="fk" href="#cara-beli">Cara Beli</a>
+            <a class="fk" href="/store">Beli Server</a>
+            <a class="fk" href="#cara-beli">Panduan Cara Beli</a>
         </div>
     </div>
 </footer>
 
 <script>
-    (function () {
-        'use strict';
-        document.getElementById('year').textContent = new Date().getFullYear();
+(function () {
+    'use strict';
+    document.getElementById('year').textContent = new Date().getFullYear();
 
-        // Menu HP
-        var burger = document.getElementById('burger');
-        var links = document.getElementById('navLinks');
+    // --- TYPEWRITER ROLES (contoh.html) ---
+    const roles = [
+        'Bot WhatsApp & Telegram',
+        'Bot Discord & Music',
+        'Game Server Minecraft & SA-MP',
+        'Web Service & REST API',
+        'Akun Reseller & Hosting'
+    ];
+    let ri = 0, ci = 0, del = false;
+    const ty = document.getElementById('typer');
+    function type() {
+        if (!ty) return;
+        const w = roles[ri];
+        ty.textContent = w.slice(0, ci);
+        if (!del && ci < w.length) {
+            ci++;
+        } else if (del && ci > 0) {
+            ci--;
+        } else if (!del) {
+            del = true;
+            return setTimeout(type, 1400);
+        } else {
+            del = false;
+            ri = (ri + 1) % roles.length;
+        }
+        setTimeout(type, del ? 35 : 75);
+    }
+    type();
+
+    // --- INTERACTIVE TOPOLOGY NETWORK SVG (contoh.html) ---
+    const svg = document.getElementById('net');
+    if (svg) {
+        const NS = 'http://www.w3.org/2000/svg';
+        const layers = [4, 6, 6, 3];
+        const pts = [];
+        layers.forEach((n, l) => {
+            for (let i = 0; i < n; i++) {
+                pts.push({ l, x: 50 + l * 100, y: 200 + (i - (n - 1) / 2) * 55 });
+            }
+        });
+        pts.forEach(a => {
+            pts.filter(b => b.l === a.l + 1).forEach(b => {
+                const ln = document.createElementNS(NS, 'line');
+                ln.setAttribute('x1', a.x);
+                ln.setAttribute('y1', a.y);
+                ln.setAttribute('x2', b.x);
+                ln.setAttribute('y2', b.y);
+                ln.style.animationDelay = (-Math.random() * 3) + 's';
+                svg.appendChild(ln);
+            });
+        });
+        pts.forEach((p, i) => {
+            const c = document.createElementNS(NS, 'circle');
+            c.setAttribute('cx', p.x);
+            c.setAttribute('cy', p.y);
+            c.setAttribute('r', 7);
+            c.style.animationDelay = (i * 0.15) + 's';
+            svg.appendChild(c);
+        });
+    }
+
+    // --- REVEAL ON SCROLL & METRICS ANIMATION (contoh.html) ---
+    function animateCounters(el) {
+        el.querySelectorAll('.bars i').forEach(b => {
+            if (b.dataset.h) b.style.height = b.dataset.h + '%';
+        });
+        el.querySelectorAll('.ring .fg').forEach(c => {
+            const p = parseFloat(c.dataset.p || 0);
+            c.style.strokeDashoffset = 314 - (314 * p / 100);
+        });
+        el.querySelectorAll('[data-n]').forEach(s => {
+            const end = parseInt(s.dataset.n, 10);
+            if (isNaN(end) || end <= 0) return;
+            let n = 0;
+            const stepTime = Math.max(15, Math.floor(1400 / end));
+            const stepVal = Math.max(1, Math.floor(end / 40));
+            const t = setInterval(() => {
+                n += stepVal;
+                if (n >= end) {
+                    n = end;
+                    clearInterval(t);
+                }
+                s.textContent = n.toLocaleString('id-ID');
+            }, stepTime);
+        });
+    }
+
+    const io = new IntersectionObserver(es => {
+        es.forEach(e => {
+            if (!e.isIntersecting) return;
+            const el = e.target;
+            el.classList.add('in');
+            animateCounters(el);
+            io.unobserve(el);
+            setTimeout(() => el.classList.remove('rv'), 1100);
+        });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.rv').forEach(el => io.observe(el));
+
+    // --- MOBILE MENU BURGER ---
+    const burger = document.getElementById('burger');
+    const links = document.getElementById('navLinks');
+    if (burger && links) {
         burger.addEventListener('click', function () {
-            var open = links.classList.toggle('open');
+            const open = links.classList.toggle('open');
             burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+            const icon = burger.querySelector('i');
+            if (icon) {
+                icon.className = open ? 'ri-close-line' : 'ri-menu-4-line';
+            }
         });
         links.addEventListener('click', function (e) {
             if (e.target && e.target.closest && e.target.closest('a')) {
                 links.classList.remove('open');
                 burger.setAttribute('aria-expanded', 'false');
+                const icon = burger.querySelector('i');
+                if (icon) icon.className = 'ri-menu-4-line';
             }
         });
+    }
 
-        function getJson(rel) {
-            // Lewat workerFetch supaya ikut auto-fallback bila domain Worker diblokir ISP.
+    // --- API HELPER & RUPIAH FORMATTER ---
+    function getJson(rel) {
+        if (typeof GlobalConfig !== 'undefined' && GlobalConfig.workerFetch) {
             return GlobalConfig.workerFetch('/db/' + rel).then(function (r) {
                 return r.ok ? r.json() : null;
             }).catch(function () { return null; });
         }
-        var rupiah = function (angka) {
-            return Number(angka || 0)
-                ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka)
-                : '';
-        };
+        return Promise.resolve(null);
+    }
 
-        // ---- Produk (maksimal 6, termurah duluan) ----
-        var grid = document.getElementById('prodGrid');
-        getJson('store_products').then(function (data) {
-            if (!data || typeof data !== 'object') {
-                grid.innerHTML = '<div class="prod-empty card" style="grid-column:1/-1;">Katalog sementara tidak dapat dimuat. Silakan <a href="/store" style="color:var(--primary);">buka Toko</a> langsung.</div>';
-                return;
-            }
-            var list = Object.keys(data).map(function (k) {
-                var p = data[k] || {}; return { id: k, nama: String(p.nama || ''), harga: Number(p.harga || 0), kategori: String(p.kategori || ''), deskripsi: String(p.deskripsi || '') };
-            }).filter(function (p) { return p.nama && p.harga > 0; })
-              .sort(function (a, b) { return a.harga - b.harga; })
-              .slice(0, 6);
-            if (!list.length) {
-                grid.innerHTML = '<div class="prod-empty card" style="grid-column:1/-1;">Belum ada produk aktif. Cek <a href="/store" style="color:var(--primary);">Toko</a> nanti lagi, ya.</div>';
-                return;
-            }
-            grid.innerHTML = list.map(function (p) {
-                return '<article class="card prod">'
-                    + '<span class="cat">' + p.kategori.replace(/[<>&"]/g, '') + '</span>'
-                    + '<span class="name">' + esc(p.nama) + '</span>'
-                    + '<span class="desc">' + esc(p.deskripsi.length > 110 ? p.deskripsi.slice(0, 107) + '...' : p.deskripsi) + '</span>'
-                    + '<span class="foot"><span class="price">' + rupiah(p.harga) + '</span>'
-                    + '<a class="buy" href="/store">Beli Sekarang</a></span></article>';
-            }).join('');
+    const rupiah = function (angka) {
+        return Number(angka || 0)
+            ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka)
+            : '';
+    };
+
+    function esc(s) {
+        return String(s || '').replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
         });
+    }
 
-        function esc(s) {
-            return String(s || '').replace(/[&<>"']/g, function (c) {
-                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-            });
+    // --- LIVE PRODUCTS (Maksimal 6) ---
+    const grid = document.getElementById('prodGrid');
+    getJson('store_products').then(function (data) {
+        if (!grid) return;
+        if (!data || typeof data !== 'object') {
+            grid.innerHTML = '<div class="prod-empty card" style="grid-column:1/-1;">Katalog sementara tidak dapat dimuat. Silakan <a href="/store" style="color:var(--a1);font-weight:600;">buka Toko</a> langsung.</div>';
+            return;
+        }
+        const list = Object.keys(data).map(function (k) {
+            const p = data[k] || {};
+            return {
+                id: k,
+                nama: String(p.nama || ''),
+                harga: Number(p.harga || 0),
+                kategori: String(p.kategori || ''),
+                deskripsi: String(p.deskripsi || '')
+            };
+        }).filter(function (p) { return p.nama && p.harga > 0; })
+          .sort(function (a, b) { return a.harga - b.harga; })
+          .slice(0, 6);
+
+        if (!list.length) {
+            grid.innerHTML = '<div class="prod-empty card" style="grid-column:1/-1;">Belum ada produk aktif. Cek <a href="/store" style="color:var(--a1);font-weight:600;">Toko</a> nanti lagi, ya.</div>';
+            return;
         }
 
-        // ---- WhatsApp admin (dari pengaturan toko) ----
-        getJson('store_settings/whatsapp').then(function (nomor) {
-            nomor = String(nomor == null ? '' : nomor).replace(/\D/g, '');
-            if (!nomor) return;
-            var wa = document.getElementById('waBtn');
-            var wf = document.getElementById('waFoot');
-            var href = 'https://wa.me/' + nomor;
-            wa.href = href; wf.href = href;
-            wa.target = wf.target = '_blank';
-            wa.rel = wf.rel = 'noopener';
-            wa.classList.add('wa-on'); wf.classList.add('wa-on');
-        });
+        grid.innerHTML = list.map(function (p) {
+            return '<article class="prod rv in">'
+                + '<span class="cat">' + p.kategori.replace(/[<>&"]/g, '') + '</span>'
+                + '<span class="name">' + esc(p.nama) + '</span>'
+                + '<span class="desc">' + esc(p.deskripsi.length > 110 ? p.deskripsi.slice(0, 107) + '...' : p.deskripsi) + '</span>'
+                + '<span class="foot"><span class="price">' + rupiah(p.harga) + '</span>'
+                + '<a class="buy" href="/store"><i class="ri-shopping-cart-line"></i> Beli</a></span>'
+                + '</article>';
+        }).join('');
+    });
 
-        // ---- Statistik sosial (live dari sistem; sel disembunyikan bila kosong) ----
-        getJson('store_stats').then(function (stats) {
-            if (!stats || typeof stats !== 'object') { sembunyikanStat(); return; }
-            var v = Number(stats.viewCount || 0), l = Number(stats.likeCount || 0);
-            if (!v) sembunyikanStat('view', true);
-            else document.getElementById('statViews').textContent = v.toLocaleString('id-ID');
-            if (!l) sembunyikanStat('like', true);
-            else document.getElementById('statLikes').textContent = l.toLocaleString('id-ID');
+    // --- LIVE WHATSAPP ADMIN ---
+    getJson('store_settings/whatsapp').then(function (nomor) {
+        nomor = String(nomor == null ? '' : nomor).replace(/\D/g, '');
+        if (!nomor) return;
+        const wa = document.getElementById('waBtn');
+        const wa2 = document.getElementById('waBtn2');
+        const wf = document.getElementById('waFoot');
+        const href = 'https://wa.me/' + nomor;
+        [wa, wa2, wf].forEach(function (el) {
+            if (!el) return;
+            el.href = href;
+            el.target = '_blank';
+            el.rel = 'noopener';
+            el.classList.add('wa-on');
         });
-        function sembunyikanStat(jenis) {
-            // tanpa data: sembunyikan seluruh sel agar tidak muncul tanda "—"
-            var els = { view: 'statViews', like: 'statLikes' };
-            var kasus = jenis;
-            Object.keys(els).forEach(function (k) {
-                if (kasus && k !== kasus) return;
-                var el = document.getElementById(els[k]);
-                if (el && el.parentElement) el.parentElement.style.display = 'none';
-            });
+    });
+
+    // --- LIVE STATS DARI DB ---
+    getJson('store_stats').then(function (stats) {
+        if (!stats || typeof stats !== 'object') return;
+        const v = Number(stats.viewCount || 0);
+        const l = Number(stats.likeCount || 0);
+        const elV = document.getElementById('statViews');
+        const elL = document.getElementById('statLikes');
+        if (elV && v > 0) {
+            elV.dataset.n = v;
+            elV.textContent = v.toLocaleString('id-ID');
         }
-    })();
+        if (elL && l > 0) {
+            elL.dataset.n = l;
+            elL.textContent = l.toLocaleString('id-ID');
+        }
+    });
+})();
 </script>
 </body>
 </html>
