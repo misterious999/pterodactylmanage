@@ -5,6 +5,44 @@
  * (Harus synchronous, jangan pakai defer/async, supaya menutupi halaman sebelum sempat tampil.)
  */
 (function () {
+    // ==========================================================
+    // Guard Sesi 5 Jam (Auto-Logout saat keluar tab/browser >= 5 jam)
+    // ==========================================================
+    try {
+        var TIMEOUT_5H_MS = 5 * 60 * 60 * 1000; // 5 jam (18.000.000 ms)
+        var p = (window.location.pathname || '').toLowerCase();
+        var isLoginPage = p.endsWith('/login.html') || p.endsWith('/login') || p === 'login.html';
+        var lastActiveRaw = localStorage.getItem('zeroix_last_active');
+        var hasAuth = !!(localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('fzb_token'));
+
+        if (hasAuth) {
+            if (!lastActiveRaw) {
+                // Inisialisasi awal bagi sesi yang sedang aktif
+                try { localStorage.setItem('zeroix_last_active', String(Date.now())); } catch (e) {}
+            } else {
+                var lastActive = parseInt(lastActiveRaw, 10);
+                var now = Date.now();
+                if (!isNaN(lastActive) && (now - lastActive) >= TIMEOUT_5H_MS) {
+                    var authKeys = [
+                        'fzb_token', 'panel_user_id', 'user_id', 'user_id_ptero',
+                        'panel_username', 'username', 'panel_role', 'role',
+                        'panel_password', 'ptero_user_id', 'zeroix_last_active'
+                    ];
+                    for (var i = 0; i < authKeys.length; i++) {
+                        try { localStorage.removeItem(authKeys[i]); } catch (e) {}
+                    }
+                    try { sessionStorage.setItem('zeroix_kick_reason', 'timeout_5h'); } catch (e) {}
+                    try { localStorage.setItem('zeroix_kick_reason', 'timeout_5h'); } catch (e) {}
+
+                    if (!isLoginPage) {
+                        window.location.replace('login.html');
+                        return; // Hentikan proses loader, browser langsung berpindah ke login
+                    }
+                }
+            }
+        }
+    } catch (e) {}
+
     if (window.__zxLoader) return;
     window.__zxLoader = true;
 

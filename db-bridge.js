@@ -96,6 +96,11 @@
         login: function (username, password) {
             return api('/auth/login', { method: 'POST', body: { username: username, password: password } }, false).then(function (r) {
                 saveToken(r.token);
+                try {
+                    localStorage.setItem('zeroix_last_active', String(Date.now()));
+                    sessionStorage.removeItem('zeroix_kick_reason');
+                    localStorage.removeItem('zeroix_kick_reason');
+                } catch (e) {}
                 return r.user;
             });
         },
@@ -103,7 +108,14 @@
             return api('/auth/verify').then(function (r) { return r.user; });
         },
         logout: function () {
-            return api('/auth/logout', { method: 'POST' }).catch(function () {}).then(function () { saveToken(null); });
+            return api('/auth/logout', { method: 'POST' }).catch(function () {}).then(function () {
+                saveToken(null);
+                try {
+                    localStorage.removeItem('zeroix_last_active');
+                    sessionStorage.removeItem('zeroix_kick_reason');
+                    localStorage.removeItem('zeroix_kick_reason');
+                } catch (e) {}
+            });
         },
         changePassword: function (current, next) {
             var body = { next: next };
@@ -281,4 +293,116 @@
             };
         },
     };
+
+    // ==========================================================
+    // Watchdog Sesi 5 Jam (Auto-Logout saat keluar tab/browser & idle)
+    // ==========================================================
+    (function () {
+        var TIMEOUT_5H_MS = 5 * 60 * 60 * 1000; // 5 jam = 18.000.000 ms
+        var THROTTLE_MS = 15 * 1000; // Simpan update aktivitas ke storage maks tiap 15 detik
+        var lastSaved = 0;
+        var authKeys = [
+            'fzb_token', 'panel_user_id', 'user_id', 'user_id_ptero',
+            'panel_username', 'username', 'panel_role', 'role',
+            'panel_password', 'ptero_user_id', 'zeroix_last_active'
+        ];
+
+        function hasSession() {
+            try {
+                return !!(localStorage.getItem('panel_user_id') || localStorage.getItem('user_id') || localStorage.getItem('fzb_token'));
+            } catch (e) { return false; }
+        }
+
+        function clearAuthSession() {
+            for (var i = 0; i < authKeys.length; i++) {
+                try { localStorage.removeItem(authKeys[i]); } catch (e) {}
+            }
+        }
+
+        function recordActivity(force) {
+            if (!hasSession()) return;
+            var now = Date.now();
+            if (force || (now - lastSaved >= THROTTLE_MS)) {
+                lastSaved = now;
+                try { localStorage.setItem('zeroix_last_active', String(now)); } catch (e) {}
+            }
+        }
+
+        function checkSessionTimeout() {
+            if (!hasSession()) return false;
+            var raw = null;
+            try { raw = localStorage.getItem('zeroix_last_active'); } catch (e) {}
+            var now = Date.now();
+            if (!raw) {
+                recordActivity(true);
+                return false;
+            }
+            var last = parseInt(raw, 10);
+            if (!isNaN(last) && (now - last) >= TIMEOUT_5H_MS) {
+                clearAuthSession();
+                try { sessionStorage.setItem('zeroix_kick_reason', 'timeout_5h'); } catch (e) {}
+                try { localStorage.setItem('zeroix_kick_reason', 'timeout_5h'); } catch (e) {}
+
+                var path = (window.location.pathname || '').toLowerCase();
+                var isLogin = path.endsWith('/login.html') || path.endsWith('/login') || path === 'login.html';
+                var isPublic = path.endsWith('/store.html') || path.endsWith('/store') || path.endsWith('/index.html') || path === '/' || path === '';
+
+                if (!isLogin && !isPublic) {
+                    window.location.replace('login.html');
+                } else if (isLogin && typeof window.checkZeroixKickReason === 'function') {
+                    window.checkZeroixKickReason();
+                }
+                return true;
+            }
+            return false;
+        }
+
+        // Pengecekan saat script dimuat
+        if (hasSession()) {
+            if (!checkSessionTimeout()) {
+                recordActivity(false);
+            }
+        }
+
+        // Event interaksi pengguna (touch/mouse/keyboard) mereset waktu sesi
+        var userEvents = ['mousedown', 'keydown', 'touchstart', 'scroll', 'click'];
+        for (var j = 0; j < userEvents.length; j++) {
+            window.addEventListener(userEvents[j], function () { recordActivity(false); }, { passive: true });
+        }
+
+        // Saat keluar tab / browser / beralih aplikasi / minimize:
+        // Simpan timestamp tepat saat ditinggalkan
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'hidden') {
+                recordActivity(true);
+            } else if (document.visibilityState === 'visible') {
+                // Saat tab dibuka kembali, cek apakah sudah melebihi 5 jam
+                if (!checkSessionTimeout()) {
+                    recordActivity(true);
+                }
+            }
+        });
+
+        window.addEventListener('pagehide', function () { recordActivity(true); });
+        window.addEventListener('beforeunload', function () { recordActivity(true); });
+
+        // Saat tab kembali dibuka / dipulihkan dari cache browser
+        window.addEventListener('pageshow', function () {
+            if (!checkSessionTimeout()) recordActivity(false);
+        });
+        window.addEventListener('focus', function () {
+            if (!checkSessionTimeout()) recordActivity(false);
+        });
+
+        // Background guard tiap 30 detik (jika tab dibiarkan terbuka terus tanpa aktivitas)
+        setInterval(function () {
+            checkSessionTimeout();
+        }, 30000);
+
+        window.ZeroixSessionGuard = {
+            check: checkSessionTimeout,
+            touch: function () { recordActivity(true); },
+            timeoutMs: TIMEOUT_5H_MS
+        };
+    })();
 })();

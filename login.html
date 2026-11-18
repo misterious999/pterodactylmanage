@@ -166,7 +166,7 @@
     </style>
 </head>
 <body>
-    <script src="page-loader.js"></script>
+    <script src="page-loader.js?v=75"></script>
 
     <div class="ambient-blob-1"></div>
     <div class="ambient-blob-2"></div>
@@ -225,7 +225,7 @@
     
     <script>try { if (localStorage.getItem('lite_mode') === 'true') document.body.classList.add('lite-mode'); } catch (e) {}</script>
     <script src="config.js?v=75"></script>
-    <script src="db-bridge.js?v=74"></script>
+    <script src="db-bridge.js?v=75"></script>
     <script>
         const passwordInput = document.getElementById('password');
         const togglePassword = document.getElementById('togglePassword');
@@ -245,12 +245,37 @@
 
         // Login diverifikasi di Worker; password disimpan dalam bentuk hash PBKDF2.
         // Bukan lagi membaca seluruh tabel users dari browser (celah lama yang dipakai hacker).
-        function tampilkanError(pesan) {
+        function tampilkanError(pesan, judul) {
             document.getElementById('errorMsgText').innerText = pesan;
+            var headerEl = document.querySelector('#modalLoginError .system-modal-header');
+            if (headerEl) headerEl.innerText = judul || "Otorisasi Ditolak";
             document.getElementById('modalLoginError').style.display = 'flex';
         }
         function tutupError() {
             document.getElementById('modalLoginError').style.display = 'none';
+            var headerEl = document.querySelector('#modalLoginError .system-modal-header');
+            if (headerEl) headerEl.innerText = "Otorisasi Ditolak";
+        }
+
+        // Cek apakah user terpental karena sesi berakhir (keluar browser/tab >= 5 jam)
+        function checkZeroixKickReason() {
+            try {
+                var reason = sessionStorage.getItem('zeroix_kick_reason') || localStorage.getItem('zeroix_kick_reason');
+                if (reason === 'timeout_5h') {
+                    try { sessionStorage.removeItem('zeroix_kick_reason'); } catch (e) {}
+                    try { localStorage.removeItem('zeroix_kick_reason'); } catch (e) {}
+                    tampilkanError(
+                        "Waktu sesi berakhir: Anda telah keluar dari browser/tab atau tidak ada aktivitas selama lebih dari 5 jam.\n\nDemi keamanan akun, silakan masuk (login) kembali.",
+                        "SESI KEDALUWARSA (5 JAM)"
+                    );
+                }
+            } catch (e) {}
+        }
+        window.checkZeroixKickReason = checkZeroixKickReason;
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkZeroixKickReason);
+        } else {
+            checkZeroixKickReason();
         }
 
         document.getElementById('password').addEventListener('keypress', function (e) {
@@ -299,6 +324,11 @@
                 localStorage.setItem('panel_role', peran);
                 localStorage.setItem('role', peran);
                 if (user.ptero_id) localStorage.setItem('ptero_user_id', user.ptero_id);
+                try {
+                    localStorage.setItem('zeroix_last_active', String(Date.now()));
+                    sessionStorage.removeItem('zeroix_kick_reason');
+                    localStorage.removeItem('zeroix_kick_reason');
+                } catch (e) {}
                 window.location.replace("dashboard.html");
             }).catch((error) => {
                 tampilkanError(error.message || "Otorisasi ditolak: Kredensial yang dimasukkan tidak valid.");
