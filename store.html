@@ -526,19 +526,193 @@
             backdrop-filter: blur(16px);
         }
 
+        
+        /* --- TOMBOL & MODAL PESANAN SAYA --- */
+        .btn-nav-orders {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 9px 15px; border-radius: 12px;
+            font-size: .88rem; font-weight: 600;
+            color: var(--ink); background: var(--card);
+            border: 1px solid var(--line);
+            cursor: pointer; transition: all .3s ease;
+            position: relative;
+        }
+        .btn-nav-orders:hover {
+            color: var(--a1); border-color: rgba(94, 234, 212, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(94, 234, 212, 0.15);
+        }
+        .order-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 18px; height: 18px; padding: 0 5px;
+            border-radius: 10px; font-size: 11px; font-weight: 800;
+            background: var(--a1); color: #071022; line-height: 1;
+        }
+        .order-badge.has-pending {
+            background: var(--warning); color: #000;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+            animation: badgePulse 1.5s infinite;
+        }
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .history-box {
+            max-width: 490px;
+            padding: 24px 20px;
+            text-align: left;
+        }
+        .history-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            gap: 12px; margin-bottom: 18px; padding-bottom: 14px;
+            border-bottom: 1px solid var(--line);
+        }
+        .history-header h3 {
+            margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--ink);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .history-subtitle {
+            margin: 4px 0 0 0; font-size: 12px; color: var(--muted);
+        }
+        .btn-close-circle {
+            background: rgba(255, 255, 255, 0.06); border: 1px solid var(--line);
+            color: var(--muted); width: 32px; height: 32px; border-radius: 50%;
+            font-size: 20px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all .2s; line-height: 1;
+        }
+        .btn-close-circle:hover {
+            color: var(--ink); background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255,255,255,0.25);
+        }
+        .history-list {
+            display: flex; flex-direction: column; gap: 12px;
+            max-height: 58vh; overflow-y: auto; padding-right: 4px;
+        }
+        .history-list::-webkit-scrollbar { width: 5px; }
+        .history-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        .history-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--line);
+            border-radius: 16px; padding: 15px;
+            transition: all .25s ease; position: relative;
+        }
+        .history-card:hover {
+            border-color: rgba(94, 234, 212, 0.35);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .history-card-top {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            gap: 10px; margin-bottom: 6px;
+        }
+        .history-prod-name {
+            font-size: 15px; font-weight: 700; color: var(--ink);
+            margin: 0 0 2px 0; overflow-wrap: anywhere;
+        }
+        .history-invoice {
+            font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace;
+        }
+        .history-amount {
+            font-size: 15px; font-weight: 800; color: var(--a1);
+            font-family: 'JetBrains Mono', monospace; white-space: nowrap;
+        }
+        .history-status-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+        }
+        .status-badge-pending {
+            background: rgba(245, 158, 11, 0.12); color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .status-badge-success {
+            background: rgba(94, 234, 212, 0.12); color: var(--a1);
+            border: 1px solid rgba(94, 234, 212, 0.3);
+        }
+        .status-badge-failed {
+            background: rgba(244, 114, 182, 0.12); color: var(--a3);
+            border: 1px solid rgba(244, 114, 182, 0.3);
+        }
+        .status-badge-wait {
+            background: rgba(129, 140, 248, 0.12); color: var(--a2);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+        }
+        .history-details {
+            font-size: 12px; color: var(--muted);
+            margin: 8px 0 10px 0; line-height: 1.5;
+            background: rgba(0, 0, 0, 0.25); border-radius: 10px;
+            padding: 8px 12px; border: 1px solid rgba(255,255,255,0.04);
+        }
+        .history-details b { color: var(--ink); }
+        .history-actions {
+            display: flex; gap: 8px; align-items: center; justify-content: flex-end;
+            flex-wrap: wrap; margin-top: 10px;
+        }
+        .btn-hist-action {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 7px 13px; border-radius: 10px; font-size: 12px; font-weight: 700;
+            cursor: pointer; transition: all .2s; border: none;
+        }
+        .btn-hist-primary {
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color: #071022; box-shadow: 0 2px 10px rgba(94, 234, 212, 0.25);
+        }
+        .btn-hist-primary:hover {
+            box-shadow: 0 4px 15px rgba(94, 234, 212, 0.4);
+            transform: translateY(-1px);
+        }
+        .btn-hist-sec {
+            background: rgba(255, 255, 255, 0.08); color: var(--ink);
+            border: 1px solid var(--line);
+        }
+        .btn-hist-sec:hover { background: rgba(255, 255, 255, 0.15); }
+        .btn-hist-del {
+            background: transparent; color: var(--muted); border: none;
+            padding: 6px; font-size: 16px; border-radius: 8px; cursor: pointer;
+            transition: all .2s;
+        }
+        .btn-hist-del:hover { color: #f43f5e; background: rgba(244, 63, 94, 0.1); }
+        .history-empty {
+            text-align: center; padding: 40px 20px; color: var(--muted);
+        }
+        .history-empty i {
+            font-size: 48px; color: rgba(255,255,255,0.15); display: block; margin-bottom: 12px;
+        }
+        .history-empty h4 {
+            font-size: 16px; color: var(--ink); margin: 0 0 6px 0;
+        }
+        .history-empty p {
+            font-size: 13px; line-height: 1.6; margin: 0;
+        }
+        .history-footer {
+            margin-top: 16px; padding-top: 14px;
+            border-top: 1px solid var(--line);
+            display: flex; justify-content: flex-end;
+        }
+        .btn-history-close {
+            background: var(--card); border: 1px solid var(--line);
+            color: var(--ink); padding: 8px 18px; border-radius: 10px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+        }
+
         /* --- RESPONSIVE HP --- */
         @media (max-width: 480px) {
-            .navbar { padding: 14px 4%; }
-            .brand { font-size: 1.05rem; gap: 8px; }
+            .navbar { padding: 12px 3%; }
+            .nav-actions { gap: 6px; }
+            .brand { font-size: 1.05rem; gap: 6px; }
             .brand svg { width: 28px; height: 28px; }
-            .btn-login { padding: 8px 14px; font-size: 12px; }
-            .btn-nav-home { padding: 8px 10px; font-size: 12px; }
+            .btn-nav-orders { padding: 7px 10px; font-size: 11px; gap: 5px; border-radius: 10px; }
+            .btn-login { padding: 7px 11px; font-size: 11px; border-radius: 10px; }
+            .btn-nav-home { padding: 7px 9px; font-size: 11px; }
             .hero { padding: 45px 16px 20px 16px; }
             .hero h1 { font-size: 1.85rem; }
             .hero p { font-size: 13px; }
             .section-title { font-size: 1.15rem; }
             .btn-category { padding: 8px 16px; font-size: 12px; }
             .product-grid { gap: 18px; }
+        }
+        @media (max-width: 380px) {
+            .btn-nav-orders span.nav-text { display: none; }
+            .btn-nav-home span { display: none; }
         }
     </style>
 </head>
@@ -567,8 +741,13 @@
             <span>Zeroix<b>Dark</b></span>
         </a>
         <div class="nav-actions">
-            <a href="/" class="btn-nav-home"><i class="ri-home-5-line"></i> Beranda</a>
-            <a href="login.html" class="btn-login"><i class="ri-shield-keyhole-line"></i> Login Panel</a>
+            <button type="button" class="btn-nav-orders" onclick="bukaModalRiwayat()" title="Lihat riwayat transaksi & data panel saya">
+                <i class="ri-shopping-bag-3-line"></i>
+                <span class="nav-text">Pesanan Saya</span>
+                <span class="order-badge" id="orderBadge" style="display:none;">0</span>
+            </button>
+            <a href="/" class="btn-nav-home"><i class="ri-home-5-line"></i> <span>Beranda</span></a>
+            <a href="login.html" class="btn-login"><i class="ri-shield-keyhole-line"></i> <span>Login Panel</span></a>
         </div>
     </nav>
 
@@ -657,6 +836,27 @@
             <div class="loading-state">
                 <svg viewBox="0 0 24 24"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg>
                 <br>Menghubungkan ke pangkalan data...
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Riwayat Pesanan Saya -->
+    <div class="pay-overlay" id="modalOrderHistory">
+        <div class="pay-box history-box">
+            <div class="history-header">
+                <div>
+                    <h3><i class="ri-shopping-bag-3-line" style="color:var(--a1);"></i> Pesanan Saya</h3>
+                    <p class="history-subtitle">Riwayat tagihan QRIS dan data akun di perangkat ini</p>
+                </div>
+                <button type="button" class="btn-close-circle" onclick="tutupModalRiwayat()" aria-label="Tutup">&times;</button>
+            </div>
+
+            <div class="history-list" id="historyList">
+                <!-- Diisi otomatis oleh JavaScript -->
+            </div>
+
+            <div class="history-footer">
+                <button type="button" class="btn-history-close" onclick="tutupModalRiwayat()">Tutup</button>
             </div>
         </div>
     </div>
@@ -872,12 +1072,13 @@
             }
         });
 
-        // --- PEMBAYARAN QRIS (lewat Worker, secret key tidak pernah ada di browser) ---
+        // --- PEMBAYARAN QRIS & RIWAYAT PESANAN (Option A: LocalStorage + Worker Pay) ---
         // Alur: tagihan QRIS -> lunas -> (produk panel) isi data panel -> panel dibuat Worker
         //       -> kirim bukti ke owner via WA -> data login panel ditampilkan seperti struk.
-        // Pesanan yang belum selesai disimpan di localStorage supaya bisa dilanjutkan setelah refresh.
+        // Semua pesanan otomatis dicatat ke riwayat perangkat (Pesanan Saya) agar struk & status tidak hilang.
         const PAY_POLL_MS = 5000;
         const PAY_STORE_KEY = 'zeroixPesananAktif';
+        const PAY_HISTORY_KEY = 'zeroixPesananRiwayat';
         const PAY_LUNAS = ['settlement', 'paid', 'success', 'completed'];
         const PAY_GAGAL = { cancel: 'Pembayaran dibatalkan.', cancelled: 'Pembayaran dibatalkan.', expired: 'Tagihan sudah kedaluwarsa. Silakan buat pesanan baru.' };
         const payEl = (id) => document.getElementById(id);
@@ -885,15 +1086,279 @@
         let payTimer = null;
         let paySeq = 0;        // naik setiap modal dibuka/ditutup, untuk buang respons yang sudah basi
 
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function muatRiwayatPesanan() {
+            try {
+                const raw = localStorage.getItem(PAY_HISTORY_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function simpanRiwayatPesanan(list) {
+            try {
+                localStorage.setItem(PAY_HISTORY_KEY, JSON.stringify(list.slice(0, 30)));
+            } catch (e) {}
+            updateBadgeRiwayat();
+        }
+
+        function catatRiwayatPesanan(order) {
+            if (!order || !order.nexpay_transaction_id) return;
+            try {
+                let list = muatRiwayatPesanan();
+                const idx = list.findIndex(item => item.nexpay_transaction_id === order.nexpay_transaction_id);
+                const orderData = {
+                    ...order,
+                    updatedAt: Date.now(),
+                    createdAt: order.createdAt || Date.now()
+                };
+                if (idx >= 0) {
+                    list[idx] = { ...list[idx], ...orderData };
+                } else {
+                    list.unshift(orderData);
+                }
+                simpanRiwayatPesanan(list);
+            } catch (e) {
+                console.error('[Riwayat] Gagal catat pesanan:', e);
+            }
+        }
+
+        function updateBadgeRiwayat() {
+            const badge = document.getElementById('orderBadge');
+            if (!badge) return;
+            const list = muatRiwayatPesanan();
+            if (!list || list.length === 0) {
+                badge.style.display = 'none';
+                badge.classList.remove('has-pending');
+                return;
+            }
+            badge.style.display = 'inline-flex';
+            badge.innerText = list.length;
+            const hasPending = list.some(o => o.status === 'pending' || belumSelesai(o));
+            if (hasPending) {
+                badge.classList.add('has-pending');
+            } else {
+                badge.classList.remove('has-pending');
+            }
+        }
+
         function simpanPesanan() {
             try {
-                if (payOrder) localStorage.setItem(PAY_STORE_KEY, JSON.stringify(payOrder));
-                else localStorage.removeItem(PAY_STORE_KEY);
+                if (payOrder) {
+                    localStorage.setItem(PAY_STORE_KEY, JSON.stringify(payOrder));
+                    catatRiwayatPesanan(payOrder);
+                } else {
+                    localStorage.removeItem(PAY_STORE_KEY);
+                }
             } catch (e) {}
+            updateBadgeRiwayat();
         }
 
         function muatPesanan() {
             try { return JSON.parse(localStorage.getItem(PAY_STORE_KEY) || 'null'); } catch (e) { return null; }
+        }
+
+        function bukaModalRiwayat() {
+            renderDaftarRiwayat();
+            const m = document.getElementById('modalOrderHistory');
+            if (m) m.classList.add('show');
+        }
+
+        function tutupModalRiwayat() {
+            const m = document.getElementById('modalOrderHistory');
+            if (m) m.classList.remove('show');
+        }
+
+        function bukaPesananDariRiwayat(nexId) {
+            const list = muatRiwayatPesanan();
+            const target = list.find(o => o.nexpay_transaction_id === nexId);
+            if (!target) return;
+            tutupModalRiwayat();
+            bukaPesanan(target);
+        }
+
+        async function cekStatusPesananRiwayat(nexId, btnEl) {
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Cek...';
+            }
+            try {
+                const data = await payRequest('status', { nexpay_transaction_id: nexId });
+                let list = muatRiwayatPesanan();
+                const idx = list.findIndex(o => o.nexpay_transaction_id === nexId);
+                if (idx >= 0) {
+                    list[idx].status = data.status;
+                    simpanRiwayatPesanan(list);
+                    if (payOrder && payOrder.nexpay_transaction_id === nexId) {
+                        payOrder.status = data.status;
+                        simpanPesanan();
+                    }
+                }
+                renderDaftarRiwayat();
+            } catch (e) {
+                alert('Gagal mengecek status: ' + e.message);
+                if (btnEl) {
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = '<i class="ri-refresh-line"></i> Cek Status';
+                }
+            }
+        }
+
+        async function salinDataDariRiwayat(nexId, btnEl) {
+            const list = muatRiwayatPesanan();
+            const item = list.find(o => o.nexpay_transaction_id === nexId);
+            if (!item || !item.panel) return;
+            const teks = teksDataPanel(item);
+            try {
+                await navigator.clipboard.writeText(teks);
+            } catch (e) {
+                const ta = document.createElement('textarea');
+                ta.value = teks;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+            }
+            if (btnEl) {
+                const ori = btnEl.innerHTML;
+                btnEl.innerHTML = '<i class="ri-check-line"></i> Tersalin!';
+                setTimeout(() => { if (btnEl) btnEl.innerHTML = ori; }, 2000);
+            }
+        }
+
+        function hapusRiwayatPesanan(nexId) {
+            if (!confirm('Hapus transaksi ini dari riwayat browser kamu? Data akun/struk yang tersimpan di sini akan ikut terhapus.')) return;
+            let list = muatRiwayatPesanan();
+            list = list.filter(o => o.nexpay_transaction_id !== nexId);
+            simpanRiwayatPesanan(list);
+            
+            const active = muatPesanan();
+            if (active && active.nexpay_transaction_id === nexId) {
+                localStorage.removeItem(PAY_STORE_KEY);
+                payOrder = null;
+            }
+            renderDaftarRiwayat();
+        }
+
+        function renderDaftarRiwayat() {
+            const listEl = document.getElementById('historyList');
+            if (!listEl) return;
+            const list = muatRiwayatPesanan();
+
+            if (!list || list.length === 0) {
+                listEl.innerHTML = `
+                    <div class="history-empty">
+                        <i class="ri-inbox-archive-line"></i>
+                        <h4>Belum Ada Riwayat Pesanan</h4>
+                        <p>Pesanan QRIS dan data akun panel yang kamu buat di toko ini akan otomatis tersimpan di perangkat ini agar mudah dicek kembali.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            list.forEach(o => {
+                const tglStr = o.createdAt ? tanggalWIB(o.createdAt) : (o.panel?.createdAt ? tanggalWIB(o.panel.createdAt) : '-');
+                let statusBadge = '';
+                let actionButtons = '';
+                let detailsHtml = '';
+
+                const isLunas = PAY_LUNAS.includes(o.status);
+
+                if (o.panel && o.unlocked) {
+                    statusBadge = `<span class="history-status-badge status-badge-success"><i class="ri-checkbox-circle-fill"></i> Panel Aktif</span>`;
+                    detailsHtml = `
+                        <div class="history-details">
+                            <div><b>Username:</b> ${escapeHtml(o.panel.username || '-')}</div>
+                            <div><b>Password:</b> ${escapeHtml(o.password || '(tersimpan)')}</div>
+                            ${o.panel.panelUrl ? `<div><b>Link:</b> <a href="${o.panel.panelUrl}" target="_blank" rel="noopener" style="color:var(--a1); text-decoration:underline;">Buka Panel</a></div>` : ''}
+                            ${o.panel.loginUrl ? `<div><b>Link:</b> <a href="${o.panel.loginUrl}" target="_blank" rel="noopener" style="color:var(--a1); text-decoration:underline;">Buka Website</a></div>` : ''}
+                        </div>
+                    `;
+                    actionButtons = `
+                        <button type="button" class="btn-hist-action btn-hist-sec" onclick="salinDataDariRiwayat('${o.nexpay_transaction_id}', this)">
+                            <i class="ri-file-copy-line"></i> Salin Data
+                        </button>
+                        <button type="button" class="btn-hist-action btn-hist-primary" onclick="bukaPesananDariRiwayat('${o.nexpay_transaction_id}')">
+                            <i class="ri-eye-line"></i> Lihat Struk
+                        </button>
+                    `;
+                } else if (o.panel) {
+                    statusBadge = `<span class="history-status-badge status-badge-wait"><i class="ri-time-line"></i> Perlu Unlock WA</span>`;
+                    actionButtons = `
+                        <button type="button" class="btn-hist-action btn-hist-primary" onclick="bukaPesananDariRiwayat('${o.nexpay_transaction_id}')">
+                            <i class="ri-whatsapp-line"></i> Unlock Akun
+                        </button>
+                    `;
+                } else if (isLunas && specPanel(o)) {
+                    statusBadge = `<span class="history-status-badge status-badge-wait"><i class="ri-flashlight-line"></i> Siap Dibuat</span>`;
+                    actionButtons = `
+                        <button type="button" class="btn-hist-action btn-hist-primary" onclick="bukaPesananDariRiwayat('${o.nexpay_transaction_id}')">
+                            <i class="ri-edit-line"></i> Isi Data Akun
+                        </button>
+                    `;
+                } else if (isLunas) {
+                    statusBadge = `<span class="history-status-badge status-badge-success"><i class="ri-checkbox-circle-fill"></i> Lunas</span>`;
+                    actionButtons = `
+                        <button type="button" class="btn-hist-action btn-hist-primary" onclick="bukaPesananDariRiwayat('${o.nexpay_transaction_id}')">
+                            <i class="ri-whatsapp-line"></i> Konfirmasi WA
+                        </button>
+                    `;
+                } else if (o.status === 'pending') {
+                    statusBadge = `<span class="history-status-badge status-badge-pending"><i class="ri-hourglass-2-line"></i> Menunggu Bayar</span>`;
+                    actionButtons = `
+                        <button type="button" class="btn-hist-action btn-hist-sec" onclick="cekStatusPesananRiwayat('${o.nexpay_transaction_id}', this)">
+                            <i class="ri-refresh-line"></i> Cek Status
+                        </button>
+                        <button type="button" class="btn-hist-action btn-hist-primary" onclick="bukaPesananDariRiwayat('${o.nexpay_transaction_id}')">
+                            <i class="ri-qr-code-line"></i> Buka QRIS
+                        </button>
+                    `;
+                } else if (PAY_GAGAL[o.status]) {
+                    statusBadge = `<span class="history-status-badge status-badge-failed"><i class="ri-close-circle-fill"></i> ${o.status === 'expired' ? 'Kedaluwarsa' : 'Dibatalkan'}</span>`;
+                } else {
+                    statusBadge = `<span class="history-status-badge status-badge-wait">${escapeHtml(o.status || '-')}</span>`;
+                    actionButtons = `
+                        <button type="button" class="btn-hist-action btn-hist-sec" onclick="cekStatusPesananRiwayat('${o.nexpay_transaction_id}', this)">
+                            <i class="ri-refresh-line"></i> Cek Status
+                        </button>
+                    `;
+                }
+
+                html += `
+                    <div class="history-card" data-nexid="${o.nexpay_transaction_id}">
+                        <div class="history-card-top">
+                            <div>
+                                <h4 class="history-prod-name">${escapeHtml(o.productName || 'Produk')}</h4>
+                                <div class="history-invoice">Inv: ${escapeHtml(o.invoice || '-')} · ${tglStr}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="history-amount">${formatRupiah(o.amount || 0)}</div>
+                                <div style="margin-top:4px;">${statusBadge}</div>
+                            </div>
+                        </div>
+                        ${detailsHtml}
+                        <div class="history-actions">
+                            <button type="button" class="btn-hist-del" onclick="hapusRiwayatPesanan('${o.nexpay_transaction_id}')" title="Hapus dari riwayat">
+                                <i class="ri-delete-bin-line"></i>
+                            </button>
+                            ${actionButtons}
+                        </div>
+                    </div>
+                `;
+            });
+
+            listEl.innerHTML = html;
         }
 
         async function payRequest(path, body) {
@@ -1080,6 +1545,11 @@
             payOrder = order;
             payEl('payQr').innerHTML = '';
             payEl('pfError').innerText = '';
+            // Reset input form jika ada sisa sebelumnya
+            ['pfUsername', 'pfPassword', 'pfServer', 'pfPhone'].forEach(id => {
+                const el = payEl(id);
+                if (el) el.value = '';
+            });
             payEl('payModal').classList.add('show');
             tampilkanPesanan();
             if (order.status === 'pending') cekStatusPembayaran();
@@ -1209,27 +1679,50 @@
         payEl('payCloseBtn').onclick = () => {
             const o = payOrder;
             if (o?.status === 'pending' &&
-                !confirm('Tagihan belum dibayar. Tutup sekarang? Kalau kamu sudah transfer, tunggu sampai status berubah jadi berhasil.')) return;
-            if (o?.panel && o.unlocked && !confirm('Sudah menyimpan data login panel? Setelah ditutup, data ini tidak ditampilkan lagi.')) return;
+                !confirm('Tagihan belum dibayar. Tutup sekarang? Jika sudah transfer, kamu tetap bisa cek statusnya kapan saja di menu "Pesanan Saya".')) return;
             // Pesanan lunas yang belum selesai tetap disimpan supaya bisa dilanjutkan nanti
-            if (belumSelesai(o)) alert('Pesanan kamu tersimpan di browser ini. Klik produk mana saja untuk melanjutkan.');
-            else { payOrder = null; simpanPesanan(); }
+            if (belumSelesai(o)) {
+                alert('Pesanan kamu tersimpan di browser ini. Kamu bisa melanjutkannya kapan saja melalui tombol "Pesanan Saya".');
+            } else {
+                payOrder = null;
+                simpanPesanan();
+            }
             stopPolling();
             payOrder = null;
             paySeq++;
             payEl('payModal').classList.remove('show');
+            updateBadgeRiwayat();
         };
+
+        // Tutup modal jika user klik overlay luar
+        const payModalOverlay = payEl('payModal');
+        if (payModalOverlay) {
+            payModalOverlay.addEventListener('click', (e) => {
+                if (e.target === payModalOverlay) payEl('payCloseBtn').click();
+            });
+        }
+        const histModalOverlay = document.getElementById('modalOrderHistory');
+        if (histModalOverlay) {
+            histModalOverlay.addEventListener('click', (e) => {
+                if (e.target === histModalOverlay) tutupModalRiwayat();
+            });
+        }
 
         // Lanjutkan pesanan tersimpan setelah data produk pertama kali termuat
         let pesananDicek = false;
         function lanjutkanPesananTersimpan() {
+            updateBadgeRiwayat();
             if (pesananDicek) return;
             pesananDicek = true;
             const tersimpan = muatPesanan();
-            if (tersimpan?.nexpay_transaction_id && (tersimpan.status === 'pending' || belumSelesai(tersimpan))) {
-                bukaPesanan(tersimpan);
+            if (tersimpan?.nexpay_transaction_id) {
+                catatRiwayatPesanan(tersimpan);
+                if (tersimpan.status === 'pending' || belumSelesai(tersimpan)) {
+                    bukaPesanan(tersimpan);
+                }
             }
         }
+        updateBadgeRiwayat();
 
         // --- SISTEM STATISTIK PENGUNJUNG & LIKES (FIREBASE) ---
         const statsRef = database.ref('store_stats');
