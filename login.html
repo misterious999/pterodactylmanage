@@ -4,172 +4,402 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>Autentikasi Sistem - Zeroix Enterprise</title>
+    <title>Login Panel &amp; Control Center — ZeroixDark</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.css" rel="stylesheet">
     <style>
         :root { 
-            --primary: #5eead4; --primary-hover: #2dd4bf; --primary-glow: rgba(94, 234, 212, 0.4);
-            --danger: #ef4444; --bg-dark: #060b1a; 
-            --card-bg: rgba(255, 255, 255, 0.04); 
-            --text-main: #e9eeff; --text-sub: #8d97b8; 
-            --border: rgba(255, 255, 255, 0.09);
-            --a1: #5eead4; --a2: #818cf8; --a3: #f472b6;
+            --bg: #060b1a;
+            --card: rgba(255, 255, 255, 0.04); 
+            --card-hover: rgba(255, 255, 255, 0.07);
+            --card-solid: #0d1527;
+            --line: rgba(255, 255, 255, 0.09);
+            --line-hover: rgba(94, 234, 212, 0.4);
+            --ink: #e9eeff;
+            --muted: #8d97b8;
+            --a1: #5eead4;
+            --a2: #818cf8;
+            --a3: #f472b6;
+            --primary: #5eead4;
+            --primary-glow: rgba(94, 234, 212, 0.35);
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body { 
-            font-family: 'Sora', sans-serif; color: var(--text-main); margin: 0; 
-            padding: 20px; box-sizing: border-box;
-            display: flex; justify-content: center; align-items: center; min-height: 100vh; min-height: 100dvh;
-            background-color: var(--bg-dark);
-            overflow-x: hidden; 
+            font-family: 'Sora', sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px 16px;
+            overflow-x: hidden;
             position: relative;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* --- AMBIENT BACKGROUND GLOW (contoh.html) --- */
-        .ambient-blob-1 {
-            position: fixed; width: 450px; height: 450px;
-            background: rgba(94, 234, 212, 0.22); border-radius: 50%;
-            top: -10%; left: -10%; filter: blur(100px);
-            animation: floatBlob 10s infinite alternate ease-in-out;
-            z-index: 0; pointer-events: none;
+        /* --- AURORA FLOATING AMBIENCE (contoh.html) --- */
+        .aurora {
+            position: fixed; inset: -20%; z-index: -2;
+            filter: blur(80px) saturate(140%);
+            opacity: .55; pointer-events: none;
         }
-        .ambient-blob-2 {
-            position: fixed; width: 380px; height: 380px;
-            background: rgba(129, 140, 248, 0.2); border-radius: 50%;
-            bottom: -10%; right: -10%; filter: blur(90px);
-            animation: floatBlob 12s infinite alternate-reverse ease-in-out;
-            z-index: 0; pointer-events: none;
+        .aurora span {
+            position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%;
+            mix-blend-mode: screen; animation: drift 22s ease-in-out infinite alternate;
         }
-            bottom: -10%; right: -10%; filter: blur(80px);
-            animation: floatBlob 12s infinite alternate-reverse ease-in-out;
-            z-index: 0; pointer-events: none;
+        .aurora span:nth-child(1) { background: radial-gradient(circle, var(--a1), transparent 60%); top: 0; left: 10%; }
+        .aurora span:nth-child(2) { background: radial-gradient(circle, var(--a2), transparent 60%); top: 20%; right: 0; animation-delay: -8s; }
+        .aurora span:nth-child(3) { background: radial-gradient(circle, var(--a3), transparent 60%); bottom: 0; left: 30%; animation-delay: -14s; opacity: .6; }
+        @keyframes drift { to { transform: translate(12vmax, -8vmax) rotate(40deg) scale(1.2); } }
+
+        /* --- GRID GRAIN BACKGROUND (contoh.html) --- */
+        .grain {
+            position: fixed; inset: 0; z-index: -1;
+            background-image:
+                linear-gradient(var(--line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--line) 1px, transparent 1px);
+            background-size: 64px 64px;
+            mask-image: radial-gradient(circle at 50% 30%, #000, transparent 75%);
+            pointer-events: none;
         }
 
-        @keyframes floatBlob {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, 40px) scale(1.1); }
+        /* --- TOMBOL KEMBALI KE BERANDA --- */
+        .btn-back-home {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: 12px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        .btn-back-home:hover {
+            color: var(--a1);
+            border-color: rgba(94, 234, 212, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(94, 234, 212, 0.15);
         }
 
         /* --- PREMIUM GLASS CARD --- */
         .login-box {
-            background: var(--card-bg); 
+            background: var(--card); 
             backdrop-filter: blur(25px); 
             -webkit-backdrop-filter: blur(25px);
-            padding: 40px 30px; border-radius: 28px; 
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-top: 1px solid rgba(255, 255, 255, 0.15); 
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(13, 148, 136, 0.05); 
-            width: 100%; max-width: 380px; text-align: center; z-index: 1;
-            box-sizing: border-box; /* Memastikan padding tidak merusak width 100% */
-            animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            padding: 38px 32px;
+            border-radius: 26px; 
+            border: 1px solid var(--line);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.65), 0 0 35px rgba(94, 234, 212, 0.08); 
+            width: 100%;
+            max-width: 410px;
+            text-align: center;
+            z-index: 1;
+            animation: fadeIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            position: relative;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            from { opacity: 0; transform: translateY(25px) scale(0.96); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .brand-logo {
-            width: 72px; height: 72px; margin: 0 auto 20px auto;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 20px;
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 16px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             filter: drop-shadow(0 10px 25px rgba(94, 234, 212, 0.35));
+            transition: transform 0.3s ease;
         }
-        
-        .brand-logo svg { width: 72px; height: 72px; }
+        .brand-logo:hover {
+            transform: rotate(6deg) scale(1.05);
+        }
+        .brand-logo svg {
+            width: 70px;
+            height: 70px;
+        }
 
-        .login-box h2 { 
-            margin: 0 0 8px 0; font-size: 24px; font-weight: 800; letter-spacing: 0.5px; 
-            background: linear-gradient(to right, #ffffff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .brand-title {
+            font-size: 1.55rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin: 0 0 6px 0;
+            color: var(--ink);
         }
-        .login-box p { color: var(--text-sub); font-size: 13px; margin-bottom: 35px; line-height: 1.6; }
+        .brand-title b {
+            color: var(--a1);
+        }
+
+        .login-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 30px;
+            background: rgba(94, 234, 212, 0.1);
+            border: 1px solid rgba(94, 234, 212, 0.25);
+            color: var(--a1);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 24px;
+        }
+
+        .login-desc {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
         
-        .input-group { text-align: left; margin-bottom: 22px; position: relative; }
-        .input-group label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; }
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .input-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .input-group label i {
+            color: var(--a1);
+            font-size: 14px;
+        }
         
         .input-group input { 
-            width: 100%; padding: 14px 16px; 
-            background: rgba(0, 0, 0, 0.25); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 12px; color: var(--text-main); font-size: 14px; 
-            box-sizing: border-box; outline: none; transition: all 0.3s ease; 
-            font-family: 'Inter', sans-serif;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+            width: 100%;
+            padding: 13px 16px; 
+            background: rgba(0, 0, 0, 0.35); 
+            border: 1px solid var(--line); 
+            border-radius: 12px;
+            color: var(--ink);
+            font-family: 'Sora', sans-serif;
+            font-size: 14px; 
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s ease; 
         }
         
         .input-group input:focus { 
-            border-color: var(--primary); 
-            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15), inset 0 2px 4px rgba(0,0,0,0.2); 
-            background: rgba(15, 23, 42, 0.6); 
+            border-color: var(--a1); 
+            box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.15); 
+            background: rgba(13, 21, 39, 0.8); 
         }
 
         .password-wrapper { position: relative; display: flex; align-items: center; }
-        .password-wrapper input { padding-right: 45px; } 
-        .btn-eye { position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; padding: 0; transition: 0.3s; }
-        .btn-eye:hover { color: var(--text-main); transform: scale(1.1); }
-        .btn-eye svg { width: 20px; height: 20px; fill: currentColor; }
+        .password-wrapper input { padding-right: 48px; } 
+        .btn-eye {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            border-radius: 8px;
+            transition: 0.25s;
+            font-size: 18px;
+        }
+        .btn-eye:hover { color: var(--a1); background: rgba(255, 255, 255, 0.05); }
 
         /* --- PREMIUM BUTTON DENGAN EFEK SHIMMER --- */
         .btn-submit { 
-            position: relative; overflow: hidden;
-            width: 100%; padding: 15px; 
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            padding: 14px 20px; 
             background: linear-gradient(135deg, var(--a1) 0%, var(--a2) 100%); 
-            color: #060b1a; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; 
-            cursor: pointer; transition: all 0.3s ease; margin-top: 10px; display: flex; 
-            justify-content: center; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px;
-            box-shadow: 0 10px 25px rgba(94, 234, 212, 0.4), inset 0 1px 1px rgba(255,255,255,0.2);
+            color: #060b1a;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 800; 
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            gap: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            box-shadow: 0 10px 30px rgba(94, 234, 212, 0.35);
         }
         
-        /* Efek Shimmer (Cahaya Lewat) */
+        /* Efek Shimmer */
         .btn-submit::after {
-            content: ''; position: absolute; top: 0; left: -100%;
-            width: 50%; height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg); transition: 0.5s ease;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            transition: 0.5s ease;
         }
 
         .btn-submit:hover { 
             transform: translateY(-2px); 
-            box-shadow: 0 15px 35px rgba(13, 148, 136, 0.5), inset 0 1px 1px rgba(255,255,255,0.3); 
+            box-shadow: 0 14px 40px rgba(94, 234, 212, 0.5); 
+            filter: brightness(1.06);
         }
-        
+        .btn-submit:active { transform: translateY(0); }
         .btn-submit:hover::after { left: 150%; }
 
-        .btn-submit svg { width: 18px; height: 18px; fill: currentColor; transition: transform 0.3s ease; }
-        .btn-submit:hover svg { transform: translateX(4px); }
+        .btn-submit i { font-size: 18px; transition: transform 0.3s ease; }
+        .btn-submit:hover i { transform: translateX(3px); }
+
+        .login-footer-info {
+            margin-top: 24px;
+            font-size: 12px;
+            color: var(--muted);
+            text-align: center;
+        }
+        .login-footer-info a {
+            color: var(--a1);
+            text-decoration: underline;
+        }
 
         /* --- System Modal --- */
-        .system-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 11, 20, 0.85); backdrop-filter: blur(10px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeInPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .system-modal-popup { background: var(--card-bg); border-radius: 24px; width: 100%; max-width: 350px; max-height: calc(100vh - 40px); overflow-y: auto; box-sizing: border-box; padding: 35px 30px; text-align: center; color: var(--text-main); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 30px 60px rgba(0,0,0,0.6); backdrop-filter: blur(25px); }
+        .system-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(4, 7, 18, 0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            animation: fadeInPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .system-modal-popup {
+            background: rgba(13, 21, 39, 0.95);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 370px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            box-sizing: border-box;
+            padding: 32px 26px;
+            text-align: center;
+            color: var(--ink);
+            border: 1px solid var(--line);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.7), 0 0 35px rgba(239, 68, 68, 0.15);
+        }
         
-        .modal-icon-top { width: 60px; height: 60px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); box-shadow: 0 0 20px rgba(239, 68, 68, 0.15); }
-        .modal-icon-top svg { width: 28px; height: 28px; fill: var(--danger); filter: drop-shadow(0 0 5px var(--danger));}
+        .modal-icon-top {
+            width: 58px; height: 58px;
+            margin: 0 auto 18px auto;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+            font-size: 26px;
+            color: var(--danger);
+        }
         
-        .system-modal-header { font-size: 18px; font-weight: 800; color: var(--danger); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
-        .system-modal-body { font-size: 13px; color: var(--text-sub); line-height: 1.6; margin-bottom: 25px; white-space: pre-wrap; }
+        .system-modal-header {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--danger);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .system-modal-body {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 24px;
+            white-space: pre-wrap;
+        }
         
-        .btn-close-modal { width: 100%; background: var(--danger); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3); }
-        .btn-close-modal:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 15px 30px rgba(239, 68, 68, 0.4); }
+        .btn-close-modal {
+            width: 100%;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 13px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+        }
+        .btn-close-modal:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(239, 68, 68, 0.45);
+        }
 
-        body.lite-mode .ambient-blob-1, body.lite-mode .ambient-blob-2 { display: none !important; }
+        body.lite-mode .aurora, body.lite-mode .grain { display: none !important; }
         body.lite-mode * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-        body.lite-mode .login-box, body.lite-mode .system-modal-popup { background: #1e293b !important; }
-        @media (max-width: 400px) { .login-box { padding: 32px 22px; border-radius: 22px; } .login-box p { margin-bottom: 28px; } }
+        body.lite-mode .login-box, body.lite-mode .system-modal-popup { background: var(--card-solid) !important; }
+
+        @media (max-width: 480px) {
+            .btn-back-home { top: 16px; left: 16px; padding: 7px 12px; font-size: 12px; }
+            .login-box { padding: 32px 22px; border-radius: 22px; }
+        }
 
         @keyframes fadeInPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+    <!-- Ambient Aurora Background Elements (contoh.html) -->
+    <div class="aurora"><span></span><span></span><span></span></div>
+    <div class="grain"></div>
+
     <script src="page-loader.js?v=75"></script>
 
-    <div class="ambient-blob-1"></div>
-    <div class="ambient-blob-2"></div>
+    <!-- Tombol Navigasi ke Beranda -->
+    <a href="/" class="btn-back-home" title="Kembali ke Beranda">
+        <i class="ri-arrow-left-line"></i>
+        <span>Beranda</span>
+    </a>
 
     <div class="login-box">
         <div class="brand-logo">
@@ -187,35 +417,40 @@
             </svg>
         </div>
         
-        <h2>Zeroix Enterprise</h2>
-        <p>Autentikasi identitas untuk akses Control Center</p>
+        <h1 class="brand-title">Zeroix<b>Dark</b></h1>
+        <div class="login-pill"><i class="ri-shield-keyhole-line"></i> Control Center</div>
+        <p class="login-desc">Autentikasi identitas untuk akses manajemen panel dan server</p>
         
         <div class="input-group">
-            <label>Identitas Pengguna</label>
+            <label><i class="ri-user-3-line"></i> Identitas Pengguna</label>
             <input type="text" id="username" placeholder="Masukkan username..." autocomplete="off" required>
         </div>
         
         <div class="input-group">
-            <label>Kata Sandi</label>
+            <label><i class="ri-lock-password-line"></i> Kata Sandi</label>
             <div class="password-wrapper">
                 <input type="password" id="password" placeholder="Masukkan kata sandi..." required>
-                <button type="button" class="btn-eye" id="togglePassword" tabindex="-1">
-                    <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>
+                <button type="button" class="btn-eye" id="togglePassword" tabindex="-1" title="Lihat/Sembunyikan password">
+                    <i class="ri-eye-off-line" id="eyeIcon"></i>
                 </button>
             </div>
         </div>
         
         <button onclick="prosesLogin()" id="btnLogin" class="btn-submit">
             <span>Otorisasi Akses</span>
-            <svg viewBox="0 0 24 24"><path d="M5 13h11.17l-4.88 4.88c-.39.39-.39 1.03 0 1.42.39.39 1.02.39 1.41 0l6.59-6.59c.39-.39.39-1.02 0-1.41l-6.58-6.6a.996.996 0 10-1.41 1.41L16.17 11H5c-.55 0-1 .45-1 1s.45 1 1 1z"/></svg>
+            <i class="ri-arrow-right-line"></i>
         </button>
+
+        <div class="login-footer-info">
+            Belum punya panel? <a href="/store">Beli langsung via QRIS</a>
+        </div>
     </div>
 
     <!-- Modal Error Sistem -->
     <div id="modalLoginError" class="system-modal-overlay">
         <div class="system-modal-popup">
             <div class="modal-icon-top">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <i class="ri-error-warning-line"></i>
             </div>
             <div class="system-modal-header">Otorisasi Ditolak</div>
             <div class="system-modal-body" id="errorMsgText">Kredensial tidak valid.</div>
@@ -237,9 +472,9 @@
             passwordInput.setAttribute('type', newType);
             
             if (newType === 'text') {
-                eyeIcon.innerHTML = `<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>`;
+                eyeIcon.className = 'ri-eye-line';
             } else {
-                eyeIcon.innerHTML = `<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>`;
+                eyeIcon.className = 'ri-eye-off-line';
             }
         });
 
@@ -292,7 +527,7 @@
             const passIn = document.getElementById('password').value.trim();
             const btn = document.getElementById('btnLogin');
 
-            const defaultBtn = `<span>Otorisasi Akses</span> <svg viewBox="0 0 24 24"><path d="M5 13h11.17l-4.88 4.88c-.39.39-.39 1.03 0 1.42.39.39 1.02.39 1.41 0l6.59-6.59c.39-.39.39-1.02 0-1.41l-6.58-6.6a.996.996 0 10-1.41 1.41L16.17 11H5c-.55 0-1 .45-1 1s.45 1 1 1z"/></svg>`;
+            const defaultBtn = `<span>Otorisasi Akses</span> <i class="ri-arrow-right-line"></i>`;
 
             if (typeof AuthBridge === 'undefined') {
                 tampilkanError("Sistem sedang diperbarui. Muat ulang halaman (refresh) lalu coba lagi.");
@@ -304,7 +539,7 @@
                 return;
             }
 
-            btn.innerHTML = `<span>Memverifikasi...</span> <svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite; width:18px; fill:currentColor;"><path d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8z"/></svg>`;
+            btn.innerHTML = `<span>Memverifikasi...</span> <i class="ri-loader-4-line ri-spin"></i>`;
             btn.style.opacity = "0.7";
             btn.style.pointerEvents = "none";
 

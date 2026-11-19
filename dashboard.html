@@ -4,30 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>Control Center - Zeroix Enterprise</title>
+    <title>Control Center — ZeroixDark</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.css" rel="stylesheet">
     <style>
         :root { 
             --bg-dark: #060b1a; 
             --card-bg: rgba(255, 255, 255, 0.04); 
             --card-solid: #0d1527;
-            --primary: #5eead4; --primary-glow: rgba(94, 234, 212, 0.25);
+            --primary: #5eead4; --primary-glow: rgba(94, 234, 212, 0.28);
             --success: #10b981; --danger: #ef4444; --warning: #f59e0b; 
             --text-main: #e9eeff; --text-sub: #8d97b8; 
-            --border-color: rgba(255,255,255,0.09);
+            --border-color: rgba(255, 255, 255, 0.09);
+            --line: rgba(255, 255, 255, 0.09);
             --a1: #5eead4; --a2: #818cf8; --a3: #f472b6;
         }
         body { font-family: 'Sora', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 0; box-sizing: border-box; overflow-x: hidden; position: relative; }
         
-        /* --- AMBIENT BACKGROUND GLOW (contoh.html) --- */
-        .ambient-blob-1 { position: fixed; width: 500px; height: 500px; background: rgba(94, 234, 212, 0.18); border-radius: 50%; top: -10%; left: -10%; filter: blur(120px); animation: floatBlob 15s infinite alternate ease-in-out; z-index: -1; pointer-events: none; }
-        .ambient-blob-2 { position: fixed; width: 420px; height: 420px; background: rgba(129, 140, 248, 0.14); border-radius: 50%; bottom: -10%; right: -10%; filter: blur(100px); animation: floatBlob 18s infinite alternate-reverse ease-in-out; z-index: -1; pointer-events: none; }
-        @keyframes floatBlob { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 60px) scale(1.1); } }
+        /* --- AURORA FLOATING AMBIENCE (contoh.html) --- */
+        .aurora {
+            position: fixed; inset: -20%; z-index: -2;
+            filter: blur(80px) saturate(140%);
+            opacity: .55; pointer-events: none;
+        }
+        .aurora span {
+            position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%;
+            mix-blend-mode: screen; animation: drift 22s ease-in-out infinite alternate;
+        }
+        .aurora span:nth-child(1) { background: radial-gradient(circle, var(--a1), transparent 60%); top: 0; left: 10%; }
+        .aurora span:nth-child(2) { background: radial-gradient(circle, var(--a2), transparent 60%); top: 20%; right: 0; animation-delay: -8s; }
+        .aurora span:nth-child(3) { background: radial-gradient(circle, var(--a3), transparent 60%); bottom: 0; left: 30%; animation-delay: -14s; opacity: .6; }
+        @keyframes drift { to { transform: translate(12vmax, -8vmax) rotate(40deg) scale(1.2); } }
+
+        /* --- GRID GRAIN BACKGROUND (contoh.html) --- */
+        .grain {
+            position: fixed; inset: 0; z-index: -1;
+            background-image:
+                linear-gradient(var(--border-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 64px 64px;
+            mask-image: radial-gradient(circle at 50% 30%, #000, transparent 75%);
+            pointer-events: none;
+        }
 
         /* --- LITE MODE (ANTI-LAG) --- */
-        body.lite-mode .ambient-blob-1, body.lite-mode .ambient-blob-2 { display: none !important; }
+        body.lite-mode .aurora, body.lite-mode .grain { display: none !important; }
         body.lite-mode * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: none !important; }
         body.lite-mode .sidebar, body.lite-mode .top-nav, body.lite-mode .menu-section, body.lite-mode .stat-card, body.lite-mode .system-modal-popup { background: var(--card-solid) !important; border: 1px solid rgba(255,255,255,0.1) !important; }
         body.lite-mode .menu-card { background: rgba(0,0,0,0.3) !important; }
@@ -279,8 +303,9 @@
 </head>
 <body>
     <script src="page-loader.js?v=75"></script>
-    <div class="ambient-blob-1"></div>
-    <div class="ambient-blob-2"></div>
+    <!-- Ambient Aurora Background Elements (contoh.html) -->
+    <div class="aurora"><span></span><span></span><span></span></div>
+    <div class="grain"></div>
 
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebarMenu">
@@ -298,7 +323,7 @@
                     <path d="M 45 46.5 H 21 C 18.2 46.5 16.2 44.5 16.8 41.7 L 32.8 25.7 C 33.5 25 34.5 24.6 35.5 24.6 H 39.5 C 40.7 24.6 41.4 25.9 40.7 26.9 L 26.2 39.5 H 45 C 46.7 39.5 48 40.8 48 42.5 V 43.5 C 48 45.2 46.7 46.5 45 46.5 Z" fill="url(#zxDashBot)"/>
                     <circle cx="32" cy="32" r="2.2" fill="#fff"/>
                 </svg> 
-                <span>ENTERPRISE</span>
+                <span>Zeroix<b>Dark</b></span>
             </div>
             <button class="btn-sidebar-toggle mobile-hide" onclick="toggleSidebar()">
                 <svg class="icon-menu" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
@@ -326,19 +351,31 @@
         <div class="sidebar-menu">
             
             <button id="btnKelolaToko" class="sidebar-btn sidebar-btn-setting" style="display: none; background: rgba(245, 158, 11, 0.1); color: var(--warning); border-color: rgba(245, 158, 11, 0.2);" onclick="window.location.href='manage_products.html'">
-                <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
-                <span class="link-name">Etalase Publik</span>
-                <span class="tooltip">Etalase Publik</span>
+                <i class="ri-store-3-line" style="font-size: 20px;"></i>
+                <span class="link-name">Etalase Produk</span>
+                <span class="tooltip">Etalase Produk</span>
             </button>
 
+            <a href="/store" class="sidebar-btn" style="text-decoration: none; color: var(--a1);">
+                <i class="ri-shopping-bag-3-line" style="font-size: 20px;"></i>
+                <span class="link-name">Toko Server</span>
+                <span class="tooltip">Toko Server</span>
+            </a>
+
+            <a href="/" class="sidebar-btn" style="text-decoration: none;">
+                <i class="ri-home-5-line" style="font-size: 20px;"></i>
+                <span class="link-name">Beranda Web</span>
+                <span class="tooltip">Beranda Web</span>
+            </a>
+
             <button class="sidebar-btn" onclick="bukaModalPassword()">
-                <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg> 
+                <i class="ri-lock-password-line" style="font-size: 20px;"></i>
                 <span class="link-name">Kredensial Akun</span>
                 <span class="tooltip">Kredensial Akun</span>
             </button>
 
             <button class="sidebar-btn sidebar-btn-logout" onclick="logout()">
-                <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg> 
+                <i class="ri-logout-box-r-line" style="font-size: 20px;"></i>
                 <span class="link-name">Terminasi Sesi</span>
                 <span class="tooltip">Terminasi Sesi</span>
             </button>
@@ -360,7 +397,7 @@
                 <path d="M 45 46.5 H 21 C 18.2 46.5 16.2 44.5 16.8 41.7 L 32.8 25.7 C 33.5 25 34.5 24.6 35.5 24.6 H 39.5 C 40.7 24.6 41.4 25.9 40.7 26.9 L 26.2 39.5 H 45 C 46.7 39.5 48 40.8 48 42.5 V 43.5 C 48 45.2 46.7 46.5 45 46.5 Z" fill="url(#zxMobBot)"/>
                 <circle cx="32" cy="32" r="2.2" fill="#fff"/>
             </svg> 
-            <span>Enterprise</span>
+            <span>Zeroix<b>Dark</b></span>
         </div>
         
         <div class="header-controls">
@@ -502,7 +539,18 @@
         </div>
     </div>
     
-    <div class="footer">Zeroix Enterprise Core &copy; 2026<br><span style="color: var(--primary); font-weight: bold;">System V7.1 - Lite Engine Integrated</span></div>
+    <div class="footer">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px; font-weight: 700;">
+            <svg viewBox="0 0 64 64" fill="none" style="width: 20px; height: 20px;" aria-hidden="true">
+                <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#zxDashBg)" stroke="url(#zxDashBrd)" stroke-width="1.6"/>
+                <path d="M 19 17.5 H 43 C 45.8 17.5 47.8 19.5 47.2 22.3 L 31.2 38.3 C 30.5 39 29.5 39.4 28.5 39.4 H 24.5 C 23.3 39.4 22.6 38.1 23.3 37.1 L 37.8 24.5 H 19 C 17.3 24.5 16 23.2 16 21.5 V 20.5 C 16 18.8 17.3 17.5 19 17.5 Z" fill="url(#zxDashTop)"/>
+                <path d="M 45 46.5 H 21 C 18.2 46.5 16.2 44.5 16.8 41.7 L 32.8 25.7 C 33.5 25 34.5 24.6 35.5 24.6 H 39.5 C 40.7 24.6 41.4 25.9 40.7 26.9 L 26.2 39.5 H 45 C 46.7 39.5 48 40.8 48 42.5 V 43.5 C 48 45.2 46.7 46.5 45 46.5 Z" fill="url(#zxDashBot)"/>
+                <circle cx="32" cy="32" r="2.2" fill="#fff"/>
+            </svg>
+            <span>Zeroix<b>Dark</b> Control Center</span>
+        </div>
+        <div>&copy; 2026 ZeroixDark · Ditenagai Infrastruktur Zeroix Enterprise.</div>
+    </div>
 
     <!-- MODAL ENTERPRISE UI -->
     <div id="modalPassword" class="system-modal-overlay"><div class="system-modal-popup" style="border-top: 4px solid var(--primary);"><svg class="modal-icon success" style="fill: var(--primary);" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg><h3 style="color: var(--primary);">MODIFIKASI KREDENSIAL</h3><p>Perbarui kata sandi untuk otorisasi akses ke Control Center.</p><input type="password" id="inputPassBaru" placeholder="Ketik kata sandi baru..." autocomplete="off"><button class="btn-action btn-success" style="background: var(--primary); box-shadow: 0 4px 15px var(--primary-glow);" onclick="simpanPassword()">Simpan Kredensial</button><button class="btn-batal" onclick="tutupModal('modalPassword')">Batalkan</button></div></div>

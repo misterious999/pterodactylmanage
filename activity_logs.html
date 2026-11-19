@@ -4,71 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>Log Audit Sistem - Zeroix Enterprise</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Log Audit Sistem — ZeroixDark</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.2">
+    <link rel="stylesheet" href="ptero-ui.css?v=9.3">
     <style>
-        :root {
-            --bg-dark: #070b14;
-            --card-bg: rgba(15, 23, 42, 0.6);
-            --card-solid: #1e293b;
-            --primary: #0d9488; --primary-glow: rgba(13, 148, 136, 0.2);
-            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
-            --text-main: #f8fafc; --text-sub: #94a3b8;
-            --input-bg: rgba(0, 0, 0, 0.25); --border-color: rgba(255,255,255,0.08);
-        }
-
-        /* --- LITE MODE (ANTI-LAG) --- */
-        body.lite-mode .ambient-blob-1, body.lite-mode .ambient-blob-2 { display: none !important; }
-        body.lite-mode * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: none !important; }
-        body.lite-mode .box, body.lite-mode .stat { background: var(--card-solid) !important; border: 1px solid rgba(255,255,255,0.1) !important; }
-
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0 auto; padding: 25px 5%; max-width: 1100px; position: relative; overflow-x: hidden; box-sizing: border-box; }
-        *, *::before, *::after { box-sizing: border-box; }
-
-        .ambient-blob-1 { position: fixed; width: 400px; height: 400px; background: rgba(239, 68, 68, 0.08); border-radius: 50%; top: -10%; left: -10%; filter: blur(100px); animation: floatBlob 15s infinite alternate ease-in-out; z-index: -1; pointer-events: none; }
-        .ambient-blob-2 { position: fixed; width: 300px; height: 300px; background: rgba(13, 148, 136, 0.12); border-radius: 50%; bottom: -10%; right: -10%; filter: blur(80px); animation: floatBlob 18s infinite alternate-reverse ease-in-out; z-index: -1; pointer-events: none; }
-        @keyframes floatBlob { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(40px, 50px) scale(1.1); } }
-
-        .btn-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 25px; padding: 10px 18px; background: rgba(255,255,255,0.05); color: var(--text-main); text-decoration: none; border-radius: 12px; font-size: 13px; font-weight: 700; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
-        .btn-back svg { width: 16px; height: 16px; fill: currentColor; transition: transform 0.3s; }
-        .btn-back:hover { background: var(--primary-glow); color: white; border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 5px 15px var(--primary-glow); }
-        .btn-back:hover svg { transform: translateX(-4px); }
-
-        h2 { font-weight: 800; margin: 0 0 5px 0; color: var(--text-main); display: flex; align-items: center; gap: 10px; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
-        h2 svg { width: 26px; height: 26px; fill: var(--danger); filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.5)); flex-shrink: 0; }
-        .sub-title { color: var(--text-sub); margin: 0 0 30px 0; font-size: 13px; line-height: 1.5; }
         .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); animation: pulse 2s infinite; margin-right: 6px; vertical-align: middle; }
         .live-dot.off { background: var(--text-sub); animation: none; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); } 70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
 
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat { background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px 20px; }
-        .stat-value { font-size: 24px; font-weight: 800; margin: 0 0 4px 0; line-height: 1; }
-        .stat-title { color: var(--text-sub); font-size: 10px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin: 0; }
-
-        .box { background: var(--card-bg); backdrop-filter: blur(20px); padding: 25px; border-radius: 20px; border: 1px solid var(--border-color); margin-bottom: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
         .toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
-        .toolbar input, .toolbar select { flex: 1 1 200px; min-width: 0; padding: 12px 14px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-main); font-size: 13px; outline: none; transition: 0.3s; font-family: 'Inter', sans-serif; }
+        .toolbar input, .toolbar select { flex: 1 1 200px; min-width: 0; }
         .toolbar select { flex: 0 1 200px; cursor: pointer; }
-        .toolbar select option { background: var(--card-solid); color: var(--text-main); }
-        .toolbar input:focus, .toolbar select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
 
         .day-label { font-size: 11px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1.5px; margin: 22px 0 10px 0; display: flex; align-items: center; gap: 10px; }
         .day-label:first-child { margin-top: 0; }
-        .day-label::after { content: ''; flex: 1; height: 1px; background: var(--border-color); }
+        .day-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 
-        .log-item { display: flex; gap: 14px; align-items: flex-start; padding: 14px; border-radius: 14px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.04); margin-bottom: 8px; transition: 0.2s; }
-        .log-item:hover { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.03); }
+        .log-item { display: flex; gap: 14px; align-items: flex-start; padding: 14px; border-radius: 14px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px; transition: 0.2s; }
+        .log-item:hover { border-color: rgba(94,234,212,0.3); background: rgba(255,255,255,0.04); }
         .log-avatar { width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; text-transform: uppercase; }
         .log-body { flex: 1; min-width: 0; }
         .log-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 5px; }
-        .log-user { font-weight: 700; font-size: 13px; overflow-wrap: anywhere; }
-        .log-time { margin-left: auto; font-size: 11px; color: var(--text-sub); font-weight: 600; white-space: nowrap; }
+        .log-user { font-weight: 700; font-size: 13.5px; overflow-wrap: anywhere; }
+        .log-time { margin-left: auto; font-size: 11px; color: var(--text-sub); font-weight: 600; white-space: nowrap; font-family: 'JetBrains Mono', monospace; }
         .log-action { font-size: 13px; color: var(--text-sub); line-height: 1.5; margin: 0; overflow-wrap: anywhere; }
         .badge { display: inline-block; padding: 3px 9px; border-radius: 50px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid; white-space: nowrap; }
         .tone-owner { background: rgba(245, 158, 11, 0.12); color: var(--warning); border-color: rgba(245, 158, 11, 0.3); }
         .tone-partner { background: rgba(16, 185, 129, 0.12); color: var(--success); border-color: rgba(16, 185, 129, 0.3); }
-        .tone-reseller { background: rgba(13, 148, 136, 0.12); color: #2dd4bf; border-color: rgba(13, 148, 136, 0.3); }
+        .tone-reseller { background: rgba(94, 234, 212, 0.12); color: var(--a1); border-color: rgba(94, 234, 212, 0.3); }
         .tone-other { background: rgba(148, 163, 184, 0.1); color: var(--text-sub); border-color: rgba(148, 163, 184, 0.25); }
         .tone-danger { color: var(--danger) !important; }
 
@@ -76,40 +39,40 @@
         .core-spinner { width: 34px; height: 34px; margin: 0 auto 15px auto; border-radius: 50%; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--primary); animation: spin 1s infinite linear; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .btn-more { display: block; width: 100%; margin-top: 15px; padding: 12px; background: rgba(255,255,255,0.03); color: var(--text-sub); border: 1px solid var(--border-color); border-radius: 12px; font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: 0.3s; font-family: 'Inter', sans-serif; }
-        .btn-more:hover { color: var(--text-main); border-color: var(--primary); background: var(--primary-glow); }
+        .btn-more { display: block; width: 100%; margin-top: 15px; padding: 12px; background: var(--card); color: var(--text-sub); border: 1px solid var(--line); border-radius: 12px; font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: 0.3s; font-family: 'Sora', sans-serif; }
+        .btn-more:hover { color: var(--text-main); border-color: var(--primary); background: var(--primary-soft); }
 
-        @media (max-width: 480px) {
-            body { padding: 20px 16px; }
-            h2 { font-size: 18px; }
-            .box { padding: 16px; border-radius: 16px; }
-            .log-item { padding: 12px; gap: 10px; }
-            .log-avatar { width: 32px; height: 32px; border-radius: 10px; font-size: 12px; }
-            .log-time { margin-left: 0; width: 100%; }
-            .toolbar select { flex: 1 1 100%; }
-        }
-        .btn-clear-all { flex: 0 0 auto; padding: 12px 16px; background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; font-weight: 700; font-size: 12px; cursor: pointer; transition: .2s; }
+        .btn-clear-all { flex: 0 0 auto; padding: 12px 16px; background: rgba(239,68,68,0.12); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; font-weight: 700; font-size: 12px; cursor: pointer; transition: .2s; }
         .btn-clear-all:hover { background: var(--danger); color: #fff; }
         .btn-clear-all:disabled { opacity: .4; cursor: not-allowed; }
         .log-del { margin-left: 8px; background: none; border: none; color: var(--text-sub); font-size: 14px; line-height: 1; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
         .log-del:hover { color: var(--danger); background: rgba(239,68,68,0.1); }
-        @media (max-width: 600px) { .btn-clear-all { flex: 1 1 100%; } }
+
+        @media (max-width: 480px) {
+            .log-item { padding: 12px; gap: 10px; }
+            .log-avatar { width: 32px; height: 32px; border-radius: 10px; font-size: 12px; }
+            .log-time { margin-left: 0; width: 100%; }
+            .toolbar select { flex: 1 1 100%; }
+            .btn-clear-all { flex: 1 1 100%; }
+        }
     </style>
 </head>
 <body>
     <script src="page-loader.js?v=75"></script>
-    <div class="ambient-blob-1"></div>
-    <div class="ambient-blob-2"></div>
+    <!-- Ambient Aurora Background Elements (contoh.html) -->
+    <div class="aurora"><span></span><span></span><span></span></div>
+    <div class="grain"></div>
 
     <a href="dashboard.html" class="btn-back">
-        <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-        Kembali ke Dashboard
+        <i class="ri-arrow-left-line"></i>
+        <span>Kembali ke Dashboard</span>
     </a>
 
     <h2>
-        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-        Log Audit Sistem
+        <i class="ri-shield-keyhole-line" style="color:var(--danger); font-size:24px; vertical-align:middle;"></i>
+        <span>Log Audit Sistem</span>
     </h2>
+    <p class="sub-title"><span class="live-dot off" id="liveDot"></span><span id="liveText">Menghubungkan ke basis data...</span></p>
     <p class="sub-title"><span class="live-dot off" id="liveDot"></span><span id="liveText">Menghubungkan ke basis data...</span></p>
 
     <div class="stats">
