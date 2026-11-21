@@ -443,12 +443,614 @@
             * { animation: none !important; transition: none !important; }
             .rv { opacity: 1; transform: none; }
         }
+
+        /* ============================================================
+           CINEMATIC PROMO INTRO OVERLAY (Tampil Pertama Kali)
+           ============================================================ */
+        html.promo-locked, html.promo-locked body {
+            overflow: hidden !important;
+            height: 100vh !important;
+        }
+        #promoIntro {
+            position: fixed; inset: 0; z-index: 999999;
+            background: #060b1a;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            transition: opacity .85s cubic-bezier(.4,0,.2,1), transform .85s cubic-bezier(.4,0,.2,1), filter .85s cubic-bezier(.4,0,.2,1);
+        }
+        #promoIntro.promo-exit {
+            opacity: 0; transform: scale(1.05); filter: blur(10px);
+            pointer-events: none;
+        }
+        #promoIntro.promo-hidden {
+            display: none !important;
+        }
+
+        /* Promo Scenes */
+        #promoIntro .scene {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 10; opacity: 0;
+            transform: scale(.92);
+            transition: opacity .8s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1);
+            pointer-events: none;
+            padding: 30px;
+            text-align: center;
+        }
+        #promoIntro .scene.active {
+            opacity: 1; transform: scale(1); pointer-events: auto;
+        }
+        #promoIntro .scene.exit {
+            opacity: 0; transform: scale(1.08);
+        }
+
+        /* Promo Scene 1: Logo Intro */
+        #promoIntro .logo-container {
+            position: relative;
+            width: 170px; height: 170px;
+            margin-bottom: 26px;
+        }
+        #promoIntro .logo-ring {
+            position: absolute; inset: -18px;
+            border-radius: 50%;
+            animation: pLogoRingSpin 6s linear infinite;
+        }
+        #promoIntro .logo-ring::before {
+            content: ''; position: absolute; inset: -2px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, var(--a1), var(--a2), var(--a3), transparent 70%);
+            mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+        }
+        @keyframes pLogoRingSpin { to { transform: rotate(360deg); } }
+        #promoIntro .logo-ring-2 {
+            animation-direction: reverse;
+            animation-duration: 8s;
+            inset: -32px; opacity: .5;
+        }
+        #promoIntro .logo-svg {
+            width: 100%; height: 100%;
+            filter: drop-shadow(0 0 40px rgba(94,234,212,.5));
+            animation: pLogoPulse 3s ease-in-out infinite;
+        }
+        @keyframes pLogoPulse {
+            0%,100% { filter: drop-shadow(0 0 40px rgba(94,234,212,.5)); }
+            50% { filter: drop-shadow(0 0 60px rgba(129,140,248,.6)); }
+        }
+        #promoIntro .scene1-title {
+            font-size: clamp(2.4rem,6.5vw,4.8rem);
+            font-weight: 900; letter-spacing: -.04em;
+            line-height: 1; opacity: 0;
+            animation: pSlideUpFade 1s 1.2s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        #promoIntro .scene1-title b { color: var(--a1); }
+        #promoIntro .scene1-sub {
+            font-size: clamp(.88rem,2.4vw,1.25rem);
+            color: var(--muted); margin-top: 14px;
+            opacity: 0; animation: pSlideUpFade .8s 1.8s cubic-bezier(.4,0,.2,1) forwards;
+            font-weight: 300;
+        }
+        @keyframes pSlideUpFade {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Promo Scene 2: Problem */
+        #promoIntro .scene2-emoji {
+            font-size: clamp(3rem,8vw,4.8rem);
+            margin-bottom: 18px; opacity: 0;
+            animation: pPopIn .6s .3s cubic-bezier(.175,.885,.32,1.275) forwards;
+        }
+        #promoIntro .scene2-title {
+            font-size: clamp(1.45rem,4.2vw,2.8rem);
+            font-weight: 800; letter-spacing: -.03em;
+            max-width: 680px; opacity: 0;
+            animation: pSlideUpFade .8s .5s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        #promoIntro .scene2-title .hl { color: var(--a3); }
+        #promoIntro .scene2-sub {
+            font-size: clamp(.85rem,2vw,1.1rem);
+            color: var(--muted); margin-top: 16px; max-width: 540px;
+            opacity: 0; animation: pSlideUpFade .8s .9s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        @keyframes pPopIn {
+            from { opacity: 0; transform: scale(0); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Promo Scene 3: Features */
+        #promoIntro .features-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 18px; max-width: 680px; width: 100%;
+        }
+        #promoIntro .feature-card {
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 20px; padding: 24px 20px;
+            backdrop-filter: blur(12px); text-align: left;
+            opacity: 0; transform: translateY(30px);
+        }
+        #promoIntro .feature-card .f-icon {
+            width: 46px; height: 46px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; margin-bottom: 12px;
+        }
+        #promoIntro .feature-card:nth-child(1) .f-icon { background: rgba(94,234,212,.12); color: var(--a1); border: 1px solid rgba(94,234,212,.3); }
+        #promoIntro .feature-card:nth-child(2) .f-icon { background: rgba(129,140,248,.12); color: var(--a2); border: 1px solid rgba(129,140,248,.3); }
+        #promoIntro .feature-card:nth-child(3) .f-icon { background: rgba(244,114,182,.12); color: var(--a3); border: 1px solid rgba(244,114,182,.3); }
+        #promoIntro .feature-card:nth-child(4) .f-icon { background: rgba(94,234,212,.12); color: var(--a1); border: 1px solid rgba(94,234,212,.3); }
+        #promoIntro .feature-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 5px; }
+        #promoIntro .feature-card p { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+        #promoIntro .scene3-title, #promoIntro .scene4-title, #promoIntro .scene5-title {
+            font-size: clamp(1.5rem,3.8vw,2.5rem);
+            font-weight: 800; letter-spacing: -.03em;
+            margin-bottom: 26px; opacity: 0;
+            animation: pSlideUpFade .8s .3s cubic-bezier(.4,0,.2,1) forwards;
+        }
+
+        /* Promo Scene 4: Steps */
+        #promoIntro .steps-flow {
+            display: flex; gap: 14px; max-width: 860px; width: 100%;
+            flex-wrap: wrap; justify-content: center;
+        }
+        #promoIntro .step-item {
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 18px; padding: 22px 18px;
+            flex: 1; min-width: 160px; max-width: 195px;
+            text-align: center; opacity: 0; transform: translateY(30px);
+        }
+        #promoIntro .step-num {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color: #060b1a; font-weight: 900; font-size: 1rem;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 12px; font-family: 'JetBrains Mono', monospace;
+            box-shadow: 0 6px 20px rgba(94,234,212,.35);
+        }
+        #promoIntro .step-item h4 { font-size: .92rem; font-weight: 700; margin-bottom: 5px; }
+        #promoIntro .step-item p { font-size: .76rem; color: var(--muted); line-height: 1.45; }
+
+        /* Promo Scene 5: Pricing */
+        #promoIntro .price-cards {
+            display: flex; gap: 18px; justify-content: center;
+            flex-wrap: wrap; max-width: 760px;
+        }
+        #promoIntro .price-card {
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 20px; padding: 26px 22px;
+            min-width: 190px; flex: 1; max-width: 230px;
+            text-align: center; opacity: 0; transform: scale(.85);
+        }
+        #promoIntro .price-card.featured {
+            border-color: rgba(94,234,212,.4);
+            background: rgba(94,234,212,.06);
+            box-shadow: 0 16px 45px rgba(94,234,212,.15);
+        }
+        #promoIntro .price-card .p-tag {
+            font-size: .7rem; padding: 4px 10px; border-radius: 20px;
+            display: inline-block; margin-bottom: 12px;
+            background: rgba(129,140,248,.15); color: #c7cbff; font-weight: 600;
+        }
+        #promoIntro .price-card.featured .p-tag {
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color: #060b1a; font-weight: 800;
+        }
+        #promoIntro .price-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
+        #promoIntro .price-card .p-price {
+            font-size: 1.7rem; font-weight: 900; margin: 8px 0;
+            font-family: 'JetBrains Mono', monospace; color: var(--a1);
+        }
+        #promoIntro .price-card .p-price small { font-size: .68rem; font-weight: 400; color: var(--muted); }
+        #promoIntro .price-card .p-desc { font-size: .8rem; color: var(--muted); line-height: 1.45; }
+
+        /* Promo Scene 6: CTA */
+        #promoIntro .cta-badge {
+            display: inline-flex; gap: 8px; align-items: center;
+            border: 1px solid var(--line); background: rgba(255,255,255,.04);
+            padding: 7px 16px; border-radius: 30px;
+            font-size: .82rem; color: var(--muted); margin-bottom: 18px;
+            opacity: 0; animation: pSlideUpFade .6s .3s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        #promoIntro .cta-badge i { color: var(--a1); }
+        #promoIntro .cta-title {
+            font-size: clamp(1.9rem,5.5vw,3.6rem);
+            font-weight: 900; letter-spacing: -.04em;
+            line-height: 1.1; max-width: 660px;
+            opacity: 0; animation: pSlideUpFade .8s .6s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        #promoIntro .cta-title .grad {
+            background: linear-gradient(90deg, var(--a1), var(--a2), var(--a3));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        #promoIntro .cta-sub {
+            font-size: clamp(.85rem,2vw,1.05rem);
+            color: var(--muted); margin: 14px 0 28px; max-width: 490px;
+            opacity: 0; animation: pSlideUpFade .8s 1s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        #promoIntro .cta-buttons {
+            display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+            opacity: 0; animation: pSlideUpFade .8s 1.3s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        #promoIntro .btn-cta {
+            display: inline-flex; gap: 8px; align-items: center; justify-content: center;
+            padding: 14px 28px; border-radius: 14px; font-weight: 700;
+            font-size: .95rem; border: 1px solid var(--line);
+            background: rgba(255,255,255,.04); color: var(--ink);
+            text-decoration: none; transition: all .3s; cursor: pointer;
+        }
+        #promoIntro .btn-cta:hover { border-color: var(--a1); transform: translateY(-3px); }
+        #promoIntro .btn-cta.primary {
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color: #060b1a; border: 0; font-weight: 800;
+            box-shadow: 0 10px 35px rgba(94,234,212,.35);
+        }
+        #promoIntro .btn-cta.primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 45px rgba(94,234,212,.5);
+        }
+        #promoIntro .cta-url {
+            margin-top: 20px; font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(.75rem,1.8vw,.92rem); color: var(--a1);
+            opacity: 0; animation: pSlideUpFade .8s 1.6s cubic-bezier(.4,0,.2,1) forwards;
+        }
+
+        /* Top Bar Controls */
+        #promoIntro .watermark {
+            position: fixed; top: 18px; left: 24px; z-index: 50;
+            display: flex; align-items: center; gap: 8px;
+            font-weight: 800; font-size: .9rem; opacity: .85;
+        }
+        #promoIntro .watermark svg {
+            width: 28px; height: 28px;
+            filter: drop-shadow(0 0 8px rgba(94,234,212,.4));
+        }
+        #promoIntro .watermark span b { color: var(--a1); }
+
+        #promoIntro .btn-skip-intro {
+            position: fixed; top: 18px; right: 24px; z-index: 60;
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 20px; border-radius: 14px;
+            font-weight: 700; font-size: .85rem;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--ink); border: 1px solid var(--line);
+            backdrop-filter: blur(12px);
+            cursor: pointer; transition: all .3s ease;
+            font-family: 'Sora', sans-serif;
+        }
+        #promoIntro .btn-skip-intro:hover {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: var(--a1); color: var(--a1);
+            transform: translateY(-2px);
+        }
+        #promoIntro .dl-btn {
+            position: fixed; top: 18px; right: 185px; z-index: 60;
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 18px; border-radius: 14px;
+            font-weight: 700; font-size: .85rem;
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color: #060b1a; border: none;
+            box-shadow: 0 4px 18px rgba(94, 234, 212, .3);
+            cursor: pointer; transition: all .3s ease;
+            font-family: 'Sora', sans-serif;
+        }
+        #promoIntro .dl-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(94, 234, 212, .45);
+        }
+        #promoIntro .dl-btn.recording {
+            background: linear-gradient(135deg, #ef4444, var(--a3));
+            animation: pRecPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes pRecPulse {
+            0%,100% { box-shadow: 0 6px 24px rgba(239,68,68,.3); }
+            50% { box-shadow: 0 6px 30px rgba(239,68,68,.55); }
+        }
+        #promoIntro .dl-btn .rec-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #fff; display: none;
+            animation: pRecDotBlink 1s step-end infinite;
+        }
+        #promoIntro .dl-btn.recording .rec-dot { display: block; }
+        @keyframes pRecDotBlink { 50% { opacity: 0; } }
+
+        #promoIntro .rec-overlay {
+            position: fixed; inset: 0; z-index: 55;
+            pointer-events: none; border: 3px solid transparent;
+            transition: border-color .3s;
+        }
+        #promoIntro .rec-overlay.active {
+            border-color: #ef4444;
+            animation: pRecBorder 2s ease-in-out infinite;
+        }
+        @keyframes pRecBorder {
+            0%,100% { border-color: rgba(239,68,68,.6); }
+            50% { border-color: rgba(239,68,68,.2); }
+        }
+        #promoIntro .rec-timer {
+            position: fixed; top: 20px; right: 350px; z-index: 60;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .8rem; font-weight: 600;
+            color: #ef4444; display: none;
+            align-items: center; gap: 6px;
+        }
+        #promoIntro .rec-timer.active { display: inline-flex; }
+        #promoIntro .rec-timer .blink { animation: pRecDotBlink 1s step-end infinite; }
+
+        /* Bottom Controls */
+        #promoIntro .progress-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 4px;
+            z-index: 100; background: rgba(255,255,255,.06);
+        }
+        #promoIntro .progress-fill {
+            height: 100%; width: 0;
+            background: linear-gradient(90deg, var(--a1), var(--a2), var(--a3));
+            transition: width .5s ease;
+            box-shadow: 0 0 15px rgba(94,234,212,.5);
+        }
+        #promoIntro .scene-dots {
+            position: fixed; right: 24px; top: 50%; transform: translateY(-50%);
+            z-index: 50; display: flex; flex-direction: column; gap: 10px;
+        }
+        #promoIntro .scene-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,.2);
+            background: transparent; transition: all .3s ease;
+            cursor: pointer;
+        }
+        #promoIntro .scene-dot.active {
+            background: var(--a1); border-color: var(--a1);
+            box-shadow: 0 0 12px rgba(94,234,212,.6);
+        }
+        #promoIntro .play-toggle {
+            position: fixed; bottom: 22px; right: 24px; z-index: 50;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+            color: var(--ink); font-size: 1.15rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all .3s; backdrop-filter: blur(10px);
+        }
+        #promoIntro .play-toggle:hover {
+            background: rgba(255,255,255,.15); border-color: var(--a1);
+            transform: scale(1.1);
+        }
+        #promoIntro .sound-wave {
+            position: fixed; bottom: 26px; left: 24px; z-index: 50;
+            display: flex; align-items: flex-end; gap: 3px; height: 20px; opacity: .5;
+        }
+        #promoIntro .sound-wave span {
+            width: 3px; background: var(--a1); border-radius: 2px;
+            animation: pWave 1s ease-in-out infinite;
+        }
+        #promoIntro .sound-wave span:nth-child(1) { height: 6px; animation-delay: 0s; }
+        #promoIntro .sound-wave span:nth-child(2) { height: 12px; animation-delay: .15s; }
+        #promoIntro .sound-wave span:nth-child(3) { height: 8px; animation-delay: .3s; }
+        #promoIntro .sound-wave span:nth-child(4) { height: 16px; animation-delay: .45s; }
+        #promoIntro .sound-wave span:nth-child(5) { height: 10px; animation-delay: .6s; }
+        @keyframes pWave { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(.3); } }
+        #promoIntro .sound-wave.paused span { animation-play-state: paused; }
+        #promoIntro .skip-hint {
+            position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+            z-index: 50; font-size: .75rem; color: var(--muted);
+            opacity: 0; animation: pFadeIn 2s 3s forwards; pointer-events: none;
+        }
+        @keyframes pFadeIn { to { opacity: .6; } }
+
+        /* Promo Particles */
+        #promoIntro .particles {
+            position: fixed; inset: 0; z-index: 1; pointer-events: none;
+        }
+        #promoIntro .particle {
+            position: absolute; width: 3px; height: 3px; border-radius: 50%;
+            background: var(--a1); opacity: 0;
+            animation: pParticleFly linear infinite;
+        }
+        @keyframes pParticleFly {
+            0% { transform: translateY(110vh) scale(0); opacity: 0; }
+            10% { opacity: .7; }
+            90% { opacity: .4; }
+            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            #promoIntro .features-grid { grid-template-columns: 1fr; max-width: 360px; }
+            #promoIntro .steps-flow { flex-direction: column; align-items: center; }
+            #promoIntro .step-item { max-width: 280px; }
+            #promoIntro .price-cards { flex-direction: column; align-items: center; }
+            #promoIntro .price-card { max-width: 280px; }
+            #promoIntro .scene-dots { right: 10px; }
+            #promoIntro .scene { padding: 20px; }
+            #promoIntro .btn-skip-intro { right: 12px; top: 12px; padding: 7px 13px; font-size: .75rem; }
+            #promoIntro .dl-btn { right: 125px; top: 12px; padding: 7px 11px; font-size: .75rem; }
+            #promoIntro .dl-btn span.dl-text { display: none; }
+            #promoIntro .rec-timer { right: 190px; top: 14px; font-size: .72rem; }
+        }
     </style>
 </head>
 <body>
+<!-- Script inisialisasi awal: lock scroll & set flag loader -->
+<script>
+    document.documentElement.classList.add('promo-locked');
+    window.__zxLoader = true;
+</script>
+
 <!-- Ambient Background Elements (contoh.html) -->
 <div class="aurora"><span></span><span></span><span></span></div>
 <div class="grain"></div>
+
+<!-- ============================================================
+     CINEMATIC PROMO INTRO (Tampil di awal sebelum landing page)
+     ============================================================ -->
+<div id="promoIntro">
+    <!-- Ambient & Particles -->
+    <div class="aurora"><span></span><span></span><span></span></div>
+    <div class="grain"></div>
+    <div class="particles" id="promoParticles"></div>
+
+    <!-- Watermark Logo -->
+    <div class="watermark">
+        <svg viewBox="0 0 64 64" fill="none">
+            <defs>
+                <linearGradient id="pWmBg" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#0c152c"/><stop offset="100%" stop-color="#050a16"/></linearGradient>
+                <linearGradient id="pWmBrd" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#5eead4"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+                <linearGradient id="pWmTop" x1="16" y1="17" x2="47" y2="38"><stop offset="0%" stop-color="#5eead4"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+                <linearGradient id="pWmBot" x1="17" y1="26" x2="48" y2="47"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+            </defs>
+            <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#pWmBg)" stroke="url(#pWmBrd)" stroke-width="1.6"/>
+            <path d="M 19 17.5 H 43 C 45.8 17.5 47.8 19.5 47.2 22.3 L 31.2 38.3 C 30.5 39 29.5 39.4 28.5 39.4 H 24.5 C 23.3 39.4 22.6 38.1 23.3 37.1 L 37.8 24.5 H 19 C 17.3 24.5 16 23.2 16 21.5 V 20.5 C 16 18.8 17.3 17.5 19 17.5 Z" fill="url(#pWmTop)"/>
+            <path d="M 45 46.5 H 21 C 18.2 46.5 16.2 44.5 16.8 41.7 L 32.8 25.7 C 33.5 25 34.5 24.6 35.5 24.6 H 39.5 C 40.7 24.6 41.4 25.9 40.7 26.9 L 26.2 39.5 H 45 C 46.7 39.5 48 40.8 48 42.5 V 43.5 C 48 45.2 46.7 46.5 45 46.5 Z" fill="url(#pWmBot)"/>
+            <circle cx="32" cy="32" r="2.2" fill="#fff"/>
+        </svg>
+        <span>Zeroix<b>Dark</b></span>
+    </div>
+
+    <!-- Top Action Buttons -->
+    <button type="button" class="dl-btn" id="promoDlBtn" title="Download Promo Video">
+        <span class="rec-dot"></span>
+        <i class="ri-download-2-line" id="promoDlIcon"></i>
+        <span class="dl-text" id="promoDlLabel">Download Video</span>
+    </button>
+    <button type="button" class="btn-skip-intro" id="btnSkipIntro" title="Lewati video & masuk ke landing page">
+        <span>Lewati Intro</span> <i class="ri-arrow-right-line"></i>
+    </button>
+    <div class="rec-overlay" id="promoRecOverlay"></div>
+    <div class="rec-timer" id="promoRecTimer"><span class="blink">⏺</span> REC <span id="promoRecTime">00:00</span></div>
+
+    <!-- ===== SCENE 1: Logo Intro ===== -->
+    <div class="scene" id="pScene1">
+        <div class="logo-container">
+            <div class="logo-ring"></div>
+            <div class="logo-ring logo-ring-2"></div>
+            <svg class="logo-svg" viewBox="0 0 64 64" fill="none">
+                <defs>
+                    <linearGradient id="pS1Bg" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#0c152c"/><stop offset="100%" stop-color="#050a16"/></linearGradient>
+                    <linearGradient id="pS1Brd" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#5eead4"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+                    <linearGradient id="pS1Top" x1="16" y1="17" x2="47" y2="38"><stop offset="0%" stop-color="#5eead4"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+                    <linearGradient id="pS1Bot" x1="17" y1="26" x2="48" y2="47"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+                </defs>
+                <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#pS1Bg)" stroke="url(#pS1Brd)" stroke-width="2"/>
+                <path d="M 19 17.5 H 43 C 45.8 17.5 47.8 19.5 47.2 22.3 L 31.2 38.3 C 30.5 39 29.5 39.4 28.5 39.4 H 24.5 C 23.3 39.4 22.6 38.1 23.3 37.1 L 37.8 24.5 H 19 C 17.3 24.5 16 23.2 16 21.5 V 20.5 C 16 18.8 17.3 17.5 19 17.5 Z" fill="url(#pS1Top)"/>
+                <path d="M 45 46.5 H 21 C 18.2 46.5 16.2 44.5 16.8 41.7 L 32.8 25.7 C 33.5 25 34.5 24.6 35.5 24.6 H 39.5 C 40.7 24.6 41.4 25.9 40.7 26.9 L 26.2 39.5 H 45 C 46.7 39.5 48 40.8 48 42.5 V 43.5 C 48 45.2 46.7 46.5 45 46.5 Z" fill="url(#pS1Bot)"/>
+                <circle cx="32" cy="32" r="3" fill="#fff"/>
+            </svg>
+        </div>
+        <div class="scene1-title">Zeroix<b>Dark</b></div>
+        <div class="scene1-sub">Panel Server Premium — Aktivasi Otomatis 24/7</div>
+    </div>
+
+    <!-- ===== SCENE 2: Problem ===== -->
+    <div class="scene" id="pScene2">
+        <div class="scene2-emoji">😩</div>
+        <div class="scene2-title">Masih <span class="hl">Nunggu Admin</span> Buat Aktifin Server?</div>
+        <div class="scene2-sub">Pesan server, transfer manual, nunggu berjam-jam... Itu cara lama. Saatnya upgrade ke cara yang lebih cerdas.</div>
+    </div>
+
+    <!-- ===== SCENE 3: Features ===== -->
+    <div class="scene" id="pScene3">
+        <div class="scene3-title">Kenapa <span class="grad">ZeroixDark</span>?</div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="f-icon"><i class="ri-flashlight-line"></i></div>
+                <h3>Aktivasi &lt; 1 Menit</h3>
+                <p>Bayar → Server langsung deploy otomatis detik itu juga tanpa antre.</p>
+            </div>
+            <div class="feature-card">
+                <div class="f-icon"><i class="ri-qr-code-line"></i></div>
+                <h3>QRIS Universal</h3>
+                <p>Scan satu QR untuk semua bank &amp; e-wallet (GoPay, OVO, DANA, BCA).</p>
+            </div>
+            <div class="feature-card">
+                <div class="f-icon"><i class="ri-shield-check-line"></i></div>
+                <h3>Keamanan Enterprise</h3>
+                <p>Enkripsi PBKDF2-SHA256 dengan salt unik. Data kamu terlindungi aman.</p>
+            </div>
+            <div class="feature-card">
+                <div class="f-icon"><i class="ri-24-hours-line"></i></div>
+                <h3>Uptime 99.9%</h3>
+                <p>Anti-DDoS filter &amp; Cloudflare Edge. Bot online 24/7 tanpa kompromi.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCENE 4: Steps ===== -->
+    <div class="scene" id="pScene4">
+        <div class="scene4-title">Semudah <span class="grad">4 Langkah</span></div>
+        <div class="steps-flow">
+            <div class="step-item">
+                <div class="step-num">01</div>
+                <h4>Pilih Paket</h4>
+                <p>Private, Public, atau V2 sesuai kebutuhanmu</p>
+            </div>
+            <div class="step-item">
+                <div class="step-num">02</div>
+                <h4>Scan QRIS</h4>
+                <p>Bayar dari e-wallet atau m-banking manapun</p>
+            </div>
+            <div class="step-item">
+                <div class="step-num">03</div>
+                <h4>Auto Deploy</h4>
+                <p>Sistem langsung buat server &amp; akun untukmu</p>
+            </div>
+            <div class="step-item">
+                <div class="step-num">04</div>
+                <h4>Server Online!</h4>
+                <p>Login dan server langsung siap pakai</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCENE 5: Pricing ===== -->
+    <div class="scene" id="pScene5">
+        <div class="scene5-title">Harga <span class="grad">Terjangkau</span></div>
+        <div class="price-cards">
+            <div class="price-card">
+                <span class="p-tag">Ekonomis</span>
+                <h3>Panel Public</h3>
+                <div class="p-price">3K<small>/bln</small></div>
+                <div class="p-desc">Cocok untuk memulai bot WhatsApp atau Discord</div>
+            </div>
+            <div class="price-card featured">
+                <span class="p-tag">⭐ Terlaris</span>
+                <h3>Panel Private</h3>
+                <div class="p-price">10K<small>/bln</small></div>
+                <div class="p-desc">CPU &amp; RAM eksklusif, performa maksimal tanpa sharing</div>
+            </div>
+            <div class="price-card">
+                <span class="p-tag">Indonesia 🇮🇩</span>
+                <h3>Panel Public V2</h3>
+                <div class="p-price">3K<small>/bln</small></div>
+                <div class="p-desc">Node lokal Indonesia dengan latensi ultra rendah</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCENE 6: CTA (Lanjut ke Landing Page) ===== -->
+    <div class="scene" id="pScene6">
+        <div class="cta-badge"><i class="ri-rocket-2-fill"></i> Mulai Sekarang</div>
+        <div class="cta-title">Server Premium<br><span class="grad">Aktif Sendiri</span><br>Tanpa Drama.</div>
+        <div class="cta-sub">Pilih paket, bayar QRIS, dan server online dalam hitungan detik. Tanpa menunggu admin, tanpa ribet.</div>
+        <div class="cta-buttons">
+            <button type="button" class="btn-cta primary" id="btnEnterLanding">
+                <i class="ri-arrow-right-line"></i> Masuk ke Website
+            </button>
+            <a class="btn-cta" href="/store">
+                <i class="ri-shopping-bag-3-line"></i> Belanja di Toko
+            </a>
+        </div>
+        <div class="cta-url">🌐 zeroixdarkmarket.web.id</div>
+    </div>
+
+    <!-- Controls -->
+    <div class="progress-bar"><div class="progress-fill" id="promoProgressFill"></div></div>
+    <div class="scene-dots" id="promoSceneDots"></div>
+    <div class="sound-wave" id="promoSoundWave">
+        <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <button class="play-toggle" id="promoPlayToggle" title="Play/Pause"><i class="ri-pause-line"></i></button>
+    <div class="skip-hint">Klik di mana saja atau tekan ➡ untuk lanjut • Spasi untuk pause</div>
+</div>
 
 <script src="page-loader.js?v=75"></script>
 <script src="config.js?v=75"></script>
@@ -480,6 +1082,7 @@
             <a class="nav-a" href="#stack">Ekosistem</a>
             <a class="nav-a" href="#faq">FAQ</a>
             <div class="nav-actions">
+                <button type="button" class="btn" onclick="openPromoIntro()" title="Putar ulang video promosi"><i class="ri-play-circle-line"></i> Video Promo</button>
                 <a class="btn" href="/dashboard"><i class="ri-shield-keyhole-line"></i> Masuk</a>
                 <a class="btn p" href="/store"><i class="ri-shopping-cart-2-line"></i> Belanja</a>
             </div>
@@ -496,6 +1099,7 @@
             <p class="lead">Panel Pterodactyl Private, Public &amp; Public V2 untuk <span class="typer mono" id="typer"></span>.<br>Bayar mudah lewat QRIS — server dan akun dibuat seketika oleh sistem tanpa menunggu konfirmasi manual.</p>
             <div class="ctas">
                 <a class="btn p" href="/store"><i class="ri-shopping-bag-3-line"></i> Belanja di Toko</a>
+                <button type="button" class="btn" onclick="openPromoIntro()"><i class="ri-play-circle-line"></i> Putar Video Promo</button>
                 <a class="btn wa-toggle" id="waBtn" href="#" rel="noopener"><i class="ri-whatsapp-line" style="color:#25d366"></i> Tanya via WhatsApp</a>
                 <a class="btn" href="/dashboard"><i class="ri-login-box-line"></i> Masuk Dashboard</a>
             </div>
@@ -956,6 +1560,319 @@
             elL.textContent = l.toLocaleString('id-ID');
         }
     });
+
+    // ============================================================
+    // CINEMATIC PROMO INTRO CONTROLLER (Tampil Otomatis di Awal)
+    // ============================================================
+    const promoIntro = document.getElementById('promoIntro');
+    if (promoIntro) {
+        const promoParticlesEl = document.getElementById('promoParticles');
+        if (promoParticlesEl) {
+            for (let i = 0; i < 35; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (8 + Math.random() * 12) + 's';
+                p.style.animationDelay = Math.random() * 10 + 's';
+                p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+                const colors = ['#5eead4','#818cf8','#f472b6','#38bdf8'];
+                p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                promoParticlesEl.appendChild(p);
+            }
+        }
+
+        const promoScenes = promoIntro.querySelectorAll('.scene');
+        const totalPromoScenes = promoScenes.length;
+        const promoSceneDurations = [4000, 4500, 5500, 5500, 5000, 7500]; // ms per scene
+        let currentPromoScene = 0;
+        let isPromoPlaying = true;
+        let promoTimer = null;
+        let isPromoRecording = false;
+        let onPromoRecComplete = null;
+
+        const promoDotsContainer = document.getElementById('promoSceneDots');
+        if (promoDotsContainer) {
+            promoScenes.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'scene-dot';
+                dot.addEventListener('click', (e) => { e.stopPropagation(); goToPromoScene(i); });
+                promoDotsContainer.appendChild(dot);
+            });
+        }
+
+        function animatePromoCards(sceneEl) {
+            if (!sceneEl) return;
+            const cards = sceneEl.querySelectorAll('.feature-card, .step-item, .price-card');
+            cards.forEach((card, i) => {
+                setTimeout(() => {
+                    card.style.transition = 'opacity .6s cubic-bezier(.4,0,.2,1), transform .6s cubic-bezier(.4,0,.2,1)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0) scale(1)';
+                }, 300 + i * 180);
+            });
+        }
+
+        function resetPromoCards(sceneEl) {
+            if (!sceneEl) return;
+            const cards = sceneEl.querySelectorAll('.feature-card, .step-item, .price-card');
+            cards.forEach(card => {
+                card.style.transition = 'none';
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px) scale(.85)';
+            });
+        }
+
+        function goToPromoScene(index) {
+            if (index === currentPromoScene && promoScenes[currentPromoScene].classList.contains('active')) return;
+            clearTimeout(promoTimer);
+
+            promoScenes[currentPromoScene].classList.remove('active');
+            promoScenes[currentPromoScene].classList.add('exit');
+            resetPromoCards(promoScenes[currentPromoScene]);
+
+            setTimeout(() => {
+                promoScenes[currentPromoScene].classList.remove('exit');
+                currentPromoScene = index;
+
+                promoScenes[currentPromoScene].classList.add('active');
+                animatePromoCards(promoScenes[currentPromoScene]);
+                updatePromoUI();
+
+                if (isPromoRecording && currentPromoScene === totalPromoScenes - 1) {
+                    promoTimer = setTimeout(() => {
+                        if (onPromoRecComplete) onPromoRecComplete();
+                    }, promoSceneDurations[currentPromoScene]);
+                } else if (isPromoPlaying && currentPromoScene < totalPromoScenes - 1) {
+                    promoTimer = setTimeout(() => goToPromoScene(currentPromoScene + 1), promoSceneDurations[currentPromoScene]);
+                } else if (isPromoPlaying && currentPromoScene === totalPromoScenes - 1) {
+                    // Selesai scene 6: otomatis transisi ke landing page!
+                    promoTimer = setTimeout(() => {
+                        closePromoIntro();
+                    }, promoSceneDurations[currentPromoScene]);
+                }
+            }, 500);
+        }
+
+        function updatePromoUI() {
+            const progress = ((currentPromoScene + 1) / totalPromoScenes) * 100;
+            const pf = document.getElementById('promoProgressFill');
+            if (pf) pf.style.width = progress + '%';
+            if (promoDotsContainer) {
+                promoDotsContainer.querySelectorAll('.scene-dot').forEach((dot, i) => {
+                    dot.classList.toggle('active', i === currentPromoScene);
+                });
+            }
+        }
+
+        function togglePromoPlay() {
+            isPromoPlaying = !isPromoPlaying;
+            const icon = document.querySelector('#promoPlayToggle i');
+            const wave = document.getElementById('promoSoundWave');
+            if (isPromoPlaying) {
+                if (icon) icon.className = 'ri-pause-line';
+                if (wave) wave.classList.remove('paused');
+                promoTimer = setTimeout(() => goToPromoScene((currentPromoScene + 1) % totalPromoScenes), promoSceneDurations[currentPromoScene]);
+            } else {
+                if (icon) icon.className = 'ri-play-line';
+                if (wave) wave.classList.add('paused');
+                clearTimeout(promoTimer);
+            }
+        }
+
+        function closePromoIntro() {
+            if (promoIntro.classList.contains('promo-exit') || promoIntro.classList.contains('promo-hidden')) return;
+            clearTimeout(promoTimer);
+            isPromoPlaying = false;
+            promoIntro.classList.add('promo-exit');
+            document.documentElement.classList.remove('promo-locked');
+            document.body.classList.remove('promo-locked');
+            setTimeout(() => {
+                promoIntro.classList.add('promo-hidden');
+            }, 850);
+        }
+
+        window.openPromoIntro = function() {
+            document.documentElement.classList.add('promo-locked');
+            document.body.classList.add('promo-locked');
+            promoIntro.classList.remove('promo-hidden', 'promo-exit');
+            isPromoPlaying = true;
+            const icon = document.querySelector('#promoPlayToggle i');
+            const wave = document.getElementById('promoSoundWave');
+            if (icon) icon.className = 'ri-pause-line';
+            if (wave) wave.classList.remove('paused');
+            goToPromoScene(0);
+        };
+
+        // Event listeners untuk promo
+        const skipBtn = document.getElementById('btnSkipIntro');
+        if (skipBtn) skipBtn.addEventListener('click', (e) => { e.stopPropagation(); closePromoIntro(); });
+
+        const enterLandingBtn = document.getElementById('btnEnterLanding');
+        if (enterLandingBtn) enterLandingBtn.addEventListener('click', (e) => { e.stopPropagation(); closePromoIntro(); });
+
+        const playToggleBtn = document.getElementById('promoPlayToggle');
+        if (playToggleBtn) playToggleBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePromoPlay(); });
+
+        document.addEventListener('keydown', (e) => {
+            if (promoIntro.classList.contains('promo-hidden')) return;
+            if (e.code === 'Escape') { closePromoIntro(); }
+            if (e.code === 'Space') { e.preventDefault(); togglePromoPlay(); }
+            if (e.code === 'ArrowRight' || e.code === 'ArrowDown') { e.preventDefault(); goToPromoScene((currentPromoScene + 1) % totalPromoScenes); }
+            if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') { e.preventDefault(); goToPromoScene((currentPromoScene - 1 + totalPromoScenes) % totalPromoScenes); }
+        });
+
+        promoIntro.addEventListener('click', (e) => {
+            if (e.target.closest('#promoPlayToggle, .scene-dot, .btn-cta, #promoDlBtn, #btnSkipIntro, a, button')) return;
+            if (isPromoRecording) return;
+            goToPromoScene((currentPromoScene + 1) % totalPromoScenes);
+        });
+
+        let pTouchStartX = 0;
+        promoIntro.addEventListener('touchstart', (e) => { pTouchStartX = e.touches[0].clientX; }, {passive:true});
+        promoIntro.addEventListener('touchend', (e) => {
+            if (isPromoRecording) return;
+            const diff = pTouchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) goToPromoScene((currentPromoScene + 1) % totalPromoScenes);
+                else goToPromoScene((currentPromoScene - 1 + totalPromoScenes) % totalPromoScenes);
+            }
+        }, {passive:true});
+
+        // Perekaman MediaRecorder untuk download video
+        const promoDlBtn = document.getElementById('promoDlBtn');
+        const promoDlIcon = document.getElementById('promoDlIcon');
+        const promoDlLabel = document.getElementById('promoDlLabel');
+        const promoRecOverlay = document.getElementById('promoRecOverlay');
+        const promoRecTimerEl = document.getElementById('promoRecTimer');
+        const promoRecTimeSpan = document.getElementById('promoRecTime');
+        let pRecorder = null;
+        let pRecChunks = [];
+        let pRecInterval = null;
+        let pRecStartTime = 0;
+
+        function formatRecTime(ms) {
+            const s = Math.floor(ms / 1000);
+            const m = Math.floor(s / 60);
+            return String(m).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
+        }
+
+        function setPromoRecUI(active) {
+            isPromoRecording = active;
+            if (promoDlBtn) promoDlBtn.classList.toggle('recording', active);
+            if (promoRecOverlay) promoRecOverlay.classList.toggle('active', active);
+            if (promoRecTimerEl) promoRecTimerEl.classList.toggle('active', active);
+            if (active) {
+                if (promoDlIcon) promoDlIcon.className = 'ri-stop-circle-line';
+                if (promoDlLabel) promoDlLabel.textContent = 'Stop & Simpan';
+            } else {
+                if (promoDlIcon) promoDlIcon.className = 'ri-download-2-line';
+                if (promoDlLabel) promoDlLabel.textContent = 'Download Video';
+            }
+        }
+
+        function downloadPromoBlob(blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ZeroixDark_Promo_' + new Date().toISOString().slice(0,10) + '.webm';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+        }
+
+        function stopPromoRecording() {
+            if (!pRecorder || pRecorder.state === 'inactive') return;
+            pRecorder.stop();
+        }
+
+        async function startPromoRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { displaySurface: 'browser', frameRate: { ideal: 30 }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+                    audio: false, preferCurrentTab: true, selfBrowserSurface: 'include', systemAudio: 'exclude'
+                });
+
+                const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+                    ? 'video/webm;codecs=vp9'
+                    : MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+                        ? 'video/webm;codecs=vp8'
+                        : 'video/webm';
+
+                pRecChunks = [];
+                pRecorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 5000000 });
+
+                pRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) pRecChunks.push(e.data);
+                };
+
+                pRecorder.onstop = () => {
+                    stream.getTracks().forEach(t => t.stop());
+                    setPromoRecUI(false);
+                    clearInterval(pRecInterval);
+                    if (pRecChunks.length > 0) {
+                        const blob = new Blob(pRecChunks, { type: mimeType });
+                        downloadPromoBlob(blob);
+                    }
+                    pRecChunks = [];
+                    pRecorder = null;
+                    onPromoRecComplete = null;
+                };
+
+                stream.getVideoTracks()[0].addEventListener('ended', () => {
+                    if (pRecorder && pRecorder.state !== 'inactive') pRecorder.stop();
+                });
+
+                pRecorder.start(500);
+                setPromoRecUI(true);
+                pRecStartTime = Date.now();
+                pRecInterval = setInterval(() => {
+                    if (promoRecTimeSpan) promoRecTimeSpan.textContent = formatRecTime(Date.now() - pRecStartTime);
+                }, 250);
+
+                isPromoPlaying = true;
+                const icon = document.querySelector('#promoPlayToggle i');
+                const wave = document.getElementById('promoSoundWave');
+                if (icon) icon.className = 'ri-pause-line';
+                if (wave) wave.classList.remove('paused');
+
+                onPromoRecComplete = () => {
+                    setTimeout(() => stopPromoRecording(), 2000);
+                };
+
+                clearTimeout(promoTimer);
+                setTimeout(() => {
+                    promoScenes[currentPromoScene].classList.remove('active','exit');
+                    resetPromoCards(promoScenes[currentPromoScene]);
+                    currentPromoScene = 0;
+                    promoScenes[0].classList.add('active');
+                    animatePromoCards(promoScenes[0]);
+                    updatePromoUI();
+                    promoTimer = setTimeout(() => goToPromoScene(1), promoSceneDurations[0]);
+                }, 600);
+
+            } catch (err) {
+                console.warn('Recording cancelled or error:', err);
+                setPromoRecUI(false);
+                clearInterval(pRecInterval);
+                if (err.name === 'NotAllowedError') {
+                    alert('⚠️ Izin perekaman ditolak.\n\nPilih tab ini saat diminta.');
+                }
+            }
+        }
+
+        if (promoDlBtn) {
+            promoDlBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (isPromoRecording) stopPromoRecording();
+                else startPromoRecording();
+            });
+        }
+
+        // Mulai intro otomatis
+        setTimeout(() => {
+            goToPromoScene(0);
+        }, 300);
+    }
 })();
 </script>
 </body>

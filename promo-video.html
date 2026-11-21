@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroixDark — Promo Video</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060b1a;
+            --a1: #5eead4;
+            --a2: #818cf8;
+            --a3: #f472b6;
+            --ink: #e9eeff;
+            --muted: #8d97b8;
+            --line: rgba(255,255,255,0.09);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html, body {
+            width:100%; height:100%; overflow:hidden;
+            background: var(--bg);
+            font-family:'Sora',sans-serif;
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== CINEMATIC CONTAINER ===== */
+        .cinema {
+            position: fixed; inset:0;
+            display: flex; align-items:center; justify-content:center;
+        }
+
+        /* ===== AURORA BACKGROUND ===== */
+        .aurora {
+            position:fixed; inset:-30%; z-index:0;
+            filter: blur(100px) saturate(160%);
+            opacity:0; pointer-events:none;
+            animation: auroraIn 2s 0.5s ease forwards;
+        }
+        @keyframes auroraIn { to { opacity:.6; } }
+        .aurora span {
+            position:absolute; width:70vmax; height:70vmax; border-radius:50%;
+            mix-blend-mode:screen;
+        }
+        .aurora span:nth-child(1) {
+            background: radial-gradient(circle, var(--a1), transparent 60%);
+            top:-10%; left:5%;
+            animation: drift1 18s ease-in-out infinite alternate;
+        }
+        .aurora span:nth-child(2) {
+            background: radial-gradient(circle, var(--a2), transparent 60%);
+            top:15%; right:-5%;
+            animation: drift2 20s ease-in-out infinite alternate;
+        }
+        .aurora span:nth-child(3) {
+            background: radial-gradient(circle, var(--a3), transparent 60%);
+            bottom:-10%; left:25%;
+            animation: drift3 22s ease-in-out infinite alternate;
+            opacity:.7;
+        }
+        @keyframes drift1 { to { transform: translate(15vw,-10vh) rotate(30deg) scale(1.3); } }
+        @keyframes drift2 { to { transform: translate(-10vw,8vh) rotate(-25deg) scale(1.15); } }
+        @keyframes drift3 { to { transform: translate(8vw,-12vh) rotate(40deg) scale(1.2); } }
+
+        /* ===== GRID GRAIN ===== */
+        .grain {
+            position:fixed; inset:0; z-index:1; pointer-events:none;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg,rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(circle at 50% 50%, #000 20%, transparent 70%);
+            opacity:0;
+            animation: grainIn 2s 1s ease forwards;
+        }
+        @keyframes grainIn { to { opacity:1; } }
+
+        /* ===== PARTICLES ===== */
+        .particles {
+            position:fixed; inset:0; z-index:1; pointer-events:none;
+        }
+        .particle {
+            position:absolute; width:3px; height:3px; border-radius:50%;
+            background: var(--a1); opacity:0;
+            animation: particleFly linear infinite;
+        }
+        @keyframes particleFly {
+            0% { transform:translateY(110vh) scale(0); opacity:0; }
+            10% { opacity:.7; }
+            90% { opacity:.4; }
+            100% { transform:translateY(-10vh) scale(1.5); opacity:0; }
+        }
+
+        /* ===== SCENES ===== */
+        .scene {
+            position:absolute; inset:0;
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            z-index:10; opacity:0;
+            transform: scale(.92);
+            transition: opacity .8s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1);
+            pointer-events:none;
+            padding: 40px;
+            text-align:center;
+        }
+        .scene.active {
+            opacity:1; transform:scale(1); pointer-events:auto;
+        }
+        .scene.exit {
+            opacity:0; transform:scale(1.08);
+        }
+
+        /* ===== SCENE 1: LOGO INTRO ===== */
+        .logo-container {
+            position:relative;
+            width:180px; height:180px;
+            margin-bottom:30px;
+        }
+        .logo-ring {
+            position:absolute; inset:-20px;
+            border: 2px solid transparent;
+            border-radius:50%;
+            animation: logoRingSpin 6s linear infinite;
+        }
+        .logo-ring::before {
+            content:''; position:absolute; inset:-2px;
+            border-radius:50%;
+            background: conic-gradient(from 0deg, var(--a1), var(--a2), var(--a3), transparent 70%);
+            mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+        }
+        @keyframes logoRingSpin { to { transform:rotate(360deg); } }
+        .logo-ring-2 {
+            animation-direction: reverse;
+            animation-duration: 8s;
+            inset: -35px;
+            opacity: .5;
+        }
+        .logo-svg {
+            width:100%; height:100%;
+            filter: drop-shadow(0 0 40px rgba(94,234,212,.5));
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+        @keyframes logoPulse {
+            0%,100% { filter: drop-shadow(0 0 40px rgba(94,234,212,.5)); }
+            50% { filter: drop-shadow(0 0 60px rgba(129,140,248,.6)); }
+        }
+        .scene1-title {
+            font-size: clamp(2.5rem,7vw,5rem);
+            font-weight:900; letter-spacing:-.04em;
+            line-height:1;
+            opacity:0;
+            animation: slideUpFade 1s 1.2s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        .scene1-title b { color: var(--a1); }
+        .scene1-sub {
+            font-size: clamp(.9rem,2.5vw,1.3rem);
+            color: var(--muted); margin-top:14px;
+            opacity:0;
+            animation: slideUpFade .8s 1.8s cubic-bezier(.4,0,.2,1) forwards;
+            font-weight:300;
+        }
+        @keyframes slideUpFade {
+            from { opacity:0; transform:translateY(30px); }
+            to { opacity:1; transform:translateY(0); }
+        }
+
+        /* ===== SCENE 2: PROBLEM ===== */
+        .scene2-emoji {
+            font-size: clamp(3rem,8vw,5rem);
+            margin-bottom:20px;
+            opacity:0;
+            animation: popIn .6s .3s cubic-bezier(.175,.885,.32,1.275) forwards;
+        }
+        .scene2-title {
+            font-size: clamp(1.5rem,4.5vw,3rem);
+            font-weight:800; letter-spacing:-.03em;
+            max-width: 700px;
+            opacity:0;
+            animation: slideUpFade .8s .5s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        .scene2-title .hl { color: var(--a3); }
+        .scene2-sub {
+            font-size: clamp(.85rem,2vw,1.15rem);
+            color: var(--muted); margin-top:16px; max-width:550px;
+            opacity:0;
+            animation: slideUpFade .8s .9s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        @keyframes popIn {
+            from { opacity:0; transform:scale(0); }
+            to { opacity:1; transform:scale(1); }
+        }
+
+        /* ===== SCENE 3: FEATURES ===== */
+        .features-grid {
+            display:grid; grid-template-columns: repeat(2,1fr);
+            gap:20px; max-width:700px; width:100%;
+        }
+        .feature-card {
+            background: rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:20px; padding:28px 24px;
+            backdrop-filter:blur(12px);
+            text-align:left;
+            opacity:0; transform:translateY(30px);
+        }
+        .feature-card .f-icon {
+            width:50px; height:50px; border-radius:14px;
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.5rem; margin-bottom:14px;
+        }
+        .feature-card:nth-child(1) .f-icon { background:rgba(94,234,212,.12); color:var(--a1); border:1px solid rgba(94,234,212,.3); }
+        .feature-card:nth-child(2) .f-icon { background:rgba(129,140,248,.12); color:var(--a2); border:1px solid rgba(129,140,248,.3); }
+        .feature-card:nth-child(3) .f-icon { background:rgba(244,114,182,.12); color:var(--a3); border:1px solid rgba(244,114,182,.3); }
+        .feature-card:nth-child(4) .f-icon { background:rgba(94,234,212,.12); color:var(--a1); border:1px solid rgba(94,234,212,.3); }
+        .feature-card h3 { font-size:1.1rem; font-weight:700; margin-bottom:6px; }
+        .feature-card p { font-size:.85rem; color:var(--muted); line-height:1.5; }
+        .scene3-title {
+            font-size: clamp(1.6rem,4vw,2.6rem);
+            font-weight:800; letter-spacing:-.03em;
+            margin-bottom:30px;
+            opacity:0;
+            animation: slideUpFade .8s .3s cubic-bezier(.4,0,.2,1) forwards;
+        }
+
+        /* ===== SCENE 4: STEPS ===== */
+        .steps-flow {
+            display:flex; gap:16px; max-width:900px; width:100%;
+            flex-wrap:wrap; justify-content:center;
+        }
+        .step-item {
+            background: rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:18px; padding:24px 20px;
+            flex:1; min-width:170px; max-width:200px;
+            text-align:center;
+            opacity:0; transform:translateY(30px);
+        }
+        .step-num {
+            width:44px; height:44px; border-radius:14px;
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color:#060b1a; font-weight:900; font-size:1.1rem;
+            display:inline-flex; align-items:center; justify-content:center;
+            margin-bottom:14px; font-family:'JetBrains Mono',monospace;
+            box-shadow: 0 8px 25px rgba(94,234,212,.35);
+        }
+        .step-item h4 { font-size:.95rem; font-weight:700; margin-bottom:6px; }
+        .step-item p { font-size:.78rem; color:var(--muted); line-height:1.45; }
+        .scene4-title {
+            font-size: clamp(1.6rem,4vw,2.6rem);
+            font-weight:800; letter-spacing:-.03em;
+            margin-bottom:30px;
+            opacity:0;
+            animation: slideUpFade .8s .3s cubic-bezier(.4,0,.2,1) forwards;
+        }
+
+        /* ===== SCENE 5: PRICING ===== */
+        .price-cards {
+            display:flex; gap:20px; justify-content:center;
+            flex-wrap:wrap; max-width:800px;
+        }
+        .price-card {
+            background: rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:22px; padding:30px 28px;
+            min-width:200px; flex:1; max-width:240px;
+            text-align:center;
+            opacity:0; transform:scale(.85);
+        }
+        .price-card.featured {
+            border-color: rgba(94,234,212,.4);
+            background: rgba(94,234,212,.06);
+            box-shadow: 0 20px 50px rgba(94,234,212,.15);
+        }
+        .price-card .p-tag {
+            font-size:.72rem; padding:4px 12px; border-radius:20px;
+            display:inline-block; margin-bottom:14px;
+            background:rgba(129,140,248,.15); color:#c7cbff; font-weight:600;
+        }
+        .price-card.featured .p-tag {
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color:#060b1a; font-weight:800;
+        }
+        .price-card h3 { font-size:1.2rem; font-weight:700; margin-bottom:4px; }
+        .price-card .p-price {
+            font-size:1.8rem; font-weight:900; margin:10px 0;
+            font-family:'JetBrains Mono',monospace;
+            color: var(--a1);
+        }
+        .price-card .p-price small { font-size:.7rem; font-weight:400; color:var(--muted); }
+        .price-card .p-desc { font-size:.82rem; color:var(--muted); line-height:1.5; }
+        .scene5-title {
+            font-size: clamp(1.6rem,4vw,2.6rem);
+            font-weight:800; letter-spacing:-.03em;
+            margin-bottom:30px;
+            opacity:0;
+            animation: slideUpFade .8s .3s cubic-bezier(.4,0,.2,1) forwards;
+        }
+
+        /* ===== SCENE 6: CTA ===== */
+        .cta-badge {
+            display:inline-flex; gap:8px; align-items:center;
+            border:1px solid var(--line); background:rgba(255,255,255,.04);
+            padding:8px 18px; border-radius:30px;
+            font-size:.85rem; color:var(--muted);
+            margin-bottom:20px;
+            opacity:0;
+            animation: slideUpFade .6s .3s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        .cta-badge i { color:var(--a1); }
+        .cta-title {
+            font-size: clamp(2rem,6vw,4rem);
+            font-weight:900; letter-spacing:-.04em;
+            line-height:1.08; max-width:700px;
+            opacity:0;
+            animation: slideUpFade .8s .6s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        .cta-title .grad {
+            background: linear-gradient(90deg, var(--a1), var(--a2), var(--a3));
+            -webkit-background-clip:text; background-clip:text; color:transparent;
+        }
+        .cta-sub {
+            font-size: clamp(.85rem,2vw,1.1rem);
+            color:var(--muted); margin:16px 0 32px; max-width:500px;
+            opacity:0;
+            animation: slideUpFade .8s 1s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        .cta-buttons {
+            display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
+            opacity:0;
+            animation: slideUpFade .8s 1.3s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        .btn-cta {
+            display:inline-flex; gap:8px; align-items:center; justify-content:center;
+            padding:16px 32px; border-radius:14px; font-weight:700;
+            font-size:1rem; border:1px solid var(--line);
+            background:rgba(255,255,255,.04); color:var(--ink);
+            text-decoration:none; transition:all .3s;
+            cursor:pointer;
+        }
+        .btn-cta:hover { border-color:var(--a1); transform:translateY(-3px); }
+        .btn-cta.primary {
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color:#060b1a; border:0; font-weight:800;
+            box-shadow: 0 12px 40px rgba(94,234,212,.35);
+        }
+        .btn-cta.primary:hover {
+            transform:translateY(-3px);
+            box-shadow: 0 16px 50px rgba(94,234,212,.5);
+        }
+        .cta-url {
+            margin-top:24px;
+            font-family:'JetBrains Mono',monospace;
+            font-size:clamp(.75rem,1.8vw,.95rem);
+            color:var(--a1);
+            opacity:0;
+            animation: slideUpFade .8s 1.6s cubic-bezier(.4,0,.2,1) forwards;
+            letter-spacing:.5px;
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-bar {
+            position:fixed; bottom:0; left:0; right:0; height:4px;
+            z-index:100; background:rgba(255,255,255,.06);
+        }
+        .progress-fill {
+            height:100%; width:0;
+            background: linear-gradient(90deg, var(--a1), var(--a2), var(--a3));
+            transition: width .5s ease;
+            box-shadow: 0 0 15px rgba(94,234,212,.5);
+        }
+
+        /* ===== SCENE INDICATOR ===== */
+        .scene-dots {
+            position:fixed; right:24px; top:50%; transform:translateY(-50%);
+            z-index:50; display:flex; flex-direction:column; gap:10px;
+        }
+        .scene-dot {
+            width:10px; height:10px; border-radius:50%;
+            border:2px solid rgba(255,255,255,.2);
+            background:transparent;
+            transition: all .3s ease;
+            cursor:pointer;
+        }
+        .scene-dot.active {
+            background: var(--a1);
+            border-color: var(--a1);
+            box-shadow: 0 0 12px rgba(94,234,212,.6);
+        }
+
+        /* ===== PLAY/PAUSE BUTTON ===== */
+        .play-toggle {
+            position:fixed; bottom:24px; right:24px; z-index:50;
+            width:48px; height:48px; border-radius:50%;
+            background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+            color:var(--ink); font-size:1.2rem;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; transition: all .3s;
+            backdrop-filter:blur(10px);
+        }
+        .play-toggle:hover {
+            background:rgba(255,255,255,.15);
+            border-color:var(--a1);
+            transform:scale(1.1);
+        }
+
+        /* ===== DOWNLOAD VIDEO & HOME BUTTONS ===== */
+        .btn-top-home {
+            position:fixed; top:20px; right:24px; z-index:60;
+            display:inline-flex; align-items:center; gap:8px;
+            padding:10px 18px; border-radius:14px;
+            font-weight:700; font-size:.85rem;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--ink); border: 1px solid var(--line);
+            backdrop-filter: blur(12px);
+            cursor:pointer; transition: all .3s ease;
+            text-decoration: none;
+        }
+        .btn-top-home:hover {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: var(--a1); color: var(--a1);
+            transform: translateY(-2px);
+        }
+        .dl-btn {
+            position:fixed; top:20px; right:190px; z-index:60;
+            display:inline-flex; align-items:center; gap:9px;
+            padding:10px 18px; border-radius:14px;
+            font-weight:700; font-size:.85rem;
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color:#060b1a; border:none;
+            box-shadow: 0 4px 20px rgba(94,234,212,.3);
+            cursor:pointer; transition: all .35s ease;
+            font-family:'Sora',sans-serif;
+            letter-spacing:-.01em;
+        }
+        .dl-btn:hover {
+            transform:translateY(-2px);
+            box-shadow: 0 8px 30px rgba(94,234,212,.45);
+        }
+        .dl-btn:active { transform:translateY(0) scale(.97); }
+        .dl-btn.recording {
+            background: linear-gradient(135deg, #ef4444, var(--a3));
+            animation: recPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes recPulse {
+            0%,100% { box-shadow: 0 6px 24px rgba(239,68,68,.3); }
+            50% { box-shadow: 0 6px 30px rgba(239,68,68,.55); }
+        }
+        .dl-btn .rec-dot {
+            width:10px; height:10px; border-radius:50%;
+            background:#fff; display:none;
+            animation: recDotBlink 1s step-end infinite;
+        }
+        .dl-btn.recording .rec-dot { display:block; }
+        @keyframes recDotBlink { 50% { opacity:0; } }
+
+        @media (max-width: 600px) {
+            .btn-top-home { right: 12px; top: 12px; padding: 7px 12px; font-size: .75rem; }
+            .dl-btn { right: 125px; top: 12px; padding: 7px 12px; font-size: .75rem; }
+            .dl-btn span#dlLabel { display: none; }
+        }
+
+        /* ===== RECORDING OVERLAY ===== */
+        .rec-overlay {
+            position:fixed; inset:0; z-index:55;
+            pointer-events:none; border:3px solid transparent;
+            border-radius:0; transition: border-color .3s;
+        }
+        .rec-overlay.active {
+            border-color: #ef4444;
+            animation: recBorder 2s ease-in-out infinite;
+        }
+        @keyframes recBorder {
+            0%,100% { border-color: rgba(239,68,68,.6); }
+            50% { border-color: rgba(239,68,68,.2); }
+        }
+        .rec-timer {
+            position:fixed; top:22px; right:180px; z-index:60;
+            font-family:'JetBrains Mono',monospace;
+            font-size:.82rem; font-weight:600;
+            color:#ef4444; display:none;
+            align-items:center; gap:6px;
+        }
+        .rec-timer.active { display:inline-flex; }
+        .rec-timer .blink { animation: recDotBlink 1s step-end infinite; }
+
+        /* ===== SKIP HINT ===== */
+        .skip-hint {
+            position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+            z-index:50; font-size:.78rem; color:var(--muted);
+            opacity:0; animation: fadeIn 2s 3s forwards;
+        }
+        @keyframes fadeIn { to { opacity:.6; } }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width:700px) {
+            .features-grid { grid-template-columns:1fr; max-width:360px; }
+            .steps-flow { flex-direction:column; align-items:center; }
+            .step-item { max-width:280px; }
+            .price-cards { flex-direction:column; align-items:center; }
+            .price-card { max-width:280px; }
+            .scene-dots { right:12px; }
+            .scene { padding:24px; }
+        }
+
+        /* ===== SOUND WAVE ===== */
+        .sound-wave {
+            position:fixed; bottom:30px; left:24px; z-index:50;
+            display:flex; align-items:flex-end; gap:3px; height:20px;
+            opacity:.5;
+        }
+        .sound-wave span {
+            width:3px; background:var(--a1); border-radius:2px;
+            animation: wave 1s ease-in-out infinite;
+        }
+        .sound-wave span:nth-child(1) { height:6px; animation-delay:0s; }
+        .sound-wave span:nth-child(2) { height:12px; animation-delay:.15s; }
+        .sound-wave span:nth-child(3) { height:8px; animation-delay:.3s; }
+        .sound-wave span:nth-child(4) { height:16px; animation-delay:.45s; }
+        .sound-wave span:nth-child(5) { height:10px; animation-delay:.6s; }
+        @keyframes wave {
+            0%,100% { transform:scaleY(1); }
+            50% { transform:scaleY(.3); }
+        }
+        .sound-wave.paused span { animation-play-state:paused; }
+
+        /* ===== WATERMARK ===== */
+        .watermark {
+            position:fixed; top:20px; left:24px; z-index:50;
+            display:flex; align-items:center; gap:8px;
+            font-weight:800; font-size:.9rem;
+            opacity:.7;
+        }
+        .watermark svg {
+            width:28px; height:28px;
+            filter: drop-shadow(0 0 8px rgba(94,234,212,.4));
+        }
+        .watermark span b { color:var(--a1); }
+    </style>
+</head>
+<body>
+
+<!-- Background Effects -->
+<div class="aurora"><span></span><span></span><span></span></div>
+<div class="grain"></div>
+<div class="particles" id="particles"></div>
+
+<!-- Watermark -->
+<div class="watermark">
+    <svg viewBox="0 0 64 64" fill="none">
+        <defs>
+            <linearGradient id="wmBg" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#0c152c"/><stop offset="100%" stop-color="#050a16"/></linearGradient>
+            <linearGradient id="wmBrd" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#5eead4"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+            <linearGradient id="wmTop" x1="16" y1="17" x2="47" y2="38"><stop offset="0%" stop-color="#5eead4"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+            <linearGradient id="wmBot" x1="17" y1="26" x2="48" y2="47"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+        </defs>
+        <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#wmBg)" stroke="url(#wmBrd)" stroke-width="1.6"/>
+        <path d="M 19 17.5 H 43 C 45.8 17.5 47.8 19.5 47.2 22.3 L 31.2 38.3 C 30.5 39 29.5 39.4 28.5 39.4 H 24.5 C 23.3 39.4 22.6 38.1 23.3 37.1 L 37.8 24.5 H 19 C 17.3 24.5 16 23.2 16 21.5 V 20.5 C 16 18.8 17.3 17.5 19 17.5 Z" fill="url(#wmTop)"/>
+        <path d="M 45 46.5 H 21 C 18.2 46.5 16.2 44.5 16.8 41.7 L 32.8 25.7 C 33.5 25 34.5 24.6 35.5 24.6 H 39.5 C 40.7 24.6 41.4 25.9 40.7 26.9 L 26.2 39.5 H 45 C 46.7 39.5 48 40.8 48 42.5 V 43.5 C 48 45.2 46.7 46.5 45 46.5 Z" fill="url(#wmBot)"/>
+        <circle cx="32" cy="32" r="2.2" fill="#fff"/>
+    </svg>
+    <span>Zeroix<b>Dark</b></span>
+</div>
+
+<!-- ===== SCENE 1: Logo Intro ===== -->
+<div class="scene" id="scene1">
+    <div class="logo-container">
+        <div class="logo-ring"></div>
+        <div class="logo-ring logo-ring-2"></div>
+        <svg class="logo-svg" viewBox="0 0 64 64" fill="none">
+            <defs>
+                <linearGradient id="s1Bg" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#0c152c"/><stop offset="100%" stop-color="#050a16"/></linearGradient>
+                <linearGradient id="s1Brd" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#5eead4"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+                <linearGradient id="s1Top" x1="16" y1="17" x2="47" y2="38"><stop offset="0%" stop-color="#5eead4"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+                <linearGradient id="s1Bot" x1="17" y1="26" x2="48" y2="47"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+            </defs>
+            <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#s1Bg)" stroke="url(#s1Brd)" stroke-width="2"/>
+            <path d="M 19 17.5 H 43 C 45.8 17.5 47.8 19.5 47.2 22.3 L 31.2 38.3 C 30.5 39 29.5 39.4 28.5 39.4 H 24.5 C 23.3 39.4 22.6 38.1 23.3 37.1 L 37.8 24.5 H 19 C 17.3 24.5 16 23.2 16 21.5 V 20.5 C 16 18.8 17.3 17.5 19 17.5 Z" fill="url(#s1Top)"/>
+            <path d="M 45 46.5 H 21 C 18.2 46.5 16.2 44.5 16.8 41.7 L 32.8 25.7 C 33.5 25 34.5 24.6 35.5 24.6 H 39.5 C 40.7 24.6 41.4 25.9 40.7 26.9 L 26.2 39.5 H 45 C 46.7 39.5 48 40.8 48 42.5 V 43.5 C 48 45.2 46.7 46.5 45 46.5 Z" fill="url(#s1Bot)"/>
+            <circle cx="32" cy="32" r="3" fill="#fff"/>
+        </svg>
+    </div>
+    <div class="scene1-title">Zeroix<b>Dark</b></div>
+    <div class="scene1-sub">Panel Server Premium — Aktivasi Otomatis 24/7</div>
+</div>
+
+<!-- ===== SCENE 2: Problem Statement ===== -->
+<div class="scene" id="scene2">
+    <div class="scene2-emoji">😩</div>
+    <div class="scene2-title">Masih <span class="hl">Nunggu Admin</span> Buat Aktifin Server?</div>
+    <div class="scene2-sub">Pesan server, transfer manual, nunggu berjam-jam... Itu cara lama. Saatnya upgrade ke cara yang lebih cerdas.</div>
+</div>
+
+<!-- ===== SCENE 3: Features ===== -->
+<div class="scene" id="scene3">
+    <div class="scene3-title">Kenapa <span class="grad">ZeroixDark</span>?</div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="f-icon"><i class="ri-flashlight-line"></i></div>
+            <h3>Aktivasi < 1 Menit</h3>
+            <p>Bayar → Server langsung deploy otomatis. Tidak perlu menunggu siapapun.</p>
+        </div>
+        <div class="feature-card">
+            <div class="f-icon"><i class="ri-qr-code-line"></i></div>
+            <h3>QRIS Universal</h3>
+            <p>Scan satu QR untuk semua bank & e-wallet. GoPay, OVO, DANA, BCA, semuanya.</p>
+        </div>
+        <div class="feature-card">
+            <div class="f-icon"><i class="ri-shield-check-line"></i></div>
+            <h3>Keamanan Enterprise</h3>
+            <p>Enkripsi PBKDF2-SHA256 dengan salt unik. Data kamu aman sepenuhnya.</p>
+        </div>
+        <div class="feature-card">
+            <div class="f-icon"><i class="ri-24-hours-line"></i></div>
+            <h3>Uptime 99.9%</h3>
+            <p>Server anti-DDoS dengan Cloudflare Edge. Bot kamu online 24/7 tanpa gangguan.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SCENE 4: Steps ===== -->
+<div class="scene" id="scene4">
+    <div class="scene4-title">Semudah <span class="grad">4 Langkah</span></div>
+    <div class="steps-flow">
+        <div class="step-item">
+            <div class="step-num">01</div>
+            <h4>Pilih Paket</h4>
+            <p>Panel Private, Public, atau V2 sesuai kebutuhanmu</p>
+        </div>
+        <div class="step-item">
+            <div class="step-num">02</div>
+            <h4>Scan QRIS</h4>
+            <p>Bayar dari e-wallet atau m-banking manapun</p>
+        </div>
+        <div class="step-item">
+            <div class="step-num">03</div>
+            <h4>Auto Deploy</h4>
+            <p>Sistem langsung buat server & akun untukmu</p>
+        </div>
+        <div class="step-item">
+            <div class="step-num">04</div>
+            <h4>Server Online!</h4>
+            <p>Login dan server siap pakai seketika</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SCENE 5: Pricing ===== -->
+<div class="scene" id="scene5">
+    <div class="scene5-title">Harga <span class="grad">Terjangkau</span></div>
+    <div class="price-cards">
+        <div class="price-card">
+            <span class="p-tag">Ekonomis</span>
+            <h3>Panel Public</h3>
+            <div class="p-price">3K<small>/bulan</small></div>
+            <div class="p-desc">Cocok untuk memulai bot WA/Discord pertamamu</div>
+        </div>
+        <div class="price-card featured">
+            <span class="p-tag">⭐ Terlaris</span>
+            <h3>Panel Private</h3>
+            <div class="p-price">10K<small>/bulan</small></div>
+            <div class="p-desc">CPU & RAM eksklusif, performa maksimal tanpa sharing</div>
+        </div>
+        <div class="price-card">
+            <span class="p-tag">Indonesia 🇮🇩</span>
+            <h3>Panel Public V2</h3>
+            <div class="p-price">3K<small>/bulan</small></div>
+            <div class="p-desc">Node lokal Indonesia, latensi ultra rendah</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SCENE 6: CTA ===== -->
+<div class="scene" id="scene6">
+    <div class="cta-badge"><i class="ri-rocket-2-fill"></i> Mulai Sekarang</div>
+    <div class="cta-title">Server Premium<br><span class="grad">Aktif Sendiri</span><br>Tanpa Drama.</div>
+    <div class="cta-sub">Pilih paket, bayar QRIS, dan server online dalam hitungan detik. Tanpa menunggu admin, tanpa ribet.</div>
+    <div class="cta-buttons">
+        <a class="btn-cta primary" href="https://zeroixdarkmarket.web.id/store" target="_blank">
+            <i class="ri-shopping-bag-3-line"></i> Belanja Sekarang
+        </a>
+        <a class="btn-cta" href="https://zeroixdarkmarket.web.id/" target="_blank">
+            <i class="ri-global-line"></i> Kunjungi Website
+        </a>
+    </div>
+    <div class="cta-url">🌐 zeroixdarkmarket.web.id</div>
+</div>
+
+<!-- UI Controls -->
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="scene-dots" id="sceneDots"></div>
+<div class="sound-wave" id="soundWave">
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+<button class="play-toggle" id="playToggle" title="Play/Pause"><i class="ri-pause-line"></i></button>
+<div class="skip-hint">Klik atau tekan ➡ untuk lanjut • Spasi untuk pause</div>
+
+<!-- Download Video Controls & Home Link -->
+<button class="dl-btn" id="dlBtn" title="Rekam & Download sebagai Video">
+    <span class="rec-dot"></span>
+    <i class="ri-download-2-line" id="dlIcon"></i>
+    <span id="dlLabel">Download Video</span>
+</button>
+<a class="btn-top-home" href="/" title="Menuju ke Website">
+    <span>Masuk Website</span> <i class="ri-arrow-right-line"></i>
+</a>
+<div class="rec-overlay" id="recOverlay"></div>
+<div class="rec-timer" id="recTimer"><span class="blink">⏺</span> REC <span id="recTime">00:00</span></div>
+
+<script>
+(function() {
+    'use strict';
+
+    // ===== PARTICLES =====
+    const particlesEl = document.getElementById('particles');
+    for (let i = 0; i < 35; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (8 + Math.random() * 12) + 's';
+        p.style.animationDelay = Math.random() * 10 + 's';
+        p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+        const colors = ['#5eead4','#818cf8','#f472b6','#38bdf8'];
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        particlesEl.appendChild(p);
+    }
+
+    // ===== SCENE MANAGEMENT =====
+    const scenes = document.querySelectorAll('.scene');
+    const totalScenes = scenes.length;
+    const sceneDurations = [4000, 4500, 5500, 5500, 5000, 8000];
+    let currentScene = 0;
+    let isPlaying = true;
+    let timer = null;
+    let isRecording = false;
+    let onRecordingComplete = null; // callback when all scenes done during recording
+
+    const dotsContainer = document.getElementById('sceneDots');
+    scenes.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'scene-dot';
+        dot.addEventListener('click', () => goToScene(i));
+        dotsContainer.appendChild(dot);
+    });
+
+    function animateFeatureCards(sceneEl) {
+        const cards = sceneEl.querySelectorAll('.feature-card, .step-item, .price-card');
+        cards.forEach((card, i) => {
+            setTimeout(() => {
+                card.style.transition = 'opacity .6s cubic-bezier(.4,0,.2,1), transform .6s cubic-bezier(.4,0,.2,1)';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0) scale(1)';
+            }, 300 + i * 180);
+        });
+    }
+
+    function resetCards(sceneEl) {
+        const cards = sceneEl.querySelectorAll('.feature-card, .step-item, .price-card');
+        cards.forEach(card => {
+            card.style.transition = 'none';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px) scale(.85)';
+        });
+    }
+
+    function goToScene(index) {
+        if (index === currentScene && scenes[currentScene].classList.contains('active')) return;
+        clearTimeout(timer);
+
+        scenes[currentScene].classList.remove('active');
+        scenes[currentScene].classList.add('exit');
+        resetCards(scenes[currentScene]);
+
+        setTimeout(() => {
+            scenes[currentScene].classList.remove('exit');
+            currentScene = index;
+
+            scenes[currentScene].classList.add('active');
+            animateFeatureCards(scenes[currentScene]);
+            updateUI();
+
+            if (isRecording && currentScene === totalScenes - 1) {
+                // Last scene during recording — wait for its duration then signal done
+                timer = setTimeout(() => {
+                    if (onRecordingComplete) onRecordingComplete();
+                }, sceneDurations[currentScene]);
+            } else if (isPlaying && currentScene < totalScenes - 1) {
+                timer = setTimeout(() => goToScene(currentScene + 1), sceneDurations[currentScene]);
+            } else if (isPlaying && currentScene === totalScenes - 1) {
+                timer = setTimeout(() => goToScene(0), sceneDurations[currentScene]);
+            }
+        }, 500);
+    }
+
+    function updateUI() {
+        const progress = ((currentScene + 1) / totalScenes) * 100;
+        document.getElementById('progressFill').style.width = progress + '%';
+        document.querySelectorAll('.scene-dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentScene);
+        });
+    }
+
+    function togglePlay() {
+        isPlaying = !isPlaying;
+        const icon = document.querySelector('#playToggle i');
+        const wave = document.getElementById('soundWave');
+        if (isPlaying) {
+            icon.className = 'ri-pause-line';
+            wave.classList.remove('paused');
+            timer = setTimeout(() => goToScene((currentScene + 1) % totalScenes), sceneDurations[currentScene]);
+        } else {
+            icon.className = 'ri-play-line';
+            wave.classList.add('paused');
+            clearTimeout(timer);
+        }
+    }
+
+    // ===== EVENT LISTENERS =====
+    document.getElementById('playToggle').addEventListener('click', togglePlay);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+        if (e.code === 'ArrowRight' || e.code === 'ArrowDown') { e.preventDefault(); goToScene((currentScene + 1) % totalScenes); }
+        if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') { e.preventDefault(); goToScene((currentScene - 1 + totalScenes) % totalScenes); }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.play-toggle, .scene-dot, .btn-cta, .dl-btn, a')) return;
+        if (isRecording) return; // don't skip during recording
+        goToScene((currentScene + 1) % totalScenes);
+    });
+
+    let touchStartX = 0;
+    document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, {passive:true});
+    document.addEventListener('touchend', (e) => {
+        if (isRecording) return;
+        const diff = touchStartX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) {
+            if (diff > 0) goToScene((currentScene + 1) % totalScenes);
+            else goToScene((currentScene - 1 + totalScenes) % totalScenes);
+        }
+    }, {passive:true});
+
+    // ===== DOWNLOAD VIDEO (MediaRecorder + getDisplayMedia) =====
+    const dlBtn = document.getElementById('dlBtn');
+    const dlIcon = document.getElementById('dlIcon');
+    const dlLabel = document.getElementById('dlLabel');
+    const recOverlay = document.getElementById('recOverlay');
+    const recTimerEl = document.getElementById('recTimer');
+    const recTimeSpan = document.getElementById('recTime');
+    let recorder = null;
+    let recChunks = [];
+    let recInterval = null;
+    let recStartTime = 0;
+
+    function formatTime(ms) {
+        const s = Math.floor(ms / 1000);
+        const m = Math.floor(s / 60);
+        return String(m).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
+    }
+
+    function startRecTimer() {
+        recStartTime = Date.now();
+        recInterval = setInterval(() => {
+            recTimeSpan.textContent = formatTime(Date.now() - recStartTime);
+        }, 250);
+    }
+
+    function stopRecTimer() {
+        clearInterval(recInterval);
+        recInterval = null;
+    }
+
+    function setRecordingUI(active) {
+        isRecording = active;
+        dlBtn.classList.toggle('recording', active);
+        recOverlay.classList.toggle('active', active);
+        recTimerEl.classList.toggle('active', active);
+        if (active) {
+            dlIcon.className = 'ri-stop-circle-line';
+            dlLabel.textContent = 'Stop & Simpan';
+        } else {
+            dlIcon.className = 'ri-download-2-line';
+            dlLabel.textContent = 'Download Video';
+        }
+    }
+
+    function downloadBlob(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ZeroixDark_Promo_' + new Date().toISOString().slice(0,10) + '.webm';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+    }
+
+    function stopRecording() {
+        if (!recorder || recorder.state === 'inactive') return;
+        recorder.stop();
+    }
+
+    async function startRecording() {
+        try {
+            // Request screen capture — preferCurrentTab hints to auto-select this tab
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+                video: { 
+                    displaySurface: 'browser',
+                    frameRate: { ideal: 30 },
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                },
+                audio: false,
+                preferCurrentTab: true,
+                selfBrowserSurface: 'include',
+                systemAudio: 'exclude'
+            });
+
+            // Determine supported mime type
+            const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+                ? 'video/webm;codecs=vp9'
+                : MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+                    ? 'video/webm;codecs=vp8'
+                    : 'video/webm';
+
+            recChunks = [];
+            recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 5000000 });
+
+            recorder.ondataavailable = (e) => {
+                if (e.data && e.data.size > 0) recChunks.push(e.data);
+            };
+
+            recorder.onstop = () => {
+                stream.getTracks().forEach(t => t.stop());
+                setRecordingUI(false);
+                stopRecTimer();
+
+                if (recChunks.length > 0) {
+                    const blob = new Blob(recChunks, { type: mimeType });
+                    downloadBlob(blob);
+                }
+                recChunks = [];
+                recorder = null;
+                onRecordingComplete = null;
+            };
+
+            // If user stops sharing via browser UI
+            stream.getVideoTracks()[0].addEventListener('ended', () => {
+                if (recorder && recorder.state !== 'inactive') recorder.stop();
+            });
+
+            recorder.start(500); // collect data every 500ms
+            setRecordingUI(true);
+            startRecTimer();
+
+            // Ensure playing & reset to scene 1 for a clean recording
+            isPlaying = true;
+            document.querySelector('#playToggle i').className = 'ri-pause-line';
+            document.getElementById('soundWave').classList.remove('paused');
+
+            // Set callback for when recording finishes all scenes
+            onRecordingComplete = () => {
+                // Give 2 extra seconds on the final scene then auto-stop
+                setTimeout(() => stopRecording(), 2000);
+            };
+
+            // Small delay then start from scene 1
+            clearTimeout(timer);
+            setTimeout(() => {
+                // Reset current scene instantly
+                scenes[currentScene].classList.remove('active','exit');
+                resetCards(scenes[currentScene]);
+                currentScene = 0;
+                scenes[0].classList.add('active');
+                animateFeatureCards(scenes[0]);
+                updateUI();
+                timer = setTimeout(() => goToScene(1), sceneDurations[0]);
+            }, 600);
+
+        } catch (err) {
+            console.warn('Recording cancelled or not supported:', err);
+            setRecordingUI(false);
+            stopRecTimer();
+            // Show user-friendly alert for common cases
+            if (err.name === 'NotAllowedError') {
+                alert('⚠️ Izin perekaman ditolak.\n\nPilih tab ini saat diminta untuk merekam.');
+            } else if (err.name === 'NotSupportedError') {
+                alert('⚠️ Browser ini belum mendukung perekaman layar.\n\nGunakan Chrome/Edge versi terbaru di desktop.');
+            }
+        }
+    }
+
+    dlBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    });
+
+    // ===== START =====
+    setTimeout(() => {
+        goToScene(0);
+    }, 300);
+
+})();
+</script>
+</body>
+</html>
