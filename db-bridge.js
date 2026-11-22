@@ -345,7 +345,13 @@
 
                 var path = (window.location.pathname || '').toLowerCase();
                 var isLogin = path.endsWith('/login.html') || path.endsWith('/login') || path === 'login.html';
-                var isPublic = path.endsWith('/store.html') || path.endsWith('/store') || path.endsWith('/index.html') || path === '/' || path === '';
+                var isPublic = path.endsWith('/store.html') || path.endsWith('/store')
+                    || path.endsWith('/index.html') || path === '/' || path === ''
+                    || path.endsWith('/status') || path.endsWith('/status.html')
+                    || path.endsWith('/syarat-ketentuan') || path.endsWith('/syarat-ketentuan.html')
+                    || path.endsWith('/privasi') || path.endsWith('/privasi.html')
+                    || path.endsWith('/promo-video') || path.endsWith('/promo-video.html')
+                    || path.endsWith('/404') || path.endsWith('/404.html');
 
                 if (!isLogin && !isPublic) {
                     window.location.replace('login.html');

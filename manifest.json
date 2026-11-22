@@ -1,0 +1,42 @@
+{
+  "name": "ZeroixDark Marketplace",
+  "short_name": "ZeroixDark",
+  "description": "Marketplace panel server Pterodactyl Private, Public, Public V2 & akun reseller dengan aktivasi QRIS otomatis 24/7.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#060b1a",
+  "theme_color": "#060b1a",
+  "lang": "id-ID",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Toko Layanan",
+      "short_name": "Toko",
+      "url": "/store"
+    },
+    {
+      "name": "Status Node",
+      "short_name": "Status",
+      "url": "/status"
+    },
+    {
+      "name": "Login Control Center",
+      "short_name": "Login",
+      "url": "/login"
+    }
+  ]
+}

@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.css">
-    <link rel="stylesheet" href="ptero-ui.css?v=9.3">
     <style>
         :root { 
             --bg-dark: #070b14; --bg-color: var(--bg-dark); --card-bg: rgba(15, 23, 42, 0.6); --card-solid: #1e293b;
@@ -140,9 +139,10 @@
             .system-modal-popup { padding: 28px 20px; }
         }
     </style>
+    <link rel="stylesheet" href="ptero-ui.css?v=9.4">
 </head>
 <body>
-    <script src="page-loader.js?v=75"></script>
+    <script src="page-loader.js?v=76"></script>
     <!-- Ambient Aurora Background Elements (contoh.html) -->
     <div class="aurora"><span></span><span></span><span></span></div>
     <div class="grain"></div>
@@ -261,8 +261,8 @@
         </div>
     </div>
 
-    <script src="config.js?v=75"></script>
-    <script src="db-bridge.js?v=75"></script>
+    <script src="config.js?v=76"></script>
+    <script src="db-bridge.js?v=76"></script>
     <script>
         // Cek Lite Mode (Anti-Lag)
         if(localStorage.getItem('lite_mode') === 'true') {
@@ -505,7 +505,7 @@
         }
 
         function musnahkanUserSekarang(uid, uname) {
-            openSysModal('confirm', 'PEMUSNAHAN TOTAL', `Peringatan: Anda akan menghapus akun <b>${uname}</b> beserta SELURUH server dan user Pterodactyl yang bersangkutan secara permanen!\n\nLanjutkan pemusnahan?`, async () => {
+            openSysModal('confirm', 'PEMUSNAHAN TOTAL', `Peringatan: Anda akan menghapus akun <b>${escapeHtml(uname)}</b> beserta SELURUH server dan user Pterodactyl yang bersangkutan secara permanen!\n\nLanjutkan pemusnahan?`, async () => {
                 try {
                     await usersRef.child(uid).remove();
                     if (window.GlobalConfig && GlobalConfig.workerFetch) {
@@ -513,7 +513,7 @@
                     }
                     openSysModal('success', 'PEMUSNAHAN BERHASIL', `Akun <b>${escapeHtml(uname)}</b> beserta seluruh data server dan user Pterodactyl terkait berhasil dimusnahkan secara permanen.`);
                 } catch (e) {
-                    openSysModal('error', 'GAGAL', e.message);
+                    openSysModal('error', 'GAGAL', escapeHtml(e.message));
                 }
             });
         }
@@ -524,13 +524,13 @@
                     const res = await GlobalConfig.workerFetch('/api/sweep', { method: 'POST' }).then(r => r.json());
                     if (res && res.ok) {
                         const aksiCount = res.result ? res.result.actionsCount : 0;
-                        const purged = (res.result && res.result.websiteUsersPurged) ? res.result.websiteUsersPurged.join(', ') : '';
+                        const purged = (res.result && res.result.websiteUsersPurged) ? res.result.websiteUsersPurged.map(escapeHtml).join(', ') : '';
                         openSysModal('success', 'SWEEPER SELESAI', `Pemindaian sweeper berhasil dijalankan.\nTotal aksi: ${aksiCount}.\n${purged ? `Akun website dimusnahkan: <b>${purged}</b>` : 'Tidak ada akun yang melewati timer 3 hari saat ini.'}`);
                     } else {
-                        openSysModal('error', 'SWEEPER GAGAL', res ? res.error : 'Gagal menghubungi server sweeper.');
+                        openSysModal('error', 'SWEEPER GAGAL', escapeHtml(res ? res.error : 'Gagal menghubungi server sweeper.'));
                     }
                 } catch (e) {
-                    openSysModal('error', 'SWEEPER GAGAL', 'Gagal memicu sweeper: ' + e.message);
+                    openSysModal('error', 'SWEEPER GAGAL', 'Gagal memicu sweeper: ' + escapeHtml(e.message));
                 }
             });
         }
@@ -543,7 +543,7 @@
                 return openSysModal('error', 'AKSES DITOLAK', 'Anda hanya diizinkan mencabut lisensi entitas yang berada di bawah jaringan Anda sendiri.');
             }
             
-            openSysModal('confirm', 'PENCABUTAN LISENSI', `Anda akan menghancurkan lisensi akses milik <b>${target.username}</b>. Entitas tersebut akan langsung tertolak oleh sistem otorisasi.\n\nLanjutkan eksekusi?`, () => {
+            openSysModal('confirm', 'PENCABUTAN LISENSI', `Anda akan menghancurkan lisensi akses milik <b>${escapeHtml(target.username)}</b>. Entitas tersebut akan langsung tertolak oleh sistem otorisasi.\n\nLanjutkan eksekusi?`, () => {
                 const now = Date.now();
                 usersRef.child(uid).update({expiredAt:null,expiredNote:null,expiredUpdatedAt:now,expiredUpdatedBy:username,expiredUpdatedByUid:currentUserId,expiredStatus:'unset'})
                 .then(()=>database.ref('activity_logs').push({uid:currentUserId,username,role,action:`Mencabut lisensi akses pengguna ${target.username}.`,timestamp:now}))

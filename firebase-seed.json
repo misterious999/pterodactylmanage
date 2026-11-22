@@ -3,7 +3,7 @@
     "user_001": {
       "username": "admin",
       "usernameLower": "admin",
-      "password": "pstar7@123",
+      "password": "CHANGE_ME_BEFORE_SEED",
       "role": "pemilik",
       "maker": "system",
       "isOnline": false,

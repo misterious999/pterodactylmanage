@@ -28,9 +28,10 @@
     <meta name="twitter:description" content="Panel Pterodactyl & akun reseller. Bayar QRIS, aktif otomatis, dukungan 24 jam.">
     <meta name="twitter:image" content="https://zeroixdarkmarket.web.id/og-cover.png?v=9.2">
 
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.2">
-    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png?v=9.2">
-    <link rel="apple-touch-icon" href="/favicon-512.png?v=9.2">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.4">
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png?v=9.4">
+    <link rel="apple-touch-icon" href="/favicon-512.png?v=9.4">
 
     <!-- Fonts & Icons (Aurora Tech Theme - contoh.html) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -451,6 +452,9 @@
             overflow: hidden !important;
             height: 100vh !important;
         }
+        html.promo-skipped #promoIntro {
+            display: none !important;
+        }
         #promoIntro {
             position: fixed; inset: 0; z-index: 999999;
             background: #060b1a;
@@ -870,10 +874,18 @@
     </style>
 </head>
 <body>
-<!-- Script inisialisasi awal: lock scroll & set flag loader -->
+<!-- Script inisialisasi awal: hanya tampilkan promo intro otomatis di kunjungan pertama -->
 <script>
-    document.documentElement.classList.add('promo-locked');
-    window.__zxLoader = true;
+    (function () {
+        var seen = false;
+        try { seen = localStorage.getItem('zeroix_promo_seen') === '1'; } catch (e) {}
+        if (seen) {
+            document.documentElement.classList.add('promo-skipped');
+        } else {
+            document.documentElement.classList.add('promo-locked');
+            window.__zxLoader = true;
+        }
+    })();
 </script>
 
 <!-- Ambient Background Elements (contoh.html) -->
@@ -1052,8 +1064,8 @@
     <div class="skip-hint">Klik di mana saja atau tekan ➡ untuk lanjut • Spasi untuk pause</div>
 </div>
 
-<script src="page-loader.js?v=75"></script>
-<script src="config.js?v=75"></script>
+<script src="page-loader.js?v=76"></script>
+<script src="config.js?v=76"></script>
 
 <!-- NAVBAR -->
 <nav class="navbar">
@@ -1079,11 +1091,11 @@
             <a class="nav-a" href="#layanan">Layanan</a>
             <a class="nav-a" href="#produk">Produk</a>
             <a class="nav-a" href="#cara-beli">Cara Beli</a>
-            <a class="nav-a" href="#stack">Ekosistem</a>
             <a class="nav-a" href="#faq">FAQ</a>
+            <a class="nav-a" href="/status">Status Node</a>
             <div class="nav-actions">
                 <button type="button" class="btn" onclick="openPromoIntro()" title="Putar ulang video promosi"><i class="ri-play-circle-line"></i> Video Promo</button>
-                <a class="btn" href="/dashboard"><i class="ri-shield-keyhole-line"></i> Masuk</a>
+                <a class="btn" href="/login"><i class="ri-shield-keyhole-line"></i> Masuk</a>
                 <a class="btn p" href="/store"><i class="ri-shopping-cart-2-line"></i> Belanja</a>
             </div>
         </div>
@@ -1168,7 +1180,7 @@
 
             <div class="card rv">
                 <span class="k">Kepuasan &amp; Server Cluster</span>
-                <div class="v"><span id="statLikes" data-n="99">0</span>%</div>
+                <div class="v"><span data-n="99">0</span>%</div>
                 <div class="bars">
                     <i data-h="45"></i>
                     <i data-h="68"></i>
@@ -1178,7 +1190,7 @@
                     <i data-h="98"></i>
                     <i data-h="90"></i>
                 </div>
-                <div class="note">SLA Uptime &amp; respons node Pterodactyl stabil 24/7.</div>
+                <div class="note">SLA Uptime 24/7 · <b id="statLikes" style="color:var(--a1);">...</b> pengguna menyukai layanan kami.</div>
             </div>
         </div>
     </section>
@@ -1328,15 +1340,17 @@
         <div>
             <h4>Navigasi</h4>
             <a class="fk" href="/store">Toko Layanan</a>
-            <a class="fk" href="/dashboard">Masuk Dashboard</a>
+            <a class="fk" href="/status">Status Infrastruktur</a>
+            <a class="fk" href="/login">Masuk Control Center</a>
             <a class="fk" href="#layanan">Layanan Server</a>
             <a class="fk" href="#faq">FAQ</a>
         </div>
         <div>
-            <h4>Bantuan</h4>
+            <h4>Bantuan &amp; Legal</h4>
             <a class="fk wa-toggle" id="waFoot" href="#">WhatsApp Admin</a>
             <a class="fk" href="/store">Beli Server</a>
-            <a class="fk" href="#cara-beli">Panduan Cara Beli</a>
+            <a class="fk" href="/syarat-ketentuan">Syarat &amp; Ketentuan</a>
+            <a class="fk" href="/privasi">Kebijakan Privasi</a>
         </div>
     </div>
 </footer>
@@ -1518,7 +1532,7 @@
 
         grid.innerHTML = list.map(function (p) {
             return '<article class="prod rv in">'
-                + '<span class="cat">' + p.kategori.replace(/[<>&"]/g, '') + '</span>'
+                + '<span class="cat">' + esc(p.kategori) + '</span>'
                 + '<span class="name">' + esc(p.nama) + '</span>'
                 + '<span class="desc">' + esc(p.deskripsi.length > 110 ? p.deskripsi.slice(0, 107) + '...' : p.deskripsi) + '</span>'
                 + '<span class="foot"><span class="price">' + rupiah(p.harga) + '</span>'
@@ -1527,10 +1541,8 @@
         }).join('');
     });
 
-    // --- LIVE WHATSAPP ADMIN ---
-    getJson('store_settings/whatsapp').then(function (nomor) {
-        nomor = String(nomor == null ? '' : nomor).replace(/\D/g, '');
-        if (!nomor) return;
+    // --- LIVE WHATSAPP ADMIN (dengan fallback nomor resmi jika belum diset di DB) ---
+    function applyWaLinks(nomor) {
         const wa = document.getElementById('waBtn');
         const wa2 = document.getElementById('waBtn2');
         const wf = document.getElementById('waFoot');
@@ -1542,13 +1554,18 @@
             el.rel = 'noopener';
             el.classList.add('wa-on');
         });
+    }
+    applyWaLinks('62895416479539');
+    getJson('store_settings/whatsapp').then(function (nomor) {
+        nomor = String(nomor == null ? '' : nomor).replace(/\D/g, '');
+        if (nomor) applyWaLinks(nomor);
     });
 
     // --- LIVE STATS DARI DB ---
     getJson('store_stats').then(function (stats) {
         if (!stats || typeof stats !== 'object') return;
-        const v = Number(stats.viewCount || 0);
-        const l = Number(stats.likeCount || 0);
+        const v = Number(stats.views ?? stats.viewCount ?? 0);
+        const l = Number(stats.likes ?? stats.likeCount ?? 0);
         const elV = document.getElementById('statViews');
         const elL = document.getElementById('statLikes');
         if (elV && v > 0) {
@@ -1556,7 +1573,6 @@
             elV.textContent = v.toLocaleString('id-ID');
         }
         if (elL && l > 0) {
-            elL.dataset.n = l;
             elL.textContent = l.toLocaleString('id-ID');
         }
     });
@@ -1680,6 +1696,7 @@
         }
 
         function closePromoIntro() {
+            try { localStorage.setItem('zeroix_promo_seen', '1'); } catch (e) {}
             if (promoIntro.classList.contains('promo-exit') || promoIntro.classList.contains('promo-hidden')) return;
             clearTimeout(promoTimer);
             isPromoPlaying = false;
@@ -1692,6 +1709,7 @@
         }
 
         window.openPromoIntro = function() {
+            document.documentElement.classList.remove('promo-skipped');
             document.documentElement.classList.add('promo-locked');
             document.body.classList.add('promo-locked');
             promoIntro.classList.remove('promo-hidden', 'promo-exit');
@@ -1786,6 +1804,11 @@
         }
 
         async function startPromoRecording() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia || typeof MediaRecorder === 'undefined') {
+                if (promoDlLabel) promoDlLabel.textContent = 'Khusus Desktop';
+                setTimeout(() => { if (promoDlLabel) promoDlLabel.textContent = 'Download Video'; }, 2500);
+                return;
+            }
             try {
                 const stream = await navigator.mediaDevices.getDisplayMedia({
                     video: { displaySurface: 'browser', frameRate: { ideal: 30 }, width: { ideal: 1920 }, height: { ideal: 1080 } },
@@ -1854,8 +1877,9 @@
                 console.warn('Recording cancelled or error:', err);
                 setPromoRecUI(false);
                 clearInterval(pRecInterval);
-                if (err.name === 'NotAllowedError') {
-                    alert('⚠️ Izin perekaman ditolak.\n\nPilih tab ini saat diminta.');
+                if (err.name === 'NotAllowedError' && promoDlLabel) {
+                    promoDlLabel.textContent = 'Izin Ditolak';
+                    setTimeout(() => { promoDlLabel.textContent = 'Download Video'; }, 2500);
                 }
             }
         }
@@ -1868,10 +1892,15 @@
             });
         }
 
-        // Mulai intro otomatis
-        setTimeout(() => {
-            goToPromoScene(0);
-        }, 300);
+        // Mulai intro otomatis hanya jika belum pernah dilewati/ditonton
+        if (!document.documentElement.classList.contains('promo-skipped')) {
+            setTimeout(() => {
+                goToPromoScene(0);
+            }, 300);
+        } else {
+            promoIntro.classList.add('promo-hidden');
+            isPromoPlaying = false;
+        }
     }
 })();
 </script>

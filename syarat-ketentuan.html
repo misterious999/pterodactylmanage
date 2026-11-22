@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syarat &amp; Ketentuan Layanan — ZeroixDark</title>
+    <meta name="description" content="Syarat dan ketentuan penggunaan panel Pterodactyl, pembayaran QRIS, masa tenggang 3 hari, serta kebijakan refund ZeroixDark.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://zeroixdarkmarket.web.id/syarat-ketentuan">
+    <meta name="theme-color" content="#060b1a">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.4">
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png?v=9.4">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root { --bg: #060b1a; --card: rgba(255,255,255,.04); --line: rgba(255,255,255,.09); --ink: #e9eeff; --muted: #8d97b8; --a1: #5eead4; --a2: #818cf8; --a3: #f472b6; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--ink); font-family: 'Sora', sans-serif; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+        a { color: var(--a1); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .aurora { position: fixed; inset: -20%; z-index: -2; filter: blur(80px) saturate(140%); opacity: .5; pointer-events: none; }
+        .aurora span { position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%; mix-blend-mode: screen; }
+        .aurora span:nth-child(1) { background: radial-gradient(circle, var(--a1), transparent 60%); top: 0; left: 10%; }
+        .aurora span:nth-child(2) { background: radial-gradient(circle, var(--a2), transparent 60%); top: 20%; right: 0; }
+        .grain { position: fixed; inset: 0; z-index: -1; pointer-events: none; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 64px 64px; mask-image: radial-gradient(circle at 50% 30%, #000, transparent 75%); }
+        .navbar { position: sticky; top: 0; z-index: 100; background: rgba(6,11,26,.8); backdrop-filter: blur(18px); border-bottom: 1px solid var(--line); }
+        .nav-inner { max-width: 960px; margin: 0 auto; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.18rem; color: var(--ink); text-decoration: none; }
+        .brand b { color: var(--a1); }
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 15px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: .85rem; font-weight: 600; text-decoration: none; }
+        .btn:hover { border-color: var(--a1); color: var(--a1); text-decoration: none; }
+        .wrap { max-width: 860px; margin: 0 auto; padding: 48px 24px 72px; }
+        h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800; margin-bottom: 8px; }
+        .meta { color: var(--muted); font-size: .86rem; margin-bottom: 30px; }
+        .doc-card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 28px; margin-bottom: 18px; backdrop-filter: blur(12px); }
+        .doc-card h2 { font-size: 1.12rem; color: var(--a1); margin-bottom: 10px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .doc-card p, .doc-card li { color: var(--muted); font-size: .92rem; }
+        .doc-card ul { padding-left: 20px; margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+        footer { border-top: 1px solid var(--line); padding: 26px 24px; text-align: center; color: var(--muted); font-size: .84rem; }
+    </style>
+</head>
+<body>
+    <script src="page-loader.js?v=76"></script>
+    <div class="aurora"><span></span><span></span></div>
+    <div class="grain"></div>
+
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a class="brand" href="/"><span>Zeroix<b>Dark</b></span></a>
+            <div style="display:flex; gap:8px;">
+                <a class="btn" href="/"><i class="ri-home-5-line"></i> Beranda</a>
+                <a class="btn" href="/store"><i class="ri-shopping-bag-3-line"></i> Toko</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="wrap">
+        <h1>Syarat &amp; Ketentuan Layanan</h1>
+        <p class="meta">Terakhir diperbarui: 22 November 2026 · Berlaku untuk seluruh layanan ZeroixDark</p>
+
+        <section class="doc-card">
+            <h2><i class="ri-shield-check-line"></i> 1. Penggunaan Layanan yang Diizinkan</h2>
+            <p>Layanan panel Pterodactyl dan akun Reseller/Partner disediakan untuk kebutuhan bot (WhatsApp, Telegram, Discord), aplikasi Node.js/Python, game server, dan proyek legal lainnya. Pengguna dilarang keras menggunakan server untuk:</p>
+            <ul>
+                <li>Serangan jaringan (DDoS/DoS, flood, port scanning, brute-force).</li>
+                <li>Crypto mining atau script yang membebani CPU node secara tidak wajar di node shared/public.</li>
+                <li>Aktivitas ilegal, phishing, malware distribution, atau pelanggaran hukum yang berlaku.</li>
+            </ul>
+            <p style="margin-top:10px;">Pelanggaran terhadap poin di atas berakibat suspend atau terminasi permanen tanpa pengembalian dana.</p>
+        </section>
+
+        <section class="doc-card">
+            <h2><i class="ri-time-line"></i> 2. Masa Aktif, Masa Tenggang 3 Hari &amp; Penghapusan Otomatis</h2>
+            <ul>
+                <li>Setiap pembelian panel dan akun role memiliki masa aktif standar <strong>30 hari</strong> (kecuali tertera lain pada produk).</li>
+                <li>Setelah melewati batas waktu expired, sistem Auto-Sweeper otomatis men-suspend server dan memberikan <strong>masa tenggang 3 hari</strong>.</li>
+                <li>Jika tidak diperpanjang hingga masa tenggang 3 hari berakhir, sistem akan menghapus server, akun Pterodactyl, serta data terkait secara <strong>permanen</strong>.</li>
+            </ul>
+        </section>
+
+        <section class="doc-card">
+            <h2><i class="ri-qr-code-line"></i> 3. Pembayaran QRIS &amp; Kebijakan Pengembalian Dana (Refund)</h2>
+            <ul>
+                <li>Pembayaran melalui QRIS bersifat final setelah terverifikasi lunas dan layanan ter-deploy otomatis.</li>
+                <li>Refund atau penggantian kompensasi hanya berlaku apabila terjadi kegagalan sistem penyediaan (misalnya port node penuh setelah pembayaran lunas atau kendala server berkepanjangan dari pihak penyedia) yang tidak dapat diselesaikan dalam 1x24 jam.</li>
+                <li>Kesalahan pengguna dalam mengisi username, password, atau penghapusan file bot sendiri bukan merupakan tanggung jawab sistem.</li>
+            </ul>
+        </section>
+
+        <section class="doc-card">
+            <h2><i class="ri-customer-service-2-line"></i> 4. Dukungan &amp; Penyelesaian Kendala</h2>
+            <p>Apabila terjadi kendala teknis setelah pembayaran, harap simpan <strong>Nomor Invoice / ID Transaksi</strong> Anda dan hubungi Admin melalui WhatsApp resmi yang tercantum di halaman <a href="/store">Toko</a> atau pantau kesiapan node melalui <a href="/status">Status Infrastruktur</a>.</p>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2026 ZeroixDark · <a href="/privasi">Kebijakan Privasi</a> · <a href="/status">Status Node</a>
+    </footer>
+</body>
+</html>

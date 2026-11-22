@@ -904,6 +904,11 @@
     }
 
     async function startRecording() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia || typeof MediaRecorder === 'undefined') {
+            dlLabel.textContent = 'Khusus Desktop';
+            setTimeout(() => { dlLabel.textContent = 'Download Video'; }, 2500);
+            return;
+        }
         try {
             // Request screen capture — preferCurrentTab hints to auto-select this tab
             const stream = await navigator.mediaDevices.getDisplayMedia({

@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>Kelola Akses Web — ZeroixDark</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.2">
-    <link rel="stylesheet" href="ptero-ui.css?v=9.3">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.4">
     <style>
         :root { 
             --bg-dark: #070b14; 
@@ -340,9 +339,10 @@
         @keyframes scaleUpModal { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
+    <link rel="stylesheet" href="ptero-ui.css?v=9.4">
 </head>
 <body>
-    <script src="page-loader.js?v=75"></script>
+    <script src="page-loader.js?v=76"></script>
     <!-- Ambient Aurora Background Elements (contoh.html) -->
     <div class="aurora"><span></span><span></span><span></span></div>
     <div class="grain"></div>
@@ -550,8 +550,8 @@
         </div>
     </div>
     
-    <script src="config.js?v=75"></script>
-    <script src="db-bridge.js?v=75"></script>
+    <script src="config.js?v=76"></script>
+    <script src="db-bridge.js?v=76"></script>
 
     <script>
         // Cek Lite Mode (Anti-Lag)
@@ -701,11 +701,11 @@
                         // Partner hanya boleh ubah akun buatannya sendiri atau akun dirinya sendiri.
                         const canChangePass = (myRole === 'pemilik' || u.maker === myUsername || u.uId === currentUserId);
                         let btnPass = canChangePass ?
-                            `<button class="btn-ganti-pass" onclick="bukaModalGantiPassword('${u.uId}', '${escapeHtml(u.username)}')">${svgKey} Ganti Sandi</button>` : '';
+                            `<button class="btn-ganti-pass" data-uid="${escapeHtml(u.uId)}" data-uname="${escapeHtml(u.username)}" onclick="bukaModalGantiPassword(this.dataset.uid, this.dataset.uname)">${svgKey} Ganti Sandi</button>` : '';
 
                         let hapus = (String(u.username).toLowerCase() === 'admin') ? 
                                     `<span style="color:var(--text-sub); font-size:11px; font-weight:700; display:flex; align-items:center; gap:4px;">${svgShield} Root System</span>` : 
-                                    `<button class="btn-hapus" onclick="hapusAkunWeb('${u.uId}', '${escapeHtml(u.username)}')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Cabut Akses</button>`;
+                                    `<button class="btn-hapus" data-uid="${escapeHtml(u.uId)}" data-uname="${escapeHtml(u.username)}" onclick="hapusAkunWeb(this.dataset.uid, this.dataset.uname)"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Cabut Akses</button>`;
 
                         // Tampilan password: jika hash PBKDF2 tampilkan label terenkripsi
                         let passDisplay = '';

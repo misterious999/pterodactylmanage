@@ -46,9 +46,11 @@
     if (window.__zxLoader) return;
     window.__zxLoader = true;
 
-    const MIN_SHOW = 1600; // ms minimal animasi tampil
-    const MAX_SHOW = 6000; // ms batas aman kalau event load tidak kunjung datang
-    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const MIN_SHOW = 450; // ms minimal animasi tampil (ringan & responsif)
+    const MAX_SHOW = 4500; // ms batas aman kalau event load tidak kunjung datang
+    const reduce = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+        || (() => { try { return localStorage.getItem('lite_mode') === 'true'; } catch (e) { return false; } })();
+    if (reduce) return;
 
     const css = `
         #zxLoader { position: fixed; inset: 0; z-index: 2147483000; display: flex; align-items: center; justify-content: center; padding: 0 16px; background: radial-gradient(circle at 50% 45%, #0b2a2a 0%, #0f172a 60%, #070b16 100%); overflow: hidden; cursor: pointer; font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; transition: opacity .55s ease, visibility .55s ease; }

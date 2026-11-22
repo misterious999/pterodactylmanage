@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>Log Audit Sistem — ZeroixDark</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.2">
-    <link rel="stylesheet" href="ptero-ui.css?v=9.3">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.4">
+    <link rel="stylesheet" href="ptero-ui.css?v=9.4">
     <style>
         .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); animation: pulse 2s infinite; margin-right: 6px; vertical-align: middle; }
         .live-dot.off { background: var(--text-sub); animation: none; }
@@ -58,7 +58,7 @@
     </style>
 </head>
 <body>
-    <script src="page-loader.js?v=75"></script>
+    <script src="page-loader.js?v=76"></script>
     <!-- Ambient Aurora Background Elements (contoh.html) -->
     <div class="aurora"><span></span><span></span><span></span></div>
     <div class="grain"></div>
@@ -72,7 +72,6 @@
         <i class="ri-shield-keyhole-line" style="color:var(--danger); font-size:24px; vertical-align:middle;"></i>
         <span>Log Audit Sistem</span>
     </h2>
-    <p class="sub-title"><span class="live-dot off" id="liveDot"></span><span id="liveText">Menghubungkan ke basis data...</span></p>
     <p class="sub-title"><span class="live-dot off" id="liveDot"></span><span id="liveText">Menghubungkan ke basis data...</span></p>
 
     <div class="stats">
@@ -92,9 +91,9 @@
         <button class="btn-more" id="btnMore" hidden onclick="muatLebih()">Muat Lebih Banyak</button>
     </div>
 
-    <script src="config.js?v=75"></script>
-    <script src="ui-confirm.js"></script>
-    <script src="db-bridge.js?v=75"></script>
+    <script src="config.js?v=76"></script>
+    <script src="ui-confirm.js?v=76"></script>
+    <script src="db-bridge.js?v=76"></script>
     <script>
         if(localStorage.getItem('lite_mode') === 'true') {
             document.body.classList.add('lite-mode');

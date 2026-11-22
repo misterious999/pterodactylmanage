@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toko Layanan &amp; Server - ZeroixDark</title>
     <meta name="description" content="Belanja panel Pterodactyl Private/Public/V2 dan akun reseller ZeroixDark. Bayar QRIS, aktivasi otomatis, kredensial langsung muncul di dashboard.">
     <link rel="canonical" href="https://zeroixdarkmarket.web.id/store">
@@ -30,9 +30,10 @@
     <meta name="twitter:image" content="https://zeroixdarkmarket.web.id/og-store.png?v=9.2">
 
     <!-- Favicon & Icons -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.2">
-    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png?v=9.2">
-    <link rel="apple-touch-icon" href="/favicon-512.png?v=9.2">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.4">
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png?v=9.4">
+    <link rel="apple-touch-icon" href="/favicon-512.png?v=9.4">
 
     <!-- Fonts & Icons (Aurora Tech Theme - contoh.html) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -694,6 +695,64 @@
             font-size: 13px; font-weight: 600; cursor: pointer;
         }
 
+        /* --- SEARCH, SORT, LOOKUP & RENEW CONTROLS --- */
+        .store-toolbar {
+            max-width: 1200px; margin: 0 auto 22px auto; padding: 0 5%;
+            display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+        }
+        .store-search-wrap {
+            flex: 1 1 260px; position: relative;
+        }
+        .store-search-wrap i {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            color: var(--muted); font-size: 16px; pointer-events: none;
+        }
+        .store-search-wrap input {
+            width: 100%; padding: 11px 14px 11px 40px; border-radius: 12px;
+            background: var(--card); border: 1px solid var(--line); color: var(--ink);
+            font-family: inherit; font-size: 13.5px; outline: none; transition: .25s;
+        }
+        .store-search-wrap input:focus {
+            border-color: var(--a1); box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.14);
+        }
+        .store-sort-select {
+            flex: 0 1 200px; padding: 11px 14px; border-radius: 12px;
+            background: var(--card); border: 1px solid var(--line); color: var(--ink);
+            font-family: inherit; font-size: 13px; font-weight: 600; outline: none; cursor: pointer;
+        }
+        .store-sort-select option { background: #0d1527; color: var(--ink); }
+        .btn-renew-quick {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 700;
+            background: rgba(129, 140, 248, 0.14); color: #c7cbff;
+            border: 1px solid rgba(129, 140, 248, 0.35); cursor: pointer; transition: .25s;
+        }
+        .btn-renew-quick:hover {
+            border-color: var(--a1); color: var(--a1); transform: translateY(-2px);
+        }
+        .lookup-box {
+            background: rgba(0, 0, 0, 0.25); border: 1px solid var(--line);
+            border-radius: 14px; padding: 12px; margin-bottom: 14px;
+        }
+        .lookup-title {
+            font-size: 11.5px; font-weight: 700; color: var(--a1);
+            margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+        }
+        .lookup-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .lookup-row input {
+            flex: 1 1 130px; min-width: 0; padding: 9px 11px; border-radius: 10px;
+            background: rgba(6, 11, 26, 0.7); border: 1px solid var(--line);
+            color: var(--ink); font-family: inherit; font-size: 12.5px; outline: none;
+        }
+        .lookup-row input:focus { border-color: var(--a1); }
+        .lookup-row button {
+            padding: 9px 14px; border-radius: 10px; border: 0; cursor: pointer;
+            font-weight: 700; font-size: 12px;
+            background: linear-gradient(135deg, var(--a1), var(--a2)); color: #060b1a;
+        }
+        .lookup-msg { font-size: 11.5px; color: var(--a3); margin-top: 6px; }
+        .lookup-msg:empty { display: none; }
+
         /* --- RESPONSIVE HP --- */
         @media (max-width: 480px) {
             .navbar { padding: 12px 3%; }
@@ -721,7 +780,7 @@
     <div class="aurora"><span></span><span></span><span></span></div>
     <div class="grain"></div>
 
-    <script src="page-loader.js?v=75"></script>
+    <script src="page-loader.js?v=76"></script>
 
     <!-- Navigasi -->
     <nav class="navbar">
@@ -746,8 +805,9 @@
                 <span class="nav-text">Pesanan Saya</span>
                 <span class="order-badge" id="orderBadge" style="display:none;">0</span>
             </button>
+            <a href="/status" class="btn-nav-home" title="Status Node"><i class="ri-pulse-line"></i> <span>Status</span></a>
             <a href="/" class="btn-nav-home"><i class="ri-home-5-line"></i> <span>Beranda</span></a>
-            <a href="login.html" class="btn-login"><i class="ri-shield-keyhole-line"></i> <span>Login Panel</span></a>
+            <a href="/login" class="btn-login"><i class="ri-shield-keyhole-line"></i> <span>Login Panel</span></a>
         </div>
     </nav>
 
@@ -824,6 +884,22 @@
 
     <div class="section-title">KATALOG LAYANAN</div>
 
+    <!-- Search, Sort & Perpanjang Panel -->
+    <div class="store-toolbar">
+        <div class="store-search-wrap">
+            <i class="ri-search-line"></i>
+            <input type="text" id="storeSearch" placeholder="Cari paket RAM, Private, Public V2, Reseller..." oninput="renderDenganFilterAktif()" autocomplete="off">
+        </div>
+        <select id="storeSort" class="store-sort-select" onchange="renderDenganFilterAktif()" aria-label="Urutkan produk">
+            <option value="default">Urutan: Default</option>
+            <option value="price-asc">Harga: Termurah</option>
+            <option value="price-desc">Harga: Termahal</option>
+        </select>
+        <button type="button" class="btn-renew-quick" onclick="bukaModalPerpanjang()">
+            <i class="ri-refresh-line"></i> Perpanjang Panel
+        </button>
+    </div>
+
     <!-- Tombol Filter Kategori Bakal Diisi Otomatis via JS -->
     <div class="category-filter" id="categoryFilter">
         <button class="btn-category active" onclick="filterKategori('Semua', this)">Semua Layanan</button>
@@ -851,12 +927,49 @@
                 <button type="button" class="btn-close-circle" onclick="tutupModalRiwayat()" aria-label="Tutup">&times;</button>
             </div>
 
+            <div class="lookup-box">
+                <div class="lookup-title"><i class="ri-search-eye-line"></i> Ganti HP / Browser? Lacak Pesanan Kamu</div>
+                <div class="lookup-row">
+                    <input type="text" id="lookupQuery" placeholder="Invoice / ID NEX-..." autocomplete="off">
+                    <input type="tel" id="lookupPhone" placeholder="No. WA (08xxx)" autocomplete="tel">
+                    <button type="button" id="btnLookupOrder" onclick="lacakPesananLintasPerangkat()">Lacak</button>
+                </div>
+                <div class="lookup-msg" id="lookupMsg"></div>
+            </div>
+
             <div class="history-list" id="historyList">
                 <!-- Diisi otomatis oleh JavaScript -->
             </div>
 
             <div class="history-footer">
                 <button type="button" class="btn-history-close" onclick="tutupModalRiwayat()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Perpanjang Panel Otomatis via QRIS -->
+    <div class="pay-overlay" id="modalRenew">
+        <div class="pay-box" style="max-width: 420px;">
+            <div class="history-header" style="margin-bottom: 14px; padding-bottom: 12px;">
+                <div>
+                    <h3 style="font-size: 1.15rem;"><i class="ri-refresh-line" style="color:var(--a1);"></i> Perpanjang Masa Aktif</h3>
+                    <p class="history-subtitle">Tambah 30 hari otomatis &amp; pulihkan server tersuspend</p>
+                </div>
+                <button type="button" class="btn-close-circle" onclick="tutupModalPerpanjang()" aria-label="Tutup">&times;</button>
+            </div>
+            <div class="pay-form" style="margin-bottom: 10px;">
+                <label>Pilih Paket Perpanjangan
+                    <select id="renewProductSelect"></select>
+                </label>
+                <label>Username Akun / Panel
+                    <input type="text" id="renewUsername" placeholder="Masukkan username akun..." autocomplete="off" autocapitalize="none">
+                </label>
+                <div id="renewCheckInfo" class="pay-spec" hidden></div>
+                <div id="renewError" class="pay-form-error"></div>
+            </div>
+            <div class="pay-actions">
+                <button type="button" class="pay-primary" id="btnRenewPay" onclick="prosesPerpanjangQRIS()">Cek Akun &amp; Bayar QRIS</button>
+                <button type="button" onclick="tutupModalPerpanjang()">Batal</button>
             </div>
         </div>
     </div>
@@ -918,13 +1031,21 @@
                 <span>Zeroix<b>Dark</b></span>
             </a>
             <p style="color:var(--muted); font-size:13px; max-width:480px; margin:0;">Marketplace resmi panel Pterodactyl &amp; server bot dengan aktivasi otomatis 24 jam ditenagai infrastruktur Zeroix Enterprise.</p>
+            <div style="display:flex; gap:18px; flex-wrap:wrap; justify-content:center; font-size:13px; color:var(--muted);">
+                <a href="/" style="color:var(--ink);">Beranda</a>
+                <a href="/status" style="color:var(--ink);">Status Node</a>
+                <a href="/syarat-ketentuan" style="color:var(--ink);">Syarat &amp; Ketentuan</a>
+                <a href="/privasi" style="color:var(--ink);">Kebijakan Privasi</a>
+                <a href="/login" style="color:var(--a1);">Login Control Center</a>
+            </div>
             <p style="color:var(--muted); font-size:12px; margin:0;">&copy; 2026 ZeroixDark · Dikelola secara profesional.</p>
         </div>
     </footer>
 
     <!-- Script Pusat -->
-    <script src="config.js?v=75"></script>
-    <script src="db-bridge.js?v=75"></script>
+    <script src="config.js?v=76"></script>
+    <script src="ui-confirm.js?v=76"></script>
+    <script src="db-bridge.js?v=76"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
@@ -951,45 +1072,67 @@
             
             let filterDiv = document.getElementById('categoryFilter');
             let currentActive = document.querySelector('.btn-category.active');
-            let activeFilter = currentActive ? currentActive.textContent.trim() : 'Semua Layanan';
+            let activeFilter = currentActive ? currentActive.dataset.cat || 'Semua' : 'Semua';
             
-            // Render ulang tombol-tombolnya
-            let html = `<button class="btn-category ${activeFilter === 'Semua Layanan' ? 'active' : ''}" onclick="filterKategori('Semua', this)">Semua Layanan</button>`;
+            let html = `<button class="btn-category ${activeFilter === 'Semua' ? 'active' : ''}" data-cat="Semua" onclick="filterKategori('Semua', this)">Semua Layanan</button>`;
             
             cats.forEach(c => {
                 let isActive = (activeFilter === c) ? 'active' : '';
-                html += `<button class="btn-category ${isActive}" onclick="filterKategori('${c}', this)">${c}</button>`;
+                html += `<button class="btn-category ${isActive}" data-cat="${escapeHtml(c)}" onclick="filterKategori(this.dataset.cat, this)">${escapeHtml(c)}</button>`;
             });
             
             filterDiv.innerHTML = html;
         });
 
+        function safeImageUrl(raw, fallback) {
+            if (!raw || typeof raw !== 'string') return fallback;
+            const u = raw.trim();
+            if (/^https?:\/\//i.test(u) || /^data:image\/(png|jpeg|jpg|webp|gif);base64,/i.test(u)) return u;
+            return fallback;
+        }
+
+        function getActiveKategori() {
+            const activeBtn = document.querySelector('.btn-category.active');
+            return activeBtn ? (activeBtn.dataset.cat || 'Semua') : 'Semua';
+        }
+
+        function renderDenganFilterAktif() {
+            renderProducts(getActiveKategori());
+        }
+
         // --- RENDER PRODUK ---
         function renderProducts(kategoriFilter) {
             const wadahKatalog = document.getElementById('katalogProduk');
-            let filteredProducts = globalProducts;
+            let filteredProducts = globalProducts.slice();
 
-            // Proses Penyaringan (Filtering EXACT MATCH)
             if (kategoriFilter !== 'Semua') {
-                filteredProducts = globalProducts.filter(p => {
+                filteredProducts = filteredProducts.filter(p => {
                     const nama = (p.nama || '').toLowerCase();
                     const kat = (p.kategori || '').trim().toLowerCase();
-                    const target = kategoriFilter.trim().toLowerCase();
-                    
-                    if (kat !== '') {
-                        return kat === target; // Cek SAMA PERSIS
-                    } else {
-                        return nama.includes(target); // Fallback ke nama kalau kategori di database kosong
-                    }
+                    const target = String(kategoriFilter || '').trim().toLowerCase();
+                    return kat !== '' ? kat === target : nama.includes(target);
                 });
             }
 
-            // Kalau kosong di kategori tertentu
+            const q = (document.getElementById('storeSearch')?.value || '').trim().toLowerCase();
+            if (q) {
+                filteredProducts = filteredProducts.filter(p =>
+                    `${p.nama || ''} ${p.kategori || ''} ${p.deskripsi || ''}`.toLowerCase().includes(q)
+                );
+            }
+
+            const sortMode = document.getElementById('storeSort')?.value || 'default';
+            if (sortMode === 'price-asc') {
+                filteredProducts.sort((a, b) => Number(a.harga || 0) - Number(b.harga || 0));
+            } else if (sortMode === 'price-desc') {
+                filteredProducts.sort((a, b) => Number(b.harga || 0) - Number(a.harga || 0));
+            }
+
             if (filteredProducts.length === 0) {
                 wadahKatalog.innerHTML = `
                     <div class="loading-state" style="color: var(--warning);">
                         <svg viewBox="0 0 24 24" style="fill: var(--warning); animation: none; margin-bottom: 15px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                        <br><span style="font-weight: 600;">Belum ada produk di kategori ini.</span>
+                        <br><span style="font-weight: 600;">${q ? 'Tidak ada layanan yang cocok dengan pencarianmu.' : 'Belum ada produk di kategori ini.'}</span>
                     </div>`;
                 return;
             }
@@ -998,40 +1141,37 @@
             filteredProducts.forEach(p => {
                 const namaAman = encodeURIComponent((p.nama || 'Produk').substring(0, 15));
                 const fallbackDarurat = `https://placehold.co/400x250/1e293b/0d9488?text=Foto+Layanan`;
-                let imgSrc = `https://ui-avatars.com/api/?name=${namaAman}&background=1e293b&color=0d9488&size=400`;
-                
-                if (p.gambar && typeof p.gambar === 'string' && p.gambar.trim() !== '') {
-                    imgSrc = p.gambar.trim();
-                }
+                const defaultAvatar = `https://ui-avatars.com/api/?name=${namaAman}&background=1e293b&color=0d9488&size=400`;
+                const imgSrc = safeImageUrl(p.gambar, defaultAvatar);
                 
                 const pesanWA = encodeURIComponent(`Halo min, saya tertarik untuk membeli produk:\n\n*${p.nama}*\nHarga: ${formatRupiah(p.harga)}\n\nApakah masih tersedia?`);
                 const linkWA = `https://wa.me/${nomorWhatsApp}?text=${pesanWA}`;
 
-                let textKategori = p.kategori ? p.kategori : 'Layanan';
+                let textKategori = escapeHtml(p.kategori ? p.kategori : 'Layanan');
                 let badgeHTML = `<div class="category-badge">${textKategori}</div>`;
 
                 html += `
                 <div class="product-card">
                     <div class="img-container">
                         ${badgeHTML}
-                        <img src="${imgSrc}" alt="${p.nama}" class="product-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackDarurat}';">
+                        <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.nama)}" class="product-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackDarurat}';">
                     </div>
-                    <h3 class="product-title">${p.nama}</h3>
-                    <p class="product-desc">${p.deskripsi ? p.deskripsi : 'Layanan premium untuk kebutuhan server dan bot Anda.'}</p>
+                    <h3 class="product-title">${escapeHtml(p.nama)}</h3>
+                    <p class="product-desc">${escapeHtml(p.deskripsi ? p.deskripsi : 'Layanan premium untuk kebutuhan server dan bot Anda.')}</p>
                     
                     <div class="product-price-box">
                         <div class="price-left">
                             <span class="price-label">Harga Spesial</span>
                             <span class="price-value">${formatRupiah(p.harga)}</span>
                         </div>
-                        ${p.diskon ? `<div class="discount-badge">${p.diskon}</div>` : ''}
+                        ${p.diskon ? `<div class="discount-badge">${escapeHtml(p.diskon)}</div>` : ''}
                     </div>
 
-                    <button class="btn-beli" onclick="bayarProduk('${p.id}')">
+                    <button class="btn-beli" onclick="bayarProduk('${escapeHtml(p.id)}')">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm-2 16h8v-8H3v8zm2-6h4v4H5v-4zm8-12v8h8V3h-8zm6 6h-4V5h4v4zm0 10h2v2h-2zm-6-6h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zm0-4h2v2h-2zm2 2h2v2h-2z"/></svg>
                         Bayar via QRIS
                     </button>
-                    <a href="${linkWA}" target="_blank" style="display:block; text-align:center; margin-top:10px; font-size:12px; color:var(--text-sub);">Tanya dulu via WhatsApp</a>
+                    <a href="${linkWA}" target="_blank" rel="noopener" style="display:block; text-align:center; margin-top:10px; font-size:12px; color:var(--text-sub);">Tanya dulu via WhatsApp</a>
                 </div>`;
             });
 
@@ -1059,17 +1199,7 @@
             }
 
             lanjutkanPesananTersimpan();
-
-            // Pertahankan filter yang lagi kepilih pas data kerestart/nambah
-            const activeBtn = document.querySelector('.btn-category.active');
-            if (activeBtn) {
-                const onclickText = activeBtn.getAttribute('onclick');
-                const filterMatch = onclickText.match(/'([^']+)'/);
-                const filterStr = filterMatch ? filterMatch[1] : 'Semua';
-                renderProducts(filterStr);
-            } else {
-                renderProducts('Semua');
-            }
+            renderDenganFilterAktif();
         });
 
         // --- PEMBAYARAN QRIS & RIWAYAT PESANAN (Option A: LocalStorage + Worker Pay) ---
@@ -1206,7 +1336,7 @@
                 }
                 renderDaftarRiwayat();
             } catch (e) {
-                alert('Gagal mengecek status: ' + e.message);
+                beritahu({ judul: 'Gagal Cek Status', pesan: e.message, tipe: 'error' });
                 if (btnEl) {
                     btnEl.disabled = false;
                     btnEl.innerHTML = '<i class="ri-refresh-line"></i> Cek Status';
@@ -1236,8 +1366,14 @@
             }
         }
 
-        function hapusRiwayatPesanan(nexId) {
-            if (!confirm('Hapus transaksi ini dari riwayat browser kamu? Data akun/struk yang tersimpan di sini akan ikut terhapus.')) return;
+        async function hapusRiwayatPesanan(nexId) {
+            const ya = await konfirmasi({
+                judul: 'Hapus Riwayat?',
+                pesan: 'Transaksi ini akan dihapus dari riwayat browser kamu. Data akun/struk yang tersimpan di perangkat ini ikut terhapus.',
+                label: 'Hapus',
+                bahaya: true
+            });
+            if (!ya) return;
             let list = muatRiwayatPesanan();
             list = list.filter(o => o.nexpay_transaction_id !== nexId);
             simpanRiwayatPesanan(list);
@@ -1248,6 +1384,101 @@
                 payOrder = null;
             }
             renderDaftarRiwayat();
+        }
+
+        async function lacakPesananLintasPerangkat() {
+            const q = (document.getElementById('lookupQuery')?.value || '').trim();
+            const phone = (document.getElementById('lookupPhone')?.value || '').trim();
+            const msgEl = document.getElementById('lookupMsg');
+            const btn = document.getElementById('btnLookupOrder');
+            if (!q) {
+                if (msgEl) msgEl.innerText = 'Masukkan Nomor Invoice (INV-...) atau ID Transaksi (NEX-...).';
+                return;
+            }
+            if (msgEl) msgEl.innerText = '';
+            btn.disabled = true;
+            btn.innerText = 'Mencari...';
+            try {
+                const found = await payRequest('lookup', { query: q, phone });
+                if (found.panel) {
+                    found.unlocked = true;
+                }
+                catatRiwayatPesanan(found);
+                renderDaftarRiwayat();
+                if (msgEl) msgEl.innerText = '';
+                document.getElementById('lookupQuery').value = '';
+                tutupModalRiwayat();
+                bukaPesanan(found);
+            } catch (e) {
+                if (msgEl) msgEl.innerText = e.message || 'Pesanan tidak ditemukan.';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Lacak';
+            }
+        }
+
+        function bukaModalPerpanjang() {
+            const sel = document.getElementById('renewProductSelect');
+            const err = document.getElementById('renewError');
+            const info = document.getElementById('renewCheckInfo');
+            if (err) err.innerText = '';
+            if (info) info.hidden = true;
+            const autoProducts = globalProducts.filter(p => !!GlobalConfig.jenisProduk(p));
+            if (!autoProducts.length) {
+                beritahu({ judul: 'Memuat Produk', pesan: 'Daftar paket perpanjangan belum siap. Coba beberapa detik lagi.', tipe: 'info' });
+                return;
+            }
+            sel.innerHTML = autoProducts.map(p =>
+                `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)} — ${formatRupiah(p.harga)}</option>`
+            ).join('');
+            document.getElementById('renewUsername').value = '';
+            document.getElementById('modalRenew').classList.add('show');
+        }
+
+        function tutupModalPerpanjang() {
+            document.getElementById('modalRenew').classList.remove('show');
+        }
+
+        async function prosesPerpanjangQRIS() {
+            const productId = document.getElementById('renewProductSelect').value;
+            const username = document.getElementById('renewUsername').value.trim();
+            const err = document.getElementById('renewError');
+            const info = document.getElementById('renewCheckInfo');
+            const btn = document.getElementById('btnRenewPay');
+            err.innerText = '';
+            if (!username) {
+                err.innerText = 'Masukkan username akun/panel yang ingin diperpanjang.';
+                return;
+            }
+            const produk = globalProducts.find(p => p.id === productId);
+            const spec = GlobalConfig.jenisProduk(produk);
+            if (!produk || !spec) {
+                err.innerText = 'Paket tidak valid.';
+                return;
+            }
+            btn.disabled = true;
+            btn.innerText = 'Memeriksa Akun...';
+            try {
+                const targetType = spec.type === 'role' ? 'role' : 'panel';
+                const mode = targetType === 'role' ? 'website' : spec.mode;
+                const check = await payRequest('renew-check', { targetType, mode, username });
+                info.hidden = false;
+                info.innerText = check.currentExpiredAt
+                    ? `Akun ditemukan (${check.username}). Expired saat ini: ${tanggalWIB(check.currentExpiredAt)}`
+                    : `Akun ditemukan (${check.username}). Masa aktif akan diset +30 hari setelah bayar.`;
+
+                btn.innerText = 'Membuat QRIS...';
+                const data = await payRequest('renew-create', { productId, targetType, mode, username });
+                tutupModalPerpanjang();
+                payOrder = { ...data, productId };
+                simpanPesanan();
+                bukaPesanan(payOrder);
+            } catch (e) {
+                err.innerText = e.message || 'Gagal memproses perpanjangan.';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Cek Akun & Bayar QRIS';
+            }
         }
 
         function renderDaftarRiwayat() {
@@ -1276,20 +1507,28 @@
                 const isLunas = PAY_LUNAS.includes(o.status);
 
                 if (o.panel && o.unlocked) {
-                    statusBadge = `<span class="history-status-badge status-badge-success"><i class="ri-checkbox-circle-fill"></i> Panel Aktif</span>`;
-                    detailsHtml = `
+                    const isRenew = (o.panel.kind === 'renew_role' || o.panel.kind === 'renew_panel');
+                    statusBadge = `<span class="history-status-badge status-badge-success"><i class="ri-checkbox-circle-fill"></i> ${isRenew ? 'Diperpanjang' : 'Panel Aktif'}</span>`;
+                    detailsHtml = isRenew ? `
+                        <div class="history-details">
+                            <div><b>Username:</b> ${escapeHtml(o.panel.username || '-')}</div>
+                            <div><b>Expired Baru:</b> ${o.panel.expiredAt ? tanggalWIB(o.panel.expiredAt) : '-'}</div>
+                            ${o.panel.panelUrl ? `<div><b>Link:</b> <a href="${escapeHtml(o.panel.panelUrl)}" target="_blank" rel="noopener" style="color:var(--a1); text-decoration:underline;">Buka Panel</a></div>` : ''}
+                            ${o.panel.loginUrl ? `<div><b>Link:</b> <a href="${escapeHtml(o.panel.loginUrl)}" target="_blank" rel="noopener" style="color:var(--a1); text-decoration:underline;">Buka Website</a></div>` : ''}
+                        </div>
+                    ` : `
                         <div class="history-details">
                             <div><b>Username:</b> ${escapeHtml(o.panel.username || '-')}</div>
                             <div><b>Password:</b> ${escapeHtml(o.password || '(tersimpan)')}</div>
-                            ${o.panel.panelUrl ? `<div><b>Link:</b> <a href="${o.panel.panelUrl}" target="_blank" rel="noopener" style="color:var(--a1); text-decoration:underline;">Buka Panel</a></div>` : ''}
-                            ${o.panel.loginUrl ? `<div><b>Link:</b> <a href="${o.panel.loginUrl}" target="_blank" rel="noopener" style="color:var(--a1); text-decoration:underline;">Buka Website</a></div>` : ''}
+                            ${o.panel.panelUrl ? `<div><b>Link:</b> <a href="${escapeHtml(o.panel.panelUrl)}" target="_blank" rel="noopener" style="color:var(--a1); text-decoration:underline;">Buka Panel</a></div>` : ''}
+                            ${o.panel.loginUrl ? `<div><b>Link:</b> <a href="${escapeHtml(o.panel.loginUrl)}" target="_blank" rel="noopener" style="color:var(--a1); text-decoration:underline;">Buka Website</a></div>` : ''}
                         </div>
                     `;
                     actionButtons = `
-                        <button type="button" class="btn-hist-action btn-hist-sec" onclick="salinDataDariRiwayat('${o.nexpay_transaction_id}', this)">
+                        <button type="button" class="btn-hist-action btn-hist-sec" onclick="salinDataDariRiwayat('${escapeHtml(o.nexpay_transaction_id)}', this)">
                             <i class="ri-file-copy-line"></i> Salin Data
                         </button>
-                        <button type="button" class="btn-hist-action btn-hist-primary" onclick="bukaPesananDariRiwayat('${o.nexpay_transaction_id}')">
+                        <button type="button" class="btn-hist-action btn-hist-primary" onclick="bukaPesananDariRiwayat('${escapeHtml(o.nexpay_transaction_id)}')">
                             <i class="ri-eye-line"></i> Lihat Struk
                         </button>
                     `;
@@ -1298,6 +1537,13 @@
                     actionButtons = `
                         <button type="button" class="btn-hist-action btn-hist-primary" onclick="bukaPesananDariRiwayat('${o.nexpay_transaction_id}')">
                             <i class="ri-whatsapp-line"></i> Unlock Akun
+                        </button>
+                    `;
+                } else if (isLunas && o.orderType === 'renew') {
+                    statusBadge = `<span class="history-status-badge status-badge-wait"><i class="ri-refresh-line"></i> Siap Perpanjang</span>`;
+                    actionButtons = `
+                        <button type="button" class="btn-hist-action btn-hist-primary" onclick="bukaPesananDariRiwayat('${o.nexpay_transaction_id}')">
+                            <i class="ri-check-double-line"></i> Aktifkan Sekarang
                         </button>
                     `;
                 } else if (isLunas && specPanel(o)) {
@@ -1408,6 +1654,9 @@
 
         function teksDataPanel(o) {
             const p = o.panel;
+            if (p.kind === 'renew_role' || p.kind === 'renew_panel') {
+                return `✅ *PERPANJANGAN BERHASIL (+30 HARI)*\n\nUsername: ${p.username}\n${p.panelUrl ? 'Link Panel: ' + p.panelUrl : 'Link Login: ' + p.loginUrl}\nPaket: ${o.productName}\nExpired Baru: ${tanggalWIB(p.expiredAt)}\nInvoice: ${o.invoice}`;
+            }
             if (p.kind === 'role') {
                 return `✅ *DATA LOGIN WEBSITE*\n\nUsername: ${p.username}\nPassword: ${o.password || '-'}\nRole: ${ROLE_LABEL[p.role] || p.role}\nLink Login: ${p.loginUrl}\nPaket: ${o.productName}\nDibuat: ${tanggalWIB(p.createdAt)}\nExpired: ${tanggalWIB(p.expiredAt)}\nInvoice: ${o.invoice}`;
             }
@@ -1420,7 +1669,8 @@
             box.innerHTML = '';
             const judul = document.createElement('div');
             judul.className = 'pay-struk-title';
-            judul.innerText = p.kind === 'role' ? 'DATA LOGIN WEBSITE' : 'DATA LOGIN PANEL';
+            if (p.kind === 'renew_role' || p.kind === 'renew_panel') judul.innerText = 'STRUK PERPANJANGAN AKTIF';
+            else judul.innerText = p.kind === 'role' ? 'DATA LOGIN WEBSITE' : 'DATA LOGIN PANEL';
             box.appendChild(judul);
             const baris = (label, nilai, href) => {
                 const row = document.createElement('div');
@@ -1433,7 +1683,13 @@
                 row.append(l, v);
                 box.appendChild(row);
             };
-            if (p.kind === 'role') {
+            if (p.kind === 'renew_role' || p.kind === 'renew_panel') {
+                baris('Username', p.username);
+                if (p.panelUrl) baris('Link Panel', p.panelUrl, p.panelUrl);
+                if (p.loginUrl) baris('Link Login', p.loginUrl, p.loginUrl);
+                if (typeof p.serversCount === 'number') baris('Server Dipulihkan', `${p.serversCount} server`);
+                baris('Paket', o.productName);
+            } else if (p.kind === 'role') {
                 baris('Link Login', p.loginUrl, p.loginUrl);
                 baris('Username', p.username);
                 baris('Password', o.password || '(yang kamu isi tadi)');
@@ -1476,10 +1732,16 @@
                 renderStruk(o);
                 payEl('payStruk').hidden = false;
                 payEl('payCopyBtn').hidden = false;
-                setPayStatus(`✅ ${o.panel.kind === 'role' ? 'Akun website' : 'Panel'} kamu sudah aktif. Silakan login dengan data di bawah.`, 'success');
+                const doneMsg = (o.panel.kind === 'renew_role' || o.panel.kind === 'renew_panel')
+                    ? 'Perpanjangan masa aktif (+30 hari) berhasil diterapkan!'
+                    : `${o.panel.kind === 'role' ? 'Akun website' : 'Panel'} kamu sudah aktif. Silakan login dengan data di bawah.`;
+                setPayStatus(`✅ ${doneMsg}`, 'success');
             } else if (o.panel) {
                 payEl('payUnlockBtn').hidden = false;
                 setPayStatus(`✅ ${o.panel.kind === 'role' ? 'Akun website' : 'Panel'} berhasil dibuat otomatis!\nKirim bukti pembayaran ke owner untuk membuka data login lengkap.`, 'success');
+            } else if (PAY_LUNAS.includes(o.status) && o.orderType === 'renew') {
+                setPayStatus('⏳ Pembayaran lunas! Memperpanjang masa aktif secara otomatis...', 'success');
+                terapkanPerpanjanganOtomatis(o);
             } else if (PAY_LUNAS.includes(o.status) && specPanel(o)) {
                 const spec = specPanel(o);
                 const isRole = spec.type === 'role';
@@ -1555,6 +1817,25 @@
             if (order.status === 'pending') cekStatusPembayaran();
         }
 
+        let renewApplyingId = null;
+        async function terapkanPerpanjanganOtomatis(order) {
+            if (!order || renewApplyingId === order.nexpay_transaction_id) return;
+            renewApplyingId = order.nexpay_transaction_id;
+            try {
+                const res = await payRequest('renew-apply', { nexpay_transaction_id: order.nexpay_transaction_id });
+                if (payOrder?.nexpay_transaction_id !== order.nexpay_transaction_id) return;
+                payOrder.panel = res;
+                payOrder.unlocked = true;
+                simpanPesanan();
+                tampilkanPesanan();
+            } catch (e) {
+                setPayStatus('Gagal menerapkan perpanjangan: ' + e.message, 'error');
+                payEl('payWaBtn').hidden = false;
+            } finally {
+                renewApplyingId = null;
+            }
+        }
+
         window.bayarProduk = async function(productId) {
             const produk = globalProducts.find(p => p.id === productId);
             if (!produk || payEl('payModal').classList.contains('show')) return;
@@ -1563,7 +1844,11 @@
             const tersimpan = muatPesanan();
             if (belumSelesai(tersimpan)) {
                 bukaPesanan(tersimpan);
-                alert('Kamu masih punya pesanan yang sudah dibayar tapi belum selesai. Selesaikan dulu ya.');
+                beritahu({
+                    judul: 'Pesanan Belum Selesai',
+                    pesan: 'Kamu masih punya pesanan yang sudah dibayar tapi belum selesai. Selesaikan dulu ya.',
+                    tipe: 'info'
+                });
                 return;
             }
 
@@ -1662,7 +1947,14 @@
         };
 
         payEl('payCancelBtn').onclick = async () => {
-            if (!payOrder || !confirm('Batalkan pembayaran ini?')) return;
+            if (!payOrder) return;
+            const ya = await konfirmasi({
+                judul: 'Batalkan Tagihan?',
+                pesan: 'Tagihan QRIS ini akan dibatalkan dan tidak dapat dibayar lagi.',
+                label: 'Ya, Batalkan',
+                bahaya: true
+            });
+            if (!ya) return;
             const btn = payEl('payCancelBtn');
             btn.disabled = true;
             try {
@@ -1671,18 +1963,29 @@
                 simpanPesanan();
                 tampilkanPesanan();
             } catch (e) {
-                alert('Gagal membatalkan: ' + e.message);
+                beritahu({ judul: 'Gagal Membatalkan', pesan: e.message, tipe: 'error' });
             }
             btn.disabled = false;
         };
 
-        payEl('payCloseBtn').onclick = () => {
+        payEl('payCloseBtn').onclick = async () => {
             const o = payOrder;
-            if (o?.status === 'pending' &&
-                !confirm('Tagihan belum dibayar. Tutup sekarang? Jika sudah transfer, kamu tetap bisa cek statusnya kapan saja di menu "Pesanan Saya".')) return;
+            if (o?.status === 'pending') {
+                const ya = await konfirmasi({
+                    judul: 'Tutup Jendela QRIS?',
+                    pesan: 'Tagihan belum dibayar. Jika sudah transfer, kamu tetap bisa cek statusnya kapan saja di menu "Pesanan Saya".',
+                    label: 'Tutup',
+                    bahaya: false
+                });
+                if (!ya) return;
+            }
             // Pesanan lunas yang belum selesai tetap disimpan supaya bisa dilanjutkan nanti
             if (belumSelesai(o)) {
-                alert('Pesanan kamu tersimpan di browser ini. Kamu bisa melanjutkannya kapan saja melalui tombol "Pesanan Saya".');
+                beritahu({
+                    judul: 'Pesanan Tersimpan',
+                    pesan: 'Pesanan kamu tersimpan di browser ini. Kamu bisa melanjutkannya kapan saja melalui tombol "Pesanan Saya".',
+                    tipe: 'info'
+                });
             } else {
                 payOrder = null;
                 simpanPesanan();
@@ -1694,7 +1997,7 @@
             updateBadgeRiwayat();
         };
 
-        // Tutup modal jika user klik overlay luar
+        // Tutup modal jika user klik overlay luar atau tekan Escape
         const payModalOverlay = payEl('payModal');
         if (payModalOverlay) {
             payModalOverlay.addEventListener('click', (e) => {
@@ -1707,6 +2010,17 @@
                 if (e.target === histModalOverlay) tutupModalRiwayat();
             });
         }
+        const renewModalOverlay = document.getElementById('modalRenew');
+        if (renewModalOverlay) {
+            renewModalOverlay.addEventListener('click', (e) => {
+                if (e.target === renewModalOverlay) tutupModalPerpanjang();
+            });
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            if (renewModalOverlay?.classList.contains('show')) tutupModalPerpanjang();
+            else if (histModalOverlay?.classList.contains('show')) tutupModalRiwayat();
+        });
 
         // Lanjutkan pesanan tersimpan setelah data produk pertama kali termuat
         let pesananDicek = false;

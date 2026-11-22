@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>Kelola Produk — ZeroixDark</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.2">
-    <link rel="stylesheet" href="ptero-ui.css?v=9.3">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.4">
     <style>
         :root {
             --primary: #0d9488; --primary-hover: #0f766e; --primary-glow: rgba(13, 148, 136, 0.15);
@@ -102,9 +101,10 @@
             th, td { padding: 12px; }
         }
     </style>
+    <link rel="stylesheet" href="ptero-ui.css?v=9.4">
 </head>
 <body>
-    <script src="page-loader.js?v=75"></script>
+    <script src="page-loader.js?v=76"></script>
     <script>try { if (localStorage.getItem('lite_mode') === 'true') document.body.classList.add('lite-mode'); } catch (e) {}</script>
     <!-- Ambient Aurora Background Elements (contoh.html) -->
     <div class="aurora"><span></span><span></span><span></span></div>
@@ -198,7 +198,8 @@
                     </div>
 
                     <div class="form-group full-width">
-                        <label>Upload Media Produk (Auto-Upload ke ImgBB)</label>
+                        <label>Media Produk (URL Gambar atau Upload via Worker)</label>
+                        <input type="url" id="urlGambar" placeholder="Tempel URL gambar https://... (opsional)" autocomplete="off" style="margin-bottom: 10px;">
                         <input type="file" id="fileGambar" accept="image/*">
                         <div class="image-preview-container">
                             <img id="previewGambar" src="" alt="Preview">
@@ -257,15 +258,18 @@
     </div>
 
     <!-- Script Pusat Firebase & Config -->
-    <script src="config.js?v=75"></script>
-    <script src="db-bridge.js?v=75"></script>
+    <script src="config.js?v=76"></script>
+    <script src="db-bridge.js?v=76"></script>
 
     <script>
         // --- Otorisasi Keamanan ---
         const role = (localStorage.getItem('role') || localStorage.getItem('panel_role') || '').trim().toLowerCase();
         if (role !== 'pemilik') {
-            alert("Akses Restriksi: Halaman ini memerlukan otorisasi tingkat Administrator/Pemilik.");
             window.location.replace('dashboard.html');
+            throw new Error('Akses ditolak');
+        }
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
         }
 
         // --- SISTEM MODAL KUSTOM ENTERPRISE ---
@@ -365,7 +369,25 @@
             });
         };
 
-        // --- SISTEM CONVERT GAMBAR ---
+        // --- SISTEM URL & CONVERT GAMBAR ---
+        document.getElementById('urlGambar').addEventListener('input', function () {
+            const val = this.value.trim();
+            const previewImg = document.getElementById('previewGambar');
+            const previewTeks = document.getElementById('previewTeks');
+            if (/^https?:\/\//i.test(val)) {
+                fotoDataFinal = val;
+                previewImg.src = val;
+                previewImg.style.display = 'block';
+                previewTeks.style.display = 'none';
+            } else if (!val && !document.getElementById('fileGambar').files.length) {
+                fotoDataFinal = '';
+                previewImg.style.display = 'none';
+                previewImg.src = '';
+                previewTeks.style.display = 'block';
+                previewTeks.innerText = 'Belum ada media terlampir';
+            }
+        });
+
         document.getElementById('fileGambar').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -419,25 +441,24 @@
 
             Object.keys(data).forEach(key => {
                 const item = data[key];
-                const fallbackImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nama)}&background=1e3a5f&color=3b82f6`;
+                const fallbackImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nama || 'P')}&background=1e3a5f&color=3b82f6`;
+                const imgDisplay = (item.gambar && /^https?:\/\//i.test(item.gambar)) ? item.gambar : fallbackImg;
                 
-                // Img Display: Bisa URL ImgBB, Base64 (legacy), atau Fallback
-                const imgDisplay = item.gambar ? item.gambar : fallbackImg;
-                
-                const diskonBadge = item.diskon ? `<br><span style="display:inline-block; margin-top:5px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">${item.diskon}</span>` : '';
-                const kategoriTeks = item.kategori ? item.kategori : 'Sistem Umum';
-                const panelBadge = `<br><span style="display:inline-block; margin-top:5px; background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">${teksJenisProduk(item)}</span>`;
+                const diskonBadge = item.diskon ? `<br><span style="display:inline-block; margin-top:5px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">${escapeHtml(item.diskon)}</span>` : '';
+                const kategoriTeks = escapeHtml(item.kategori ? item.kategori : 'Sistem Umum');
+                const panelBadge = `<br><span style="display:inline-block; margin-top:5px; background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">${escapeHtml(teksJenisProduk(item))}</span>`;
+                const safeKey = escapeHtml(key);
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><img src="${imgDisplay}" class="prod-img-preview" onerror="this.src='${fallbackImg}'"></td>
-                    <td><strong style="font-size:14px; color:var(--text-main);">${item.nama}</strong><br><small style="color:var(--text-sub)">${item.deskripsi.substring(0, 45)}...</small></td>
+                    <td><img src="${escapeHtml(imgDisplay)}" class="prod-img-preview" onerror="this.src='${fallbackImg}'"></td>
+                    <td><strong style="font-size:14px; color:var(--text-main);">${escapeHtml(item.nama)}</strong><br><small style="color:var(--text-sub)">${escapeHtml(String(item.deskripsi || '').substring(0, 45))}...</small></td>
                     <td><span class="kategori-badge">${kategoriTeks}</span>${panelBadge}</td>
                     <td><strong style="color:var(--success); font-size:14px;">${formatRupiah(item.harga)}</strong>${diskonBadge}</td>
                     <td>
-                        <button class="btn-action btn-edit" onclick="editProduct('${key}')">Modifikasi</button>
-                        <button class="btn-action btn-clone" onclick="cloneProduct('${key}')">Duplikat</button>
-                        <button class="btn-action btn-delete" onclick="deleteProduct('${key}')">Cabut</button>
+                        <button class="btn-action btn-edit" onclick="editProduct('${safeKey}')">Modifikasi</button>
+                        <button class="btn-action btn-clone" onclick="cloneProduct('${safeKey}')">Duplikat</button>
+                        <button class="btn-action btn-delete" onclick="deleteProduct('${safeKey}')">Cabut</button>
                     </td>
                 `;
                 tableBody.appendChild(tr);
@@ -460,28 +481,26 @@
             let finalImageUrl = fotoDataFinal; // Bisa link url lama kalau cuma ngedit teks
 
             try {
-                // DETEKSI LOGIC: Kalau dataFinal mengandung "data:image" artinya ada foto BARU yang di-upload dari device
-                if (fotoDataFinal && fotoDataFinal.startsWith('data:image')) {
-                    btnSubmit.innerHTML = `${spinnerSvg} Mengunggah ke Server Gambar...`;
-                    
-                    const IMGBB_API_KEY = "dd6dfe82e68580df6aa5205dbdbbe22c"; 
-                    
-                    // Hilangkan prefix 'data:image/jpeg;base64,' agar format bersih dan diterima ImgBB
+                const urlInputVal = (document.getElementById('urlGambar')?.value || '').trim();
+                if (urlInputVal && /^https?:\/\//i.test(urlInputVal)) {
+                    finalImageUrl = urlInputVal;
+                } else if (fotoDataFinal && fotoDataFinal.startsWith('data:image')) {
+                    btnSubmit.innerHTML = `${spinnerSvg} Mengunggah via Worker...`;
                     const base64Clean = fotoDataFinal.split(',')[1];
-                    
-                    const formData = new FormData();
-                    formData.append("image", base64Clean);
-
-                    const uploadRes = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                    const token = localStorage.getItem('fzb_token') || '';
+                    const uploadRes = await GlobalConfig.workerFetch('/admin/upload-image', {
                         method: 'POST',
-                        body: formData
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({ image: base64Clean })
                     });
-                    
-                    const uploadData = await uploadRes.json();
-                    if (uploadData.success) {
-                        finalImageUrl = uploadData.data.url; // Dapet direct link dari ImgBB
+                    const uploadData = await uploadRes.json().catch(() => null);
+                    if (uploadRes.ok && uploadData && uploadData.url) {
+                        finalImageUrl = uploadData.url;
                     } else {
-                        throw new Error("Gagal mengunggah gambar ke server pihak ketiga.");
+                        throw new Error((uploadData && uploadData.error) || "Upload gambar belum dikonfigurasi (isi IMGBB_API_KEY di Cloudflare Worker atau tempel URL gambar langsung).");
                     }
                 }
 
@@ -555,6 +574,7 @@
                     togglePanelSpec();
                     
                     document.getElementById('fileGambar').value = '';
+                    document.getElementById('urlGambar').value = (data.gambar && /^https?:\/\//i.test(data.gambar)) ? data.gambar : '';
                     
                     const previewImg = document.getElementById('previewGambar');
                     const previewTeks = document.getElementById('previewTeks');

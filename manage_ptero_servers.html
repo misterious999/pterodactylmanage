@@ -511,10 +511,10 @@
         body.lite-mode .system-modal-overlay { background: rgba(7, 11, 20, 0.95); }
 
     </style>
-    <link rel="stylesheet" href="ptero-ui.css?v=9.3">
+    <link rel="stylesheet" href="ptero-ui.css?v=9.4">
 </head>
 <body>
-    <script src="page-loader.js?v=75"></script>
+    <script src="page-loader.js?v=76"></script>
     <!-- Ambient Aurora Background Elements (contoh.html) -->
     <div class="aurora"><span></span><span></span><span></span></div>
     <div class="grain"></div>
@@ -610,9 +610,20 @@
             </div>
         </div>
 
+        <div class="input-group">
+            <label>Lingkungan Server (Egg)</label>
+            <select id="eggId" style="display: none;">
+                <option value="15" selected>NodeJS (Bot / Server)</option>
+                <option value="20">Python (Bot / Server)</option>
+            </select>
+            <div class="custom-select-trigger" id="trigger_eggId" onclick="bukaModalSelect('eggId', 'PILIH LINGKUNGAN (EGG)', 'Runtime engine eksekusi server')">
+                <span id="label_eggId">NodeJS (Bot / Server)</span>
+                <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+            </div>
+        </div>
+
         <div class="grid-2" style="display: none;">
             <input type="number" id="locId" value="1">
-            <input type="number" id="eggId" value="15">
             <input type="number" id="nodeId" value="1">
             <input type="number" id="nestId" value="5">
         </div>
@@ -738,9 +749,9 @@
     
     <div id="modalAiSuccess" class="system-modal-overlay" style="z-index: 999999;"><div class="system-modal-popup mode-success" id="popupSuccessMode"><div class="modal-icon-top" id="iconSuccessMode"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="system-modal-header" id="aiSuccessTitle">STATUS OK</div><div class="system-modal-body" id="aiSuccessBody">Operasi berhasil diselesaikan.</div><div class="system-btn-group"><button class="system-btn btn-success-action" id="btnTutupSuccess" onclick="tutupModal('modalAiSuccess')">Tutup</button></div></div></div>
 
-    <script src="config.js?v=75"></script>
-    <script src="api-services.js?v=75"></script>
-    <script src="db-bridge.js?v=75"></script>
+    <script src="config.js?v=76"></script>
+    <script src="api-services.js?v=76"></script>
+    <script src="db-bridge.js?v=76"></script>
 
     <script>
         if(localStorage.getItem('lite_mode') === 'true') document.body.classList.add('lite-mode');
@@ -887,6 +898,7 @@
             syncCustomSelect('serverCpu');
             syncCustomSelect('serverDisk');
             syncCustomSelect('userSelect');
+            syncCustomSelect('eggId');
             let defaults = { locationId: 1, eggId: 15, nodeId: 1, nestId: 5 };
             if(window.GlobalConfig && GlobalConfig.getDefaultDeploy) defaults = GlobalConfig.getDefaultDeploy();
             
@@ -902,6 +914,7 @@
         });
 
         const spinnerSvg = `<svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite; width:16px; height:16px; fill:currentColor;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg>`;
+        function escapeHtml(value) { return String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 
         // ============ UI HELPERS ============
         function tutupModal(id) { 
@@ -1026,37 +1039,38 @@
                     
                     count++;
                     serverTerkini[s.id] = s;
+                    const safeSname = escapeHtml(s.name);
+                    const safeOwner = escapeHtml(oData.username);
+                    const safeMaker = escapeHtml(oData.maker);
                     let sBadge = s.suspended ? `<span class="badge badge-suspended"><span class="status-dot dot-danger"></span> Suspended</span>` : `<span class="badge badge-active"><span class="status-dot dot-success"></span> Active</span>`;
                     if (s.status === 'installing') sBadge = `<span class="badge badge-install"><span class="status-dot dot-warning"></span> Installing</span>`;
-                    let mTag = isOwner ? `<br><span class="reseller-tag">Author: ${oData.maker}</span>` : '';
+                    let mTag = isOwner ? `<br><span class="reseller-tag">Author: ${safeMaker}</span>` : '';
                     
-                    // Eksekusi Logika Masa Aktif Server & Tombol Hapus Expired
                     let expInfo = expiredData[s.id];
                     let kolomExpired = '';
                     if (expInfo && expInfo.expiredAt) {
-                        // Countdown menangani status aktif / masa tenggang (suspend) / menunggu dihapus Worker
                         kolomExpired = `<div style="display:flex; align-items:center; gap:8px;">
-                                <span class="ptero-server-countdown badge badge-admin" data-expire="${expInfo.expiredAt}" data-sid="${s.id}" data-sname="${s.name}" style="font-family:monospace; font-size:11px; font-weight:800;">Menghitung...</span>
-                                <button class="btn-action-small" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);" onclick="bukaModalExpiredServer(${s.id}, '${s.name}', ${expInfo.expiredAt})" title="Tambah Waktu">+</button>
-                                <button class="btn-action-small" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);" onclick="konfirmasiHapusTimer(${s.id}, '${s.name}')" title="Hapus Masa Aktif"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+                                <span class="ptero-server-countdown badge badge-admin" data-expire="${expInfo.expiredAt}" data-sid="${s.id}" data-sname="${safeSname}" style="font-family:monospace; font-size:11px; font-weight:800;">Menghitung...</span>
+                                <button class="btn-action-small" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);" data-sid="${s.id}" data-sname="${safeSname}" data-expire="${expInfo.expiredAt}" onclick="bukaModalExpiredServer(Number(this.dataset.sid), this.dataset.sname, Number(this.dataset.expire))" title="Tambah Waktu">+</button>
+                                <button class="btn-action-small" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);" data-sid="${s.id}" data-sname="${safeSname}" onclick="konfirmasiHapusTimer(Number(this.dataset.sid), this.dataset.sname)" title="Hapus Masa Aktif"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
                             </div>`;
                     } else {
-                        kolomExpired = `<button class="badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); cursor: pointer;" onclick="bukaModalExpiredServer(${s.id}, '${s.name}', 0)">Set Expired</button>`;
+                        kolomExpired = `<button class="badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); cursor: pointer;" data-sid="${s.id}" data-sname="${safeSname}" onclick="bukaModalExpiredServer(Number(this.dataset.sid), this.dataset.sname, 0)">Set Expired</button>`;
                     }
 
                     let btnLock = s.suspended ? 
-                                  `<button class="btn-action-small btn-unsuspend" title="Buka Suspend Server" onclick="konfirmasiUnsuspend(${s.id}, '${s.name}')">${iconUnlock}</button>` : 
-                                  `<button class="btn-action-small btn-suspend" title="Suspend Server" onclick="konfirmasiSuspend(${s.id}, '${s.name}')">${iconLock}</button>`;
+                                  `<button class="btn-action-small btn-unsuspend" title="Buka Suspend Server" data-sid="${s.id}" data-sname="${safeSname}" onclick="konfirmasiUnsuspend(Number(this.dataset.sid), this.dataset.sname)">${iconUnlock}</button>` : 
+                                  `<button class="btn-action-small btn-suspend" title="Suspend Server" data-sid="${s.id}" data-sname="${safeSname}" onclick="konfirmasiSuspend(Number(this.dataset.sid), this.dataset.sname)">${iconLock}</button>`;
 
                     let btnGame = `<button class="btn-action-small btn-ganti-game" title="Ganti Game" onclick="bukaModalGantiGame(${s.id})">${iconGame}</button>`;
 
                     let btnAction = `<div class="action-group">
-                        <button class="btn-action-small btn-hapus" title="Hapus Server" onclick="konfirmasiHapusServer(${s.id}, '${s.name}')">${iconTrash}</button>
+                        <button class="btn-action-small btn-hapus" title="Hapus Server" data-sid="${s.id}" data-sname="${safeSname}" onclick="konfirmasiHapusServer(Number(this.dataset.sid), this.dataset.sname)">${iconTrash}</button>
                         ${btnLock}
                         ${btnGame}
                     </div>`;
 
-                    tabel += `<tr><td style="color:var(--text-sub); font-weight:bold;">#${s.id}</td><td style="font-weight:700; color:var(--text-main); font-size:14px;">${s.name}</td><td><span style="color:var(--primary); font-weight:bold;">${oData.username}</span>${mTag}</td><td>${kolomExpired}</td><td>${sBadge}</td><td>${btnAction}</td></tr>`;
+                    tabel += `<tr><td style="color:var(--text-sub); font-weight:bold;">#${s.id}</td><td style="font-weight:700; color:var(--text-main); font-size:14px;">${safeSname}</td><td><span style="color:var(--primary); font-weight:bold;">${safeOwner}</span>${mTag}</td><td>${kolomExpired}</td><td>${sBadge}</td><td>${btnAction}</td></tr>`;
                 });
                 
                 if (count === 0) tabel += `<tr><td colspan="6" style="text-align: center; color: var(--warning); padding: 30px;">Database server kosong atau di luar jangkauan otorisasi.</td></tr>`;
@@ -1623,7 +1637,7 @@
                                 `✅ Notifikasi transaksi otomatis\n` +
                                 `✅ Praktis, aman, & nyaman\n\n` +
                                 `_*Selalu Order Di Website Official Kami :*_\n` +
-                                `https://pterodactylmanage.vercel.app/store`; 
+                                `https://zeroixdarkmarket.web.id/store`; 
                 
                 await navigator.clipboard.writeText(teksSalin);
                 
@@ -1672,7 +1686,7 @@
             if (!blockMessage || __expiredHandled) return;
             __expiredHandled = true;
             firebase.database().ref('users/' + guardUserId + '/isOnline').set(false).catch(function(){});
-            ['panel_user_id','user_id','user_id_ptero','panel_username','username','panel_role','role','panel_password','ptero_user_id'].forEach(function(k){ localStorage.removeItem(k); });
+            ['panel_user_id','user_id','user_id_ptero','panel_username','username','panel_role','role','panel_password','ptero_user_id','fzb_token','zeroix_last_active'].forEach(function(k){ localStorage.removeItem(k); });
             const modalGuard = document.getElementById('modalAksesDitolak');
             if (modalGuard) {
                 const bodyEl = document.getElementById('teksAksesDitolakServer') || modalGuard.querySelector('.system-modal-body');

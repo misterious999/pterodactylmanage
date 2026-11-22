@@ -4,8 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#060b1a">
     <title>Login Panel &amp; Control Center — ZeroixDark</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.2">
+    <meta name="description" content="Masuk ke ZeroixDark Control Center untuk mengelola server Pterodactyl, lisensi panel, dan jaringan reseller Anda.">
+
+    <!-- Open Graph / Twitter Preview -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ZeroixDark">
+    <meta property="og:locale" content="id_ID">
+    <meta property="og:title" content="Login Panel &amp; Control Center — ZeroixDark">
+    <meta property="og:description" content="Portal otorisasi ZeroixDark Control Center untuk manajemen panel Pterodactyl dan akun reseller.">
+    <meta property="og:url" content="https://zeroixdarkmarket.web.id/login">
+    <meta property="og:image" content="https://zeroixdarkmarket.web.id/og-cover.png?v=9.4">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Login Panel &amp; Control Center — ZeroixDark">
+    <meta name="twitter:description" content="Portal otorisasi ZeroixDark Control Center untuk manajemen panel Pterodactyl dan akun reseller.">
+    <meta name="twitter:image" content="https://zeroixdarkmarket.web.id/og-cover.png?v=9.4">
+
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.4">
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png?v=9.4">
+    <link rel="apple-touch-icon" href="/favicon-512.png?v=9.4">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -42,13 +63,13 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 24px 16px;
+            padding: 72px 16px 28px;
             overflow-x: hidden;
             position: relative;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- AURORA FLOATING AMBIENCE (contoh.html) --- */
+        /* --- AURORA FLOATING AMBIENCE --- */
         .aurora {
             position: fixed; inset: -20%; z-index: -2;
             filter: blur(80px) saturate(140%);
@@ -63,7 +84,7 @@
         .aurora span:nth-child(3) { background: radial-gradient(circle, var(--a3), transparent 60%); bottom: 0; left: 30%; animation-delay: -14s; opacity: .6; }
         @keyframes drift { to { transform: translate(12vmax, -8vmax) rotate(40deg) scale(1.2); } }
 
-        /* --- GRID GRAIN BACKGROUND (contoh.html) --- */
+        /* --- GRID GRAIN BACKGROUND --- */
         .grain {
             position: fixed; inset: 0; z-index: -1;
             background-image:
@@ -74,73 +95,76 @@
             pointer-events: none;
         }
 
-        /* --- TOMBOL KEMBALI KE BERANDA --- */
-        .btn-back-home {
+        /* --- TOMBOL NAVIGASI ATAS --- */
+        .btn-back-home, .btn-lite-toggle {
             position: fixed;
-            top: 24px;
-            left: 24px;
+            top: 20px;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 9px 16px;
+            padding: 9px 15px;
             border-radius: 12px;
             background: var(--card);
             border: 1px solid var(--line);
             color: var(--muted);
+            font-family: inherit;
             font-size: 13px;
             font-weight: 600;
             text-decoration: none;
+            cursor: pointer;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
             z-index: 10;
         }
-        .btn-back-home:hover {
+        .btn-back-home { left: 20px; }
+        .btn-lite-toggle { right: 20px; }
+        .btn-back-home:hover, .btn-lite-toggle:hover {
             color: var(--a1);
             border-color: rgba(94, 234, 212, 0.4);
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(94, 234, 212, 0.15);
         }
+        .btn-lite-toggle.active {
+            color: var(--warning);
+            border-color: rgba(245, 158, 11, 0.4);
+            background: rgba(245, 158, 11, 0.08);
+        }
 
         /* --- PREMIUM GLASS CARD --- */
-        .login-box {
+        main.login-box {
             background: var(--card); 
             backdrop-filter: blur(25px); 
             -webkit-backdrop-filter: blur(25px);
-            padding: 38px 32px;
+            padding: 36px 32px 30px;
             border-radius: 26px; 
             border: 1px solid var(--line);
             box-shadow: 0 30px 70px rgba(0, 0, 0, 0.65), 0 0 35px rgba(94, 234, 212, 0.08); 
             width: 100%;
-            max-width: 410px;
+            max-width: 420px;
             text-align: center;
             z-index: 1;
-            animation: fadeIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation: fadeIn 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
             position: relative;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(25px) scale(0.96); }
+            from { opacity: 0; transform: translateY(20px) scale(0.97); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .brand-logo {
-            width: 70px;
-            height: 70px;
-            margin: 0 auto 16px auto;
+            width: 68px;
+            height: 68px;
+            margin: 0 auto 14px auto;
             display: flex;
             align-items: center;
             justify-content: center;
             filter: drop-shadow(0 10px 25px rgba(94, 234, 212, 0.35));
             transition: transform 0.3s ease;
         }
-        .brand-logo:hover {
-            transform: rotate(6deg) scale(1.05);
-        }
-        .brand-logo svg {
-            width: 70px;
-            height: 70px;
-        }
+        .brand-logo:hover { transform: rotate(6deg) scale(1.05); }
+        .brand-logo svg { width: 68px; height: 68px; }
 
         .brand-title {
             font-size: 1.55rem;
@@ -149,9 +173,7 @@
             margin: 0 0 6px 0;
             color: var(--ink);
         }
-        .brand-title b {
-            color: var(--a1);
-        }
+        .brand-title b { color: var(--a1); }
 
         .login-pill {
             display: inline-flex;
@@ -162,40 +184,57 @@
             background: rgba(94, 234, 212, 0.1);
             border: 1px solid rgba(94, 234, 212, 0.25);
             color: var(--a1);
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.8px;
-            margin-bottom: 24px;
+            margin-bottom: 18px;
         }
 
         .login-desc {
             color: var(--muted);
             font-size: 13px;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
             line-height: 1.6;
         }
         
         .input-group {
             text-align: left;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             position: relative;
+        }
+        .label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            gap: 8px;
         }
         .input-group label {
             display: flex;
             align-items: center;
             gap: 6px;
-            margin-bottom: 8px;
             font-size: 11px;
             font-weight: 700;
             color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.8px;
+            cursor: pointer;
         }
-        .input-group label i {
+        .input-group label i { color: var(--a1); font-size: 14px; }
+
+        .forgot-link {
+            font-size: 11px;
+            font-weight: 600;
             color: var(--a1);
-            font-size: 14px;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            font-family: inherit;
+            text-decoration: none;
         }
+        .forgot-link:hover { text-decoration: underline; }
         
         .input-group input { 
             width: 100%;
@@ -208,9 +247,8 @@
             font-size: 14px; 
             box-sizing: border-box;
             outline: none;
-            transition: all 0.3s ease; 
+            transition: all 0.25s ease; 
         }
-        
         .input-group input:focus { 
             border-color: var(--a1); 
             box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.15); 
@@ -221,7 +259,7 @@
         .password-wrapper input { padding-right: 48px; } 
         .btn-eye {
             position: absolute;
-            right: 12px;
+            right: 10px;
             background: none;
             border: none;
             cursor: pointer;
@@ -231,10 +269,21 @@
             justify-content: center;
             padding: 6px;
             border-radius: 8px;
-            transition: 0.25s;
+            transition: 0.2s;
             font-size: 18px;
         }
-        .btn-eye:hover { color: var(--a1); background: rgba(255, 255, 255, 0.05); }
+        .btn-eye:hover, .btn-eye:focus-visible { color: var(--a1); background: rgba(255, 255, 255, 0.06); outline: none; }
+
+        .caps-warn {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            margin-top: 7px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--warning);
+        }
+        .caps-warn.show { display: flex; }
 
         /* --- PREMIUM BUTTON DENGAN EFEK SHIMMER --- */
         .btn-submit { 
@@ -246,54 +295,81 @@
             color: #060b1a;
             border: none;
             border-radius: 12px;
+            font-family: inherit;
             font-size: 14px;
             font-weight: 800; 
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
+            transition: all 0.25s ease;
+            margin-top: 6px;
             display: flex; 
             justify-content: center;
             align-items: center;
             gap: 9px;
             text-transform: uppercase;
             letter-spacing: 0.6px;
-            box-shadow: 0 10px 30px rgba(94, 234, 212, 0.35);
+            box-shadow: 0 10px 30px rgba(94, 234, 212, 0.32);
         }
-        
-        /* Efek Shimmer */
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: wait;
+            transform: none;
+        }
         .btn-submit::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 50%;
-            height: 100%;
+            top: 0; left: -100%; width: 50%; height: 100%;
             background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%);
             transform: skewX(-25deg);
             transition: 0.5s ease;
         }
-
-        .btn-submit:hover { 
+        .btn-submit:hover:not(:disabled) { 
             transform: translateY(-2px); 
-            box-shadow: 0 14px 40px rgba(94, 234, 212, 0.5); 
+            box-shadow: 0 14px 40px rgba(94, 234, 212, 0.45); 
             filter: brightness(1.06);
         }
-        .btn-submit:active { transform: translateY(0); }
-        .btn-submit:hover::after { left: 150%; }
+        .btn-submit:active:not(:disabled) { transform: translateY(0); }
+        .btn-submit:hover:not(:disabled)::after { left: 150%; }
+        .btn-submit i { font-size: 18px; transition: transform 0.25s ease; }
+        .btn-submit:hover:not(:disabled) i { transform: translateX(3px); }
 
-        .btn-submit i { font-size: 18px; transition: transform 0.3s ease; }
-        .btn-submit:hover i { transform: translateX(3px); }
+        .session-banner {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 18px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: rgba(94, 234, 212, 0.08);
+            border: 1px solid rgba(94, 234, 212, 0.25);
+            color: var(--a1);
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+        .session-banner.show { display: flex; }
 
         .login-footer-info {
-            margin-top: 24px;
+            margin-top: 22px;
+            padding-top: 16px;
+            border-top: 1px solid var(--line);
             font-size: 12px;
             color: var(--muted);
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
-        .login-footer-info a {
-            color: var(--a1);
-            text-decoration: underline;
+        .login-footer-info a { color: var(--a1); text-decoration: none; font-weight: 600; }
+        .login-footer-info a:hover { text-decoration: underline; }
+        .footer-sub-links {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            font-size: 11.5px;
         }
+        .footer-sub-links a { color: var(--muted); font-weight: 500; }
+        .footer-sub-links a:hover { color: var(--a1); }
 
         /* --- System Modal --- */
         .system-modal-overlay {
@@ -309,13 +385,13 @@
             align-items: center;
             padding: 20px;
             box-sizing: border-box;
-            animation: fadeInPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: fadeInPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .system-modal-popup {
-            background: rgba(13, 21, 39, 0.95);
+            background: rgba(13, 21, 39, 0.96);
             border-radius: 24px;
             width: 100%;
-            max-width: 370px;
+            max-width: 380px;
             max-height: calc(100vh - 40px);
             overflow-y: auto;
             box-sizing: border-box;
@@ -324,6 +400,9 @@
             color: var(--ink);
             border: 1px solid var(--line);
             box-shadow: 0 25px 60px rgba(0,0,0,0.7), 0 0 35px rgba(239, 68, 68, 0.15);
+        }
+        .system-modal-popup.mode-info {
+            box-shadow: 0 25px 60px rgba(0,0,0,0.7), 0 0 35px rgba(94, 234, 212, 0.14);
         }
         
         .modal-icon-top {
@@ -337,6 +416,12 @@
             font-size: 26px;
             color: var(--danger);
         }
+        .mode-info .modal-icon-top {
+            background: rgba(94, 234, 212, 0.12);
+            border-color: rgba(94, 234, 212, 0.35);
+            box-shadow: 0 0 20px rgba(94, 234, 212, 0.18);
+            color: var(--a1);
+        }
         
         .system-modal-header {
             font-size: 17px;
@@ -346,62 +431,87 @@
             text-transform: uppercase;
             letter-spacing: 0.8px;
         }
+        .mode-info .system-modal-header { color: var(--a1); }
         .system-modal-body {
             font-size: 13px;
             color: var(--muted);
-            line-height: 1.6;
+            line-height: 1.65;
             margin-bottom: 24px;
             white-space: pre-wrap;
         }
         
-        .btn-close-modal {
+        .modal-btn-col { display: flex; flex-direction: column; gap: 10px; }
+        .btn-close-modal, .btn-wa-reset {
             width: 100%;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
             border: none;
             padding: 13px;
             border-radius: 12px;
+            font-family: inherit;
             font-weight: 700;
             font-size: 13px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.25s;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn-close-modal {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
             box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
         }
-        .btn-close-modal:hover {
-            filter: brightness(1.1);
-            transform: translateY(-2px);
-            box-shadow: 0 14px 28px rgba(239, 68, 68, 0.45);
+        .mode-info .btn-close-modal {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--line);
+            color: var(--ink);
+            box-shadow: none;
         }
+        .btn-wa-reset {
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            color: #060b1a;
+            font-weight: 800;
+            box-shadow: 0 10px 25px rgba(94, 234, 212, 0.28);
+        }
+        .btn-close-modal:hover, .btn-wa-reset:hover { filter: brightness(1.08); transform: translateY(-2px); }
 
         body.lite-mode .aurora, body.lite-mode .grain { display: none !important; }
         body.lite-mode * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-        body.lite-mode .login-box, body.lite-mode .system-modal-popup { background: var(--card-solid) !important; }
+        body.lite-mode main.login-box, body.lite-mode .system-modal-popup { background: var(--card-solid) !important; }
 
         @media (max-width: 480px) {
-            .btn-back-home { top: 16px; left: 16px; padding: 7px 12px; font-size: 12px; }
-            .login-box { padding: 32px 22px; border-radius: 22px; }
+            .btn-back-home { top: 14px; left: 14px; padding: 7px 12px; font-size: 12px; }
+            .btn-lite-toggle { top: 14px; right: 14px; padding: 7px 12px; font-size: 12px; }
+            main.login-box { padding: 30px 20px 24px; border-radius: 22px; }
         }
 
-        @keyframes fadeInPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes fadeInPop { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
-    <!-- Ambient Aurora Background Elements (contoh.html) -->
+    <script>try { if (localStorage.getItem('lite_mode') === 'true') document.body.classList.add('lite-mode'); } catch (e) {}</script>
+
+    <!-- Ambient Aurora Background Elements -->
     <div class="aurora"><span></span><span></span><span></span></div>
     <div class="grain"></div>
 
-    <script src="page-loader.js?v=75"></script>
+    <script src="page-loader.js?v=76"></script>
 
-    <!-- Tombol Navigasi ke Beranda -->
+    <!-- Tombol Navigasi Atas -->
     <a href="/" class="btn-back-home" title="Kembali ke Beranda">
         <i class="ri-arrow-left-line"></i>
         <span>Beranda</span>
     </a>
 
-    <div class="login-box">
+    <button type="button" class="btn-lite-toggle" id="btnLiteToggle" onclick="toggleLiteModeLogin()" title="Aktifkan/Matikan Mode Ringan (Anti-Lag)">
+        <i class="ri-flashlight-line" id="liteToggleIcon"></i>
+        <span id="liteToggleText">Lite Mode</span>
+    </button>
+
+    <main class="login-box">
         <div class="brand-logo">
             <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
                 <defs>
@@ -420,82 +530,178 @@
         <h1 class="brand-title">Zeroix<b>Dark</b></h1>
         <div class="login-pill"><i class="ri-shield-keyhole-line"></i> Control Center</div>
         <p class="login-desc">Autentikasi identitas untuk akses manajemen panel dan server</p>
-        
-        <div class="input-group">
-            <label><i class="ri-user-3-line"></i> Identitas Pengguna</label>
-            <input type="text" id="username" placeholder="Masukkan username..." autocomplete="off" required>
+
+        <div id="sessionRedirectBanner" class="session-banner" role="status">
+            <i class="ri-loader-4-line ri-spin"></i>
+            <span>Sesi aktif terdeteksi, mengarahkan ke Dashboard...</span>
         </div>
-        
-        <div class="input-group">
-            <label><i class="ri-lock-password-line"></i> Kata Sandi</label>
-            <div class="password-wrapper">
-                <input type="password" id="password" placeholder="Masukkan kata sandi..." required>
-                <button type="button" class="btn-eye" id="togglePassword" tabindex="-1" title="Lihat/Sembunyikan password">
-                    <i class="ri-eye-off-line" id="eyeIcon"></i>
-                </button>
+
+        <form id="loginForm" onsubmit="event.preventDefault(); prosesLogin();">
+            <div class="input-group">
+                <div class="label-row">
+                    <label for="username"><i class="ri-user-3-line"></i> Identitas Pengguna</label>
+                </div>
+                <input type="text" id="username" name="username" placeholder="Masukkan username..." autocomplete="username" autocapitalize="none" spellcheck="false" required>
             </div>
-        </div>
-        
-        <button onclick="prosesLogin()" id="btnLogin" class="btn-submit">
-            <span>Otorisasi Akses</span>
-            <i class="ri-arrow-right-line"></i>
-        </button>
+            
+            <div class="input-group">
+                <div class="label-row">
+                    <label for="password"><i class="ri-lock-password-line"></i> Kata Sandi</label>
+                    <button type="button" class="forgot-link" onclick="bukaModalLupaSandi()">Lupa kata sandi?</button>
+                </div>
+                <div class="password-wrapper">
+                    <input type="password" id="password" name="password" placeholder="Masukkan kata sandi..." autocomplete="current-password" required>
+                    <button type="button" class="btn-eye" id="togglePassword" aria-label="Lihat atau sembunyikan kata sandi" aria-pressed="false" title="Lihat/Sembunyikan password">
+                        <i class="ri-eye-off-line" id="eyeIcon"></i>
+                    </button>
+                </div>
+                <div class="caps-warn" id="capsLockWarn">
+                    <i class="ri-alert-line"></i>
+                    <span>Caps Lock sedang aktif</span>
+                </div>
+            </div>
+            
+            <button type="submit" id="btnLogin" class="btn-submit">
+                <span>Otorisasi Akses</span>
+                <i class="ri-arrow-right-line"></i>
+            </button>
+        </form>
 
         <div class="login-footer-info">
-            Belum punya panel? <a href="/store">Beli langsung via QRIS</a>
+            <div>Belum punya panel atau akun reseller? <a href="/store">Beli via QRIS Otomatis</a></div>
+            <div class="footer-sub-links">
+                <a href="/status">Status Node</a>
+                <a href="/syarat-ketentuan">Syarat &amp; Ketentuan</a>
+                <a href="/privasi">Privasi</a>
+            </div>
         </div>
-    </div>
+    </main>
 
     <!-- Modal Error Sistem -->
-    <div id="modalLoginError" class="system-modal-overlay">
+    <div id="modalLoginError" class="system-modal-overlay" role="alertdialog" aria-modal="true" aria-labelledby="errorModalTitle">
         <div class="system-modal-popup">
             <div class="modal-icon-top">
                 <i class="ri-error-warning-line"></i>
             </div>
-            <div class="system-modal-header">Otorisasi Ditolak</div>
+            <div class="system-modal-header" id="errorModalTitle">Otorisasi Ditolak</div>
             <div class="system-modal-body" id="errorMsgText">Kredensial tidak valid.</div>
-            <button class="btn-close-modal" onclick="tutupError()">Mengerti</button>
+            <button type="button" class="btn-close-modal" onclick="tutupError()">Mengerti</button>
+        </div>
+    </div>
+
+    <!-- Modal Lupa Kata Sandi -->
+    <div id="modalLupaSandi" class="system-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="forgotModalTitle">
+        <div class="system-modal-popup mode-info">
+            <div class="modal-icon-top">
+                <i class="ri-key-2-line"></i>
+            </div>
+            <div class="system-modal-header" id="forgotModalTitle">Reset Kata Sandi</div>
+            <div class="system-modal-body" id="forgotMsgText">Demi keamanan (enkripsi PBKDF2 &amp; pencabutan sesi otomatis), reset kata sandi akun Control Center dilakukan melalui verifikasi Admin / Partner pembuat akun Anda.</div>
+            <div class="modal-btn-col">
+                <a id="btnWaLupaSandi" href="#" target="_blank" rel="noopener" class="btn-wa-reset">
+                    <i class="ri-whatsapp-line" style="font-size:18px;"></i>
+                    <span>Minta Reset ke Admin</span>
+                </a>
+                <button type="button" class="btn-close-modal" onclick="tutupModalLupaSandi()">Tutup</button>
+            </div>
         </div>
     </div>
     
-    <script>try { if (localStorage.getItem('lite_mode') === 'true') document.body.classList.add('lite-mode'); } catch (e) {}</script>
-    <script src="config.js?v=75"></script>
-    <script src="db-bridge.js?v=75"></script>
+    <script src="config.js?v=76"></script>
+    <script src="db-bridge.js?v=76"></script>
     <script>
+        const DEFAULT_WA_ADMIN = '62895416479539';
+        let adminWaNumber = DEFAULT_WA_ADMIN;
+
+        if (typeof GlobalConfig !== 'undefined' && GlobalConfig.workerFetch) {
+            GlobalConfig.workerFetch('/db/store_settings/whatsapp')
+                .then((r) => (r.ok ? r.json() : null))
+                .then((nomor) => {
+                    const bersih = String(nomor == null ? '' : nomor).replace(/\D/g, '');
+                    if (bersih) adminWaNumber = bersih;
+                })
+                .catch(() => {});
+        }
+
+        function syncLiteToggleUI() {
+            const isLite = document.body.classList.contains('lite-mode');
+            const btn = document.getElementById('btnLiteToggle');
+            const icon = document.getElementById('liteToggleIcon');
+            const txt = document.getElementById('liteToggleText');
+            if (!btn) return;
+            btn.classList.toggle('active', isLite);
+            if (icon) icon.className = isLite ? 'ri-fire-line' : 'ri-flashlight-line';
+            if (txt) txt.textContent = isLite ? 'Lite: ON' : 'Lite Mode';
+        }
+        function toggleLiteModeLogin() {
+            const isLite = document.body.classList.toggle('lite-mode');
+            try { localStorage.setItem('lite_mode', isLite ? 'true' : 'false'); } catch (e) {}
+            syncLiteToggleUI();
+        }
+        syncLiteToggleUI();
+
         const passwordInput = document.getElementById('password');
         const togglePassword = document.getElementById('togglePassword');
         const eyeIcon = document.getElementById('eyeIcon');
+        const capsWarn = document.getElementById('capsLockWarn');
         
         togglePassword.addEventListener('click', function () {
             const isPassword = passwordInput.getAttribute('type') === 'password';
             const newType = isPassword ? 'text' : 'password';
             passwordInput.setAttribute('type', newType);
-            
-            if (newType === 'text') {
-                eyeIcon.className = 'ri-eye-line';
-            } else {
-                eyeIcon.className = 'ri-eye-off-line';
-            }
+            togglePassword.setAttribute('aria-pressed', newType === 'text' ? 'true' : 'false');
+            eyeIcon.className = newType === 'text' ? 'ri-eye-line' : 'ri-eye-off-line';
         });
 
-        // Login diverifikasi di Worker; password disimpan dalam bentuk hash PBKDF2.
-        // Bukan lagi membaca seluruh tabel users dari browser (celah lama yang dipakai hacker).
+        function updateCapsWarning(e) {
+            if (!capsWarn || typeof e.getModifierState !== 'function') return;
+            capsWarn.classList.toggle('show', !!e.getModifierState('CapsLock'));
+        }
+        passwordInput.addEventListener('keydown', updateCapsWarning);
+        passwordInput.addEventListener('keyup', updateCapsWarning);
+        passwordInput.addEventListener('blur', () => capsWarn && capsWarn.classList.remove('show'));
+
         function tampilkanError(pesan, judul) {
             document.getElementById('errorMsgText').innerText = pesan;
-            var headerEl = document.querySelector('#modalLoginError .system-modal-header');
+            const headerEl = document.getElementById('errorModalTitle');
             if (headerEl) headerEl.innerText = judul || "Otorisasi Ditolak";
             document.getElementById('modalLoginError').style.display = 'flex';
         }
         function tutupError() {
             document.getElementById('modalLoginError').style.display = 'none';
-            var headerEl = document.querySelector('#modalLoginError .system-modal-header');
+            const headerEl = document.getElementById('errorModalTitle');
             if (headerEl) headerEl.innerText = "Otorisasi Ditolak";
         }
+
+        function bukaModalLupaSandi() {
+            const uVal = (document.getElementById('username').value || '').trim();
+            const msg = uVal
+                ? `Halo Admin ZeroixDark, saya lupa kata sandi untuk akun Control Center *${uVal}*. Mohon bantu reset sandi saya.`
+                : `Halo Admin ZeroixDark, saya lupa kata sandi akun Control Center saya. Mohon bantu reset sandi saya.`;
+            document.getElementById('btnWaLupaSandi').href = `https://wa.me/${adminWaNumber}?text=${encodeURIComponent(msg)}`;
+            document.getElementById('modalLupaSandi').style.display = 'flex';
+        }
+        function tutupModalLupaSandi() {
+            document.getElementById('modalLupaSandi').style.display = 'none';
+        }
+
+        document.getElementById('modalLoginError').addEventListener('click', function (e) {
+            if (e.target === this) tutupError();
+        });
+        document.getElementById('modalLupaSandi').addEventListener('click', function (e) {
+            if (e.target === this) tutupModalLupaSandi();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                tutupError();
+                tutupModalLupaSandi();
+            }
+        });
 
         // Cek apakah user terpental karena sesi berakhir (keluar browser/tab >= 5 jam)
         function checkZeroixKickReason() {
             try {
-                var reason = sessionStorage.getItem('zeroix_kick_reason') || localStorage.getItem('zeroix_kick_reason');
+                const reason = sessionStorage.getItem('zeroix_kick_reason') || localStorage.getItem('zeroix_kick_reason');
                 if (reason === 'timeout_5h') {
                     try { sessionStorage.removeItem('zeroix_kick_reason'); } catch (e) {}
                     try { localStorage.removeItem('zeroix_kick_reason'); } catch (e) {}
@@ -503,30 +709,50 @@
                         "Waktu sesi berakhir: Anda telah keluar dari browser/tab atau tidak ada aktivitas selama lebih dari 5 jam.\n\nDemi keamanan akun, silakan masuk (login) kembali.",
                         "SESI KEDALUWARSA (5 JAM)"
                     );
+                    return true;
                 }
             } catch (e) {}
+            return false;
         }
         window.checkZeroixKickReason = checkZeroixKickReason;
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', checkZeroixKickReason);
-        } else {
-            checkZeroixKickReason();
+
+        function autoRedirectIfLoggedIn() {
+            try {
+                if (typeof AuthBridge === 'undefined' || !AuthBridge.session) return;
+                const sess = AuthBridge.session();
+                const hasId = !!(localStorage.getItem('panel_user_id') || localStorage.getItem('user_id'));
+                if (!sess || !hasId) return;
+
+                const banner = document.getElementById('sessionRedirectBanner');
+                if (banner) banner.classList.add('show');
+
+                AuthBridge.verify().then((u) => {
+                    if (u && u.username) {
+                        window.location.replace('dashboard.html');
+                    } else if (banner) {
+                        banner.classList.remove('show');
+                    }
+                }).catch(() => {
+                    if (banner) banner.classList.remove('show');
+                });
+            } catch (e) {}
         }
 
-        document.getElementById('password').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') prosesLogin();
-        });
-        document.getElementById('username').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') document.getElementById('password').focus();
-        });
+        function initLoginPage() {
+            if (!checkZeroixKickReason()) {
+                autoRedirectIfLoggedIn();
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initLoginPage);
+        } else {
+            initLoginPage();
+        }
 
-        // Data user tidak lagi dibaca langsung dari database di sini.
-        // Login diverifikasi di Worker (hash PBKDF2 di sisi server).
         function prosesLogin() {
             const userIn = document.getElementById('username').value.trim();
-            const passIn = document.getElementById('password').value.trim();
+            const passIn = document.getElementById('password').value;
             const btn = document.getElementById('btnLogin');
-
             const defaultBtn = `<span>Otorisasi Akses</span> <i class="ri-arrow-right-line"></i>`;
 
             if (typeof AuthBridge === 'undefined') {
@@ -540,26 +766,25 @@
             }
 
             btn.innerHTML = `<span>Memverifikasi...</span> <i class="ri-loader-4-line ri-spin"></i>`;
-            btn.style.opacity = "0.7";
-            btn.style.pointerEvents = "none";
+            btn.disabled = true;
 
-            // Verifikasi lewat Worker. Password tidak pernah disimpan di browser.
             let loginPromise;
             try { loginPromise = AuthBridge.login(userIn, passIn); }
             catch (e) { loginPromise = Promise.reject(e); }
             if (!loginPromise) loginPromise = Promise.reject(new Error("Sistem belum siap. Muat ulang halaman."));
+
             loginPromise.then((user) => {
                 const nama = String(user.username || userIn);
                 const peran = String(user.role || '').toLowerCase();
-                localStorage.setItem('panel_user_id', user.uid);
-                localStorage.setItem('user_id', user.uid);
-                localStorage.setItem('user_id_ptero', user.uid);
-                localStorage.setItem('panel_username', nama);
-                localStorage.setItem('username', nama);
-                localStorage.setItem('panel_role', peran);
-                localStorage.setItem('role', peran);
-                if (user.ptero_id) localStorage.setItem('ptero_user_id', user.ptero_id);
                 try {
+                    localStorage.setItem('panel_user_id', user.uid);
+                    localStorage.setItem('user_id', user.uid);
+                    localStorage.setItem('user_id_ptero', user.uid);
+                    localStorage.setItem('panel_username', nama);
+                    localStorage.setItem('username', nama);
+                    localStorage.setItem('panel_role', peran);
+                    localStorage.setItem('role', peran);
+                    if (user.ptero_id) localStorage.setItem('ptero_user_id', user.ptero_id);
                     localStorage.setItem('zeroix_last_active', String(Date.now()));
                     sessionStorage.removeItem('zeroix_kick_reason');
                     localStorage.removeItem('zeroix_kick_reason');
@@ -568,8 +793,7 @@
             }).catch((error) => {
                 tampilkanError(error.message || "Otorisasi ditolak: Kredensial yang dimasukkan tidak valid.");
                 btn.innerHTML = defaultBtn;
-                btn.style.opacity = "1";
-                btn.style.pointerEvents = "auto";
+                btn.disabled = false;
             });
         }
     </script>

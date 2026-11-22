@@ -2,7 +2,11 @@ User-agent: *
 Allow: /
 Disallow: /dashboard
 Disallow: /login
+Disallow: /activity_logs
 Disallow: /activity-logs
+Disallow: /manage_
 Disallow: /manage-
+Disallow: /workers.js
+Disallow: /contoh
 
 Sitemap: https://zeroixdarkmarket.web.id/sitemap.xml

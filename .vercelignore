@@ -1,0 +1,17 @@
+# Exclude backend worker, internal docs, rules, seed, and dev files from Vercel static hosting
+workers.js
+firebase-seed.json
+firebase-database.rules.*.json
+PANDUAN_PEMBERSIHAN.md
+README_FIREBASE.md
+README.md
+CHANGELOG.md
+PENGUMUMAN_*.md
+PROMO_WHATSAPP*
+Screenshot_*.jpg
+contoh.html
+Bot Zeroix
+.claude
+.aiXdrTempPics
+.git
+.gitignore

@@ -4,8 +4,8 @@
 
 // Website yang boleh memakai Worker ini
 const ALLOWED_ORIGINS = [
-    'https://pterodactylmanage.vercel.app',
     'https://zeroixdarkmarket.web.id',
+    'https://pterodactylmanage.vercel.app',
 ];
 
 // Setiap mode HANYA boleh diteruskan ke domain panelnya sendiri
@@ -567,6 +567,12 @@ async function coreGateway(request, env, origin, cors) {
 
         // Pembayaran QRIS toko (store.html) -> RaflyShop Payment
         const pathname = new URL(request.url).pathname;
+        if (pathname === '/status/nodes' && request.method === 'GET') {
+            return handleNodeStatus(env, cors);
+        }
+        if (pathname === '/admin/upload-image' && request.method === 'POST') {
+            return handleAdminImageUpload(request, env, cors);
+        }
         if (pathname.startsWith('/pay/')) {
             return handlePayment(pathname, request, env, cors);
         }
@@ -730,11 +736,130 @@ class PayError extends Error {
 
 // Tanda tangan order dibuat Worker saat tagihan dibuat. Firebase bisa ditulis dari browser,
 // jadi order tanpa tanda tangan yang cocok tidak boleh dipakai untuk membuat panel.
-async function signOrder(env, nexId, productId, amount) {
+async function signOrder(env, nexId, productId, amount, extra = '') {
     const enc = new TextEncoder();
     const key = await crypto.subtle.importKey('raw', enc.encode(env.RAFLYSHOP_PAY_KEY), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-    const sig = await crypto.subtle.sign('HMAC', key, enc.encode(`${nexId}|${productId}|${amount}`));
+    const payload = extra ? `${nexId}|${productId}|${amount}|${extra}` : `${nexId}|${productId}|${amount}`;
+    const sig = await crypto.subtle.sign('HMAC', key, enc.encode(payload));
     return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function normalizePhoneDigits(raw) {
+    let d = String(raw || '').replace(/\D/g, '');
+    if (d.startsWith('62')) d = '0' + d.slice(2);
+    return d;
+}
+
+async function countFreeAllocations(panel, apiKey, locId = DEPLOY.locationId, stopAtFirst = false) {
+    const ptero = pteroClient(panel, apiKey);
+    const nodes = (await ptero('/nodes'))?.data || [];
+    let nodesInLoc = nodes.filter(n => parseInt(n.attributes?.location_id) === locId);
+    if (!nodesInLoc.length) nodesInLoc = nodes;
+    let free = 0;
+    for (const node of nodesInLoc) {
+        for (let page = 1, total = 1; page <= total; page++) {
+            const res = await ptero(`/nodes/${node.attributes.id}/allocations?page=${page}`);
+            const list = res?.data || [];
+            for (const a of list) {
+                if (a.attributes?.assigned === false) {
+                    free++;
+                    if (stopAtFirst) return free;
+                }
+            }
+            total = res?.meta?.pagination?.total_pages || 1;
+            if (page >= 5) break; // jaga budget subrequest Cloudflare
+        }
+    }
+    return free;
+}
+
+async function handleNodeStatus(env, cors) {
+    const entries = Object.entries(PANELS);
+    const out = {};
+    await Promise.all(entries.map(async ([mode, panel]) => {
+        const apiKey = env[panel.key];
+        if (!apiKey) {
+            out[mode] = { online: false, freePorts: 0, error: 'Key missing' };
+            return;
+        }
+        try {
+            const freePorts = await Promise.race([
+                countFreeAllocations(panel, apiKey, DEPLOY.locationId, false),
+                new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000)),
+            ]);
+            out[mode] = { online: true, freePorts };
+        } catch (e) {
+            out[mode] = { online: false, freePorts: 0 };
+        }
+    }));
+    return jsonHttp({ ok: true, nodes: out, timestamp: Date.now() }, 200, cors);
+}
+
+async function handleAdminImageUpload(request, env, cors) {
+    const sess = await verifySession(env, request);
+    if (!sess) return reply('Sesi berakhir, silakan login.', 401, cors);
+    if (String(sess.r || '').toLowerCase() !== 'pemilik') return reply('Hanya pemilik yang boleh mengunggah media.', 403, cors);
+    if (!env.IMGBB_API_KEY) return reply('IMGBB_API_KEY belum diisi di Cloudflare Worker Secrets.', 501, cors);
+
+    let input;
+    try { input = await request.json(); } catch { return reply('Invalid JSON', 400, cors); }
+    const base64Clean = String(input.image || '').replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '').trim();
+    if (!base64Clean || base64Clean.length > 8 * 1024 * 1024) return reply('Gambar tidak valid atau terlalu besar.', 400, cors);
+
+    const formData = new FormData();
+    formData.append('image', base64Clean);
+    const up = await fetch(`https://api.imgbb.com/1/upload?key=${encodeURIComponent(env.IMGBB_API_KEY)}`, {
+        method: 'POST',
+        body: formData,
+    });
+    const json = await up.json().catch(() => null);
+    if (!up.ok || !json?.success || !json?.data?.url) {
+        return reply(json?.error?.message || 'Gagal mengunggah gambar ke ImgBB.', 502, cors);
+    }
+    return jsonHttp({ ok: true, url: json.data.url }, 200, cors);
+}
+
+async function findRenewTarget(env, targetType, mode, username) {
+    const cleanUser = String(username || '').trim().toLowerCase();
+    if (!/^[a-z0-9][a-z0-9_.@-]{1,63}$/.test(cleanUser)) {
+        throw new PayError('Username tidak valid.', 400);
+    }
+    if (targetType === 'role') {
+        const users = await firebaseRest(env, 'users') || {};
+        const entry = Object.entries(users).find(([, u]) => u && String(u.username || '').trim().toLowerCase() === cleanUser);
+        if (!entry) throw new PayError('Akun website dengan username tersebut tidak ditemukan.', 404);
+        const [uid, u] = entry;
+        if (String(u.role || '').toLowerCase() === 'pemilik') {
+            throw new PayError('Akun administrator tidak memerlukan perpanjangan.', 400);
+        }
+        return {
+            targetType: 'role',
+            mode: 'website',
+            uid,
+            username: u.username,
+            role: u.role,
+            currentExpiredAt: saneTs(u.expiredAt),
+        };
+    }
+
+    const panel = PANELS[mode];
+    if (!panel) throw new PayError('Tipe panel tidak dikenal.', 400);
+    const apiKey = env[panel.key];
+    if (!apiKey) throw new PayError('Panel API key not configured in Worker', 500);
+    const ptero = pteroClient(panel, apiKey);
+    const res = await ptero(`/users?filter[username]=${encodeURIComponent(cleanUser)}`);
+    const match = (res?.data || []).find(u => String(u.attributes?.username || '').trim().toLowerCase() === cleanUser);
+    if (!match) throw new PayError(`User "${cleanUser}" tidak ditemukan di panel ${mode}.`, 404);
+    const pteroUserId = match.attributes.id;
+    const domainKey = panel.host.replace(/\./g, '_');
+    const expRec = await firebaseRest(env, `ptero_users_expired/${domainKey}/${pteroUserId}`).catch(() => null);
+    return {
+        targetType: 'panel',
+        mode,
+        pteroUserId,
+        username: match.attributes.username,
+        currentExpiredAt: saneTs(expRec?.expiredAt),
+    };
 }
 
 async function handlePayment(pathname, request, env, cors) {
@@ -749,6 +874,129 @@ async function handlePayment(pathname, request, env, cors) {
     });
 
     try {
+        // ---------- CEK TARGET PERPANJANGAN ----------
+        if (pathname === '/pay/renew-check') {
+            const target = await findRenewTarget(env, String(input.targetType || 'panel'), String(input.mode || 'private'), input.username);
+            const now = Date.now();
+            return ok200({
+                found: true,
+                targetType: target.targetType,
+                mode: target.mode,
+                username: target.username,
+                currentExpiredAt: target.currentExpiredAt,
+                isGracePeriod: !!(target.currentExpiredAt && target.currentExpiredAt <= now && target.currentExpiredAt + GRACE_MS > now),
+            });
+        }
+
+        // ---------- BUAT TAGIHAN PERPANJANGAN ----------
+        if (pathname === '/pay/renew-create') {
+            const productId = String(input.productId || '');
+            if (!/^[A-Za-z0-9_-]{1,128}$/.test(productId)) return reply('Produk tidak valid', 400, cors);
+            const product = await firebaseRest(env, `store_products/${productId}`);
+            const amount = parseInt(product?.harga);
+            if (!product || !(amount > 0)) return reply('Produk tidak ditemukan', 404, cors);
+
+            const spec = jenisProduk(product);
+            const targetType = spec?.type === 'role' ? 'role' : 'panel';
+            const mode = targetType === 'role' ? 'website' : (spec?.mode || String(input.mode || 'private'));
+            const target = await findRenewTarget(env, targetType, mode, input.username);
+
+            const data = await payApi(env, '/charge/qris', { amount })
+                .catch(e => e.message === 'fetch failed' ? payApi(env, '/charge/qris', { amount }) : Promise.reject(e));
+            const nexId = data.nexpay_transaction_id;
+            const renewTag = `${target.targetType}:${target.mode}:${target.username}`;
+            const order = {
+                orderType: 'renew',
+                productId,
+                productName: `Perpanjang: ${product.nama || '-'}`,
+                amount: data.amount,
+                fee: data.fee ?? null,
+                invoice: data.merchant_order_id,
+                status: payStatus(data) || 'pending',
+                expiresAt: data.expires_at || null,
+                createdAt: Date.now(),
+                renewTarget: {
+                    targetType: target.targetType,
+                    mode: target.mode,
+                    username: target.username,
+                    uid: target.uid || null,
+                    pteroUserId: target.pteroUserId || null,
+                },
+                sig: await signOrder(env, nexId, productId, data.amount, renewTag),
+            };
+            await firebaseRest(env, `store_orders/${nexId}`, 'PUT', order);
+            return ok200({
+                orderType: 'renew',
+                nexpay_transaction_id: nexId,
+                invoice: order.invoice,
+                productName: order.productName,
+                amount: order.amount,
+                status: order.status,
+                renewTarget: order.renewTarget,
+                qr_string: data.qr_string,
+                qr_image: data.qr_image,
+                expires_at: order.expiresAt,
+            });
+        }
+
+        // ---------- LACAK PESANAN LINTAS PERANGKAT ----------
+        if (pathname === '/pay/lookup') {
+            const query = String(input.query || '').trim();
+            const phone = normalizePhoneDigits(input.phone);
+            if (!query) return reply('Masukkan Nomor Invoice atau ID Transaksi.', 400, cors);
+
+            const orders = await firebaseRest(env, 'store_orders') || {};
+            const entry = Object.entries(orders).find(([k, o]) =>
+                o && (k === query || String(o.invoice || '').trim().toUpperCase() === query.toUpperCase())
+            );
+            if (!entry) return reply('Pesanan tidak ditemukan.', 404, cors);
+
+            const [nexId, order] = entry;
+            let status = order.status;
+            if (status === 'pending') {
+                const live = await payApi(env, '/charge/status', { nexpay_transaction_id: nexId }).catch(() => null);
+                const liveStatus = live ? payStatus(live) : '';
+                if (liveStatus && liveStatus !== status) {
+                    status = liveStatus;
+                    await firebaseRest(env, `store_orders/${nexId}`, 'PATCH', { status, updatedAt: Date.now() }).catch(() => {});
+                }
+            }
+
+            const prov = order.provision || null;
+            if (prov && prov.status === 'done') {
+                const provPhone = normalizePhoneDigits(prov.phone);
+                if (!phone || !provPhone || phone !== provPhone) {
+                    return reply('Nomor WhatsApp tidak cocok dengan data pesanan ini.', 403, cors);
+                }
+                return ok200({
+                    nexpay_transaction_id: nexId,
+                    invoice: order.invoice,
+                    productId: order.productId,
+                    productName: order.productName,
+                    amount: order.amount,
+                    status,
+                    orderType: order.orderType || 'new',
+                    renewTarget: order.renewTarget || null,
+                    createdAt: order.createdAt || null,
+                    panel: prov,
+                });
+            }
+
+            return ok200({
+                nexpay_transaction_id: nexId,
+                invoice: order.invoice,
+                productId: order.productId,
+                productName: order.productName,
+                amount: order.amount,
+                status,
+                orderType: order.orderType || 'new',
+                renewTarget: order.renewTarget || null,
+                createdAt: order.createdAt || null,
+                expires_at: order.expiresAt || null,
+                panel: null,
+            });
+        }
+
         // ---------- BUAT TAGIHAN ----------
         if (pathname === '/pay/create') {
             const productId = String(input.productId || '');
@@ -756,6 +1004,24 @@ async function handlePayment(pathname, request, env, cors) {
             const product = await firebaseRest(env, `store_products/${productId}`);
             const amount = parseInt(product?.harga);
             if (!product || !(amount > 0)) return reply('Produk tidak ditemukan', 404, cors);
+
+            // Cek ketersediaan port node sebelum membuat tagihan QRIS agar pembeli tidak bayar saat penuh
+            const spec = jenisProduk(product);
+            if (spec?.type === 'panel') {
+                const panel = PANELS[spec.mode];
+                const apiKey = panel && env[panel.key];
+                if (panel && apiKey) {
+                    try {
+                        const free = await Promise.race([
+                            countFreeAllocations(panel, apiKey, DEPLOY.locationId, true),
+                            new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 4000)),
+                        ]);
+                        if (free === 0) {
+                            return reply(`Slot port pada ${spec.mode.replace('_', ' ').toUpperCase()} sedang penuh. Silakan pilih tipe panel lain atau hubungi Admin.`, 503, cors);
+                        }
+                    } catch {}
+                }
+            }
 
             // Gateway kadang membalas "fetch failed" (gangguan di sisi mereka), coba sekali lagi
             const data = await payApi(env, '/charge/qris', { amount })
@@ -785,12 +1051,16 @@ async function handlePayment(pathname, request, env, cors) {
             });
         }
 
-        // ---------- CEK STATUS / BATALKAN / BUAT PANEL (hanya order yang dibuat lewat Worker ini) ----------
-        if (!['/pay/status', '/pay/cancel', '/pay/provision'].includes(pathname)) return reply('Not found', 404, cors);
+        // ---------- CEK STATUS / BATALKAN / BUAT PANEL / PERPANJANG ----------
+        if (!['/pay/status', '/pay/cancel', '/pay/provision', '/pay/renew-apply'].includes(pathname)) return reply('Not found', 404, cors);
         const nexId = String(input.nexpay_transaction_id || '');
         if (!NEX_ID.test(nexId)) return reply('ID transaksi tidak valid', 400, cors);
         const order = await firebaseRest(env, `store_orders/${nexId}`);
         if (!order) return reply('Order tidak ditemukan', 404, cors);
+
+        if (pathname === '/pay/renew-apply') {
+            return ok200(await applyRenewalOrder(env, nexId, order));
+        }
 
         if (pathname === '/pay/provision') {
             return ok200(await provisionPanel(env, nexId, order, input));
@@ -826,7 +1096,110 @@ const EGG_IMAGES = { 15: 'ghcr.io/parkervcp/yolks:nodejs_20', 20: 'ghcr.io/parke
 // Sama persis dengan startup di manage_ptero_users.html
 const STARTUP = "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [[ ! -z${UNNODE_PACKAGES} ]]; then /usr/local/bin/npm uninstall ${UNNODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install; fi; if [[ ! -z${CUSTOM_ENVIRONMENT_VARIABLES} ]]; then vars=$(echo${CUSTOM_ENVIRONMENT_VARIABLES} | tr \";\" \"\\n\"); for line in $vars; do export$line; done fi; /usr/local/bin/${CMD_RUN};";
 const PROVISION_LOCK_MS = 3 * 60 * 1000; // kunci "processing" dianggap macet setelah 3 menit
-const WEB_LOGIN_URL = `${ALLOWED_ORIGINS[0]}/login`;
+const WEB_LOGIN_URL = 'https://zeroixdarkmarket.web.id/login';
+
+async function applyRenewalOrder(env, nexId, order) {
+    if (order.orderType !== 'renew' || !order.renewTarget) {
+        throw new PayError('Order ini bukan order perpanjangan.', 400);
+    }
+    const rt = order.renewTarget;
+    const renewTag = `${rt.targetType}:${rt.mode}:${rt.username}`;
+    if (!order.sig || order.sig !== await signOrder(env, nexId, order.productId, order.amount, renewTag)) {
+        throw new PayError('Order perpanjangan tidak valid.', 403);
+    }
+
+    const pay = await payApi(env, '/charge/status', { nexpay_transaction_id: nexId });
+    if (!PAID_STATUSES.includes(payStatus(pay)) || Number(pay.amount) !== Number(order.amount)) {
+        throw new PayError('Pembayaran belum terverifikasi lunas.', 402);
+    }
+
+    await claimProvision(env, nexId);
+    const now = Date.now();
+    const addMs = PANEL_DAYS * 24 * 60 * 60 * 1000;
+
+    try {
+        if (rt.targetType === 'role') {
+            const target = await findRenewTarget(env, 'role', 'website', rt.username);
+            const base = target.currentExpiredAt > now ? target.currentExpiredAt : now;
+            const newExpiredAt = base + addMs;
+            const result = {
+                kind: 'renew_role',
+                username: target.username,
+                role: target.role,
+                loginUrl: WEB_LOGIN_URL,
+                createdAt: now,
+                expiredAt: newExpiredAt,
+            };
+            const pesan = `Toko: perpanjangan lisensi website ${target.username} (+${PANEL_DAYS} hari) lunas, invoice ${order.invoice}. Expired baru ${tanggalWIB(newExpiredAt)}.`;
+            await firebaseRest(env, '', 'PATCH', {
+                [`users/${target.uid}/expiredAt`]: newExpiredAt,
+                [`users/${target.uid}/expiredStatus`]: 'active',
+                [`users/${target.uid}/expiredNote`]: `Perpanjangan otomatis ${PANEL_DAYS} Hari via QRIS (${order.invoice}).`,
+                [`users/${target.uid}/expiredUpdatedAt`]: now,
+                [`users/${target.uid}/expiredUpdatedBy`]: 'Sistem',
+                [`store_orders/${nexId}/provision`]: { status: 'done', ...result },
+                [`store_orders/${nexId}/status`]: payStatus(pay),
+                [`activity_logs/store_${now}`]: { uid: 'system', username: 'Toko Otomatis', role: 'system', action: pesan, timestamp: now },
+                [`notifikasi/${now}_toko`]: { tipe: 'toko', pesan, maker: PANEL_AUTHOR, timestamp: now },
+            });
+            return { ...result, productName: order.productName, invoice: order.invoice };
+        }
+
+        const panel = PANELS[rt.mode];
+        const apiKey = panel && env[panel.key];
+        if (!panel || !apiKey) throw new PayError('Panel tidak tersedia.', 500);
+        const ptero = pteroClient(panel, apiKey);
+        const target = await findRenewTarget(env, 'panel', rt.mode, rt.username);
+        const base = target.currentExpiredAt > now ? target.currentExpiredAt : now;
+        const newExpiredAt = base + addMs;
+        const domainKey = panel.host.replace(/\./g, '_');
+
+        const userDetail = await ptero(`/users/${target.pteroUserId}?include=servers`);
+        const servers = userDetail?.attributes?.relationships?.servers?.data || [];
+        const updates = {
+            [`ptero_users_expired/${domainKey}/${target.pteroUserId}`]: {
+                expiredAt: newExpiredAt,
+                username: target.username,
+                maker: PANEL_AUTHOR,
+                expiredUpdatedAt: now,
+            },
+            [`ptero_sweeper_state/${domainKey}/users/${target.pteroUserId}`]: null,
+        };
+        for (const s of servers) {
+            const sid = s.attributes?.id;
+            if (!sid) continue;
+            await ptero(`/servers/${sid}/unsuspend`, 'POST').catch(() => {});
+            updates[`ptero_servers_expired/${domainKey}/${sid}`] = {
+                expiredAt: newExpiredAt,
+                serverName: s.attributes.name || '',
+                maker: PANEL_AUTHOR,
+                expiredUpdatedAt: now,
+            };
+            updates[`ptero_sweeper_state/${domainKey}/servers/${sid}`] = null;
+        }
+
+        const result = {
+            kind: 'renew_panel',
+            username: target.username,
+            mode: rt.mode,
+            panelUrl: `https://${panel.host}`,
+            serversCount: servers.length,
+            createdAt: now,
+            expiredAt: newExpiredAt,
+        };
+        const pesan = `[${rt.mode}] Toko: perpanjangan panel ${target.username} (+${PANEL_DAYS} hari, ${servers.length} server dipulihkan) lunas, invoice ${order.invoice}. Expired baru ${tanggalWIB(newExpiredAt)}.`;
+        updates[`store_orders/${nexId}/provision`] = { status: 'done', ...result };
+        updates[`store_orders/${nexId}/status`] = payStatus(pay);
+        updates[`activity_logs/store_${now}`] = { uid: 'system', username: 'Toko Otomatis', role: 'system', action: pesan, timestamp: now };
+        updates[`notifikasi/${now}_toko`] = { tipe: 'toko', pesan, maker: PANEL_AUTHOR, timestamp: now };
+
+        await firebaseRest(env, '', 'PATCH', updates);
+        return { ...result, productName: order.productName, invoice: order.invoice };
+    } catch (error) {
+        await firebaseRest(env, `store_orders/${nexId}/provision`, 'DELETE').catch(() => {});
+        throw error;
+    }
+}
 
 // Harus sama dengan GlobalConfig.jenisProduk() di config.js
 function jenisProduk(p) {

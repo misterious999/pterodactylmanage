@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kebijakan Privasi — ZeroixDark</title>
+    <meta name="description" content="Kebijakan privasi dan keamanan data pengguna, enkripsi PBKDF2-SHA256, dan pengelolaan transaksi QRIS di ZeroixDark.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://zeroixdarkmarket.web.id/privasi">
+    <meta name="theme-color" content="#060b1a">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.4">
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png?v=9.4">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.1/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root { --bg: #060b1a; --card: rgba(255,255,255,.04); --line: rgba(255,255,255,.09); --ink: #e9eeff; --muted: #8d97b8; --a1: #5eead4; --a2: #818cf8; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--ink); font-family: 'Sora', sans-serif; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+        a { color: var(--a1); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .aurora { position: fixed; inset: -20%; z-index: -2; filter: blur(80px) saturate(140%); opacity: .5; pointer-events: none; }
+        .aurora span { position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%; mix-blend-mode: screen; }
+        .aurora span:nth-child(1) { background: radial-gradient(circle, var(--a1), transparent 60%); top: 0; left: 10%; }
+        .aurora span:nth-child(2) { background: radial-gradient(circle, var(--a2), transparent 60%); top: 20%; right: 0; }
+        .grain { position: fixed; inset: 0; z-index: -1; pointer-events: none; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 64px 64px; mask-image: radial-gradient(circle at 50% 30%, #000, transparent 75%); }
+        .navbar { position: sticky; top: 0; z-index: 100; background: rgba(6,11,26,.8); backdrop-filter: blur(18px); border-bottom: 1px solid var(--line); }
+        .nav-inner { max-width: 960px; margin: 0 auto; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.18rem; color: var(--ink); text-decoration: none; }
+        .brand b { color: var(--a1); }
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 15px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: .85rem; font-weight: 600; text-decoration: none; }
+        .btn:hover { border-color: var(--a1); color: var(--a1); text-decoration: none; }
+        .wrap { max-width: 860px; margin: 0 auto; padding: 48px 24px 72px; }
+        h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800; margin-bottom: 8px; }
+        .meta { color: var(--muted); font-size: .86rem; margin-bottom: 30px; }
+        .doc-card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 28px; margin-bottom: 18px; backdrop-filter: blur(12px); }
+        .doc-card h2 { font-size: 1.12rem; color: var(--a1); margin-bottom: 10px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .doc-card p, .doc-card li { color: var(--muted); font-size: .92rem; }
+        .doc-card ul { padding-left: 20px; margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+        footer { border-top: 1px solid var(--line); padding: 26px 24px; text-align: center; color: var(--muted); font-size: .84rem; }
+    </style>
+</head>
+<body>
+    <script src="page-loader.js?v=76"></script>
+    <div class="aurora"><span></span><span></span></div>
+    <div class="grain"></div>
+
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a class="brand" href="/"><span>Zeroix<b>Dark</b></span></a>
+            <div style="display:flex; gap:8px;">
+                <a class="btn" href="/"><i class="ri-home-5-line"></i> Beranda</a>
+                <a class="btn" href="/store"><i class="ri-shopping-bag-3-line"></i> Toko</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="wrap">
+        <h1>Kebijakan Privasi</h1>
+        <p class="meta">Terakhir diperbarui: 22 November 2026 · ZeroixDark Marketplace</p>
+
+        <section class="doc-card">
+            <h2><i class="ri-database-2-line"></i> 1. Data yang Kami Kumpulkan</h2>
+            <p>Untuk memproses pesanan panel dan otorisasi akses Control Center, kami hanya mengumpulkan data minimum yang diperlukan:</p>
+            <ul>
+                <li><strong>Username &amp; Nomor WhatsApp:</strong> digunakan untuk pembuatan akun panel/role serta keperluan dukungan layanan.</li>
+                <li><strong>Data Transaksi QRIS:</strong> ID transaksi, nomor invoice, nominal, dan status pembayaran untuk verifikasi otomatis.</li>
+                <li><strong>Log Audit Keamanan:</strong> catatan aktivitas masuk/keluar dan perubahan konfigurasi sistem bagi pengguna panel manajemen.</li>
+            </ul>
+        </section>
+
+        <section class="doc-card">
+            <h2><i class="ri-lock-password-line"></i> 2. Keamanan &amp; Enkripsi Kredensial</h2>
+            <ul>
+                <li>Kata sandi akun Control Center disimpan menggunakan hash kriptografi <strong>PBKDF2-SHA256 (100.000 iterasi)</strong> dengan salt acak unik — kata sandi asli tidak disimpan dalam bentuk plaintext.</li>
+                <li>Token sesi ditandatangani dengan HMAC-SHA256 dan otomatis dicabut kapan pun kata sandi diubah atau di-reset.</li>
+                <li>Kami <strong>tidak pernah menyimpan</strong> data rekening bank, kartu debit/kredit, maupun kredensial e-wallet Anda.</li>
+            </ul>
+        </section>
+
+        <section class="doc-card">
+            <h2><i class="ri-smartphone-line"></i> 3. Penyimpanan Lokal Browser (LocalStorage)</h2>
+            <p>Halaman Toko menyimpan riwayat pesanan sementara (<em>Pesanan Saya</em>) di <code>localStorage</code> browser Anda agar Anda tidak kehilangan struk saat halaman tertutup. Anda dapat menghapus riwayat tersebut kapan saja langsung dari menu <em>Pesanan Saya</em>.</p>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2026 ZeroixDark · <a href="/syarat-ketentuan">Syarat &amp; Ketentuan</a> · <a href="/status">Status Node</a>
+    </footer>
+</body>
+</html>
