@@ -487,7 +487,13 @@
         .pay-form input:focus, .pay-form select:focus { border-color: var(--a1); box-shadow: 0 0 15px rgba(94, 234, 212, 0.2); }
         .pay-form select option { background: #0c152c; }
         .pay-spec { font-size: 12px; font-weight: 600; color: var(--a1); background: rgba(94, 234, 212, 0.1); border: 1px solid rgba(94, 234, 212, 0.2); padding: 10px; border-radius: 12px; text-align: center; }
-        .pay-form-error { font-size: 12px; font-weight: 600; color: var(--a3); }
+        .pay-form-error {
+            font-size: 12px; font-weight: 600; color: var(--a3);
+            background: rgba(244, 114, 182, 0.12);
+            border: 1px solid rgba(244, 114, 182, 0.35);
+            border-radius: 10px; padding: 10px 12px;
+            line-height: 1.5; white-space: pre-line; text-align: left;
+        }
         .pay-form-error:empty { display: none; }
         .pay-struk {
             text-align: left; background: rgba(6, 11, 26, 0.6);
@@ -1607,6 +1613,26 @@
             listEl.innerHTML = html;
         }
 
+        function formatStoreError(rawMsg, status = 0) {
+            const msg = String(rawMsg || '').trim();
+            const low = msg.toLowerCase();
+            if (/username.*(already been taken|sudah dipakai|sudah digunakan|sudah ada)/.test(low)) {
+                if (/pembayaran anda/.test(low)) return msg;
+                return 'Username tersebut sudah digunakan oleh orang lain.\n\nTenang, pembayaran Anda tetap aman. Silakan ganti ke username lain (misalnya tambahkan angka di belakangnya, contoh: budi01) lalu klik "Buat Sekarang" lagi.';
+            }
+            if (/email.*(already been taken|sudah dipakai|sudah terdaftar)/.test(low)) {
+                return 'Nomor WhatsApp / email tersebut sudah pernah terdaftar di panel ini. Silakan hubungi Admin via WhatsApp agar dibantu pengecekan.';
+            }
+            if (/penuh|slot port|semua port|semua slot|kapasitas server|allocation|viable node|not have enough (memory|disk)|disk space|out of memory/.test(low) || status === 507) {
+                if (/pembayaran anda|pembayaran belum dibuat/.test(low)) return msg;
+                return 'Maaf, kapasitas server (node) untuk paket ini saat ini sedang penuh sehingga server baru belum bisa dibuat.\n\nJika Anda sudah membayar, jangan khawatir — klik tombol WhatsApp Admin di bawah agar dibantu dipindahkan ke slot server yang tersedia.';
+            }
+            if (/panel error \d+/i.test(low)) {
+                return 'Server panel sedang sibuk atau mengalami gangguan sementara. Silakan tunggu sebentar lalu klik "Buat Sekarang" lagi, atau hubungi Admin jika masih gagal.';
+            }
+            return msg || `Terjadi kesalahan (kode ${status || 'jaringan'}). Silakan coba lagi atau hubungi Admin.`;
+        }
+
         async function payRequest(path, body) {
             // Lewat GlobalConfig.workerFetch: kalau domain Worker utama diblokir
             // DNS ISP, otomatis dicoba ke domain cadangan. workerFetch TIDAK
@@ -1618,7 +1644,7 @@
                 body: JSON.stringify(body),
             });
             const json = await res.json().catch(() => null);
-            if (!res.ok || !json?.success) throw new Error(json?.error || `Error ${res.status}`);
+            if (!res.ok || !json?.success) throw new Error(formatStoreError(json?.error || `Error ${res.status}`, res.status));
             return json.data;
         }
 
@@ -1718,6 +1744,7 @@
             const o = payOrder;
             if (!o) return;
             ['payForm', 'payStruk', 'payUnlockBtn', 'payCopyBtn', 'payWaBtn', 'payCancelBtn'].forEach(id => payEl(id).hidden = true);
+            payEl('payWaBtn').innerText = 'Konfirmasi via WhatsApp';
             payEl('payProduct').innerText = o.productName || 'Produk';
             payEl('payAmount').innerText = formatRupiah(o.amount);
             payEl('payMeta').innerText = `Invoice: ${o.invoice}`;
@@ -1856,6 +1883,7 @@
             payOrder = null;
             const seq = ++paySeq;
             ['payForm', 'payStruk', 'payUnlockBtn', 'payCopyBtn', 'payWaBtn', 'payCancelBtn'].forEach(id => payEl(id).hidden = true);
+            payEl('payWaBtn').innerText = 'Konfirmasi via WhatsApp';
             payEl('payProduct').innerText = produk.nama || 'Produk';
             payEl('payAmount').innerText = formatRupiah(produk.harga);
             payEl('payQr').innerHTML = '';
@@ -1894,6 +1922,7 @@
             if (!isRole && !input.serverName) return err.innerText = 'Nama server wajib diisi.';
             if (!/^\d{9,15}$/.test(input.phone)) return err.innerText = 'Nomor WhatsApp tidak valid.';
             err.innerText = '';
+            payEl('payWaBtn').hidden = true;
 
             const btn = payEl('pfSubmit');
             const seq = paySeq;
@@ -1907,7 +1936,18 @@
                 simpanPesanan();
                 tampilkanPesanan();
             } catch (e) {
-                if (seq === paySeq) err.innerText = `Gagal membuat ${isRole ? 'akun' : 'panel'}: ` + e.message;
+                if (seq === paySeq) {
+                    const msg = String(e?.message || `Gagal membuat ${isRole ? 'akun' : 'panel'}. Silakan coba lagi atau hubungi Admin.`);
+                    err.innerText = msg;
+                    const low = msg.toLowerCase();
+                    if (/username.*(sudah|digunakan|dipakai)/.test(low)) {
+                        payEl('pfUsername')?.focus();
+                    } else if (/penuh|slot|kapasitas|alokasi|hubungi admin/.test(low)) {
+                        const waBtn = payEl('payWaBtn');
+                        waBtn.innerText = 'Hubungi Admin via WhatsApp';
+                        waBtn.hidden = false;
+                    }
+                }
             }
             btn.disabled = false;
             btn.innerText = 'Buat Sekarang';

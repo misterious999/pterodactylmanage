@@ -746,14 +746,14 @@
         function buatAkunWeb() {
             let uName = document.getElementById('webUsername').value.trim(); 
             let pWord = document.getElementById('webPassword').value.trim();
-            if(!uName || !pWord) return showPeringatan("Parameter input tidak lengkap. Harap isi identitas dan kata sandi.");
+            if(!uName || !pWord) return showPeringatan("Harap isi Username dan Password terlebih dahulu sebelum membuat akun.");
             
             database.ref('users').once('value', s => {
                 let usernameDipakai = false;
                 s.forEach(c => { const u = c.val() || {}; if (String(u.username || '').trim().toLowerCase() === uName.toLowerCase()) usernameDipakai = true; });
                 
                 if(usernameDipakai) { 
-                    showPeringatan("Identitas pengguna telah digunakan dalam sistem. Pilih kombinasi lain."); 
+                    showPeringatan(`Username "${uName}" sudah digunakan akun lain. Silakan ganti ke username yang berbeda (misalnya tambahkan angka di belakangnya).`); 
                 } else {
                     const roleBaru = document.getElementById('webRole').value;
                     

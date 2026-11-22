@@ -1017,7 +1017,7 @@ async function handlePayment(pathname, request, env, cors) {
                             new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 4000)),
                         ]);
                         if (free === 0) {
-                            return reply(`Slot port pada ${spec.mode.replace('_', ' ').toUpperCase()} sedang penuh. Silakan pilih tipe panel lain atau hubungi Admin.`, 503, cors);
+                            return reply(`Maaf, server ${spec.mode.replace('_', ' ').toUpperCase()} saat ini sedang penuh dan semua slot server sudah terpakai. Pembayaran belum dibuat — silakan pilih paket di tipe panel lain (Private / Public / Public V2) atau hubungi Admin.`, 503, cors);
                         }
                     } catch {}
                 }
@@ -1226,7 +1226,7 @@ function jenisProduk(p) {
 async function buatAkunWebsite(env, nexId, order, jenis, { username, password, phone }) {
     const users = await firebaseRest(env, 'users') || {};
     const dipakai = Object.values(users).some(u => String(u?.username || '').trim().toLowerCase() === username);
-    if (dipakai) throw new PayError('Username sudah dipakai, pilih username lain.', 409);
+    if (dipakai) throw new PayError(`Username "${username}" sudah digunakan oleh pengguna lain. Tenang, pembayaran Anda tetap aman — silakan ganti ke username lain (misalnya tambahkan angka di belakangnya) lalu klik "Buat Sekarang" lagi.`, 409);
 
     const createdAt = Date.now();
     const expiredAt = createdAt + PANEL_DAYS * 24 * 60 * 60 * 1000;
@@ -1274,6 +1274,34 @@ const tanggalWIB = (ms) => new Date(ms).toLocaleString('id-ID', {
     timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
 }) + ' WIB';
 
+// Terjemahkan respons error mentah dari Pterodactyl API ke bahasa awam yang ramah pembeli
+function formatPteroApiError(status, data, text) {
+    const detail = data?.errors?.map(e => e?.detail || e?.code || '').filter(Boolean).join('; ') || String(text || '').slice(0, 240);
+    const low = detail.toLowerCase();
+    if (/username.*already been taken/.test(low)) {
+        return new PayError('Username tersebut sudah digunakan oleh pengguna lain. Tenang, pembayaran Anda aman — silakan ganti ke username lain (misalnya tambahkan angka di belakangnya) lalu klik "Buat Sekarang" lagi.', 409);
+    }
+    if (/email.*already been taken/.test(low)) {
+        return new PayError('Nomor WhatsApp / email tersebut sudah pernah terdaftar di panel ini. Silakan hubungi Admin via WhatsApp agar dibantu pengecekan.', 409);
+    }
+    if (/allocation.*(already.*(assigned|taken)|invalid|not found|available)|no suitable allocation|available allocation|viable node|not have enough (memory|disk)|disk space|out of memory/.test(low) || status === 507) {
+        return new PayError('Maaf, kapasitas server (node) untuk paket ini saat ini sedang penuh dan tidak cukup menampung server baru. Pembayaran Anda sudah lunas & aman — silakan hubungi Admin lewat WhatsApp agar dibantu dipindahkan atau ditambah slotnya.', 503);
+    }
+    if (/password.*(at least|minimal|between|characters|too short)/.test(low)) {
+        return new PayError('Password terlalu pendek atau belum sesuai ketentuan. Gunakan minimal 8 karakter gabungan huruf dan angka.', 400);
+    }
+    if (/username.*(may only contain|alpha_dash|format|between|at least)/.test(low)) {
+        return new PayError('Format username belum sesuai. Gunakan 3–30 karakter huruf kecil atau angka tanpa spasi (boleh titik, strip -, atau underscore _).', 400);
+    }
+    if (status === 429) {
+        return new PayError('Server sedang sibuk menerima banyak permintaan. Tunggu beberapa detik lalu klik "Buat Sekarang" lagi.', 429);
+    }
+    if (status >= 500) {
+        return new PayError('Server panel sedang mengalami gangguan sementara. Silakan tunggu sebentar lalu klik "Buat Sekarang" lagi, atau hubungi Admin jika masih gagal.', 502);
+    }
+    return new PayError(detail ? `Gagal membuat server di panel: ${detail}. Coba lagi atau hubungi Admin.` : `Gagal membuat server di panel (kode ${status}). Silakan hubungi Admin.`, 502);
+}
+
 function pteroClient(panel, apiKey) {
     return async (path, method = 'GET', body) => {
         const res = await fetch(`https://${panel.host}/api/application${path}`, {
@@ -1286,8 +1314,7 @@ function pteroClient(panel, apiKey) {
         let data = null;
         try { data = text ? JSON.parse(text) : null; } catch {}
         if (!res.ok) {
-            const detail = data?.errors?.map(e => e.detail).join('; ') || text.slice(0, 200);
-            throw new PayError(`Panel error ${res.status}: ${detail}`, 502);
+            throw formatPteroApiError(res.status, data, text);
         }
         return data;
     };
@@ -1364,7 +1391,7 @@ async function provisionPanel(env, nexId, order, input) {
         // 4. Username harus unik; email = nomor telepon @gmail.com (kalau sudah dipakai, pakai alias +kode)
         const sama = (list, field, value) => (list?.data || []).some(u => String(u.attributes?.[field]).toLowerCase() === value);
         if (sama(await ptero(`/users?filter[username]=${encodeURIComponent(username)}`), 'username', username)) {
-            throw new PayError('Username sudah dipakai, pilih username lain.', 409);
+            throw new PayError(`Username "${username}" sudah digunakan oleh pengguna lain. Tenang, pembayaran Anda tetap aman — silakan ganti ke username lain (misalnya tambahkan angka di belakangnya) lalu klik "Buat Sekarang" lagi.`, 409);
         }
         let email = `${phone}@gmail.com`;
         if (sama(await ptero(`/users?filter[email]=${encodeURIComponent(email)}`), 'email', email)) {
@@ -1393,7 +1420,7 @@ async function provisionPanel(env, nexId, order, input) {
             }
             if (alloc) break;
         }
-        if (!alloc) throw new PayError('Semua port panel sedang penuh. Hubungi admin.', 503);
+        if (!alloc) throw new PayError(`Maaf, server (node) untuk paket ini saat ini sedang penuh sehingga server belum bisa dibuat otomatis. Pembayaran Anda sudah lunas & tercatat aman (Invoice: ${order.invoice}) — silakan hubungi Admin lewat WhatsApp agar dibantu dipindahkan atau ditambah slotnya.`, 503);
 
         // 6. Environment egg (sama dengan getDynamicEnvironment)
         let environment = { INST: 'npm', USER_UPLOAD: '0', AUTO_UPDATE: '0', CMD_RUN: 'npm start' };

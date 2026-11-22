@@ -714,7 +714,7 @@
     <div id="modalAiSuccess" class="system-modal-overlay" style="z-index: 999999;"><div class="system-modal-popup mode-success" id="popupSuccessMode"><div class="modal-icon-top" id="iconSuccessMode"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="system-modal-header" id="aiSuccessTitle">STATUS OK</div><div class="system-modal-body" id="aiSuccessBody">Operasi berhasil diselesaikan.</div><div class="system-btn-group"><button class="system-btn btn-success-action" id="btnTutupSuccess" onclick="tutupModal('modalAiSuccess')">Tutup</button></div></div></div>
 
     <script src="config.js?v=76"></script>
-    <script src="api-services.js?v=76"></script>
+    <script src="api-services.js?v=77"></script>
     <script src="db-bridge.js?v=76"></script>
 
     <script>
@@ -1435,7 +1435,7 @@
                 nodesInLoc = nodes;
             }
             if (nodesInLoc.length === 0) {
-                throw new Error(`Konfigurasi Location ID ${locId} gagal: Tidak ada Node yang tersedia di panel.`);
+                throw new Error('Server (Node) belum tersedia atau belum aktif di lokasi ini. Silakan hubungi Admin untuk mengecek atau menambah node.');
             }
 
             for (let node of nodesInLoc) {
@@ -1453,7 +1453,7 @@
                     page++;
                 } while (page <= totalPages);
             }
-            throw new Error(`Traffic Padat: Seluruh port terisi pada Location ID ${locId}. Hubungi Administrator.`);
+            throw new Error('Server (Node) saat ini sedang penuh — semua slot / port sudah terpakai sehingga server baru belum bisa dibuat di panel ini.\n\nYang bisa Anda lakukan:\n• Coba pindah ke panel tipe lain di menu (misalnya Private, Public, atau Public V2) yang masih memiliki slot kosong.\n• Atau hubungi Admin untuk menambah kapasitas port di node.');
         }
 
         async function getDynamicEnvironment(nestId, eggId) {
@@ -1501,13 +1501,14 @@
             let isAdmin = document.getElementById('newRole').value === "true"; 
             
             if(!username || !password || !email || !serverName || ram === '' || cpu === '' || disk === '' || !locId || !eggId) { 
-                showAiAlert("Kesalahan validasi data. Seluruh field mandatory harus diisi.", "INTEGRITAS DATA GAGAL"); 
+                showAiAlert("Data belum lengkap. Pastikan Username, Password, Email, Nama Server, RAM, CPU, dan Disk sudah diisi semua.", "Data Belum Lengkap"); 
                 return; 
             }
             
             let btn = document.querySelector('.btn-tambah'); 
             let originalText = btn.innerHTML; 
             btn.style.pointerEvents = "none";
+            let createdUserId = null;
             
             try {
                 btn.innerHTML = `${spinnerSvg} Transmisi Identitas...`;
@@ -1521,7 +1522,8 @@
                 };
                 
                 let resUser = await apiPtero.createUser(userPayload);
-                let newUserId = resUser.attributes.id; 
+                let newUserId = resUser.attributes.id;
+                createdUserId = newUserId;
                 
                 btn.innerHTML = `${spinnerSvg} Memindai Port Node...`;
                 let allocData = await getFreeNodeAndAllocation(locId);
@@ -1568,9 +1570,23 @@
                 syncCustomSelect('newEggId');
                 ambilDataPtero(); 
             } catch(e) { 
+                let rolledBack = false;
+                if (createdUserId) {
+                    try {
+                        await apiPtero.deleteUser(createdUserId);
+                        rolledBack = true;
+                    } catch (cleanupErr) {
+                        console.warn('[Auto-Rollback] Gagal menghapus akun sementara:', cleanupErr);
+                    }
+                }
                 btn.innerHTML = originalText; 
                 btn.style.pointerEvents = "auto"; 
-                showAiAlert(`<div style="text-align: left; white-space: pre-wrap;">${e.message}</div>`, "SYSTEM HALT"); 
+                const friendlyMsg = (window.PteroAPI && PteroAPI.formatError) ? PteroAPI.formatError(e) : (e?.message || 'Terjadi kesalahan saat membuat server.');
+                const finalMsg = rolledBack
+                    ? `${friendlyMsg}\n\n(Catatan: Akun panel sementara otomatis dibatalkan karena server gagal dibuat, sehingga username "${username}" tetap bisa Anda pakai lagi nanti.)`
+                    : friendlyMsg;
+                const judul = (window.PteroAPI && PteroAPI.getErrorTitle) ? PteroAPI.getErrorTitle(friendlyMsg) : 'Gagal Membuat Server';
+                showAiAlert(`<div style="text-align: left; white-space: pre-wrap; line-height: 1.55;">${escapeHtml(finalMsg)}</div>`, judul); 
             }
         }
 
