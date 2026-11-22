@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="600" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0b152c"/>
+      <stop offset="55%" stop-color="#060b1a"/>
+      <stop offset="100%" stop-color="#0c1126"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="25%" cy="25%" r="55%">
+      <stop offset="0%" stop-color="#5eead4" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#5eead4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="80%" cy="75%" r="55%">
+      <stop offset="0%" stop-color="#818cf8" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#818cf8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="brd" x1="230" y1="76" x2="370" y2="216" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5eead4"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#f472b6"/>
+    </linearGradient>
+    <linearGradient id="topZ" x1="262" y1="108" x2="336" y2="160" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5eead4"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <linearGradient id="botZ" x1="264" y1="130" x2="338" y2="182" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#f472b6"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="600" height="360" fill="url(#bg)"/>
+  <rect width="600" height="360" fill="url(#grid)"/>
+  <rect width="600" height="360" fill="url(#glow1)"/>
+  <rect width="600" height="360" fill="url(#glow2)"/>
+  <rect x="240" y="84" width="120" height="120" rx="30" fill="#080f22" stroke="url(#brd)" stroke-width="2.4"/>
+  <path d="M 276 116 H 322 C 327.6 116 331.4 119.8 330.2 125.2 L 299.8 155.6 C 298.4 157 296.4 157.8 294.4 157.8 H 286.8 C 284.4 157.8 283 155.2 284.4 153.2 L 312.2 129.2 H 276 C 272.6 129.2 270 126.6 270 123.2 V 122 C 270 118.6 272.6 116 276 116 Z" fill="url(#topZ)"/>
+  <path d="M 324 172 H 278 C 272.4 172 268.6 168.2 269.8 162.8 L 300.2 132.4 C 301.6 131 303.6 130.2 305.6 130.2 H 313.2 C 315.6 130.2 317 132.8 315.6 134.8 L 287.8 158.8 H 324 C 327.4 158.8 330 161.4 330 164.8 V 166 C 330 169.4 327.4 172 324 172 Z" fill="url(#botZ)"/>
+  <circle cx="300" cy="144" r="4" fill="#ffffff"/>
+  <text x="300" y="246" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="22" font-weight="800" fill="#e9eeff" letter-spacing="-0.4">Zeroix<tspan fill="#5eead4">Dark</tspan> Panel</text>
+  <text x="300" y="274" text-anchor="middle" font-family="monospace" font-size="13" fill="#8d97b8" letter-spacing="1.2">DEPLOY OTOMATIS 24/7</text>
+</svg>

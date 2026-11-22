@@ -46,6 +46,15 @@
     if (window.__zxLoader) return;
     window.__zxLoader = true;
 
+    // Daftarkan PWA Service Worker sekali saja (tidak menghalangi Lite Mode)
+    try {
+        if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/sw.js').catch(function () {});
+            }, { once: true });
+        }
+    } catch (e) {}
+
     const MIN_SHOW = 450; // ms minimal animasi tampil (ringan & responsif)
     const MAX_SHOW = 4500; // ms batas aman kalau event load tidak kunjung datang
     const reduce = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)

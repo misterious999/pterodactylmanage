@@ -1005,21 +1005,26 @@ async function handlePayment(pathname, request, env, cors) {
             const amount = parseInt(product?.harga);
             if (!product || !(amount > 0)) return reply('Produk tidak ditemukan', 404, cors);
 
-            // Cek ketersediaan port node sebelum membuat tagihan QRIS agar pembeli tidak bayar saat penuh
+            // Cek ketersediaan & kesehatan node sebelum membuat tagihan QRIS agar pembeli tidak bayar saat penuh / offline
             const spec = jenisProduk(product);
             if (spec?.type === 'panel') {
                 const panel = PANELS[spec.mode];
                 const apiKey = panel && env[panel.key];
-                if (panel && apiKey) {
-                    try {
-                        const free = await Promise.race([
-                            countFreeAllocations(panel, apiKey, DEPLOY.locationId, true),
-                            new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 4000)),
-                        ]);
-                        if (free === 0) {
-                            return reply(`Maaf, server ${spec.mode.replace('_', ' ').toUpperCase()} saat ini sedang penuh dan semua slot server sudah terpakai. Pembayaran belum dibuat — silakan pilih paket di tipe panel lain (Private / Public / Public V2) atau hubungi Admin.`, 503, cors);
-                        }
-                    } catch {}
+                const modeName = spec.mode.replace('_', ' ').toUpperCase();
+                if (!panel || !apiKey) {
+                    return reply(`Maaf, server ${modeName} sedang tidak tersedia saat ini. Pembayaran belum dibuat — silakan pilih tipe panel lain atau hubungi Admin.`, 503, cors);
+                }
+                let free = 0;
+                try {
+                    free = await Promise.race([
+                        countFreeAllocations(panel, apiKey, DEPLOY.locationId, true),
+                        new Promise((_, rej) => setTimeout(() => rej(new Error('node_timeout')), 4500)),
+                    ]);
+                } catch {
+                    return reply(`Maaf, server ${modeName} sedang maintenance / tidak dapat dihubungi saat ini. Pembayaran QRIS belum dibuat agar dana Anda aman — silakan pilih tipe panel lain (Public / Public V2) atau hubungi Admin.`, 503, cors);
+                }
+                if (free === 0) {
+                    return reply(`Maaf, server ${modeName} saat ini sedang penuh dan semua slot server sudah terpakai. Pembayaran belum dibuat — silakan pilih paket di tipe panel lain (Private / Public / Public V2) atau hubungi Admin.`, 503, cors);
                 }
             }
 

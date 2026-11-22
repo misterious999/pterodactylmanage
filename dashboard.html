@@ -943,9 +943,13 @@
 
     <script>
         // Tarik Nomor WA Admin dari database (Untuk tombol perpanjang lisensi)
-        let adminWaNumber = "62895416479539"; 
+        let adminWaNumber = (window.GlobalConfig && GlobalConfig.getDefaultWhatsapp) ? GlobalConfig.getDefaultWhatsapp() : "62895416479539"; 
         database.ref('store_settings/whatsapp').once('value').then(snap => {
-            if(snap.exists()) adminWaNumber = snap.val();
+            const raw = snap.exists() ? snap.val() : '';
+            const norm = (window.GlobalConfig && GlobalConfig.normalizeWhatsapp)
+                ? GlobalConfig.normalizeWhatsapp(raw)
+                : String(raw || '').replace(/\D/g, '').replace(/^0/, '62');
+            if (norm) adminWaNumber = norm;
         });
 
         (function userExpiryGuard(){

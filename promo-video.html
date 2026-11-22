@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZeroixDark — Promo Video</title>
+    <meta name="description" content="Tonton video promo interaktif ZeroixDark Marketplace: panel Pterodactyl Private, Public &amp; Public V2 dengan aktivasi QRIS otomatis 24/7.">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#060b1a">
+    <link rel="canonical" href="https://zeroixdarkmarket.web.id/promo-video">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=9.4">
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png?v=9.4">
+    <link rel="apple-touch-icon" href="/favicon-512.png?v=9.4">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ZeroixDark">
+    <meta property="og:locale" content="id_ID">
+    <meta property="og:title" content="ZeroixDark — Video Promo Aktivasi Panel Otomatis 24/7">
+    <meta property="og:description" content="Beli panel server &amp; akun reseller via QRIS, langsung deploy otomatis dalam hitungan detik.">
+    <meta property="og:url" content="https://zeroixdarkmarket.web.id/promo-video">
+    <meta property="og:image" content="https://zeroixdarkmarket.web.id/og-cover.png?v=9.4">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ZeroixDark — Video Promo Aktivasi Panel Otomatis">
+    <meta name="twitter:description" content="Beli panel server &amp; akun reseller via QRIS, langsung deploy otomatis dalam hitungan detik.">
+    <meta name="twitter:image" content="https://zeroixdarkmarket.web.id/og-cover.png?v=9.4">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -1118,11 +1137,21 @@
             console.warn('Recording cancelled or not supported:', err);
             setRecordingUI(false);
             stopRecTimer();
-            // Show user-friendly alert for common cases
+            // Show user-friendly notice without blocking browser alert()
             if (err.name === 'NotAllowedError') {
-                alert('⚠️ Izin perekaman ditolak.\n\nPilih tab ini saat diminta untuk merekam.');
+                if (typeof window.beritahu === 'function') {
+                    beritahu({ judul: 'Izin Perekaman Ditolak', pesan: 'Pilih tab ini saat browser meminta izin berbagi layar untuk merekam video promo.', tipe: 'info' });
+                } else {
+                    dlLabel.textContent = 'Izin Ditolak';
+                    setTimeout(() => { dlLabel.textContent = 'Download Video'; }, 2500);
+                }
             } else if (err.name === 'NotSupportedError') {
-                alert('⚠️ Browser ini belum mendukung perekaman layar.\n\nGunakan Chrome/Edge versi terbaru di desktop.');
+                if (typeof window.beritahu === 'function') {
+                    beritahu({ judul: 'Browser Belum Mendukung', pesan: 'Fitur rekam layar tersedia di browser desktop seperti Chrome atau Edge versi terbaru.', tipe: 'info' });
+                } else {
+                    dlLabel.textContent = 'Khusus Desktop';
+                    setTimeout(() => { dlLabel.textContent = 'Download Video'; }, 2500);
+                }
             }
         }
     }
@@ -1142,6 +1171,14 @@
     }, 300);
 
 })();
+</script>
+<script src="ui-confirm.js?v=76"></script>
+<script>
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js').catch(function () {});
+        }, { once: true });
+    }
 </script>
 </body>
 </html>

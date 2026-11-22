@@ -1666,9 +1666,12 @@
             el.classList.add('wa-on');
         });
     }
-    applyWaLinks('62895416479539');
+    const defaultWa = (window.GlobalConfig && GlobalConfig.getDefaultWhatsapp) ? GlobalConfig.getDefaultWhatsapp() : '62895416479539';
+    applyWaLinks(defaultWa);
     getJson('store_settings/whatsapp').then(function (nomor) {
-        nomor = String(nomor == null ? '' : nomor).replace(/\D/g, '');
+        nomor = (window.GlobalConfig && GlobalConfig.normalizeWhatsapp)
+            ? GlobalConfig.normalizeWhatsapp(nomor)
+            : String(nomor == null ? '' : nomor).replace(/\D/g, '').replace(/^0/, '62');
         if (nomor) applyWaLinks(nomor);
     });
 

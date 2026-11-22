@@ -85,6 +85,14 @@ const GlobalConfig = {
         return attempt(0);
     },
 
+    // Nomor WhatsApp fallback tunggal jika store_settings/whatsapp di DB belum disetel
+    getDefaultWhatsapp: () => "62895416479539",
+
+    normalizeWhatsapp: (raw) => {
+        const d = String(raw == null ? '' : raw).replace(/\D/g, '');
+        return d ? d.replace(/^0/, '62') : '';
+    },
+
     getFirebaseUrl: () => "https://cobaaja-ac5d0-default-rtdb.firebaseio.com",
     
     // Domain dipastikan bersih dari https://

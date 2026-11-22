@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="https://zeroixdarkmarket.web.id/login">
     <meta name="theme-color" content="#060b1a">
     <title>Login Panel &amp; Control Center — ZeroixDark</title>
     <meta name="description" content="Masuk ke ZeroixDark Control Center untuk mengelola server Pterodactyl, lisensi panel, dan jaringan reseller Anda.">
@@ -610,14 +611,18 @@
     <script src="config.js?v=76"></script>
     <script src="db-bridge.js?v=76"></script>
     <script>
-        const DEFAULT_WA_ADMIN = '62895416479539';
+        const DEFAULT_WA_ADMIN = (typeof GlobalConfig !== 'undefined' && GlobalConfig.getDefaultWhatsapp)
+            ? GlobalConfig.getDefaultWhatsapp()
+            : '62895416479539';
         let adminWaNumber = DEFAULT_WA_ADMIN;
 
         if (typeof GlobalConfig !== 'undefined' && GlobalConfig.workerFetch) {
             GlobalConfig.workerFetch('/db/store_settings/whatsapp')
                 .then((r) => (r.ok ? r.json() : null))
                 .then((nomor) => {
-                    const bersih = String(nomor == null ? '' : nomor).replace(/\D/g, '');
+                    const bersih = GlobalConfig.normalizeWhatsapp
+                        ? GlobalConfig.normalizeWhatsapp(nomor)
+                        : String(nomor == null ? '' : nomor).replace(/\D/g, '').replace(/^0/, '62');
                     if (bersih) adminWaNumber = bersih;
                 })
                 .catch(() => {});

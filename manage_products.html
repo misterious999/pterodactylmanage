@@ -129,6 +129,7 @@
                     <label>Nomor WhatsApp Pembayaran</label>
                     <input type="text" id="storeWhatsapp" placeholder="Contoh: 628123456789 (Gunakan 62)">
                     <p style="font-size: 10px; color: var(--text-sub); margin-top: 6px;">Otomatis mengubah tujuan order pada halaman Store pelanggan.</p>
+                    <p id="waDbStatusHint" style="display:none; font-size: 11px; color: var(--warning); margin-top: 4px; font-weight: 600;">Belum tersimpan di database — klik "Simpan Konfigurasi" sekali agar nomor WhatsApp tersinkron penuh.</p>
                 </div>
                 <div class="form-group">
                     <label>Kategori Produk (Pisahkan Koma)</label>
@@ -198,8 +199,11 @@
                     </div>
 
                     <div class="form-group full-width">
-                        <label>Media Produk (URL Gambar atau Upload via Worker)</label>
-                        <input type="url" id="urlGambar" placeholder="Tempel URL gambar https://... (opsional)" autocomplete="off" style="margin-bottom: 10px;">
+                        <label>Media Produk (URL Gambar, Artwork Lokal, atau Upload via Worker)</label>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 10px;">
+                            <input type="text" id="urlGambar" placeholder="Tempel URL gambar https://... atau /default-product.svg" autocomplete="off" style="flex:1; min-width:220px;">
+                            <button type="button" onclick="const u=document.getElementById('urlGambar'); u.value='/default-product.svg'; u.dispatchEvent(new Event('input'));" style="padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:rgba(94,234,212,0.1); color:var(--primary); font-size:12px; font-weight:700; cursor:pointer;">Pakai Artwork Lokal</button>
+                        </div>
                         <input type="file" id="fileGambar" accept="image/*">
                         <div class="image-preview-container">
                             <img id="previewGambar" src="" alt="Preview">
@@ -338,10 +342,17 @@
         database.ref('store_settings').on('value', (snap) => {
             let settings = snap.val() || {};
             let catString = settings.categories || "Panel Pterodactyl, Sewa Server, Script & Bot";
-            let waNumber = settings.whatsapp || "62895416479539";
+            let rawWa = String(settings.whatsapp || '').trim();
+            let waNumber = (window.GlobalConfig && GlobalConfig.normalizeWhatsapp)
+                ? (GlobalConfig.normalizeWhatsapp(rawWa) || GlobalConfig.getDefaultWhatsapp())
+                : (rawWa.replace(/\D/g, '') || "62895416479539");
             
             document.getElementById('storeCategories').value = catString; 
             document.getElementById('storeWhatsapp').value = waNumber;
+            const waWarn = document.getElementById('waDbStatusHint');
+            if (waWarn) {
+                waWarn.style.display = rawWa ? 'none' : 'block';
+            }
             
             currentCategories = catString.split(',').map(s => s.trim()).filter(s => s);
             const datalist = document.getElementById('kategoriList');
@@ -357,10 +368,16 @@
 
         window.simpanPengaturanToko = function() {
             let cats = document.getElementById('storeCategories').value.trim();
-            let wa = document.getElementById('storeWhatsapp').value.trim();
+            let rawWa = document.getElementById('storeWhatsapp').value.trim();
+            let wa = (window.GlobalConfig && GlobalConfig.normalizeWhatsapp)
+                ? GlobalConfig.normalizeWhatsapp(rawWa)
+                : rawWa.replace(/\D/g, '').replace(/^0/, '62');
             
             if(!cats) cats = "Panel Pterodactyl, Sewa Server, Script & Bot"; 
-            if(!wa) wa = "62895416479539";
+            if(!wa || wa.length < 9) {
+                wa = (window.GlobalConfig && GlobalConfig.getDefaultWhatsapp) ? GlobalConfig.getDefaultWhatsapp() : "62895416479539";
+            }
+            document.getElementById('storeWhatsapp').value = wa;
             
             database.ref('store_settings').update({ categories: cats, whatsapp: wa }).then(() => {
                 openSysModal('success', 'KONFIGURASI TERSIMPAN', 'Data nomor WhatsApp dan arsitektur kategori telah diperbarui pada sistem etalase publik.');
@@ -374,7 +391,7 @@
             const val = this.value.trim();
             const previewImg = document.getElementById('previewGambar');
             const previewTeks = document.getElementById('previewTeks');
-            if (/^https?:\/\//i.test(val)) {
+            if (/^https?:\/\//i.test(val) || /^\/[a-zA-Z0-9_.-]+\.(svg|png|jpe?g|webp)$/i.test(val)) {
                 fotoDataFinal = val;
                 previewImg.src = val;
                 previewImg.style.display = 'block';
