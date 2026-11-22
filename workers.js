@@ -128,6 +128,30 @@ async function signSession(env, sess) {
     return `v1.${payload}.${await hmacHex(env, payload)}`;
 }
 
+async function pendingAesKey(env, usage) {
+    const secret = env.AUTH_SECRET || env.FIREBASE_SECRET || env.RAFLYSHOP_PAY_KEY || '';
+    if (!secret) throw new Error('AUTH_SECRET belum diisi di Cloudflare Worker');
+    const digest = await crypto.subtle.digest('SHA-256', txtEnc.encode('pending:' + secret));
+    return crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, [usage]);
+}
+
+async function encryptPendingInput(env, data) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await pendingAesKey(env, 'encrypt');
+    const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, txtEnc.encode(JSON.stringify(data)));
+    return `${b64url(iv)}.${b64url(new Uint8Array(cipher))}`;
+}
+
+async function decryptPendingInput(env, token) {
+    if (!token || typeof token !== 'string' || !token.includes('.')) return null;
+    const [ivPart, dataPart] = token.split('.');
+    try {
+        const key = await pendingAesKey(env, 'decrypt');
+        const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64url(ivPart) }, key, fromB64url(dataPart));
+        return JSON.parse(new TextDecoder().decode(plain));
+    } catch { return null; }
+}
+
 async function verifySession(env, request) {
     const m = (request.headers.get('Authorization') || '').match(/^Bearer v1\.([A-Za-z0-9_-]+)\.([0-9a-f]{64})$/);
     if (!m) return null;
@@ -991,6 +1015,7 @@ async function handlePayment(pathname, request, env, cors) {
                 status,
                 orderType: order.orderType || 'new',
                 renewTarget: order.renewTarget || null,
+                hasPrefill: Boolean(order.pendingData),
                 createdAt: order.createdAt || null,
                 expires_at: order.expiresAt || null,
                 panel: null,
@@ -1005,8 +1030,21 @@ async function handlePayment(pathname, request, env, cors) {
             const amount = parseInt(product?.harga);
             if (!product || !(amount > 0)) return reply('Produk tidak ditemukan', 404, cors);
 
-            // Cek ketersediaan & kesehatan node sebelum membuat tagihan QRIS agar pembeli tidak bayar saat penuh / offline
+            // Validasi data panel & cek username + kapasitas node sebelum membuat tagihan QRIS
             const spec = jenisProduk(product);
+            let prefillClean = null;
+            if (spec && input.prefill && typeof input.prefill === 'object') {
+                prefillClean = validateProvisionFields(spec, input.prefill);
+            }
+
+            if (spec?.type === 'role' && prefillClean) {
+                const users = await firebaseRest(env, 'users') || {};
+                const dipakai = Object.values(users).some(u => String(u?.username || '').trim().toLowerCase() === prefillClean.username);
+                if (dipakai) {
+                    return reply(`Username "${prefillClean.username}" sudah digunakan oleh pengguna lain. Silakan pilih username lain sebelum lanjut ke pembayaran QRIS.`, 409, cors);
+                }
+            }
+
             if (spec?.type === 'panel') {
                 const panel = PANELS[spec.mode];
                 const apiKey = panel && env[panel.key];
@@ -1014,17 +1052,29 @@ async function handlePayment(pathname, request, env, cors) {
                 if (!panel || !apiKey) {
                     return reply(`Maaf, server ${modeName} sedang tidak tersedia saat ini. Pembayaran belum dibuat — silakan pilih tipe panel lain atau hubungi Admin.`, 503, cors);
                 }
+                const ptero = pteroClient(panel, apiKey);
                 let free = 0;
+                let existingUsers = null;
                 try {
-                    free = await Promise.race([
-                        countFreeAllocations(panel, apiKey, DEPLOY.locationId, true),
+                    const checks = [countFreeAllocations(panel, apiKey, DEPLOY.locationId, true)];
+                    if (prefillClean) {
+                        checks.push(ptero(`/users?filter[username]=${encodeURIComponent(prefillClean.username)}`));
+                    }
+                    const [freeRes, userRes] = await Promise.race([
+                        Promise.all(checks),
                         new Promise((_, rej) => setTimeout(() => rej(new Error('node_timeout')), 4500)),
                     ]);
-                } catch {
+                    free = freeRes;
+                    existingUsers = userRes;
+                } catch (e) {
+                    if (e instanceof PayError && e.status === 409) return reply(e.message, 409, cors);
                     return reply(`Maaf, server ${modeName} sedang maintenance / tidak dapat dihubungi saat ini. Pembayaran QRIS belum dibuat agar dana Anda aman — silakan pilih tipe panel lain (Public / Public V2) atau hubungi Admin.`, 503, cors);
                 }
                 if (free === 0) {
                     return reply(`Maaf, server ${modeName} saat ini sedang penuh dan semua slot server sudah terpakai. Pembayaran belum dibuat — silakan pilih paket di tipe panel lain (Private / Public / Public V2) atau hubungi Admin.`, 503, cors);
+                }
+                if (prefillClean && existingUsers?.data?.some(u => String(u.attributes?.username || '').toLowerCase() === prefillClean.username)) {
+                    return reply(`Username "${prefillClean.username}" sudah digunakan oleh pengguna lain. Silakan ganti ke username lain sebelum lanjut ke pembayaran QRIS.`, 409, cors);
                 }
             }
 
@@ -1043,6 +1093,9 @@ async function handlePayment(pathname, request, env, cors) {
                 createdAt: Date.now(),
                 sig: await signOrder(env, nexId, productId, data.amount),
             };
+            if (prefillClean) {
+                order.pendingData = await encryptPendingInput(env, prefillClean);
+            }
             await firebaseRest(env, `store_orders/${nexId}`, 'PUT', order);
             return ok200({
                 nexpay_transaction_id: nexId,
@@ -1050,6 +1103,7 @@ async function handlePayment(pathname, request, env, cors) {
                 productName: order.productName,
                 amount: order.amount,
                 status: order.status,
+                hasPrefill: Boolean(prefillClean),
                 qr_string: data.qr_string,
                 qr_image: data.qr_image, // URL gambar QR (.jpg) dari gateway
                 expires_at: order.expiresAt,
@@ -1227,6 +1281,32 @@ function jenisProduk(p) {
     return null;
 }
 
+function validateProvisionFields(spec, rawInput) {
+    const username = String(rawInput?.username || '').trim().toLowerCase();
+    const password = String(rawInput?.password || '');
+    const serverName = String(rawInput?.serverName || '').trim();
+    const phone = String(rawInput?.phone || '').replace(/\D/g, '');
+    const eggId = parseInt(rawInput?.eggId, 10);
+    if (!/^[a-z0-9][a-z0-9_.-]{2,29}$/.test(username)) {
+        throw new PayError('Username harus 3–30 karakter: huruf kecil, angka, titik, strip (-), atau underscore (_).', 400);
+    }
+    if (password.length < 8 || password.length > 72) {
+        throw new PayError('Password minimal 8 karakter (maksimal 72 karakter).', 400);
+    }
+    if (!/^\d{9,15}$/.test(phone)) {
+        throw new PayError('Nomor WhatsApp tidak valid (gunakan 9–15 digit angka, contoh: 081234567890).', 400);
+    }
+    if (spec?.type === 'panel') {
+        if (!serverName || serverName.length > 50) {
+            throw new PayError('Nama server wajib diisi (maksimal 50 karakter).', 400);
+        }
+        if (!EGG_IMAGES[eggId]) {
+            throw new PayError('Lingkungan server tidak valid.', 400);
+        }
+    }
+    return { username, password, serverName, phone, eggId };
+}
+
 // Akun login website (sama dengan buatAkunWeb() di manage_panel_users.html), author "admin", aktif PANEL_DAYS hari
 async function buatAkunWebsite(env, nexId, order, jenis, { username, password, phone }) {
     const users = await firebaseRest(env, 'users') || {};
@@ -1266,6 +1346,7 @@ async function buatAkunWebsite(env, nexId, order, jenis, { username, password, p
     try {
         await firebaseRest(env, '', 'PATCH', {
             [`store_orders/${nexId}/provision`]: { status: 'done', ...result },
+            [`store_orders/${nexId}/pendingData`]: null,
             [`activity_logs/store_${createdAt}`]: { uid: 'system', username: 'Toko Otomatis', role: 'system', action: pesan, timestamp: createdAt },
             [`notifikasi/${createdAt}_toko`]: { tipe: 'toko', pesan, maker: PANEL_AUTHOR, timestamp: createdAt },
         });
@@ -1346,17 +1427,7 @@ async function claimProvision(env, nexId) {
 }
 
 async function provisionPanel(env, nexId, order, input) {
-    // 1. Validasi input pembeli
-    const username = String(input.username || '').trim().toLowerCase();
-    const password = String(input.password || '');
-    const serverName = String(input.serverName || '').trim();
-    const phone = String(input.phone || '').replace(/\D/g, '');
-    const eggId = parseInt(input.eggId);
-    if (!/^[a-z0-9][a-z0-9_.-]{2,29}$/.test(username)) throw new PayError('Username 3-30 karakter: huruf kecil, angka, titik, strip, atau underscore.');
-    if (password.length < 8 || password.length > 72) throw new PayError('Password minimal 8 karakter.');
-    if (!/^\d{9,15}$/.test(phone)) throw new PayError('Nomor telepon tidak valid.');
-
-    // 2. Order harus asli dari Worker ini dan produknya bisa diproses otomatis
+    // 1. Order harus asli dari Worker ini dan produknya bisa diproses otomatis
     if (!order.sig || order.sig !== await signOrder(env, nexId, order.productId, order.amount)) {
         throw new PayError('Order tidak valid.', 403);
     }
@@ -1364,13 +1435,19 @@ async function provisionPanel(env, nexId, order, input) {
     const spec = jenisProduk(product);
     if (!spec) throw new PayError('Produk ini tidak bisa diproses otomatis. Hubungi admin.', 400);
     const panel = spec.type === 'panel' ? PANELS[spec.mode] : null;
-    if (spec.type === 'panel') {
-        if (!serverName || serverName.length > 50) throw new PayError('Nama server wajib diisi (maks. 50 karakter).');
-        if (!EGG_IMAGES[eggId]) throw new PayError('Lingkungan server tidak valid.');
-        if (!panel) throw new PayError('Panel untuk produk ini tidak dikenal. Hubungi admin.', 400);
+    if (spec.type === 'panel' && !panel) {
+        throw new PayError('Panel untuk produk ini tidak dikenal. Hubungi admin.', 400);
     }
     const apiKey = panel && env[panel.key];
     if (panel && !apiKey) throw new PayError('Panel API key not configured in Worker', 500);
+
+    // 2. Ambil & validasi input (langsung dari client atau fallback dari encrypted pendingData sebelum QRIS)
+    let rawInput = input;
+    if ((!rawInput?.username || !rawInput?.password) && order.pendingData) {
+        const decrypted = await decryptPendingInput(env, order.pendingData);
+        if (decrypted) rawInput = decrypted;
+    }
+    const { username, password, serverName, phone, eggId } = validateProvisionFields(spec, rawInput);
 
     // 3. Cek ulang ke gateway, jangan percaya status di Firebase
     const pay = await payApi(env, '/charge/status', { nexpay_transaction_id: nexId });
@@ -1469,6 +1546,7 @@ async function provisionPanel(env, nexId, order, input) {
             [`ptero_users_expired/${domainKey}/${userId}`]: { expiredAt, username, maker: PANEL_AUTHOR },
             [`store_orders/${nexId}/provision`]: { status: 'done', ...result },
             [`store_orders/${nexId}/status`]: payStatus(pay),
+            [`store_orders/${nexId}/pendingData`]: null,
             [`activity_logs/store_${createdAt}`]: { uid: 'system', username: 'Toko Otomatis', role: 'system', action: pesan, timestamp: createdAt },
             [`notifikasi/${createdAt}_toko`]: { tipe: 'toko', pesan, maker: PANEL_AUTHOR, timestamp: createdAt },
         });

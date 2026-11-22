@@ -1032,13 +1032,13 @@
     <!-- Modal Pembayaran QRIS -->
     <div class="pay-overlay" id="payModal">
         <div class="pay-box">
-            <h3>Pembayaran QRIS</h3>
+            <h3 id="payModalTitle">Pembayaran QRIS</h3>
             <div class="pay-product" id="payProduct"></div>
             <div class="pay-amount" id="payAmount"></div>
             <div class="pay-qr" id="payQr"></div>
             <div class="pay-status" id="payStatus"></div>
 
-            <!-- Form data panel, muncul setelah lunas untuk produk panel otomatis -->
+            <!-- Form data panel (Langkah 1 sebelum QRIS, dan fallback bila perlu ganti username) -->
             <div class="pay-form" id="payForm" hidden>
                 <div class="pay-spec" id="paySpec"></div>
                 <label>Username<input type="text" id="pfUsername" placeholder="huruf kecil tanpa spasi" autocomplete="off" autocapitalize="off" maxlength="30"></label>
@@ -1052,13 +1052,13 @@
                     </select>
                 </label>
                 <div class="pay-form-error" id="pfError"></div>
-                <div class="pay-actions"><button class="pay-primary" id="pfSubmit">Buat Sekarang</button></div>
+                <div class="pay-actions"><button class="pay-primary" id="pfSubmit">Lanjut ke Pembayaran QRIS</button></div>
             </div>
 
             <div class="pay-struk" id="payStruk" hidden></div>
             <div class="pay-meta" id="payMeta"></div>
             <div class="pay-actions">
-                <button class="pay-primary" id="payUnlockBtn" hidden>Kirim Bukti ke Owner, lalu Unlock Data Lengkap</button>
+                <button class="pay-primary" id="payUnlockBtn" hidden>Kirim Invoice ke Owner, lalu Unlock Data Lengkap</button>
                 <button class="pay-primary" id="payCopyBtn" hidden>Salin Data Panel</button>
                 <button class="pay-primary" id="payWaBtn" hidden>Konfirmasi via WhatsApp</button>
                 <button id="payCancelBtn" hidden>Batalkan Pembayaran</button>
@@ -1329,9 +1329,9 @@
             renderDenganFilterAktif();
         });
 
-        // --- PEMBAYARAN QRIS & RIWAYAT PESANAN (Option A: LocalStorage + Worker Pay) ---
-        // Alur: tagihan QRIS -> lunas -> (produk panel) isi data panel -> panel dibuat Worker
-        //       -> kirim bukti ke owner via WA -> data login panel ditampilkan seperti struk.
+        // --- PEMBAYARAN QRIS & RIWAYAT PESANAN (LocalStorage + Worker Pay) ---
+        // Alur: isi data lengkap -> buat QRIS -> scan & bayar -> Worker otomatis buat panel
+        //       -> kirim pesan invoice ke owner via WA -> kembali dari WA, data lengkap langsung terbuka.
         // Semua pesanan otomatis dicatat ke riwayat perangkat (Pesanan Saya) agar struk & status tidak hilang.
         const PAY_POLL_MS = 5000;
         const PAY_STORE_KEY = 'zeroixPesananAktif';
@@ -1340,6 +1340,7 @@
         const PAY_GAGAL = { cancel: 'Pembayaran dibatalkan.', cancelled: 'Pembayaran dibatalkan.', expired: 'Tagihan sudah kedaluwarsa. Silakan buat pesanan baru.' };
         const payEl = (id) => document.getElementById(id);
         let payOrder = null;   // pesanan yang sedang ditampilkan di modal
+        let payDraft = null;   // draft Langkah 1 sebelum QRIS dibuat
         let payTimer = null;
         let paySeq = 0;        // naik setiap modal dibuka/ditutup, untuk buang respons yang sudah basi
 
@@ -1528,7 +1529,14 @@
             try {
                 const found = await payRequest('lookup', { query: q, phone });
                 if (found.panel) {
-                    found.unlocked = true;
+                    const isRenew = found.panel.kind === 'renew_role' || found.panel.kind === 'renew_panel';
+                    const existing = muatRiwayatPesanan().find(x => x.nexpay_transaction_id === found.nexpay_transaction_id);
+                    if (isRenew || existing?.unlocked) found.unlocked = true;
+                    if (existing?.password && !found.password) found.password = existing.password;
+                } else {
+                    const existing = muatRiwayatPesanan().find(x => x.nexpay_transaction_id === found.nexpay_transaction_id);
+                    if (existing?.prefill && !found.prefill) found.prefill = existing.prefill;
+                    if (existing?.password && !found.password) found.password = existing.password;
                 }
                 catatRiwayatPesanan(found);
                 renderDaftarRiwayat();
@@ -1674,10 +1682,11 @@
                         </button>
                     `;
                 } else if (isLunas && specPanel(o)) {
-                    statusBadge = `<span class="history-status-badge status-badge-wait"><i class="ri-flashlight-line"></i> Siap Dibuat</span>`;
+                    const hasSavedPrefill = !!(o.prefill || o.hasPrefill);
+                    statusBadge = `<span class="history-status-badge status-badge-wait"><i class="ri-flashlight-line"></i> ${hasSavedPrefill ? 'Siap Aktifkan' : 'Siap Dibuat'}</span>`;
                     actionButtons = `
                         <button type="button" class="btn-hist-action btn-hist-primary" onclick="bukaPesananDariRiwayat('${o.nexpay_transaction_id}')">
-                            <i class="ri-edit-line"></i> Isi Data Akun
+                            <i class="${hasSavedPrefill ? 'ri-flashlight-line' : 'ri-edit-line'}"></i> ${hasSavedPrefill ? 'Buat Panel Sekarang' : 'Isi Data Akun'}
                         </button>
                     `;
                 } else if (isLunas) {
@@ -1860,6 +1869,37 @@
             box.appendChild(note);
         }
 
+        // Gambar ulang isi modal untuk Langkah 1 (Isi data sebelum QRIS)
+        function tampilkanDraft() {
+            const d = payDraft;
+            if (!d) return;
+            ['payForm', 'payStruk', 'payUnlockBtn', 'payCopyBtn', 'payWaBtn', 'payCancelBtn'].forEach(id => payEl(id).hidden = true);
+            payEl('payQr').innerHTML = '';
+            payEl('payModalTitle').innerText = d.isRole ? 'Isi Data Akun Website' : 'Isi Data Panel';
+            payEl('payProduct').innerText = d.produk.nama || 'Produk';
+            payEl('payAmount').innerText = formatRupiah(d.produk.harga);
+            payEl('payMeta').innerText = 'Tagihan QRIS akan dibuat otomatis setelah data lengkap.';
+            payEl('paySpec').innerText = d.isRole
+                ? `Akun login website\nRole ${ROLE_LABEL[d.spec.role] || d.spec.role}`
+                : `${PANEL_LABEL[d.spec.mode] || d.spec.mode} · ${d.produk.nama}\n${specLimit(d.spec)}`;
+            payEl('pfServerRow').hidden = d.isRole;
+            payEl('pfEggRow').hidden = d.isRole;
+            payEl('pfError').innerText = '';
+            payEl('pfSubmit').disabled = false;
+            payEl('pfSubmit').innerText = 'Lanjut ke Pembayaran QRIS';
+            payEl('payForm').hidden = false;
+            setPayStatus(`📝 Langkah 1 dari 3 · Lengkapi data ${d.isRole ? 'akun website' : 'panel'} Anda sebelum menampilkan kode QRIS.`);
+        }
+
+        function isiFormDariPrefill(prefill) {
+            if (!prefill) return;
+            if (prefill.username) payEl('pfUsername').value = prefill.username;
+            if (prefill.password) payEl('pfPassword').value = prefill.password;
+            if (prefill.serverName) payEl('pfServer').value = prefill.serverName;
+            if (prefill.phone) payEl('pfPhone').value = prefill.phone;
+            if (prefill.eggId) payEl('pfEgg').value = String(prefill.eggId);
+        }
+
         // Gambar ulang isi modal sesuai tahap pesanan
         function tampilkanPesanan() {
             const o = payOrder;
@@ -1873,40 +1913,71 @@
             if (o.status !== 'pending') payEl('payQr').innerHTML = '';
 
             if (o.status === 'pending') {
+                payEl('payModalTitle').innerText = 'Pembayaran QRIS';
                 renderQr(o);
                 payEl('payCancelBtn').hidden = false;
-                setPayStatus('⏳ Menunggu pembayaran...\nScan QR di atas dengan e-wallet / m-banking.');
+                const preNote = (o.prefill || o.hasPrefill)
+                    ? '⏳ Langkah 2 dari 3 · Menunggu pembayaran...\nScan QR di atas dengan e-wallet / m-banking. Website akan langsung membuat panel otomatis setelah bayar!'
+                    : '⏳ Menunggu pembayaran...\nScan QR di atas dengan e-wallet / m-banking.';
+                setPayStatus(preNote);
             } else if (o.panel && o.unlocked) {
+                const isRenew = o.panel.kind === 'renew_role' || o.panel.kind === 'renew_panel';
+                payEl('payModalTitle').innerText = isRenew ? 'Perpanjangan Aktif' : (o.panel.kind === 'role' ? 'Data Login Website' : 'Data Lengkap Panel');
                 renderStruk(o);
                 payEl('payStruk').hidden = false;
                 payEl('payCopyBtn').hidden = false;
-                const doneMsg = (o.panel.kind === 'renew_role' || o.panel.kind === 'renew_panel')
+                const doneMsg = isRenew
                     ? 'Perpanjangan masa aktif (+30 hari) berhasil diterapkan!'
-                    : `${o.panel.kind === 'role' ? 'Akun website' : 'Panel'} kamu sudah aktif. Silakan login dengan data di bawah.`;
+                    : `Terima kasih! Data lengkap ${o.panel.kind === 'role' ? 'akun website' : 'panel Pterodactyl'} kamu sudah terbuka di bawah.`;
                 setPayStatus(`✅ ${doneMsg}`, 'success');
             } else if (o.panel) {
+                payEl('payModalTitle').innerText = o.panel.kind === 'role' ? 'Akun Siap · Kirim Invoice' : 'Panel Siap · Kirim Invoice';
                 payEl('payUnlockBtn').hidden = false;
-                setPayStatus(`✅ ${o.panel.kind === 'role' ? 'Akun website' : 'Panel'} berhasil dibuat otomatis!\nKirim bukti pembayaran ke owner untuk membuka data login lengkap.`, 'success');
+                setPayStatus(`✅ Pembayaran lunas & ${o.panel.kind === 'role' ? 'akun website' : 'panel Pterodactyl'} sudah dibuat otomatis!\n\nLangkah 3 dari 3: Klik tombol di bawah untuk mengirim pesan invoice (struk) ke WhatsApp Owner agar data lengkap ${o.panel.kind === 'role' ? 'akun' : 'panel'} terbuka saat kamu kembali dari WhatsApp.`, 'success');
             } else if (PAY_LUNAS.includes(o.status) && o.orderType === 'renew') {
+                payEl('payModalTitle').innerText = 'Memperpanjang Aktif...';
                 setPayStatus('⏳ Pembayaran lunas! Memperpanjang masa aktif secara otomatis...', 'success');
                 terapkanPerpanjanganOtomatis(o);
             } else if (PAY_LUNAS.includes(o.status) && specPanel(o)) {
                 const spec = specPanel(o);
                 const isRole = spec.type === 'role';
-                payEl('paySpec').innerText = isRole
-                    ? `Akun login website\nRole ${ROLE_LABEL[spec.role] || spec.role}`
-                    : `${PANEL_LABEL[spec.mode] || spec.mode} · ${o.productName}\n${specLimit(spec)}`;
-                payEl('pfServerRow').hidden = isRole;
-                payEl('pfEggRow').hidden = isRole;
-                payEl('payForm').hidden = false;
-                setPayStatus(`✅ Pembayaran berhasil!\nIsi data ${isRole ? 'akun website' : 'panel'} di bawah, ${isRole ? 'akun' : 'panel'} akan dibuat otomatis.`, 'success');
+                if ((o.prefill || o.hasPrefill) && !o.provisionNeedsForm) {
+                    payEl('payModalTitle').innerText = isRole ? 'Membuat Akun Otomatis...' : 'Membuat Panel Otomatis...';
+                    setPayStatus(`⚡ Pembayaran QRIS berhasil!\nWebsite sedang langsung membuatkan ${isRole ? 'akun website' : 'panel Pterodactyl'} Anda... (jangan tutup halaman)`, 'success');
+                    otomatisBuatPanel(o);
+                } else {
+                    payEl('payModalTitle').innerText = isRole ? 'Lengkapi Data Akun Website' : 'Lengkapi Data Panel';
+                    payEl('paySpec').innerText = isRole
+                        ? `Akun login website\nRole ${ROLE_LABEL[spec.role] || spec.role}`
+                        : `${PANEL_LABEL[spec.mode] || spec.mode} · ${o.productName}\n${specLimit(spec)}`;
+                    payEl('pfServerRow').hidden = isRole;
+                    payEl('pfEggRow').hidden = isRole;
+                    isiFormDariPrefill(o.prefill);
+                    payEl('pfSubmit').disabled = false;
+                    payEl('pfSubmit').innerText = 'Buat Sekarang';
+                    payEl('pfError').innerText = o.provisionError || '';
+                    if (o.provisionError && /penuh|slot|kapasitas|alokasi|hubungi admin/i.test(o.provisionError)) {
+                        const waBtn = payEl('payWaBtn');
+                        waBtn.innerText = 'Hubungi Admin via WhatsApp';
+                        waBtn.hidden = false;
+                    }
+                    payEl('payForm').hidden = false;
+                    setPayStatus(o.provisionError
+                        ? `⚠️ Pembayaran Anda sudah lunas, silakan periksa atau ubah data di bawah lalu klik Buat Sekarang.`
+                        : `✅ Pembayaran berhasil!\nIsi data ${isRole ? 'akun website' : 'panel'} di bawah, ${isRole ? 'akun' : 'panel'} akan dibuat otomatis.`,
+                        o.provisionError ? '' : 'success'
+                    );
+                }
             } else if (PAY_LUNAS.includes(o.status)) {
+                payEl('payModalTitle').innerText = 'Pembayaran Lunas';
                 payEl('payWaBtn').hidden = false;
                 setPayStatus('✅ Pembayaran berhasil!\nKirim konfirmasi ke admin untuk memproses pesanan.', 'success');
             } else if (PAY_GAGAL[o.status]) {
+                payEl('payModalTitle').innerText = 'Pembayaran Dibatalkan / Kedaluwarsa';
                 setPayStatus(PAY_GAGAL[o.status], 'error');
             } else {
                 // Status yang tidak dikenal: jangan anggap gagal, biar admin yang cek
+                payEl('payModalTitle').innerText = 'Status Pembayaran';
                 payEl('payWaBtn').hidden = false;
                 setPayStatus(`Status pembayaran: ${o.status || '-'}\nHubungi admin dengan menyertakan invoice di bawah.`);
             }
@@ -1952,6 +2023,7 @@
         function bukaPesanan(order) {
             stopPolling();
             paySeq++;
+            payDraft = null;
             payOrder = order;
             payEl('payQr').innerHTML = '';
             payEl('pfError').innerText = '';
@@ -1960,9 +2032,59 @@
                 const el = payEl(id);
                 if (el) el.value = '';
             });
+            payEl('pfEgg').value = '15';
             payEl('payModal').classList.add('show');
             tampilkanPesanan();
             if (order.status === 'pending') cekStatusPembayaran();
+        }
+
+        let provisioningId = null;
+        async function otomatisBuatPanel(order) {
+            if (!order || provisioningId === order.nexpay_transaction_id) return;
+            provisioningId = order.nexpay_transaction_id;
+            const seq = paySeq;
+            try {
+                const payload = order.prefill
+                    ? { nexpay_transaction_id: order.nexpay_transaction_id, ...order.prefill }
+                    : { nexpay_transaction_id: order.nexpay_transaction_id };
+                const panel = await payRequest('provision', payload);
+
+                const savedPassword = order.password || order.prefill?.password;
+                const finalized = {
+                    ...order,
+                    panel,
+                    ...(savedPassword ? { password: savedPassword } : {}),
+                };
+                delete finalized.prefill;
+                delete finalized.provisionNeedsForm;
+                delete finalized.provisionError;
+
+                if (payOrder?.nexpay_transaction_id === order.nexpay_transaction_id) {
+                    payOrder = finalized;
+                    simpanPesanan();
+                    renderDaftarRiwayat();
+                    if (seq === paySeq) tampilkanPesanan();
+                } else {
+                    const active = muatPesanan();
+                    if (active?.nexpay_transaction_id === order.nexpay_transaction_id) {
+                        try { localStorage.setItem(PAY_STORE_KEY, JSON.stringify(finalized)); } catch (e) {}
+                    }
+                    catatRiwayatPesanan(finalized);
+                    renderDaftarRiwayat();
+                }
+            } catch (e) {
+                const msg = String(e?.message || 'Gagal membuat server otomatis. Silakan coba lagi.');
+                order.provisionNeedsForm = true;
+                order.provisionError = msg;
+                if (payOrder?.nexpay_transaction_id === order.nexpay_transaction_id) {
+                    simpanPesanan();
+                    if (seq === paySeq) tampilkanPesanan();
+                } else {
+                    catatRiwayatPesanan(order);
+                }
+            } finally {
+                if (provisioningId === order.nexpay_transaction_id) provisioningId = null;
+            }
         }
 
         let renewApplyingId = null;
@@ -2017,13 +2139,31 @@
 
             stopPolling();
             payOrder = null;
+            payDraft = null;
             const seq = ++paySeq;
+            ['pfUsername', 'pfPassword', 'pfServer', 'pfPhone'].forEach(id => {
+                const el = payEl(id);
+                if (el) el.value = '';
+            });
+            payEl('pfEgg').value = '15';
+
+            // Langkah 1: Untuk produk panel/role otomatis, minta data lengkap DULU sebelum buat QRIS
+            if (spec) {
+                payDraft = { productId, produk, spec, isRole: spec.type === 'role' };
+                tampilkanDraft();
+                payEl('payModal').classList.add('show');
+                setTimeout(() => payEl('pfUsername')?.focus(), 80);
+                return;
+            }
+
+            // Produk manual tanpa auto-deploy: langsung buat QRIS
             ['payForm', 'payStruk', 'payUnlockBtn', 'payCopyBtn', 'payWaBtn', 'payCancelBtn'].forEach(id => payEl(id).hidden = true);
+            payEl('payModalTitle').innerText = 'Pembayaran QRIS';
             payEl('payWaBtn').innerText = 'Konfirmasi via WhatsApp';
             payEl('payProduct').innerText = produk.nama || 'Produk';
             payEl('payAmount').innerText = formatRupiah(produk.harga);
             payEl('payQr').innerHTML = '';
-            payEl('payMeta').innerHTML = '';
+            payEl('payMeta').innerText = '';
             setPayStatus('Membuat tagihan QRIS...');
             payEl('payModal').classList.add('show');
 
@@ -2041,35 +2181,65 @@
             }
         };
 
-        // --- Isi data panel lalu buat otomatis ---
+        // --- Submit form: Tahap 1 buat QRIS (payDraft), atau fallback buat panel (payOrder lunas) ---
         payEl('pfSubmit').onclick = async () => {
-            if (!payOrder) return;
+            const isDraft = Boolean(payDraft && !payOrder);
+            if (!isDraft && !payOrder) return;
+
+            const isRole = isDraft ? payDraft.isRole : (specPanel(payOrder)?.type === 'role');
             const input = {
-                nexpay_transaction_id: payOrder.nexpay_transaction_id,
                 username: payEl('pfUsername').value.trim().toLowerCase(),
                 password: payEl('pfPassword').value,
                 serverName: payEl('pfServer').value.trim(),
                 phone: payEl('pfPhone').value.replace(/\D/g, ''),
-                eggId: parseInt(payEl('pfEgg').value),
+                eggId: parseInt(payEl('pfEgg').value, 10),
             };
             const err = payEl('pfError');
             if (!/^[a-z0-9][a-z0-9_.-]{2,29}$/.test(input.username)) return err.innerText = 'Username 3-30 karakter: huruf kecil, angka, titik, strip, atau underscore.';
-            if (input.password.length < 8) return err.innerText = 'Password minimal 8 karakter.';
-            const isRole = specPanel(payOrder)?.type === 'role';
+            if (input.password.length < 8 || input.password.length > 72) return err.innerText = 'Password minimal 8 karakter (maksimal 72 karakter).';
             if (!isRole && !input.serverName) return err.innerText = 'Nama server wajib diisi.';
-            if (!/^\d{9,15}$/.test(input.phone)) return err.innerText = 'Nomor WhatsApp tidak valid.';
+            if (!/^\d{9,15}$/.test(input.phone)) return err.innerText = 'Nomor WhatsApp tidak valid (9-15 digit).';
             err.innerText = '';
             payEl('payWaBtn').hidden = true;
 
             const btn = payEl('pfSubmit');
             const seq = paySeq;
             btn.disabled = true;
+
+            if (isDraft) {
+                const draftProductId = payDraft.productId;
+                btn.innerText = 'Memeriksa data & membuat QRIS...';
+                try {
+                    const data = await payRequest('create', { productId: draftProductId, prefill: input });
+                    if (seq !== paySeq) return;
+                    payDraft = null;
+                    payOrder = { ...data, productId: draftProductId, prefill: input, password: input.password };
+                    simpanPesanan();
+                    tampilkanPesanan();
+                    if (data.status === 'pending') payTimer = setTimeout(cekStatusPembayaran, PAY_POLL_MS);
+                } catch (e) {
+                    if (seq === paySeq) {
+                        const msg = String(e?.message || 'Gagal membuat tagihan QRIS. Silakan coba lagi.');
+                        err.innerText = msg;
+                        if (/username.*(sudah|digunakan|dipakai)/i.test(msg)) {
+                            payEl('pfUsername')?.focus();
+                        }
+                    }
+                    btn.disabled = false;
+                    btn.innerText = 'Lanjut ke Pembayaran QRIS';
+                }
+                return;
+            }
+
             btn.innerText = `Membuat ${isRole ? 'akun' : 'panel'}... (jangan tutup halaman)`;
             try {
-                const panel = await payRequest('provision', input);
+                const panel = await payRequest('provision', { nexpay_transaction_id: payOrder.nexpay_transaction_id, ...input });
                 if (seq !== paySeq) return;
                 payOrder.panel = panel;
                 payOrder.password = input.password; // hanya disimpan di browser pembeli sendiri
+                delete payOrder.prefill;
+                delete payOrder.provisionNeedsForm;
+                delete payOrder.provisionError;
                 simpanPesanan();
                 tampilkanPesanan();
             } catch (e) {
@@ -2090,16 +2260,36 @@
             btn.innerText = 'Buat Sekarang';
         };
 
-        // --- Kirim bukti ke owner, lalu buka data login ---
+        // --- Kirim invoice (struk) ke owner, lalu langsung buka data lengkap saat pelanggan kembali dari WhatsApp ---
         payEl('payUnlockBtn').onclick = () => {
             if (!payOrder?.panel) return;
             const p = payOrder.panel;
-            const jenis = p.kind === 'role' ? `akun website (${ROLE_LABEL[p.role] || p.role})` : 'panel';
-            bukaWa(`Halo min, saya sudah membayar via QRIS dan ${jenis} sudah dibuat otomatis.\n\n*${payOrder.productName}*\nNominal: ${formatRupiah(payOrder.amount)}\nInvoice: ${payOrder.invoice}\nID Transaksi: ${payOrder.nexpay_transaction_id}\nUsername: ${p.username}\nNomor: ${p.phone}\n\nBerikut bukti pembayaran saya:`);
+            const jenis = p.kind === 'role' ? `akun website (${ROLE_LABEL[p.role] || p.role})` : 'panel Pterodactyl';
+            const pesanInvoice =
+                `🧾 *INVOICE PEMBAYARAN & AKTIVASI PANEL*\n\n` +
+                `Produk: *${payOrder.productName}*\n` +
+                `Nominal: ${formatRupiah(payOrder.amount)}\n` +
+                `Invoice: ${payOrder.invoice}\n` +
+                `ID Transaksi: ${payOrder.nexpay_transaction_id}\n` +
+                `Username: ${p.username}\n` +
+                (p.serverName ? `Server: ${p.serverName}\n` : '') +
+                `No. WA: ${p.phone}\n` +
+                `Aktif s/d: ${tanggalWIB(p.expiredAt)}\n\n` +
+                `Halo Owner, pembayaran QRIS saya sudah lunas dan ${jenis} sudah dibuat otomatis oleh website. Berikut pesan invoice saya, terima kasih!`;
+
+            // Simpan & buka data lengkap dulu sebelum berpindah ke aplikasi WhatsApp
             payOrder.unlocked = true;
             simpanPesanan();
+            renderDaftarRiwayat();
             tampilkanPesanan();
+            bukaWa(pesanInvoice);
         };
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && payEl('payModal').classList.contains('show') && payOrder?.panel && payOrder?.unlocked) {
+                tampilkanPesanan();
+            }
+        });
 
         payEl('payCopyBtn').onclick = async () => {
             if (!payOrder?.panel) return;
@@ -2146,6 +2336,12 @@
         };
 
         payEl('payCloseBtn').onclick = async () => {
+            if (payDraft && !payOrder) {
+                payDraft = null;
+                paySeq++;
+                payEl('payModal').classList.remove('show');
+                return;
+            }
             const o = payOrder;
             if (o?.status === 'pending') {
                 const ya = await konfirmasi({
@@ -2169,6 +2365,7 @@
             }
             stopPolling();
             payOrder = null;
+            payDraft = null;
             paySeq++;
             payEl('payModal').classList.remove('show');
             updateBadgeRiwayat();
@@ -2197,6 +2394,7 @@
             if (e.key !== 'Escape') return;
             if (renewModalOverlay?.classList.contains('show')) tutupModalPerpanjang();
             else if (histModalOverlay?.classList.contains('show')) tutupModalRiwayat();
+            else if (payModalOverlay?.classList.contains('show') && payDraft && !payOrder) payEl('payCloseBtn').click();
         });
 
         // Lanjutkan pesanan tersimpan setelah data produk pertama kali termuat
