@@ -472,21 +472,32 @@
 
         /* Promo Scenes */
         #promoIntro .scene {
-            position: absolute; inset: 0;
+            position: fixed; inset: 0;
             display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
+            align-items: center; justify-content: flex-start;
             z-index: 10; opacity: 0;
             transform: scale(.92);
             transition: opacity .8s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1);
             pointer-events: none;
-            padding: 30px;
+            padding: 80px 56px 82px 30px;
             text-align: center;
+            overflow-y: auto; overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+        #promoIntro .scene-inner {
+            width: 100%; max-width: 900px;
+            margin: auto;
+            display: flex; flex-direction: column; align-items: center;
         }
         #promoIntro .scene.active {
             opacity: 1; transform: scale(1); pointer-events: auto;
         }
         #promoIntro .scene.exit {
             opacity: 0; transform: scale(1.08);
+        }
+        #promoIntro .grad {
+            background: linear-gradient(90deg, var(--a1), var(--a2), var(--a3));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
         }
 
         /* Promo Scene 1: Logo Intro */
@@ -703,7 +714,10 @@
 
         /* Top Bar Controls */
         #promoIntro .watermark {
-            position: fixed; top: 18px; left: 24px; z-index: 50;
+            position: fixed;
+            top: max(18px, env(safe-area-inset-top));
+            left: max(24px, env(safe-area-inset-left));
+            z-index: 50;
             display: flex; align-items: center; gap: 8px;
             font-weight: 800; font-size: .9rem; opacity: .85;
         }
@@ -713,8 +727,14 @@
         }
         #promoIntro .watermark span b { color: var(--a1); }
 
+        #promoIntro .top-controls {
+            position: fixed;
+            top: max(18px, env(safe-area-inset-top));
+            right: max(24px, env(safe-area-inset-right));
+            z-index: 60;
+            display: flex; align-items: center; gap: 10px;
+        }
         #promoIntro .btn-skip-intro {
-            position: fixed; top: 18px; right: 24px; z-index: 60;
             display: inline-flex; align-items: center; gap: 8px;
             padding: 10px 20px; border-radius: 14px;
             font-weight: 700; font-size: .85rem;
@@ -722,7 +742,7 @@
             color: var(--ink); border: 1px solid var(--line);
             backdrop-filter: blur(12px);
             cursor: pointer; transition: all .3s ease;
-            font-family: 'Sora', sans-serif;
+            font-family: 'Sora', sans-serif; white-space: nowrap;
         }
         #promoIntro .btn-skip-intro:hover {
             background: rgba(255, 255, 255, 0.16);
@@ -730,7 +750,6 @@
             transform: translateY(-2px);
         }
         #promoIntro .dl-btn {
-            position: fixed; top: 18px; right: 185px; z-index: 60;
             display: inline-flex; align-items: center; gap: 8px;
             padding: 10px 18px; border-radius: 14px;
             font-weight: 700; font-size: .85rem;
@@ -738,7 +757,7 @@
             color: #060b1a; border: none;
             box-shadow: 0 4px 18px rgba(94, 234, 212, .3);
             cursor: pointer; transition: all .3s ease;
-            font-family: 'Sora', sans-serif;
+            font-family: 'Sora', sans-serif; white-space: nowrap;
         }
         #promoIntro .dl-btn:hover {
             transform: translateY(-2px);
@@ -774,11 +793,10 @@
             50% { border-color: rgba(239,68,68,.2); }
         }
         #promoIntro .rec-timer {
-            position: fixed; top: 20px; right: 350px; z-index: 60;
             font-family: 'JetBrains Mono', monospace;
             font-size: .8rem; font-weight: 600;
             color: #ef4444; display: none;
-            align-items: center; gap: 6px;
+            align-items: center; gap: 6px; white-space: nowrap;
         }
         #promoIntro .rec-timer.active { display: inline-flex; }
         #promoIntro .rec-timer .blink { animation: pRecDotBlink 1s step-end infinite; }
@@ -838,7 +856,7 @@
         #promoIntro .skip-hint {
             position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
             z-index: 50; font-size: .75rem; color: var(--muted);
-            opacity: 0; animation: pFadeIn 2s 3s forwards; pointer-events: none;
+            opacity: 0; animation: pFadeIn 2s 3s forwards; pointer-events: none; text-align: center;
         }
         @keyframes pFadeIn { to { opacity: .6; } }
 
@@ -859,17 +877,96 @@
         }
 
         @media (max-width: 768px) {
-            #promoIntro .features-grid { grid-template-columns: 1fr; max-width: 360px; }
-            #promoIntro .steps-flow { flex-direction: column; align-items: center; }
-            #promoIntro .step-item { max-width: 280px; }
-            #promoIntro .price-cards { flex-direction: column; align-items: center; }
-            #promoIntro .price-card { max-width: 280px; }
-            #promoIntro .scene-dots { right: 10px; }
-            #promoIntro .scene { padding: 20px; }
-            #promoIntro .btn-skip-intro { right: 12px; top: 12px; padding: 7px 13px; font-size: .75rem; }
-            #promoIntro .dl-btn { right: 125px; top: 12px; padding: 7px 11px; font-size: .75rem; }
+            #promoIntro .scene { padding: 68px 34px 74px 14px; }
+            #promoIntro .watermark { left: 14px; font-size: .82rem; gap: 6px; }
+            #promoIntro .watermark svg { width: 24px; height: 24px; }
+            #promoIntro .top-controls { right: 12px; gap: 6px; }
+            #promoIntro .btn-skip-intro { padding: 8px 12px; font-size: .76rem; border-radius: 12px; }
+            #promoIntro .dl-btn { padding: 8px 11px; font-size: .78rem; border-radius: 12px; }
             #promoIntro .dl-btn span.dl-text { display: none; }
-            #promoIntro .rec-timer { right: 190px; top: 14px; font-size: .72rem; }
+            #promoIntro .rec-timer { font-size: .7rem; }
+
+            #promoIntro .scene-dots { right: 10px; gap: 8px; }
+            #promoIntro .scene-dot { width: 8px; height: 8px; }
+            #promoIntro .play-toggle { bottom: 14px; right: 12px; width: 40px; height: 40px; font-size: 1rem; }
+            #promoIntro .sound-wave { bottom: 18px; left: 14px; height: 16px; }
+            #promoIntro .skip-hint {
+                bottom: 16px;
+                max-width: calc(100% - 136px);
+                width: max-content;
+                font-size: .68rem;
+                line-height: 1.3;
+            }
+
+            #promoIntro .logo-container { width: 112px; height: 112px; margin-bottom: 20px; }
+            #promoIntro .logo-ring { inset: -14px; }
+            #promoIntro .logo-ring-2 { inset: -24px; }
+            #promoIntro .scene1-title { font-size: clamp(2.1rem, 10vw, 3rem); }
+            #promoIntro .scene1-sub { font-size: .88rem; margin-top: 10px; max-width: 300px; }
+
+            #promoIntro .scene2-emoji { font-size: 2.8rem; margin-bottom: 12px; }
+            #promoIntro .scene2-title { font-size: clamp(1.35rem, 6vw, 1.85rem); line-height: 1.25; }
+            #promoIntro .scene2-sub { font-size: .86rem; margin-top: 12px; }
+
+            #promoIntro .scene3-title, #promoIntro .scene4-title, #promoIntro .scene5-title {
+                font-size: clamp(1.4rem, 6vw, 1.9rem);
+                margin-bottom: 16px;
+            }
+
+            #promoIntro .features-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px; max-width: 440px;
+            }
+            #promoIntro .feature-card { padding: 14px 12px; border-radius: 16px; }
+            #promoIntro .feature-card .f-icon {
+                width: 34px; height: 34px; border-radius: 10px;
+                font-size: 1.05rem; margin-bottom: 8px;
+            }
+            #promoIntro .feature-card h3 { font-size: .84rem; line-height: 1.25; margin-bottom: 4px; }
+            #promoIntro .feature-card p { font-size: .72rem; line-height: 1.38; }
+
+            #promoIntro .steps-flow {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px; max-width: 440px;
+            }
+            #promoIntro .step-item {
+                min-width: 0; max-width: none; width: 100%;
+                padding: 14px 10px; border-radius: 16px;
+            }
+            #promoIntro .step-num {
+                width: 34px; height: 34px; border-radius: 10px;
+                font-size: .88rem; margin-bottom: 8px;
+            }
+            #promoIntro .step-item h4 { font-size: .84rem; margin-bottom: 4px; }
+            #promoIntro .step-item p { font-size: .72rem; line-height: 1.38; }
+
+            #promoIntro .price-cards {
+                flex-direction: column; align-items: stretch;
+                gap: 10px; max-width: 400px;
+            }
+            #promoIntro .price-card {
+                min-width: 0; max-width: none; width: 100%;
+                padding: 13px 15px; border-radius: 16px;
+                display: grid; grid-template-columns: 1fr auto;
+                grid-template-areas: "tag price" "title price" "desc desc";
+                align-items: center; text-align: left;
+                column-gap: 12px; row-gap: 4px;
+            }
+            #promoIntro .price-card .p-tag { grid-area: tag; justify-self: start; margin-bottom: 0; font-size: .66rem; padding: 3px 9px; }
+            #promoIntro .price-card h3 { grid-area: title; font-size: .96rem; margin: 0; }
+            #promoIntro .price-card .p-price { grid-area: price; font-size: 1.35rem; margin: 0; text-align: right; white-space: nowrap; }
+            #promoIntro .price-card .p-desc { grid-area: desc; font-size: .74rem; line-height: 1.38; margin-top: 2px; }
+
+            #promoIntro .cta-badge { font-size: .76rem; padding: 6px 14px; margin-bottom: 12px; }
+            #promoIntro .cta-title { font-size: clamp(1.65rem, 7.5vw, 2.4rem); line-height: 1.12; }
+            #promoIntro .cta-sub { font-size: .84rem; margin: 12px 0 20px; }
+            #promoIntro .cta-buttons { flex-direction: column; align-items: stretch; max-width: 300px; gap: 10px; }
+            #promoIntro .btn-cta { width: 100%; padding: 13px 20px; font-size: .9rem; }
+            #promoIntro .cta-url { margin-top: 14px; font-size: .76rem; }
+        }
+        @media (max-width: 359px) {
+            #promoIntro .features-grid, #promoIntro .steps-flow { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -919,139 +1016,153 @@
     </div>
 
     <!-- Top Action Buttons -->
-    <button type="button" class="dl-btn" id="promoDlBtn" title="Download Promo Video">
-        <span class="rec-dot"></span>
-        <i class="ri-download-2-line" id="promoDlIcon"></i>
-        <span class="dl-text" id="promoDlLabel">Download Video</span>
-    </button>
-    <button type="button" class="btn-skip-intro" id="btnSkipIntro" title="Lewati video & masuk ke landing page">
-        <span>Lewati Intro</span> <i class="ri-arrow-right-line"></i>
-    </button>
+    <div class="top-controls">
+        <div class="rec-timer" id="promoRecTimer"><span class="blink">⏺</span> REC <span id="promoRecTime">00:00</span></div>
+        <button type="button" class="dl-btn" id="promoDlBtn" title="Download Promo Video">
+            <span class="rec-dot"></span>
+            <i class="ri-download-2-line" id="promoDlIcon"></i>
+            <span class="dl-text" id="promoDlLabel">Download Video</span>
+        </button>
+        <button type="button" class="btn-skip-intro" id="btnSkipIntro" title="Lewati video &amp; masuk ke landing page">
+            <span>Lewati Intro</span> <i class="ri-arrow-right-line"></i>
+        </button>
+    </div>
     <div class="rec-overlay" id="promoRecOverlay"></div>
-    <div class="rec-timer" id="promoRecTimer"><span class="blink">⏺</span> REC <span id="promoRecTime">00:00</span></div>
 
     <!-- ===== SCENE 1: Logo Intro ===== -->
     <div class="scene" id="pScene1">
-        <div class="logo-container">
-            <div class="logo-ring"></div>
-            <div class="logo-ring logo-ring-2"></div>
-            <svg class="logo-svg" viewBox="0 0 64 64" fill="none">
-                <defs>
-                    <linearGradient id="pS1Bg" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#0c152c"/><stop offset="100%" stop-color="#050a16"/></linearGradient>
-                    <linearGradient id="pS1Brd" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#5eead4"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
-                    <linearGradient id="pS1Top" x1="16" y1="17" x2="47" y2="38"><stop offset="0%" stop-color="#5eead4"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
-                    <linearGradient id="pS1Bot" x1="17" y1="26" x2="48" y2="47"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
-                </defs>
-                <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#pS1Bg)" stroke="url(#pS1Brd)" stroke-width="2"/>
-                <path d="M 19 17.5 H 43 C 45.8 17.5 47.8 19.5 47.2 22.3 L 31.2 38.3 C 30.5 39 29.5 39.4 28.5 39.4 H 24.5 C 23.3 39.4 22.6 38.1 23.3 37.1 L 37.8 24.5 H 19 C 17.3 24.5 16 23.2 16 21.5 V 20.5 C 16 18.8 17.3 17.5 19 17.5 Z" fill="url(#pS1Top)"/>
-                <path d="M 45 46.5 H 21 C 18.2 46.5 16.2 44.5 16.8 41.7 L 32.8 25.7 C 33.5 25 34.5 24.6 35.5 24.6 H 39.5 C 40.7 24.6 41.4 25.9 40.7 26.9 L 26.2 39.5 H 45 C 46.7 39.5 48 40.8 48 42.5 V 43.5 C 48 45.2 46.7 46.5 45 46.5 Z" fill="url(#pS1Bot)"/>
-                <circle cx="32" cy="32" r="3" fill="#fff"/>
-            </svg>
+        <div class="scene-inner">
+            <div class="logo-container">
+                <div class="logo-ring"></div>
+                <div class="logo-ring logo-ring-2"></div>
+                <svg class="logo-svg" viewBox="0 0 64 64" fill="none">
+                    <defs>
+                        <linearGradient id="pS1Bg" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#0c152c"/><stop offset="100%" stop-color="#050a16"/></linearGradient>
+                        <linearGradient id="pS1Brd" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#5eead4"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+                        <linearGradient id="pS1Top" x1="16" y1="17" x2="47" y2="38"><stop offset="0%" stop-color="#5eead4"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+                        <linearGradient id="pS1Bot" x1="17" y1="26" x2="48" y2="47"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+                    </defs>
+                    <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#pS1Bg)" stroke="url(#pS1Brd)" stroke-width="2"/>
+                    <path d="M 19 17.5 H 43 C 45.8 17.5 47.8 19.5 47.2 22.3 L 31.2 38.3 C 30.5 39 29.5 39.4 28.5 39.4 H 24.5 C 23.3 39.4 22.6 38.1 23.3 37.1 L 37.8 24.5 H 19 C 17.3 24.5 16 23.2 16 21.5 V 20.5 C 16 18.8 17.3 17.5 19 17.5 Z" fill="url(#pS1Top)"/>
+                    <path d="M 45 46.5 H 21 C 18.2 46.5 16.2 44.5 16.8 41.7 L 32.8 25.7 C 33.5 25 34.5 24.6 35.5 24.6 H 39.5 C 40.7 24.6 41.4 25.9 40.7 26.9 L 26.2 39.5 H 45 C 46.7 39.5 48 40.8 48 42.5 V 43.5 C 48 45.2 46.7 46.5 45 46.5 Z" fill="url(#pS1Bot)"/>
+                    <circle cx="32" cy="32" r="3" fill="#fff"/>
+                </svg>
+            </div>
+            <div class="scene1-title">Zeroix<b>Dark</b></div>
+            <div class="scene1-sub">Panel Server Premium — Aktivasi Otomatis 24/7</div>
         </div>
-        <div class="scene1-title">Zeroix<b>Dark</b></div>
-        <div class="scene1-sub">Panel Server Premium — Aktivasi Otomatis 24/7</div>
     </div>
 
     <!-- ===== SCENE 2: Problem ===== -->
     <div class="scene" id="pScene2">
-        <div class="scene2-emoji">😩</div>
-        <div class="scene2-title">Masih <span class="hl">Nunggu Admin</span> Buat Aktifin Server?</div>
-        <div class="scene2-sub">Pesan server, transfer manual, nunggu berjam-jam... Itu cara lama. Saatnya upgrade ke cara yang lebih cerdas.</div>
+        <div class="scene-inner">
+            <div class="scene2-emoji">😩</div>
+            <div class="scene2-title">Masih <span class="hl">Nunggu Admin</span> Buat Aktifin Server?</div>
+            <div class="scene2-sub">Pesan server, transfer manual, nunggu berjam-jam... Itu cara lama. Saatnya upgrade ke cara yang lebih cerdas.</div>
+        </div>
     </div>
 
     <!-- ===== SCENE 3: Features ===== -->
     <div class="scene" id="pScene3">
-        <div class="scene3-title">Kenapa <span class="grad">ZeroixDark</span>?</div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="f-icon"><i class="ri-flashlight-line"></i></div>
-                <h3>Aktivasi &lt; 1 Menit</h3>
-                <p>Bayar → Server langsung deploy otomatis detik itu juga tanpa antre.</p>
-            </div>
-            <div class="feature-card">
-                <div class="f-icon"><i class="ri-qr-code-line"></i></div>
-                <h3>QRIS Universal</h3>
-                <p>Scan satu QR untuk semua bank &amp; e-wallet (GoPay, OVO, DANA, BCA).</p>
-            </div>
-            <div class="feature-card">
-                <div class="f-icon"><i class="ri-shield-check-line"></i></div>
-                <h3>Keamanan Enterprise</h3>
-                <p>Enkripsi PBKDF2-SHA256 dengan salt unik. Data kamu terlindungi aman.</p>
-            </div>
-            <div class="feature-card">
-                <div class="f-icon"><i class="ri-24-hours-line"></i></div>
-                <h3>Uptime 99.9%</h3>
-                <p>Anti-DDoS filter &amp; Cloudflare Edge. Bot online 24/7 tanpa kompromi.</p>
+        <div class="scene-inner">
+            <div class="scene3-title">Kenapa <span class="grad">ZeroixDark</span>?</div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="f-icon"><i class="ri-flashlight-line"></i></div>
+                    <h3>Aktivasi &lt; 1 Menit</h3>
+                    <p>Bayar → Server langsung deploy otomatis detik itu juga tanpa antre.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="f-icon"><i class="ri-qr-code-line"></i></div>
+                    <h3>QRIS Universal</h3>
+                    <p>Scan satu QR untuk semua bank &amp; e-wallet (GoPay, OVO, DANA, BCA).</p>
+                </div>
+                <div class="feature-card">
+                    <div class="f-icon"><i class="ri-shield-check-line"></i></div>
+                    <h3>Keamanan Enterprise</h3>
+                    <p>Enkripsi PBKDF2-SHA256 dengan salt unik. Data kamu terlindungi aman.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="f-icon"><i class="ri-24-hours-line"></i></div>
+                    <h3>Uptime 99.9%</h3>
+                    <p>Anti-DDoS filter &amp; Cloudflare Edge. Bot online 24/7 tanpa kompromi.</p>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- ===== SCENE 4: Steps ===== -->
     <div class="scene" id="pScene4">
-        <div class="scene4-title">Semudah <span class="grad">4 Langkah</span></div>
-        <div class="steps-flow">
-            <div class="step-item">
-                <div class="step-num">01</div>
-                <h4>Pilih Paket</h4>
-                <p>Private, Public, atau V2 sesuai kebutuhanmu</p>
-            </div>
-            <div class="step-item">
-                <div class="step-num">02</div>
-                <h4>Scan QRIS</h4>
-                <p>Bayar dari e-wallet atau m-banking manapun</p>
-            </div>
-            <div class="step-item">
-                <div class="step-num">03</div>
-                <h4>Auto Deploy</h4>
-                <p>Sistem langsung buat server &amp; akun untukmu</p>
-            </div>
-            <div class="step-item">
-                <div class="step-num">04</div>
-                <h4>Server Online!</h4>
-                <p>Login dan server langsung siap pakai</p>
+        <div class="scene-inner">
+            <div class="scene4-title">Semudah <span class="grad">4 Langkah</span></div>
+            <div class="steps-flow">
+                <div class="step-item">
+                    <div class="step-num">01</div>
+                    <h4>Pilih Paket</h4>
+                    <p>Private, Public, atau V2 sesuai kebutuhanmu</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">02</div>
+                    <h4>Scan QRIS</h4>
+                    <p>Bayar dari e-wallet atau m-banking manapun</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">03</div>
+                    <h4>Auto Deploy</h4>
+                    <p>Sistem langsung buat server &amp; akun untukmu</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">04</div>
+                    <h4>Server Online!</h4>
+                    <p>Login dan server langsung siap pakai</p>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- ===== SCENE 5: Pricing ===== -->
     <div class="scene" id="pScene5">
-        <div class="scene5-title">Harga <span class="grad">Terjangkau</span></div>
-        <div class="price-cards">
-            <div class="price-card">
-                <span class="p-tag">Ekonomis</span>
-                <h3>Panel Public</h3>
-                <div class="p-price">3K<small>/bln</small></div>
-                <div class="p-desc">Cocok untuk memulai bot WhatsApp atau Discord</div>
-            </div>
-            <div class="price-card featured">
-                <span class="p-tag">⭐ Terlaris</span>
-                <h3>Panel Private</h3>
-                <div class="p-price">10K<small>/bln</small></div>
-                <div class="p-desc">CPU &amp; RAM eksklusif, performa maksimal tanpa sharing</div>
-            </div>
-            <div class="price-card">
-                <span class="p-tag">Indonesia 🇮🇩</span>
-                <h3>Panel Public V2</h3>
-                <div class="p-price">3K<small>/bln</small></div>
-                <div class="p-desc">Node lokal Indonesia dengan latensi ultra rendah</div>
+        <div class="scene-inner">
+            <div class="scene5-title">Harga <span class="grad">Terjangkau</span></div>
+            <div class="price-cards">
+                <div class="price-card">
+                    <span class="p-tag">Ekonomis</span>
+                    <h3>Panel Public</h3>
+                    <div class="p-price">3K<small>/bln</small></div>
+                    <div class="p-desc">Cocok untuk memulai bot WhatsApp atau Discord</div>
+                </div>
+                <div class="price-card featured">
+                    <span class="p-tag">⭐ Terlaris</span>
+                    <h3>Panel Private</h3>
+                    <div class="p-price">10K<small>/bln</small></div>
+                    <div class="p-desc">CPU &amp; RAM eksklusif, performa maksimal tanpa sharing</div>
+                </div>
+                <div class="price-card">
+                    <span class="p-tag">Indonesia 🇮🇩</span>
+                    <h3>Panel Public V2</h3>
+                    <div class="p-price">3K<small>/bln</small></div>
+                    <div class="p-desc">Node lokal Indonesia dengan latensi ultra rendah</div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- ===== SCENE 6: CTA (Lanjut ke Landing Page) ===== -->
     <div class="scene" id="pScene6">
-        <div class="cta-badge"><i class="ri-rocket-2-fill"></i> Mulai Sekarang</div>
-        <div class="cta-title">Server Premium<br><span class="grad">Aktif Sendiri</span><br>Tanpa Drama.</div>
-        <div class="cta-sub">Pilih paket, bayar QRIS, dan server online dalam hitungan detik. Tanpa menunggu admin, tanpa ribet.</div>
-        <div class="cta-buttons">
-            <button type="button" class="btn-cta primary" id="btnEnterLanding">
-                <i class="ri-arrow-right-line"></i> Masuk ke Website
-            </button>
-            <a class="btn-cta" href="/store">
-                <i class="ri-shopping-bag-3-line"></i> Belanja di Toko
-            </a>
+        <div class="scene-inner">
+            <div class="cta-badge"><i class="ri-rocket-2-fill"></i> Mulai Sekarang</div>
+            <div class="cta-title">Server Premium<br><span class="grad">Aktif Sendiri</span><br>Tanpa Drama.</div>
+            <div class="cta-sub">Pilih paket, bayar QRIS, dan server online dalam hitungan detik. Tanpa menunggu admin, tanpa ribet.</div>
+            <div class="cta-buttons">
+                <button type="button" class="btn-cta primary" id="btnEnterLanding">
+                    <i class="ri-arrow-right-line"></i> Masuk ke Website
+                </button>
+                <a class="btn-cta" href="/store">
+                    <i class="ri-shopping-bag-3-line"></i> Belanja di Toko
+                </a>
+            </div>
+            <div class="cta-url">🌐 zeroixdarkmarket.web.id</div>
         </div>
-        <div class="cta-url">🌐 zeroixdarkmarket.web.id</div>
     </div>
 
     <!-- Controls -->
@@ -1061,7 +1172,7 @@
         <span></span><span></span><span></span><span></span><span></span>
     </div>
     <button class="play-toggle" id="promoPlayToggle" title="Play/Pause"><i class="ri-pause-line"></i></button>
-    <div class="skip-hint">Klik di mana saja atau tekan ➡ untuk lanjut • Spasi untuk pause</div>
+    <div class="skip-hint">Ketuk layar atau geser ➡ untuk lanjut • Spasi untuk pause</div>
 </div>
 
 <script src="page-loader.js?v=76"></script>
@@ -1650,6 +1761,7 @@
                 promoScenes[currentPromoScene].classList.remove('exit');
                 currentPromoScene = index;
 
+                promoScenes[currentPromoScene].scrollTop = 0;
                 promoScenes[currentPromoScene].classList.add('active');
                 animatePromoCards(promoScenes[currentPromoScene]);
                 updatePromoUI();
@@ -1740,18 +1852,24 @@
         });
 
         promoIntro.addEventListener('click', (e) => {
-            if (e.target.closest('#promoPlayToggle, .scene-dot, .btn-cta, #promoDlBtn, #btnSkipIntro, a, button')) return;
+            if (e.target.closest('#promoPlayToggle, .scene-dot, .btn-cta, #promoDlBtn, #btnSkipIntro, .top-controls, a, button')) return;
             if (isPromoRecording) return;
             goToPromoScene((currentPromoScene + 1) % totalPromoScenes);
         });
 
         let pTouchStartX = 0;
-        promoIntro.addEventListener('touchstart', (e) => { pTouchStartX = e.touches[0].clientX; }, {passive:true});
+        let pTouchStartY = 0;
+        promoIntro.addEventListener('touchstart', (e) => {
+            pTouchStartX = e.touches[0].clientX;
+            pTouchStartY = e.touches[0].clientY;
+        }, {passive:true});
         promoIntro.addEventListener('touchend', (e) => {
             if (isPromoRecording) return;
-            const diff = pTouchStartX - e.changedTouches[0].clientX;
-            if (Math.abs(diff) > 50) {
-                if (diff > 0) goToPromoScene((currentPromoScene + 1) % totalPromoScenes);
+            if (e.target.closest('#promoPlayToggle, .scene-dot, .btn-cta, #promoDlBtn, #btnSkipIntro, .top-controls, a, button')) return;
+            const diffX = pTouchStartX - e.changedTouches[0].clientX;
+            const diffY = pTouchStartY - e.changedTouches[0].clientY;
+            if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.2) {
+                if (diffX > 0) goToPromoScene((currentPromoScene + 1) % totalPromoScenes);
                 else goToPromoScene((currentPromoScene - 1 + totalPromoScenes) % totalPromoScenes);
             }
         }, {passive:true});

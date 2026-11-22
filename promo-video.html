@@ -96,21 +96,32 @@
 
         /* ===== SCENES ===== */
         .scene {
-            position:absolute; inset:0;
+            position:fixed; inset:0;
             display:flex; flex-direction:column;
-            align-items:center; justify-content:center;
+            align-items:center; justify-content:flex-start;
             z-index:10; opacity:0;
             transform: scale(.92);
             transition: opacity .8s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1);
             pointer-events:none;
-            padding: 40px;
+            padding: 84px 64px 86px 40px;
             text-align:center;
+            overflow-y: auto; overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+        .scene-inner {
+            width: 100%; max-width: 920px;
+            margin: auto;
+            display: flex; flex-direction: column; align-items: center;
         }
         .scene.active {
             opacity:1; transform:scale(1); pointer-events:auto;
         }
         .scene.exit {
             opacity:0; transform:scale(1.08);
+        }
+        .grad {
+            background: linear-gradient(90deg, var(--a1), var(--a2), var(--a3));
+            -webkit-background-clip:text; background-clip:text; color:transparent;
         }
 
         /* ===== SCENE 1: LOGO INTRO ===== */
@@ -162,6 +173,7 @@
             opacity:0;
             animation: slideUpFade .8s 1.8s cubic-bezier(.4,0,.2,1) forwards;
             font-weight:300;
+            max-width: 100%; overflow-wrap: break-word;
         }
         @keyframes slideUpFade {
             from { opacity:0; transform:translateY(30px); }
@@ -178,14 +190,14 @@
         .scene2-title {
             font-size: clamp(1.5rem,4.5vw,3rem);
             font-weight:800; letter-spacing:-.03em;
-            max-width: 700px;
+            max-width: 700px; width: 100%; overflow-wrap: break-word;
             opacity:0;
             animation: slideUpFade .8s .5s cubic-bezier(.4,0,.2,1) forwards;
         }
         .scene2-title .hl { color: var(--a3); }
         .scene2-sub {
             font-size: clamp(.85rem,2vw,1.15rem);
-            color: var(--muted); margin-top:16px; max-width:550px;
+            color: var(--muted); margin-top:16px; max-width:550px; width: 100%; line-height: 1.55;
             opacity:0;
             animation: slideUpFade .8s .9s cubic-bezier(.4,0,.2,1) forwards;
         }
@@ -196,7 +208,7 @@
 
         /* ===== SCENE 3: FEATURES ===== */
         .features-grid {
-            display:grid; grid-template-columns: repeat(2,1fr);
+            display:grid; grid-template-columns: repeat(2, minmax(0, 1fr));
             gap:20px; max-width:700px; width:100%;
         }
         .feature-card {
@@ -206,6 +218,7 @@
             backdrop-filter:blur(12px);
             text-align:left;
             opacity:0; transform:translateY(30px);
+            min-width: 0; overflow-wrap: break-word;
         }
         .feature-card .f-icon {
             width:50px; height:50px; border-radius:14px;
@@ -238,6 +251,7 @@
             flex:1; min-width:170px; max-width:200px;
             text-align:center;
             opacity:0; transform:translateY(30px);
+            overflow-wrap: break-word;
         }
         .step-num {
             width:44px; height:44px; border-radius:14px;
@@ -260,7 +274,7 @@
         /* ===== SCENE 5: PRICING ===== */
         .price-cards {
             display:flex; gap:20px; justify-content:center;
-            flex-wrap:wrap; max-width:800px;
+            flex-wrap:wrap; max-width:800px; width: 100%;
         }
         .price-card {
             background: rgba(255,255,255,.04);
@@ -269,6 +283,7 @@
             min-width:200px; flex:1; max-width:240px;
             text-align:center;
             opacity:0; transform:scale(.85);
+            overflow-wrap: break-word;
         }
         .price-card.featured {
             border-color: rgba(94,234,212,.4);
@@ -314,22 +329,18 @@
         .cta-title {
             font-size: clamp(2rem,6vw,4rem);
             font-weight:900; letter-spacing:-.04em;
-            line-height:1.08; max-width:700px;
+            line-height:1.08; max-width:700px; width: 100%; overflow-wrap: break-word;
             opacity:0;
             animation: slideUpFade .8s .6s cubic-bezier(.4,0,.2,1) forwards;
         }
-        .cta-title .grad {
-            background: linear-gradient(90deg, var(--a1), var(--a2), var(--a3));
-            -webkit-background-clip:text; background-clip:text; color:transparent;
-        }
         .cta-sub {
             font-size: clamp(.85rem,2vw,1.1rem);
-            color:var(--muted); margin:16px 0 32px; max-width:500px;
+            color:var(--muted); margin:16px 0 32px; max-width:500px; width: 100%; line-height: 1.55;
             opacity:0;
             animation: slideUpFade .8s 1s cubic-bezier(.4,0,.2,1) forwards;
         }
         .cta-buttons {
-            display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
+            display:flex; gap:14px; flex-wrap:wrap; justify-content:center; width: 100%;
             opacity:0;
             animation: slideUpFade .8s 1.3s cubic-bezier(.4,0,.2,1) forwards;
         }
@@ -407,9 +418,17 @@
             transform:scale(1.1);
         }
 
-        /* ===== DOWNLOAD VIDEO & HOME BUTTONS ===== */
+        /* ===== TOP ACTION CONTROLS ===== */
+        .top-controls {
+            position: fixed;
+            top: max(18px, env(safe-area-inset-top));
+            right: max(24px, env(safe-area-inset-right));
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
         .btn-top-home {
-            position:fixed; top:20px; right:24px; z-index:60;
             display:inline-flex; align-items:center; gap:8px;
             padding:10px 18px; border-radius:14px;
             font-weight:700; font-size:.85rem;
@@ -417,7 +436,7 @@
             color: var(--ink); border: 1px solid var(--line);
             backdrop-filter: blur(12px);
             cursor:pointer; transition: all .3s ease;
-            text-decoration: none;
+            text-decoration: none; white-space: nowrap;
         }
         .btn-top-home:hover {
             background: rgba(255, 255, 255, 0.16);
@@ -425,7 +444,6 @@
             transform: translateY(-2px);
         }
         .dl-btn {
-            position:fixed; top:20px; right:190px; z-index:60;
             display:inline-flex; align-items:center; gap:9px;
             padding:10px 18px; border-radius:14px;
             font-weight:700; font-size:.85rem;
@@ -434,7 +452,7 @@
             box-shadow: 0 4px 20px rgba(94,234,212,.3);
             cursor:pointer; transition: all .35s ease;
             font-family:'Sora',sans-serif;
-            letter-spacing:-.01em;
+            letter-spacing:-.01em; white-space: nowrap;
         }
         .dl-btn:hover {
             transform:translateY(-2px);
@@ -457,12 +475,6 @@
         .dl-btn.recording .rec-dot { display:block; }
         @keyframes recDotBlink { 50% { opacity:0; } }
 
-        @media (max-width: 600px) {
-            .btn-top-home { right: 12px; top: 12px; padding: 7px 12px; font-size: .75rem; }
-            .dl-btn { right: 125px; top: 12px; padding: 7px 12px; font-size: .75rem; }
-            .dl-btn span#dlLabel { display: none; }
-        }
-
         /* ===== RECORDING OVERLAY ===== */
         .rec-overlay {
             position:fixed; inset:0; z-index:55;
@@ -478,11 +490,10 @@
             50% { border-color: rgba(239,68,68,.2); }
         }
         .rec-timer {
-            position:fixed; top:22px; right:180px; z-index:60;
             font-family:'JetBrains Mono',monospace;
             font-size:.82rem; font-weight:600;
             color:#ef4444; display:none;
-            align-items:center; gap:6px;
+            align-items:center; gap:6px; white-space: nowrap;
         }
         .rec-timer.active { display:inline-flex; }
         .rec-timer .blink { animation: recDotBlink 1s step-end infinite; }
@@ -492,19 +503,9 @@
             position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
             z-index:50; font-size:.78rem; color:var(--muted);
             opacity:0; animation: fadeIn 2s 3s forwards;
+            pointer-events: none; text-align: center;
         }
         @keyframes fadeIn { to { opacity:.6; } }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width:700px) {
-            .features-grid { grid-template-columns:1fr; max-width:360px; }
-            .steps-flow { flex-direction:column; align-items:center; }
-            .step-item { max-width:280px; }
-            .price-cards { flex-direction:column; align-items:center; }
-            .price-card { max-width:280px; }
-            .scene-dots { right:12px; }
-            .scene { padding:24px; }
-        }
 
         /* ===== SOUND WAVE ===== */
         .sound-wave {
@@ -529,16 +530,122 @@
 
         /* ===== WATERMARK ===== */
         .watermark {
-            position:fixed; top:20px; left:24px; z-index:50;
+            position:fixed;
+            top: max(18px, env(safe-area-inset-top));
+            left: max(24px, env(safe-area-inset-left));
+            z-index:50;
             display:flex; align-items:center; gap:8px;
             font-weight:800; font-size:.9rem;
-            opacity:.7;
+            opacity:.78;
         }
         .watermark svg {
             width:28px; height:28px;
             filter: drop-shadow(0 0 8px rgba(94,234,212,.4));
         }
         .watermark span b { color:var(--a1); }
+
+        /* ===== RESPONSIVE MOBILE ===== */
+        @media (max-width: 768px) {
+            .scene {
+                padding: 68px 34px 74px 14px;
+            }
+            .watermark { left: 14px; font-size: .82rem; gap: 6px; }
+            .watermark svg { width: 24px; height: 24px; }
+            .top-controls { right: 12px; gap: 6px; }
+            .btn-top-home { padding: 8px 12px; font-size: .76rem; border-radius: 12px; }
+            .dl-btn { padding: 8px 11px; font-size: .78rem; border-radius: 12px; }
+            .dl-btn span#dlLabel { display: none; }
+            .rec-timer { font-size: .7rem; }
+
+            .scene-dots { right: 10px; gap: 8px; }
+            .scene-dot { width: 8px; height: 8px; }
+            .play-toggle { bottom: 14px; right: 12px; width: 40px; height: 40px; font-size: 1rem; }
+            .sound-wave { bottom: 18px; left: 14px; height: 16px; }
+            .skip-hint {
+                bottom: 16px;
+                max-width: calc(100% - 136px);
+                width: max-content;
+                font-size: .68rem;
+                line-height: 1.3;
+            }
+
+            /* Scene 1 */
+            .logo-container { width: 112px; height: 112px; margin-bottom: 22px; }
+            .logo-ring { inset: -14px; }
+            .logo-ring-2 { inset: -24px; }
+            .scene1-title { font-size: clamp(2.1rem, 10vw, 3rem); }
+            .scene1-sub { font-size: .88rem; margin-top: 10px; max-width: 300px; }
+
+            /* Scene 2 */
+            .scene2-emoji { font-size: 2.8rem; margin-bottom: 12px; }
+            .scene2-title { font-size: clamp(1.35rem, 6vw, 1.85rem); line-height: 1.25; }
+            .scene2-sub { font-size: .86rem; margin-top: 12px; }
+
+            /* Scene 3, 4, 5 titles */
+            .scene3-title, .scene4-title, .scene5-title {
+                font-size: clamp(1.4rem, 6vw, 1.9rem);
+                margin-bottom: 16px;
+            }
+
+            /* Scene 3: Compact 2x2 grid */
+            .features-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px; max-width: 440px;
+            }
+            .feature-card { padding: 14px 12px; border-radius: 16px; }
+            .feature-card .f-icon {
+                width: 34px; height: 34px; border-radius: 10px;
+                font-size: 1.05rem; margin-bottom: 8px;
+            }
+            .feature-card h3 { font-size: .84rem; line-height: 1.25; margin-bottom: 4px; }
+            .feature-card p { font-size: .72rem; line-height: 1.38; }
+
+            /* Scene 4: Compact 2x2 grid */
+            .steps-flow {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px; max-width: 440px;
+            }
+            .step-item {
+                min-width: 0; max-width: none; width: 100%;
+                padding: 14px 10px; border-radius: 16px;
+            }
+            .step-num {
+                width: 34px; height: 34px; border-radius: 10px;
+                font-size: .88rem; margin-bottom: 8px;
+            }
+            .step-item h4 { font-size: .84rem; margin-bottom: 4px; }
+            .step-item p { font-size: .72rem; line-height: 1.38; }
+
+            /* Scene 5: Compact horizontal cards */
+            .price-cards {
+                flex-direction: column; align-items: stretch;
+                gap: 10px; max-width: 400px;
+            }
+            .price-card {
+                min-width: 0; max-width: none; width: 100%;
+                padding: 13px 15px; border-radius: 16px;
+                display: grid; grid-template-columns: 1fr auto;
+                grid-template-areas: "tag price" "title price" "desc desc";
+                align-items: center; text-align: left;
+                column-gap: 12px; row-gap: 4px;
+            }
+            .price-card .p-tag { grid-area: tag; justify-self: start; margin-bottom: 0; font-size: .66rem; padding: 3px 9px; }
+            .price-card h3 { grid-area: title; font-size: .96rem; margin: 0; }
+            .price-card .p-price { grid-area: price; font-size: 1.35rem; margin: 0; text-align: right; white-space: nowrap; }
+            .price-card .p-desc { grid-area: desc; font-size: .74rem; line-height: 1.38; margin-top: 2px; }
+
+            /* Scene 6 */
+            .cta-badge { font-size: .76rem; padding: 6px 14px; margin-bottom: 12px; }
+            .cta-title { font-size: clamp(1.65rem, 7.5vw, 2.4rem); line-height: 1.12; }
+            .cta-sub { font-size: .84rem; margin: 12px 0 20px; }
+            .cta-buttons { flex-direction: column; align-items: stretch; max-width: 300px; gap: 10px; }
+            .btn-cta { width: 100%; padding: 13px 20px; font-size: .9rem; }
+            .cta-url { margin-top: 14px; font-size: .76rem; }
+        }
+        @media (max-width: 359px) {
+            .features-grid, .steps-flow { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -567,126 +674,138 @@
 
 <!-- ===== SCENE 1: Logo Intro ===== -->
 <div class="scene" id="scene1">
-    <div class="logo-container">
-        <div class="logo-ring"></div>
-        <div class="logo-ring logo-ring-2"></div>
-        <svg class="logo-svg" viewBox="0 0 64 64" fill="none">
-            <defs>
-                <linearGradient id="s1Bg" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#0c152c"/><stop offset="100%" stop-color="#050a16"/></linearGradient>
-                <linearGradient id="s1Brd" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#5eead4"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
-                <linearGradient id="s1Top" x1="16" y1="17" x2="47" y2="38"><stop offset="0%" stop-color="#5eead4"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
-                <linearGradient id="s1Bot" x1="17" y1="26" x2="48" y2="47"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
-            </defs>
-            <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#s1Bg)" stroke="url(#s1Brd)" stroke-width="2"/>
-            <path d="M 19 17.5 H 43 C 45.8 17.5 47.8 19.5 47.2 22.3 L 31.2 38.3 C 30.5 39 29.5 39.4 28.5 39.4 H 24.5 C 23.3 39.4 22.6 38.1 23.3 37.1 L 37.8 24.5 H 19 C 17.3 24.5 16 23.2 16 21.5 V 20.5 C 16 18.8 17.3 17.5 19 17.5 Z" fill="url(#s1Top)"/>
-            <path d="M 45 46.5 H 21 C 18.2 46.5 16.2 44.5 16.8 41.7 L 32.8 25.7 C 33.5 25 34.5 24.6 35.5 24.6 H 39.5 C 40.7 24.6 41.4 25.9 40.7 26.9 L 26.2 39.5 H 45 C 46.7 39.5 48 40.8 48 42.5 V 43.5 C 48 45.2 46.7 46.5 45 46.5 Z" fill="url(#s1Bot)"/>
-            <circle cx="32" cy="32" r="3" fill="#fff"/>
-        </svg>
+    <div class="scene-inner">
+        <div class="logo-container">
+            <div class="logo-ring"></div>
+            <div class="logo-ring logo-ring-2"></div>
+            <svg class="logo-svg" viewBox="0 0 64 64" fill="none">
+                <defs>
+                    <linearGradient id="s1Bg" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#0c152c"/><stop offset="100%" stop-color="#050a16"/></linearGradient>
+                    <linearGradient id="s1Brd" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#5eead4"/><stop offset="50%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+                    <linearGradient id="s1Top" x1="16" y1="17" x2="47" y2="38"><stop offset="0%" stop-color="#5eead4"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+                    <linearGradient id="s1Bot" x1="17" y1="26" x2="48" y2="47"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+                </defs>
+                <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#s1Bg)" stroke="url(#s1Brd)" stroke-width="2"/>
+                <path d="M 19 17.5 H 43 C 45.8 17.5 47.8 19.5 47.2 22.3 L 31.2 38.3 C 30.5 39 29.5 39.4 28.5 39.4 H 24.5 C 23.3 39.4 22.6 38.1 23.3 37.1 L 37.8 24.5 H 19 C 17.3 24.5 16 23.2 16 21.5 V 20.5 C 16 18.8 17.3 17.5 19 17.5 Z" fill="url(#s1Top)"/>
+                <path d="M 45 46.5 H 21 C 18.2 46.5 16.2 44.5 16.8 41.7 L 32.8 25.7 C 33.5 25 34.5 24.6 35.5 24.6 H 39.5 C 40.7 24.6 41.4 25.9 40.7 26.9 L 26.2 39.5 H 45 C 46.7 39.5 48 40.8 48 42.5 V 43.5 C 48 45.2 46.7 46.5 45 46.5 Z" fill="url(#s1Bot)"/>
+                <circle cx="32" cy="32" r="3" fill="#fff"/>
+            </svg>
+        </div>
+        <div class="scene1-title">Zeroix<b>Dark</b></div>
+        <div class="scene1-sub">Panel Server Premium — Aktivasi Otomatis 24/7</div>
     </div>
-    <div class="scene1-title">Zeroix<b>Dark</b></div>
-    <div class="scene1-sub">Panel Server Premium — Aktivasi Otomatis 24/7</div>
 </div>
 
 <!-- ===== SCENE 2: Problem Statement ===== -->
 <div class="scene" id="scene2">
-    <div class="scene2-emoji">😩</div>
-    <div class="scene2-title">Masih <span class="hl">Nunggu Admin</span> Buat Aktifin Server?</div>
-    <div class="scene2-sub">Pesan server, transfer manual, nunggu berjam-jam... Itu cara lama. Saatnya upgrade ke cara yang lebih cerdas.</div>
+    <div class="scene-inner">
+        <div class="scene2-emoji">😩</div>
+        <div class="scene2-title">Masih <span class="hl">Nunggu Admin</span> Buat Aktifin Server?</div>
+        <div class="scene2-sub">Pesan server, transfer manual, nunggu berjam-jam... Itu cara lama. Saatnya upgrade ke cara yang lebih cerdas.</div>
+    </div>
 </div>
 
 <!-- ===== SCENE 3: Features ===== -->
 <div class="scene" id="scene3">
-    <div class="scene3-title">Kenapa <span class="grad">ZeroixDark</span>?</div>
-    <div class="features-grid">
-        <div class="feature-card">
-            <div class="f-icon"><i class="ri-flashlight-line"></i></div>
-            <h3>Aktivasi < 1 Menit</h3>
-            <p>Bayar → Server langsung deploy otomatis. Tidak perlu menunggu siapapun.</p>
-        </div>
-        <div class="feature-card">
-            <div class="f-icon"><i class="ri-qr-code-line"></i></div>
-            <h3>QRIS Universal</h3>
-            <p>Scan satu QR untuk semua bank & e-wallet. GoPay, OVO, DANA, BCA, semuanya.</p>
-        </div>
-        <div class="feature-card">
-            <div class="f-icon"><i class="ri-shield-check-line"></i></div>
-            <h3>Keamanan Enterprise</h3>
-            <p>Enkripsi PBKDF2-SHA256 dengan salt unik. Data kamu aman sepenuhnya.</p>
-        </div>
-        <div class="feature-card">
-            <div class="f-icon"><i class="ri-24-hours-line"></i></div>
-            <h3>Uptime 99.9%</h3>
-            <p>Server anti-DDoS dengan Cloudflare Edge. Bot kamu online 24/7 tanpa gangguan.</p>
+    <div class="scene-inner">
+        <div class="scene3-title">Kenapa <span class="grad">ZeroixDark</span>?</div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="f-icon"><i class="ri-flashlight-line"></i></div>
+                <h3>Aktivasi &lt; 1 Menit</h3>
+                <p>Bayar → Server langsung deploy otomatis. Tidak perlu menunggu siapapun.</p>
+            </div>
+            <div class="feature-card">
+                <div class="f-icon"><i class="ri-qr-code-line"></i></div>
+                <h3>QRIS Universal</h3>
+                <p>Scan satu QR untuk semua bank &amp; e-wallet. GoPay, OVO, DANA, BCA, semuanya.</p>
+            </div>
+            <div class="feature-card">
+                <div class="f-icon"><i class="ri-shield-check-line"></i></div>
+                <h3>Keamanan Enterprise</h3>
+                <p>Enkripsi PBKDF2-SHA256 dengan salt unik. Data kamu aman sepenuhnya.</p>
+            </div>
+            <div class="feature-card">
+                <div class="f-icon"><i class="ri-24-hours-line"></i></div>
+                <h3>Uptime 99.9%</h3>
+                <p>Server anti-DDoS dengan Cloudflare Edge. Bot kamu online 24/7 tanpa gangguan.</p>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- ===== SCENE 4: Steps ===== -->
 <div class="scene" id="scene4">
-    <div class="scene4-title">Semudah <span class="grad">4 Langkah</span></div>
-    <div class="steps-flow">
-        <div class="step-item">
-            <div class="step-num">01</div>
-            <h4>Pilih Paket</h4>
-            <p>Panel Private, Public, atau V2 sesuai kebutuhanmu</p>
-        </div>
-        <div class="step-item">
-            <div class="step-num">02</div>
-            <h4>Scan QRIS</h4>
-            <p>Bayar dari e-wallet atau m-banking manapun</p>
-        </div>
-        <div class="step-item">
-            <div class="step-num">03</div>
-            <h4>Auto Deploy</h4>
-            <p>Sistem langsung buat server & akun untukmu</p>
-        </div>
-        <div class="step-item">
-            <div class="step-num">04</div>
-            <h4>Server Online!</h4>
-            <p>Login dan server siap pakai seketika</p>
+    <div class="scene-inner">
+        <div class="scene4-title">Semudah <span class="grad">4 Langkah</span></div>
+        <div class="steps-flow">
+            <div class="step-item">
+                <div class="step-num">01</div>
+                <h4>Pilih Paket</h4>
+                <p>Panel Private, Public, atau V2 sesuai kebutuhanmu</p>
+            </div>
+            <div class="step-item">
+                <div class="step-num">02</div>
+                <h4>Scan QRIS</h4>
+                <p>Bayar dari e-wallet atau m-banking manapun</p>
+            </div>
+            <div class="step-item">
+                <div class="step-num">03</div>
+                <h4>Auto Deploy</h4>
+                <p>Sistem langsung buat server &amp; akun untukmu</p>
+            </div>
+            <div class="step-item">
+                <div class="step-num">04</div>
+                <h4>Server Online!</h4>
+                <p>Login dan server siap pakai seketika</p>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- ===== SCENE 5: Pricing ===== -->
 <div class="scene" id="scene5">
-    <div class="scene5-title">Harga <span class="grad">Terjangkau</span></div>
-    <div class="price-cards">
-        <div class="price-card">
-            <span class="p-tag">Ekonomis</span>
-            <h3>Panel Public</h3>
-            <div class="p-price">3K<small>/bulan</small></div>
-            <div class="p-desc">Cocok untuk memulai bot WA/Discord pertamamu</div>
-        </div>
-        <div class="price-card featured">
-            <span class="p-tag">⭐ Terlaris</span>
-            <h3>Panel Private</h3>
-            <div class="p-price">10K<small>/bulan</small></div>
-            <div class="p-desc">CPU & RAM eksklusif, performa maksimal tanpa sharing</div>
-        </div>
-        <div class="price-card">
-            <span class="p-tag">Indonesia 🇮🇩</span>
-            <h3>Panel Public V2</h3>
-            <div class="p-price">3K<small>/bulan</small></div>
-            <div class="p-desc">Node lokal Indonesia, latensi ultra rendah</div>
+    <div class="scene-inner">
+        <div class="scene5-title">Harga <span class="grad">Terjangkau</span></div>
+        <div class="price-cards">
+            <div class="price-card">
+                <span class="p-tag">Ekonomis</span>
+                <h3>Panel Public</h3>
+                <div class="p-price">3K<small>/bulan</small></div>
+                <div class="p-desc">Cocok untuk memulai bot WA/Discord pertamamu</div>
+            </div>
+            <div class="price-card featured">
+                <span class="p-tag">⭐ Terlaris</span>
+                <h3>Panel Private</h3>
+                <div class="p-price">10K<small>/bulan</small></div>
+                <div class="p-desc">CPU &amp; RAM eksklusif, performa maksimal tanpa sharing</div>
+            </div>
+            <div class="price-card">
+                <span class="p-tag">Indonesia 🇮🇩</span>
+                <h3>Panel Public V2</h3>
+                <div class="p-price">3K<small>/bulan</small></div>
+                <div class="p-desc">Node lokal Indonesia, latensi ultra rendah</div>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- ===== SCENE 6: CTA ===== -->
 <div class="scene" id="scene6">
-    <div class="cta-badge"><i class="ri-rocket-2-fill"></i> Mulai Sekarang</div>
-    <div class="cta-title">Server Premium<br><span class="grad">Aktif Sendiri</span><br>Tanpa Drama.</div>
-    <div class="cta-sub">Pilih paket, bayar QRIS, dan server online dalam hitungan detik. Tanpa menunggu admin, tanpa ribet.</div>
-    <div class="cta-buttons">
-        <a class="btn-cta primary" href="https://zeroixdarkmarket.web.id/store" target="_blank">
-            <i class="ri-shopping-bag-3-line"></i> Belanja Sekarang
-        </a>
-        <a class="btn-cta" href="https://zeroixdarkmarket.web.id/" target="_blank">
-            <i class="ri-global-line"></i> Kunjungi Website
-        </a>
+    <div class="scene-inner">
+        <div class="cta-badge"><i class="ri-rocket-2-fill"></i> Mulai Sekarang</div>
+        <div class="cta-title">Server Premium<br><span class="grad">Aktif Sendiri</span><br>Tanpa Drama.</div>
+        <div class="cta-sub">Pilih paket, bayar QRIS, dan server online dalam hitungan detik. Tanpa menunggu admin, tanpa ribet.</div>
+        <div class="cta-buttons">
+            <a class="btn-cta primary" href="https://zeroixdarkmarket.web.id/store" target="_blank">
+                <i class="ri-shopping-bag-3-line"></i> Belanja Sekarang
+            </a>
+            <a class="btn-cta" href="https://zeroixdarkmarket.web.id/" target="_blank">
+                <i class="ri-global-line"></i> Kunjungi Website
+            </a>
+        </div>
+        <div class="cta-url">🌐 zeroixdarkmarket.web.id</div>
     </div>
-    <div class="cta-url">🌐 zeroixdarkmarket.web.id</div>
 </div>
 
 <!-- UI Controls -->
@@ -696,19 +815,21 @@
     <span></span><span></span><span></span><span></span><span></span>
 </div>
 <button class="play-toggle" id="playToggle" title="Play/Pause"><i class="ri-pause-line"></i></button>
-<div class="skip-hint">Klik atau tekan ➡ untuk lanjut • Spasi untuk pause</div>
+<div class="skip-hint">Ketuk layar atau geser ➡ untuk lanjut • Spasi untuk pause</div>
 
 <!-- Download Video Controls & Home Link -->
-<button class="dl-btn" id="dlBtn" title="Rekam & Download sebagai Video">
-    <span class="rec-dot"></span>
-    <i class="ri-download-2-line" id="dlIcon"></i>
-    <span id="dlLabel">Download Video</span>
-</button>
-<a class="btn-top-home" href="/" title="Menuju ke Website">
-    <span>Masuk Website</span> <i class="ri-arrow-right-line"></i>
-</a>
+<div class="top-controls">
+    <div class="rec-timer" id="recTimer"><span class="blink">⏺</span> REC <span id="recTime">00:00</span></div>
+    <button class="dl-btn" id="dlBtn" title="Rekam &amp; Download sebagai Video">
+        <span class="rec-dot"></span>
+        <i class="ri-download-2-line" id="dlIcon"></i>
+        <span id="dlLabel">Download Video</span>
+    </button>
+    <a class="btn-top-home" href="/" title="Menuju ke Website">
+        <span>Masuk Website</span> <i class="ri-arrow-right-line"></i>
+    </a>
+</div>
 <div class="rec-overlay" id="recOverlay"></div>
-<div class="rec-timer" id="recTimer"><span class="blink">⏺</span> REC <span id="recTime">00:00</span></div>
 
 <script>
 (function() {
@@ -778,6 +899,7 @@
             scenes[currentScene].classList.remove('exit');
             currentScene = index;
 
+            scenes[currentScene].scrollTop = 0;
             scenes[currentScene].classList.add('active');
             animateFeatureCards(scenes[currentScene]);
             updateUI();
@@ -828,18 +950,24 @@
     });
 
     document.addEventListener('click', (e) => {
-        if (e.target.closest('.play-toggle, .scene-dot, .btn-cta, .dl-btn, a')) return;
+        if (e.target.closest('.play-toggle, .scene-dot, .btn-cta, .dl-btn, .top-controls, a, button')) return;
         if (isRecording) return; // don't skip during recording
         goToScene((currentScene + 1) % totalScenes);
     });
 
     let touchStartX = 0;
-    document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, {passive:true});
+    let touchStartY = 0;
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    }, {passive:true});
     document.addEventListener('touchend', (e) => {
         if (isRecording) return;
-        const diff = touchStartX - e.changedTouches[0].clientX;
-        if (Math.abs(diff) > 50) {
-            if (diff > 0) goToScene((currentScene + 1) % totalScenes);
+        if (e.target.closest('.play-toggle, .scene-dot, .btn-cta, .dl-btn, .top-controls, a, button')) return;
+        const diffX = touchStartX - e.changedTouches[0].clientX;
+        const diffY = touchStartY - e.changedTouches[0].clientY;
+        if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.2) {
+            if (diffX > 0) goToScene((currentScene + 1) % totalScenes);
             else goToScene((currentScene - 1 + totalScenes) % totalScenes);
         }
     }, {passive:true});
@@ -979,6 +1107,7 @@
                 scenes[currentScene].classList.remove('active','exit');
                 resetCards(scenes[currentScene]);
                 currentScene = 0;
+                scenes[0].scrollTop = 0;
                 scenes[0].classList.add('active');
                 animateFeatureCards(scenes[0]);
                 updateUI();
