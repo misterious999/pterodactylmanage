@@ -436,6 +436,13 @@
             color: var(--ink);
             box-shadow: 0 4px 16px rgba(244, 114, 182, 0.15);
         }
+        .btn-beli:disabled,
+        .btn-beli.is-unavailable:disabled {
+            cursor: not-allowed;
+            opacity: 0.72;
+            transform: none;
+            box-shadow: none;
+        }
 
         /* Live Node Availability Strip & Card Badges */
         .node-status-bar {
@@ -1256,26 +1263,29 @@
                 let badgeHTML = `<div class="category-badge">${textKategori}</div>`;
 
                 const spec = GlobalConfig.jenisProduk(p);
-                const nodeInfo = (spec?.type === 'panel' && nodeStatusLoaded) ? nodeStatusMap[spec.mode] : null;
+                const targetMode = GlobalConfig.getPanelModeForSpec(spec);
+                const nodeInfo = (targetMode && nodeStatusLoaded) ? nodeStatusMap[targetMode] : null;
                 let availHTML = '';
                 let isUnavailable = false;
                 let unavailableLabel = '';
                 if (nodeInfo) {
                     if (!nodeInfo.online) {
                         isUnavailable = true;
-                        unavailableLabel = 'Sedang Maintenance';
-                        availHTML = `<div class="node-availability is-down"><i class="ri-tools-line"></i> Server Maintenance / Offline</div>`;
-                    } else if (Number(nodeInfo.freePorts || 0) <= 0) {
+                        unavailableLabel = 'Node Off / Tidak Tersedia';
+                        availHTML = `<div class="node-availability is-down"><i class="ri-tools-line"></i> Node Off / Maintenance</div>`;
+                    } else if (spec?.type === 'panel' && Number(nodeInfo.freePorts || 0) <= 0) {
                         isUnavailable = true;
                         unavailableLabel = 'Slot Server Penuh';
                         availHTML = `<div class="node-availability is-full"><i class="ri-error-warning-line"></i> Slot Penuh (0 kosong)</div>`;
-                    } else {
+                    } else if (spec?.type === 'panel') {
                         availHTML = `<div class="node-availability is-ok"><i class="ri-checkbox-circle-line"></i> Online &bull; ${Number(nodeInfo.freePorts)} slot tersedia</div>`;
+                    } else {
+                        availHTML = `<div class="node-availability is-ok"><i class="ri-checkbox-circle-line"></i> Node Online &bull; Siap Aktivasi</div>`;
                     }
                 }
 
                 const btnInner = isUnavailable
-                    ? `<i class="ri-information-line"></i> ${unavailableLabel}`
+                    ? `<i class="ri-close-circle-line"></i> ${unavailableLabel}`
                     : `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm-2 16h8v-8H3v8zm2-6h4v4H5v-4zm8-12v8h8V3h-8zm6 6h-4V5h4v4zm0 10h2v2h-2zm-6-6h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zm0-4h2v2h-2zm2 2h2v2h-2z"/></svg> Bayar via QRIS`;
 
                 html += `
@@ -1295,7 +1305,7 @@
                         ${p.diskon ? `<div class="discount-badge">${escapeHtml(p.diskon)}</div>` : ''}
                     </div>
 
-                    <button class="btn-beli${isUnavailable ? ' is-unavailable' : ''}" onclick="bayarProduk('${escapeHtml(p.id)}')">
+                    <button class="btn-beli${isUnavailable ? ' is-unavailable' : ''}"${isUnavailable ? ' disabled aria-disabled="true"' : ''} onclick="bayarProduk('${escapeHtml(p.id)}')">
                         ${btnInner}
                     </button>
                     <a href="${linkWA}" target="_blank" rel="noopener" style="display:block; text-align:center; margin-top:10px; font-size:12px; color:var(--text-sub);">Tanya dulu via WhatsApp</a>
@@ -2111,18 +2121,31 @@
             if (!produk || payEl('payModal').classList.contains('show')) return;
 
             const spec = GlobalConfig.jenisProduk(produk);
-            const nodeInfo = (spec?.type === 'panel' && nodeStatusLoaded) ? nodeStatusMap[spec.mode] : null;
-            if (nodeInfo && (!nodeInfo.online || Number(nodeInfo.freePorts || 0) <= 0)) {
-                const modeLabel = PANEL_LABEL[spec.mode] || spec.mode;
-                const isOff = !nodeInfo.online;
-                await beritahu({
-                    judul: isOff ? 'Server Sedang Maintenance' : 'Slot Server Sedang Penuh',
-                    pesan: isOff
-                        ? `Maaf, server ${modeLabel} saat ini sedang maintenance / tidak dapat dihubungi sehingga belum menerima pesanan baru.\n\nSilakan pilih paket di panel lain yang sedang Online (misalnya Panel Public atau Panel Public V2), atau hubungi Admin lewat WhatsApp.`
-                        : `Maaf, seluruh slot server pada ${modeLabel} saat ini sedang penuh.\n\nSilakan pilih paket di panel lain yang masih memiliki slot kosong, atau hubungi Admin lewat WhatsApp.`,
-                    tipe: 'info'
-                });
-                return;
+            const targetMode = GlobalConfig.getPanelModeForSpec(spec);
+            if (targetMode) {
+                if (!nodeStatusLoaded) {
+                    await loadNodeStatus();
+                }
+                const nodeInfo = nodeStatusLoaded ? nodeStatusMap[targetMode] : null;
+                const modeLabel = PANEL_LABEL[targetMode] || targetMode;
+                if (!nodeInfo || !nodeInfo.online) {
+                    await beritahu({
+                        judul: !nodeInfo ? 'Gagal Verifikasi Status Node' : 'Node Sedang Off / Maintenance',
+                        pesan: !nodeInfo
+                            ? `Status node ${modeLabel} belum dapat diverifikasi saat ini sehingga pembelian ditahan demi keamanan.\n\nCoba muat ulang halaman atau hubungi Admin lewat WhatsApp.`
+                            : `Maaf, node server ${modeLabel} saat ini sedang OFF / maintenance sehingga produk ini tidak dapat dibeli.\n\nSilakan pilih paket di panel lain yang sedang Online (misalnya Panel Public atau Panel Public V2), atau hubungi Admin lewat WhatsApp.`,
+                        tipe: 'info'
+                    });
+                    return;
+                }
+                if (spec?.type === 'panel' && Number(nodeInfo.freePorts || 0) <= 0) {
+                    await beritahu({
+                        judul: 'Slot Server Sedang Penuh',
+                        pesan: `Maaf, seluruh slot server pada ${modeLabel} saat ini sedang penuh.\n\nSilakan pilih paket di panel lain yang masih memiliki slot kosong, atau hubungi Admin lewat WhatsApp.`,
+                        tipe: 'info'
+                    });
+                    return;
+                }
             }
 
             // Masih ada pesanan lunas yang belum selesai, lanjutkan itu dulu

@@ -1,5 +1,7 @@
 # Local bot and temporary folders
 .aiXdrTempPics/
+.claude/
 Bot Zeroix/
+bot-zeroix-telegram/
 Screenshot_*.jpg
 *.log

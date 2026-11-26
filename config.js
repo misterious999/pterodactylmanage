@@ -134,6 +134,16 @@ const GlobalConfig = {
         return null;
     },
 
+    getPanelModeForSpec: (spec) => {
+        if (!spec) return null;
+        if (spec.type === 'panel' && spec.mode) return spec.mode;
+        if (spec.type === 'role' && spec.role) {
+            const m = String(spec.role).match(/_(public_v2|private|public)$/);
+            return m ? m[1] : null;
+        }
+        return null;
+    },
+
     // Parameter statis default
     getDefaultDeploy: () => ({
         locationId: "1",

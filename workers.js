@@ -774,27 +774,40 @@ function normalizePhoneDigits(raw) {
     return d;
 }
 
-async function countFreeAllocations(panel, apiKey, locId = DEPLOY.locationId, stopAtFirst = false) {
+async function inspectPanelNodeStatus(panel, apiKey, locId = DEPLOY.locationId, stopAtFirst = false) {
     const ptero = pteroClient(panel, apiKey);
     const nodes = (await ptero('/nodes'))?.data || [];
-    let nodesInLoc = nodes.filter(n => parseInt(n.attributes?.location_id) === locId);
-    if (!nodesInLoc.length) nodesInLoc = nodes;
+    if (!nodes.length) return { online: false, freePorts: 0 };
+
+    let activeNodes = nodes.filter((n) => !n.attributes?.maintenance_mode && parseInt(n.attributes?.location_id) === locId);
+    if (!activeNodes.length) {
+        activeNodes = nodes.filter((n) => !n.attributes?.maintenance_mode);
+    }
+    if (!activeNodes.length) {
+        return { online: false, freePorts: 0 };
+    }
+
     let free = 0;
-    for (const node of nodesInLoc) {
+    for (const node of activeNodes) {
         for (let page = 1, total = 1; page <= total; page++) {
             const res = await ptero(`/nodes/${node.attributes.id}/allocations?page=${page}`);
             const list = res?.data || [];
             for (const a of list) {
                 if (a.attributes?.assigned === false) {
                     free++;
-                    if (stopAtFirst) return free;
+                    if (stopAtFirst) return { online: true, freePorts: free };
                 }
             }
             total = res?.meta?.pagination?.total_pages || 1;
             if (page >= 5) break; // jaga budget subrequest Cloudflare
         }
     }
-    return free;
+    return { online: true, freePorts: free };
+}
+
+async function countFreeAllocations(panel, apiKey, locId = DEPLOY.locationId, stopAtFirst = false) {
+    const res = await inspectPanelNodeStatus(panel, apiKey, locId, stopAtFirst);
+    return res.online ? res.freePorts : 0;
 }
 
 async function handleNodeStatus(env, cors) {
@@ -807,11 +820,10 @@ async function handleNodeStatus(env, cors) {
             return;
         }
         try {
-            const freePorts = await Promise.race([
-                countFreeAllocations(panel, apiKey, DEPLOY.locationId, false),
+            out[mode] = await Promise.race([
+                inspectPanelNodeStatus(panel, apiKey, DEPLOY.locationId, false),
                 new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000)),
             ]);
-            out[mode] = { online: true, freePorts };
         } catch (e) {
             out[mode] = { online: false, freePorts: 0 };
         }
@@ -1045,35 +1057,39 @@ async function handlePayment(pathname, request, env, cors) {
                 }
             }
 
-            if (spec?.type === 'panel') {
-                const panel = PANELS[spec.mode];
+            const targetMode = getPanelModeForSpec(spec);
+            if (targetMode) {
+                const panel = PANELS[targetMode];
                 const apiKey = panel && env[panel.key];
-                const modeName = spec.mode.replace('_', ' ').toUpperCase();
+                const modeName = targetMode.replace('_', ' ').toUpperCase();
                 if (!panel || !apiKey) {
                     return reply(`Maaf, server ${modeName} sedang tidak tersedia saat ini. Pembayaran belum dibuat — silakan pilih tipe panel lain atau hubungi Admin.`, 503, cors);
                 }
                 const ptero = pteroClient(panel, apiKey);
-                let free = 0;
+                let nodeStatus = { online: false, freePorts: 0 };
                 let existingUsers = null;
                 try {
-                    const checks = [countFreeAllocations(panel, apiKey, DEPLOY.locationId, true)];
-                    if (prefillClean) {
+                    const checks = [inspectPanelNodeStatus(panel, apiKey, DEPLOY.locationId, spec?.type === 'panel')];
+                    if (spec?.type === 'panel' && prefillClean) {
                         checks.push(ptero(`/users?filter[username]=${encodeURIComponent(prefillClean.username)}`));
                     }
-                    const [freeRes, userRes] = await Promise.race([
+                    const [statusRes, userRes] = await Promise.race([
                         Promise.all(checks),
                         new Promise((_, rej) => setTimeout(() => rej(new Error('node_timeout')), 4500)),
                     ]);
-                    free = freeRes;
+                    nodeStatus = statusRes;
                     existingUsers = userRes;
                 } catch (e) {
                     if (e instanceof PayError && e.status === 409) return reply(e.message, 409, cors);
                     return reply(`Maaf, server ${modeName} sedang maintenance / tidak dapat dihubungi saat ini. Pembayaran QRIS belum dibuat agar dana Anda aman — silakan pilih tipe panel lain (Public / Public V2) atau hubungi Admin.`, 503, cors);
                 }
-                if (free === 0) {
+                if (!nodeStatus?.online) {
+                    return reply(`Maaf, node server ${modeName} sedang OFF / maintenance saat ini sehingga produk ini tidak dapat dibeli. Pembayaran QRIS belum dibuat.`, 503, cors);
+                }
+                if (spec?.type === 'panel' && nodeStatus.freePorts === 0) {
                     return reply(`Maaf, server ${modeName} saat ini sedang penuh dan semua slot server sudah terpakai. Pembayaran belum dibuat — silakan pilih paket di tipe panel lain (Private / Public / Public V2) atau hubungi Admin.`, 503, cors);
                 }
-                if (prefillClean && existingUsers?.data?.some(u => String(u.attributes?.username || '').toLowerCase() === prefillClean.username)) {
+                if (spec?.type === 'panel' && prefillClean && existingUsers?.data?.some(u => String(u.attributes?.username || '').toLowerCase() === prefillClean.username)) {
                     return reply(`Username "${prefillClean.username}" sudah digunakan oleh pengguna lain. Silakan ganti ke username lain sebelum lanjut ke pembayaran QRIS.`, 409, cors);
                 }
             }
@@ -1277,6 +1293,16 @@ function jenisProduk(p) {
         const gb = nama.match(/(\d+)\s*gb/);
         if (/unli/.test(nama)) return { type: 'panel', mode: area(kat), ram: 0, disk: 0, cpu: 0 };
         if (gb) return { type: 'panel', mode: area(kat), ram: gb[1] * 1024, disk: gb[1] * 1024, cpu: 100 };
+    }
+    return null;
+}
+
+function getPanelModeForSpec(spec) {
+    if (!spec) return null;
+    if (spec.type === 'panel' && spec.mode) return spec.mode;
+    if (spec.type === 'role' && spec.role) {
+        const m = String(spec.role).match(/_(public_v2|private|public)$/);
+        return m ? m[1] : null;
     }
     return null;
 }

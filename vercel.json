@@ -3,12 +3,7 @@
   "trailingSlash": false,
   "rewrites": [
     { "source": "/workers.js", "destination": "/404.html" },
-    { "source": "/firebase-seed.json", "destination": "/404.html" },
-    { "source": "/contoh", "destination": "/404.html" },
-    { "source": "/contoh.html", "destination": "/404.html" },
-    { "source": "/PANDUAN_PEMBERSIHAN.md", "destination": "/404.html" },
-    { "source": "/README_FIREBASE.md", "destination": "/404.html" },
-    { "source": "/CHANGELOG.md", "destination": "/404.html" }
+    { "source": "/README_FIREBASE.md", "destination": "/404.html" }
   ],
   "headers": [
     {
