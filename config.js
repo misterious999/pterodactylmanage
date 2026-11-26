@@ -144,6 +144,23 @@ const GlobalConfig = {
         return null;
     },
 
+    isRolePanelProduct: (p) => {
+        if (!p) return false;
+        const spec = GlobalConfig.jenisProduk(p);
+        if (spec?.type === 'role') return true;
+        return /\brole\b/i.test(String(p?.kategori || '').toLowerCase());
+    },
+
+    getRenewalPrice: (p, roleRenewPrices = null) => {
+        const buyPrice = Math.max(0, parseInt(p?.harga, 10) || 0);
+        if (!p || !GlobalConfig.isRolePanelProduct(p)) return buyPrice;
+        const customFromMap = roleRenewPrices && p.id !== undefined ? parseInt(roleRenewPrices[p.id], 10) : NaN;
+        if (Number.isFinite(customFromMap) && customFromMap > 0) return customFromMap;
+        const customFromItem = parseInt(p?.hargaPerpanjang ?? p?.renewPrice, 10);
+        if (Number.isFinite(customFromItem) && customFromItem > 0) return customFromItem;
+        return buyPrice;
+    },
+
     // Parameter statis default
     getDefaultDeploy: () => ({
         locationId: "1",

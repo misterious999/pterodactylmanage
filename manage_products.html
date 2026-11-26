@@ -142,6 +142,27 @@
             </button>
         </div>
 
+        <div class="card" id="roleRenewCard">
+            <h2 style="color: #38bdf8; border-bottom-color: rgba(56, 189, 248, 0.3);">
+                <svg viewBox="0 0 24 24" style="fill:#38bdf8; width:18px;"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/></svg>
+                Harga Perpanjang Custom (Khusus Role Panel)
+            </h2>
+            <p style="font-size: 12px; color: var(--text-sub); margin-top: -8px; margin-bottom: 16px; line-height: 1.5;">
+                Hanya produk kategori <b>Role Panel</b> yang harga perpanjangannya dapat diatur bebas (disinkronkan otomatis ke Website &amp; Bot Telegram). Produk panel dan kategori lain <b>selalu mengikuti harga beli</b>. Kosongkan atau isi <code>0</code> jika ingin mengikuti harga beli normal.
+            </p>
+            <div id="roleRenewList" class="form-grid" style="margin-bottom: 14px;">
+                <div style="grid-column: 1 / -1; font-size: 12px; color: var(--text-sub);">Memuat daftar produk Role Panel...</div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button type="button" class="btn-save" style="width: auto; margin-top: 0; background: linear-gradient(135deg, #0284c7, #0d9488);" onclick="simpanTarifPerpanjangRole()">
+                    <svg viewBox="0 0 24 24" style="width:16px; fill:white;"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg> Simpan Tarif Perpanjang Role
+                </button>
+                <button type="button" class="btn-save" style="width: auto; margin-top: 0; background: rgba(255,255,255,0.06); border: 1px solid var(--border); box-shadow: none;" onclick="resetTarifPerpanjangRole()">
+                    Reset Semua ke Harga Beli
+                </button>
+            </div>
+        </div>
+
         <div class="card">
             <h2 id="formTitle">
                 <svg viewBox="0 0 24 24" style="fill:var(--primary); width:18px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg> 
@@ -165,6 +186,12 @@
                     <div class="form-group">
                         <label>Harga Layanan (Angka)</label>
                         <input type="number" id="harga" placeholder="Contoh: 15000" required>
+                    </div>
+
+                    <div class="form-group" id="roleRenewGroup" style="display: none;">
+                        <label>Harga Perpanjang Custom — Role Panel (Opsional)</label>
+                        <input type="number" id="hargaPerpanjang" min="0" placeholder="Kosongkan = ikuti harga beli">
+                        <small style="display:block; margin-top:6px; font-size:11px; color:var(--text-sub);">Khusus kategori Role Panel; kategori lain tetap mengikuti harga beli.</small>
                     </div>
 
                     <div class="form-group">
@@ -330,6 +357,8 @@
         
         let fotoDataFinal = ""; 
         let currentCategories = []; 
+        let currentProductsMap = {};
+        let currentRoleRenewPrices = {};
         let isUploading = false;
         
         const spinnerSvg = `<svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite; width:16px; height:16px; flex-shrink:0; fill:currentColor;"><path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c-4.41 0-8-3.59-8-8H2c0 5.52 4.48 10 10 10v-2zM22 12c0-5.52-4.48-10-10-10v2c4.41 0 8 3.59 8 8h-2l3 3 3-3h-2z"/></svg>`;
@@ -341,6 +370,9 @@
         // --- SISTEM TARIK & SIMPAN PENGATURAN TOKO ---
         database.ref('store_settings').on('value', (snap) => {
             let settings = snap.val() || {};
+            currentRoleRenewPrices = (settings.roleRenewPrices && typeof settings.roleRenewPrices === 'object')
+                ? settings.roleRenewPrices
+                : {};
             let catString = settings.categories || "Panel Pterodactyl, Sewa Server, Script & Bot";
             let rawWa = String(settings.whatsapp || '').trim();
             let waNumber = (window.GlobalConfig && GlobalConfig.normalizeWhatsapp)
@@ -364,7 +396,85 @@
                     datalist.appendChild(option);
                 });
             }
+            renderRoleRenewSettings();
         });
+
+        function renderRoleRenewSettings() {
+            const box = document.getElementById('roleRenewList');
+            if (!box) return;
+            const roleItems = Object.entries(currentProductsMap || {})
+                .filter(([, item]) => item && GlobalConfig.isRolePanelProduct(item))
+                .map(([id, item]) => ({ id, ...item }));
+
+            if (!roleItems.length) {
+                box.innerHTML = `<div style="grid-column: 1 / -1; font-size: 12px; color: var(--text-sub); padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.2); border: 1px dashed var(--border);">Belum ada produk dengan kategori <b>Role Panel</b> di etalase.</div>`;
+                return;
+            }
+
+            box.innerHTML = roleItems.map((p) => {
+                const buyPrice = parseInt(p.harga, 10) || 0;
+                const mapVal = parseInt(currentRoleRenewPrices[p.id], 10);
+                const itemVal = parseInt(p.hargaPerpanjang, 10);
+                const customVal = (Number.isFinite(mapVal) && mapVal > 0)
+                    ? mapVal
+                    : (Number.isFinite(itemVal) && itemVal > 0 ? itemVal : '');
+                return `
+                    <div class="form-group" style="margin-bottom: 6px; padding: 12px 14px; border-radius: 12px; background: rgba(0,0,0,0.22); border: 1px solid var(--border);">
+                        <label style="color: var(--text-main); margin-bottom: 4px;">${escapeHtml(p.nama)}</label>
+                        <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">Harga beli: <b>${escapeHtml(formatRupiah(buyPrice))}</b></div>
+                        <input type="number" min="0" class="role-renew-input" data-product-id="${escapeHtml(p.id)}" value="${customVal}" placeholder="Ikuti harga beli (${buyPrice})">
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.simpanTarifPerpanjangRole = async function() {
+            const inputs = Array.from(document.querySelectorAll('.role-renew-input'));
+            const nextMap = {};
+            const patchUpdates = {};
+
+            for (const inp of inputs) {
+                const id = inp.getAttribute('data-product-id');
+                if (!id || !currentProductsMap[id] || !GlobalConfig.isRolePanelProduct(currentProductsMap[id])) continue;
+                const val = parseInt(inp.value, 10);
+                if (Number.isFinite(val) && val > 0) {
+                    nextMap[id] = val;
+                    patchUpdates[`store_products/${id}/hargaPerpanjang`] = val;
+                } else {
+                    patchUpdates[`store_products/${id}/hargaPerpanjang`] = null;
+                }
+            }
+
+            try {
+                await database.ref('store_settings/roleRenewPrices').set(nextMap);
+                if (Object.keys(patchUpdates).length) {
+                    await database.ref('').update(patchUpdates).catch(() => {});
+                }
+                openSysModal('success', 'TARIF PERPANJANG TERSIMPAN', 'Tarif perpanjang custom Role Panel telah disimpan dan langsung berlaku di Website & Bot Telegram.');
+            } catch (e) {
+                openSysModal('error', 'KEGAGALAN SISTEM', 'Gagal menyimpan tarif perpanjang: ' + e.message);
+            }
+        };
+
+        window.resetTarifPerpanjangRole = function() {
+            openSysModal('confirm', 'RESET TARIF ROLE PANEL', 'Kembalikan seluruh harga perpanjang Role Panel agar mengikuti harga beli normal?', async () => {
+                try {
+                    const patchUpdates = {};
+                    Object.keys(currentProductsMap || {}).forEach((id) => {
+                        if (GlobalConfig.isRolePanelProduct(currentProductsMap[id])) {
+                            patchUpdates[`store_products/${id}/hargaPerpanjang`] = null;
+                        }
+                    });
+                    await database.ref('store_settings/roleRenewPrices').set({});
+                    if (Object.keys(patchUpdates).length) {
+                        await database.ref('').update(patchUpdates).catch(() => {});
+                    }
+                    openSysModal('success', 'TARIF DIRESET', 'Seluruh Role Panel kini mengikuti harga beli normal saat perpanjangan.');
+                } catch (e) {
+                    openSysModal('error', 'KEGAGALAN SISTEM', 'Gagal mereset tarif perpanjang: ' + e.message);
+                }
+            });
+        };
 
         window.simpanPengaturanToko = function() {
             let cats = document.getElementById('storeCategories').value.trim();
@@ -449,6 +559,8 @@
         // --- RENDER TABEL PRODUK ---
         productRef.on('value', (snapshot) => {
             const data = snapshot.val();
+            currentProductsMap = data || {};
+            renderRoleRenewSettings();
             tableBody.innerHTML = '';
 
             if (!data) {
@@ -462,6 +574,11 @@
                 const imgDisplay = (item.gambar && /^https?:\/\//i.test(item.gambar)) ? item.gambar : fallbackImg;
                 
                 const diskonBadge = item.diskon ? `<br><span style="display:inline-block; margin-top:5px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">${escapeHtml(item.diskon)}</span>` : '';
+                const isRoleProd = GlobalConfig.isRolePanelProduct(item);
+                const effRenew = GlobalConfig.getRenewalPrice({ id: key, ...item }, currentRoleRenewPrices);
+                const renewBadge = (isRoleProd && effRenew !== parseInt(item.harga, 10))
+                    ? `<br><span style="display:inline-block; margin-top:5px; background: rgba(56, 189, 248, 0.16); color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">Renew: ${escapeHtml(formatRupiah(effRenew))}</span>`
+                    : '';
                 const kategoriTeks = escapeHtml(item.kategori ? item.kategori : 'Sistem Umum');
                 const panelBadge = `<br><span style="display:inline-block; margin-top:5px; background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight:bold;">${escapeHtml(teksJenisProduk(item))}</span>`;
                 const safeKey = escapeHtml(key);
@@ -471,7 +588,7 @@
                     <td><img src="${escapeHtml(imgDisplay)}" class="prod-img-preview" onerror="this.src='${fallbackImg}'"></td>
                     <td><strong style="font-size:14px; color:var(--text-main);">${escapeHtml(item.nama)}</strong><br><small style="color:var(--text-sub)">${escapeHtml(String(item.deskripsi || '').substring(0, 45))}...</small></td>
                     <td><span class="kategori-badge">${kategoriTeks}</span>${panelBadge}</td>
-                    <td><strong style="color:var(--success); font-size:14px;">${formatRupiah(item.harga)}</strong>${diskonBadge}</td>
+                    <td><strong style="color:var(--success); font-size:14px;">${formatRupiah(item.harga)}</strong>${renewBadge}${diskonBadge}</td>
                     <td>
                         <button class="btn-action btn-edit" onclick="editProduct('${safeKey}')">Modifikasi</button>
                         <button class="btn-action btn-clone" onclick="cloneProduct('${safeKey}')">Duplikat</button>
@@ -523,6 +640,7 @@
 
                 btnSubmit.innerHTML = `${spinnerSvg} Sinkronisasi Database...`;
 
+                const rawRenew = parseInt(document.getElementById('hargaPerpanjang').value, 10);
                 const productData = {
                     nama: document.getElementById('nama').value,
                     kategori: inputKategori,
@@ -537,6 +655,8 @@
                         cpu: parseInt(document.getElementById('panelCpu').value)
                     } : null
                 };
+                const isRoleForm = GlobalConfig.isRolePanelProduct(productData);
+                productData.hargaPerpanjang = (isRoleForm && Number.isFinite(rawRenew) && rawRenew > 0) ? rawRenew : null;
 
                 if (finalImageUrl !== "") {
                     productData.gambar = finalImageUrl;
@@ -551,12 +671,23 @@
                     }
                 }
 
+                let savedProductId = id;
                 if (id) {
                     await productRef.child(id).update(productData);
                     openSysModal('success', 'MODIFIKASI BERHASIL', 'Atribut layanan berhasil diperbarui di etalase publik.');
                 } else {
-                    await productRef.push(productData);
+                    const pushedRef = await productRef.push(productData);
+                    savedProductId = pushedRef?.key || '';
                     openSysModal('success', 'PUBLIKASI BERHASIL', 'Layanan baru telah didistribusikan ke etalase publik.');
+                }
+
+                if (savedProductId) {
+                    const renewRef = database.ref(`store_settings/roleRenewPrices/${savedProductId}`);
+                    if (productData.hargaPerpanjang) {
+                        await renewRef.set(productData.hargaPerpanjang).catch(() => {});
+                    } else {
+                        await renewRef.remove().catch(() => {});
+                    }
                 }
                 
                 resetForm();
@@ -582,6 +713,8 @@
                     document.getElementById('nama').value = isClone ? `${data.nama} (Salinan)` : data.nama;
                     document.getElementById('kategori').value = data.kategori || '';
                     document.getElementById('harga').value = data.harga;
+                    const customRnp = currentRoleRenewPrices[key] || data.hargaPerpanjang || '';
+                    document.getElementById('hargaPerpanjang').value = customRnp > 0 ? customRnp : '';
                     document.getElementById('diskon').value = data.diskon || '';
                     document.getElementById('deskripsi').value = data.deskripsi;
                     document.getElementById('panelMode').value = data.panel?.mode || '';
@@ -661,6 +794,12 @@
                 kategori: document.getElementById('kategori').value,
                 panel: manual ? { mode: document.getElementById('panelMode').value, ram: parseInt(document.getElementById('panelRam').value), disk: parseInt(document.getElementById('panelDisk').value), cpu: parseInt(document.getElementById('panelCpu').value) } : null
             };
+            const roleGroup = document.getElementById('roleRenewGroup');
+            if (roleGroup) {
+                const isRole = GlobalConfig.isRolePanelProduct(item);
+                roleGroup.style.display = isRole ? '' : 'none';
+                if (!isRole) document.getElementById('hargaPerpanjang').value = '';
+            }
             document.getElementById('panelDeteksi').innerText = 'Hasil setelah lunas: ' + teksJenisProduk(item);
         };
         ['nama', 'kategori', 'panelRam', 'panelDisk', 'panelCpu'].forEach(id => document.getElementById(id).addEventListener('input', togglePanelSpec));

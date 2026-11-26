@@ -929,10 +929,22 @@ async function handlePayment(pathname, request, env, cors) {
             const productId = String(input.productId || '');
             if (!/^[A-Za-z0-9_-]{1,128}$/.test(productId)) return reply('Produk tidak valid', 400, cors);
             const product = await firebaseRest(env, `store_products/${productId}`);
-            const amount = parseInt(product?.harga);
-            if (!product || !(amount > 0)) return reply('Produk tidak ditemukan', 404, cors);
+            const buyAmount = parseInt(product?.harga, 10);
+            if (!product || !(buyAmount > 0)) return reply('Produk tidak ditemukan', 404, cors);
 
             const spec = jenisProduk(product);
+            let amount = buyAmount;
+            if (isRolePanelProduct(product)) {
+                const roleRenewMap = await firebaseRest(env, 'store_settings/roleRenewPrices').catch(() => null);
+                const customMap = parseInt(roleRenewMap?.[productId], 10);
+                const customField = parseInt(product?.hargaPerpanjang ?? product?.renewPrice, 10);
+                if (Number.isFinite(customMap) && customMap > 0) {
+                    amount = customMap;
+                } else if (Number.isFinite(customField) && customField > 0) {
+                    amount = customField;
+                }
+            }
+
             const targetType = spec?.type === 'role' ? 'role' : 'panel';
             const mode = targetType === 'role' ? 'website' : (spec?.mode || String(input.mode || 'private'));
             const target = await findRenewTarget(env, targetType, mode, input.username);
@@ -1305,6 +1317,13 @@ function getPanelModeForSpec(spec) {
         return m ? m[1] : null;
     }
     return null;
+}
+
+function isRolePanelProduct(p) {
+    if (!p) return false;
+    const spec = jenisProduk(p);
+    if (spec?.type === 'role') return true;
+    return /\brole\b/i.test(String(p?.kategori || '').toLowerCase());
 }
 
 function validateProvisionFields(spec, rawInput) {

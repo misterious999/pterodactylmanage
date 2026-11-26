@@ -1117,6 +1117,7 @@
         const database = firebase.database();
 
         let globalProducts = [];
+        let roleRenewPrices = {};
         let nomorWhatsApp = (window.GlobalConfig && GlobalConfig.getDefaultWhatsapp) ? GlobalConfig.getDefaultWhatsapp() : "62895416479539";
         database.ref('store_settings/whatsapp').on('value', (snap) => {
             const raw = snap.val();
@@ -1124,6 +1125,10 @@
                 ? GlobalConfig.normalizeWhatsapp(raw)
                 : String(raw || '').replace(/\D/g, '').replace(/^0/, '62');
             if (nomor) nomorWhatsApp = nomor;
+        });
+        database.ref('store_settings/roleRenewPrices').on('value', (snap) => {
+            const val = snap.val();
+            roleRenewPrices = (val && typeof val === 'object') ? val : {};
         });
 
         let nodeStatusMap = {};
@@ -1573,9 +1578,10 @@
                 beritahu({ judul: 'Memuat Produk', pesan: 'Daftar paket perpanjangan belum siap. Coba beberapa detik lagi.', tipe: 'info' });
                 return;
             }
-            sel.innerHTML = autoProducts.map(p =>
-                `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)} — ${formatRupiah(p.harga)}</option>`
-            ).join('');
+            sel.innerHTML = autoProducts.map(p => {
+                const renewHarga = GlobalConfig.getRenewalPrice(p, roleRenewPrices);
+                return `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)} — ${formatRupiah(renewHarga)}</option>`;
+            }).join('');
             document.getElementById('renewUsername').value = '';
             document.getElementById('modalRenew').classList.add('show');
         }
